@@ -205,6 +205,7 @@ namespace Machine {
 
     void Homing::done() {
         log_debug("Homing done");
+        _phase = Phase::None;
 
         if (sys.abort()) {
             return;  // Did not complete. Alarm state set by mc_alarm.
@@ -232,6 +233,7 @@ namespace Machine {
             while (!_remainingCycles.empty()) {
                 _remainingCycles.pop();
             }
+            _phase = Phase::None;
             return;
         }
         if (_remainingCycles.empty()) {
@@ -252,7 +254,8 @@ namespace Machine {
     }
 
     void Homing::fail(ExecAlarm alarm) {
-        Stepper::reset();  // Stop moving
+        _phase = Phase::None;  // The cycle is over; a stale approach phase must not outlive it
+        Stepper::reset();      // Stop moving
         send_alarm(alarm);
         Axes::set_homing_mode(_cycleAxes, false);  // tell motors homing is done...failed
         Axes::set_disable(Stepping::_idleMsecs != 255, false);
