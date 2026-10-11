@@ -20,6 +20,7 @@
 #include "Machine/MachineConfig.h"
 #include "Parameters.h"
 #include "Flowcontrol.h"
+#include "ZAdjust.h"               // live Z adjust while a job runs
 
 #include <string.h>  // memset
 #include <math.h>    // sqrt etc.
@@ -333,6 +334,9 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
     bool disableLaser         = false;
     bool laserIsMotion        = false;
     bool nonmodalG38          = false;  // Used for G38.6-9
+    float zadjUse             = 0.0f;   // live Z adjust in this move (ZAdjust.h)
+    bool  zadjCommit          = false;
+    bool  zadjResetPos        = false;
     bool isWaitOnInputDigital = false;
     std::vector<float> clustered_spindle_speeds;
 
@@ -1287,6 +1291,9 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
                         // WPos = MPos - WCS - G92 - TLO  ->  WCS = MPos - G92 - TLO - WPos
                         coord_data[axis] = gc_state.position[axis] - gc_state.coord_offset[axis] - gc_block.values.xyz[axis];
                         coord_data[axis] -= gc_state.tool_length_offset[axis];
+                        if (axis == Z_AXIS) {
+                            coord_data[axis] -= zadj_applied();  // not part of the work zero
+                        }
                     } else {
                         // L2: Update coordinate system axis to programmed value.
                         coord_data[axis] = gc_block.values.xyz[axis];
@@ -1307,6 +1314,9 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
                     // WPos = MPos - WCS - G92 - TLO  ->  G92 = MPos - WCS - TLO - WPos
                     gc_block.values.xyz[axis] = gc_state.position[axis] - block_coord_system[axis] - gc_block.values.xyz[axis];
                     gc_block.values.xyz[axis] -= gc_state.tool_length_offset[axis];
+                    if (axis == Z_AXIS) {
+                        gc_block.values.xyz[axis] -= zadj_applied();  // not part of G92
+                    }
                 } else {
                     gc_block.values.xyz[axis] = gc_state.coord_offset[axis];
                 }
@@ -1335,6 +1345,28 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
                                     gc_block.values.xyz[axis] += gc_state.position[axis];
                                 }
                             }
+                        }
+                    }
+                }
+                // Live Z adjust (ZAdjust.h): put the wanted offset into Z of this
+                // move. The parser position already holds the offset in use, so a
+                // move without an absolute Z word only adds the change. Arcs take
+                // it only when Z is their linear (helix) axis, so the arc stays valid.
+                if (axis_command == AxisCommand::MotionMode && axis_words && n_axis > Z_AXIS && !nonmodalG38) {
+                    Motion mm    = gc_block.modal.motion;
+                    bool   arc   = mm == Motion::CwArc || mm == Motion::CcwArc;
+                    bool   zWord = bitnum_is_true(axis_words, Z_AXIS);
+                    if (arc || mm == Motion::Seek || mm == Motion::Linear) {
+                        if (gc_block.non_modal_command == NonModal::AbsoluteOverride) {
+                            zadjResetPos = zWord;  // G53 Z: machine coordinates, no offset
+                        } else {
+                            zadjUse = zadj_target(!arc || axis_linear == Z_AXIS);
+                            if (zWord && gc_block.modal.distance == Distance::Absolute) {
+                                gc_block.values.xyz[Z_AXIS] += zadjUse;
+                            } else {
+                                gc_block.values.xyz[Z_AXIS] += zadjUse - zadj_applied();
+                            }
+                            zadjCommit = true;
                         }
                     }
                 }
@@ -1941,6 +1973,9 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
             }
             mc_linear(coord_data, pl_data, gc_state.position);
             copyAxes(gc_state.position, coord_data);
+            if (!axis_words || bitnum_is_true(axis_words, Z_AXIS)) {
+                zadj_reset_position();  // at the stored position: no offset in it
+            }
             break;
         case NonModal::SetHome0:
             coords[CoordIndex::G28]->set(gc_state.position);
@@ -2006,6 +2041,11 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
             }
             if (gc_update_pos == GCUpdatePos::Target) {
                 copyAxes(gc_state.position, gc_block.values.xyz);
+                if (zadjCommit) {
+                    zadj_moved(zadjUse);
+                } else if (zadjResetPos) {
+                    zadj_reset_position();
+                }
             } else if (gc_update_pos == GCUpdatePos::System) {
                 gc_sync_position();
             }  // == GCUpdatePos::None

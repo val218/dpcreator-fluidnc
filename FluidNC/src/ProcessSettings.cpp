@@ -4,6 +4,7 @@
 #include "Settings.h"
 #include "PathRetrace.h"   // PathRetrace plugin (TabUI pendant)
 #include "VizGenerator.h"  // VizGenerator plugin (TabUI pendant)
+#include "ZAdjust.h"
 #include "PendantLink.h"   // $Pendant/Status
 #include "Parameters.h"  // global_named_params
 
@@ -1393,6 +1394,20 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
         const char* v = line + 15;
         pendant_trace(channel, strcasecmp(v, "on") == 0 || strcmp(v, "1") == 0);
         return Error::Ok;
+    }
+    // Live Z adjust: answered right here on any task, also while a job runs
+    // (the parser picks the new offset up); /Apply is queued like G-code.
+    {
+        bool defer = false;
+        if (zadj_command(line, channel, on_protocol_task, defer)) {
+            if (defer) {
+                if (Job::channel()) {
+                    return Error::AnotherInterfaceBusy;
+                }
+                return cmd_queue_defer(line, channel) ? Error::Deferred : Error::AnotherInterfaceBusy;
+            }
+            return Error::Ok;
+        }
     }
     // VizGenerator / prepared job: always on the protocol task (queued from here).
     if (viz_command(line, channel, on_protocol_task)) {

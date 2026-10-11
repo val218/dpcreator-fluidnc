@@ -7,6 +7,7 @@
 */
 
 #include "System.h"
+#include "ZAdjust.h"
 #include "Report.h"                 // report_ovr_counter
 #include "Config.h"                 // MAX_N_AXIS
 #include "Machine/MachineConfig.h"  // config
@@ -131,6 +132,9 @@ float* get_wco() {
         // Apply work coordinate offsets and tool length offset to current position.
         wco[axis] = gc_state.coord_system[axis] + gc_state.coord_offset[axis];
         wco[axis] += gc_state.tool_length_offset[axis];
+    }
+    if (n_axis > Z_AXIS) {
+        wco[Z_AXIS] += zadj_shown();  // live Z adjust: WPos keeps showing the file's Z
     }
     return wco;
 }
