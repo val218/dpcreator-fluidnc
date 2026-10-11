@@ -350,6 +350,10 @@ class Machine:
             first = rec_msg()
             REC["st"] = "interrupted"
             return [first, rec_msg(), "ok"]
+        if u.startswith("$JOB/RUNFROM="):
+            ln_, _, path = ln.split("=", 1)[1].partition(":")
+            REC.update(st="interrupted", stop=int(ln_), retract=0, tool=0, why=f"run from line {ln_}", file=path.strip())
+            return [rec_msg(), "ok"]
         if u.startswith("$JOB/RESUME=") and REC["st"] == "interrupted":
             ln, _, dry = u.split("=", 1)[1].partition(":")
             if self.state != "Idle":

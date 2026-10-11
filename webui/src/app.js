@@ -175,6 +175,8 @@
     p.title = st === "connected" ? "TabUI pendant connected (UART1)" : "No TabUI pendant on UART1";
   }
 
+  var codeHook = null;      // G-code view: file shown changed
+  var codeLineHook = null;  // G-code view: line being cut
   var recovHook = null;  // var: hoisted, set by the recovery panel
   var rwHook = null;     // var: hoisted, set by the rewind bar
   var macroHook = null;  // var: hoisted, set by the macros panel
@@ -271,6 +273,7 @@
       const [jfs, jpath] = jobFsPath(st.sdFile);
       const onScreen = Viewer.job && $("#viewer-file").dataset.path === cacheKey(jfs, jpath);
       const p = onScreen ? Viewer.setProgress(filePct / 100, wpos, rwLineNow > 0 ? rwLineNow : st.line) : null;
+      if (codeLineHook) codeLineHook(rwLineNow > 0 ? rwLineNow : st.line);
       const pct = p === null ? filePct : p * 100;
       const elapsed = (Date.now() - S.job.start) / 1000;
       // Page opened mid-job: measure the rate from the first % we saw.
@@ -383,6 +386,7 @@
 
   // Parsed files are kept (last 3) so re-opening or running a file is instant.
   const parsedCache = new Map();
+  const textCache = new Map();  // key -> G-code text (G-code view)
   const cacheKey = (fs, path) => fs + ":" + path;
   const forget = (fs, path) => parsedCache.delete(cacheKey(fs, path));
   const moving = () => ["Run", "Jog", "Home"].includes(S.state);
@@ -394,6 +398,7 @@
     label.textContent = name + (partial ? " · preview" : "");
     label.dataset.path = key;
     label.dataset.partial = partial ? "1" : "";
+    if (codeHook) codeHook(key);
     $("#load-full").hidden = !partial;
     const size = job.max.map((v, i) => v - job.min[i]);
     $("#viewer-info").textContent = partial
@@ -411,6 +416,8 @@
     if (!job) {
       label.textContent = "Loading " + path + "…";
       const text = await Files.getText(fs, path);
+      textCache.set(key, text);
+      while (textCache.size > 2) textCache.delete(textCache.keys().next().value);
       label.textContent = "Parsing " + path + "…";
       job = await Gcode.parse(text, {
         onProgress: (f) => (label.textContent = `Parsing ${path}… ${Math.round(f * 100)}%`),
@@ -681,6 +688,82 @@
     $("#uiold").hidden = false;
   }
   $("#uiold-hide").onclick = () => ($("#uiold").hidden = true);
+
+  // ------------------------------------------------------------- G-code view
+  // The file shown in the 3D view as text: follows the line being cut (Ln:),
+  // click a line and "Run from line" starts the file there through the job
+  // recovery screens ($Job/RunFrom: restart point, Dry run, Resume).
+  (() => {
+    const box = $("#code"), scroll = $("#code-scroll"), inner = $("#code-inner"), RH = 18;
+    let key = "", lines = null, runLine = 0, sel = 0, lastFollow = 0;
+    function load() {
+      const k = $("#viewer-file").dataset.path || "";
+      key = k;
+      const t = textCache.get(k);
+      lines = t ? t.split("\n") : null;
+      if (!t && k && !$("#viewer-file").dataset.partial && !moving()) {  // cached path: get the text once
+        const fs = k.slice(0, k.indexOf(":")), p = k.slice(k.indexOf(":") + 1);
+        Files.getText(fs, p).then((txt) => {
+          textCache.set(k, txt);
+          while (textCache.size > 2) textCache.delete(textCache.keys().next().value);
+          if (key === k) load();
+        }).catch(() => {});
+      }
+      if (lines && lines.length && lines[lines.length - 1] === "") lines.pop();
+      sel = 0;
+      info();
+      inner.style.height = (lines ? lines.length * RH : 0) + "px";
+      draw();
+    }
+    function info() {
+      const name = key.slice(key.indexOf(":") + 1);
+      $("#code-info").textContent = !key ? "no file" : !lines ? `${name} · the text loads with the full path (when the machine stops)` :
+        `${name} · ${lines.length} lines` + (runLine ? ` · cutting line ${runLine}` : "") + (sel ? ` · selected ${sel}` : "");
+      const sd = key.startsWith("sd:");
+      $("#code-run").disabled = !(sel && sd && idle());
+      $("#code-run").textContent = sel ? `Run from line ${sel}` : "Run from line";
+    }
+    function draw() {
+      if (box.hidden || !lines) { inner.textContent = ""; return; }
+      const top = scroll.scrollTop, h = scroll.clientHeight;
+      const a = Math.max(0, Math.floor(top / RH) - 5), b = Math.min(lines.length, Math.ceil((top + h) / RH) + 5);
+      inner.textContent = "";
+      for (let i = a; i < b; i++) {
+        const n = i + 1;
+        const r = el("div", { class: "code-row" + (n === runLine ? " run" : "") + (n === sel ? " sel" : "") });
+        r.style.top = i * RH + "px";
+        r.append(el("span", { class: "n" }, String(n)), lines[i]);
+        r.onclick = () => { sel = sel === n ? 0 : n; info(); draw(); };
+        inner.append(r);
+      }
+    }
+    scroll.addEventListener("scroll", draw);
+    $("#code-toggle").onclick = () => {
+      box.hidden = !box.hidden;
+      $("#code-toggle").classList.toggle("on", !box.hidden);
+      if (!box.hidden) { if ($("#viewer-file").dataset.path !== key || !lines) load(); else draw(); }
+      window.dispatchEvent(new Event("resize"));  // the 3D view gets smaller / bigger
+    };
+    $("#code-run").onclick = () => {
+      if (!sel || !idle()) return;
+      const path = key.slice(key.indexOf(":") + 1);
+      if (!confirm(`Start ${path.split("/").pop()} from line ${sel}?\n\nThe job recovery screens open here and on the pendant: check the restart point, then Dry run / Resume.`)) return;
+      send(`$Job/RunFrom=${sel}:/sd${path}`);
+    };
+    codeHook = (k) => { if (k !== key) { key = ""; lines = null; if (!box.hidden) load(); } else if (!lines && !box.hidden) load(); };
+    codeLineHook = (ln) => {
+      if (!ln || ln === runLine) return;
+      runLine = ln;
+      if (box.hidden || !lines) return;
+      if ($("#code-follow").checked && Date.now() - lastFollow > 150) {
+        lastFollow = Date.now();
+        const want = (ln - 1) * RH - scroll.clientHeight / 2;
+        if (Math.abs(scroll.scrollTop - want) > RH) scroll.scrollTop = Math.max(0, want);
+      }
+      info();
+      draw();
+    };
+  })();
 
   // ------------------------------------------------------------- tools
   // Tool table (SD card, /.dpc/tools.txt: T|name|diameter|notes) and tool
@@ -1265,7 +1348,8 @@
       if (rec.st === "interrupted") {
         busy = false;
         if (!rec.retract && !rec.tool && asked !== key()) { asked = key(); send("$Job/Points"); }
-        if (choice < 0 || (choice === 2 && (rec.retract || rec.tool))) choice = rec.retract ? 0 : rec.tool ? 1 : 2;
+        const runFrom = /^run from line/.test(rec.why);  // asked for that line: keep it chosen
+        if (choice < 0 || (!runFrom && choice === 2 && (rec.retract || rec.tool))) choice = runFrom ? 2 : rec.retract ? 0 : rec.tool ? 1 : 2;
       }
       render();
       loadText();

@@ -385,6 +385,33 @@ bool recov_command(const char* line) {
         }
         return true;
     }
+    // Run a file from a line: an "interrupted" record at that line, so the
+    // WebUI / pendant recovery screens offer the restart choices (last retract,
+    // start of the tool, the line), Dry run and Resume - same safe sequence.
+    if (strncasecmp(cmd, "RunFrom=", 8) == 0) {
+        if (Job::active() || _r.st == St::Scanning || _r.st == St::Resuming) {
+            report_err("a job is running");
+            return true;
+        }
+        char*    end;
+        uint32_t ln = strtoul(cmd + 8, &end, 10);
+        if (ln < 1 || *end != ':' || !end[1]) {
+            report_err("use $Job/RunFrom=<line>:<file>");
+            return true;
+        }
+        std::string path = end + 1;
+        if (path[0] != '/') path = "/" + path;
+        if (strncasecmp(path.c_str(), "/sd/", 4) != 0) path = "/sd" + path;
+        scan_stop();
+        _r        = Record();
+        _r.st     = St::Interrupted;
+        _r.path   = path;
+        _r.line   = ln;
+        _r.reason = "run from line " + std::to_string(ln);
+        save();
+        report();
+        return true;
+    }
     if (strncasecmp(cmd, "Resume=", 7) == 0) {
         if (_r.st != St::Interrupted) { report_err("no interrupted job"); return true; }
         if (!state_is(State::Idle)) {

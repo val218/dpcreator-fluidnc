@@ -263,6 +263,24 @@ with sync_playwright() as p:
     page.screenshot(path=str(OUT / "desktop-offsets.png"))
     page.click("#offsets-close")
 
+    # G-code view: text of the shown file, run from a line -> recovery card
+    page.click("#file-list li:has-text('job1.nc')")
+    page.click("#preview")
+    page.wait_for_function("document.querySelector('#viewer-file').textContent === 'job1.nc'", timeout=6000)
+    page.click("#code-toggle")
+    page.wait_for_selector("#code-inner .code-row", timeout=3000)
+    check("lines" in page.inner_text("#code-info"), "G-code view: " + page.inner_text("#code-info"))
+    page.click("#code-inner .code-row:nth-child(10)")
+    check(not page.is_disabled("#code-run"), "line selected: Run from line enabled")
+    page.screenshot(path=str(OUT / "desktop-gcode.png"))
+    page.click("#code-run")
+    page.wait_for_selector("#recovery:not([hidden])", timeout=4000)
+    page.wait_for_function("document.querySelector('#rec-why').textContent.includes('run from line 10')", timeout=4000)
+    check(page.inner_text("#rec-go").strip().endswith("line 10"), "run from line 10 offered through the recovery card: " + page.inner_text("#rec-go"))
+    page.click("#rec-discard")
+    page.wait_for_selector("#recovery[hidden]", state="attached", timeout=4000)
+    page.click("#code-toggle")
+
     # tools: table, setter info from $/atc_manual, M6 with the install prompt
     page.wait_for_function("document.querySelector('#state').textContent === 'Idle'", timeout=8000)
     page.click("#tools-open")

@@ -15,6 +15,7 @@
 //   $Job/Resume=<line>     continue the interrupted job from <line>
 //   $Job/Resume=<line>:dry go to that line's start position at safe height only
 //   $Job/Discard           forget the interrupted job
+//   $Job/RunFrom=<line>:<file>  start a file from a line: offered like an interrupted job
 // Reports (all channels):
 //   [MSG:Recovery:<state>:<stopLine>:<retractLine>:<toolLine>:<reason>:<file>]
 //     state: none | interrupted | scanning | resuming

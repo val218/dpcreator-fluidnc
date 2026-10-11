@@ -136,6 +136,7 @@
         <button data-v="right">Side</button>
       </div>
       <button class="btn small" id="fit">Fit</button>
+      <button class="btn small" id="code-toggle" title="Show the G-code: follows the running line, run from a line">G-code</button>
       <button class="btn small" id="load-full" hidden title="Load the full 3D path of the running job now">Load path</button>
       <span class="viewer-file" id="viewer-file">No file loaded</span>
     </div>
@@ -149,6 +150,14 @@
       </span>
     </div>
     <div class="viewer-canvas" id="viewer"></div>
+    <div class="code" id="code" hidden>
+      <div class="code-head">
+        <label title="Scroll with the line being cut"><input type="checkbox" id="code-follow" checked> follow</label>
+        <span class="code-info" id="code-info"></span>
+        <button class="btn small" id="code-run" disabled title="Start the file from the selected line (recovery screens: restart point, Dry run, Resume)">Run from line</button>
+      </div>
+      <div class="code-scroll" id="code-scroll"><div class="code-inner" id="code-inner"></div></div>
+    </div>
     <div class="jobzadj" id="jobzadj" hidden title="Live Z adjust for the running job: ▲ raises the tool (shallower), ▼ lowers it (deeper). Ends with the job.">
       <span class="prep-label">Z adjust</span>
       <button data-zadj="-0.1">▼ 0.1</button><button data-zadj="-0.01">▼ 0.01</button>
