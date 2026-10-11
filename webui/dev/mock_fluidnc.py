@@ -7,6 +7,7 @@ same port at "/", and WebDAV-ish /sd and /flash. Pure stdlib (no pip).
     python3 webui/build.py && python3 webui/dev/mock_fluidnc.py
 """
 import asyncio
+import os
 import base64
 import hashlib
 import math
@@ -289,6 +290,8 @@ class Machine:
             if idx is None:
                 starters = [("Park", "#22d3ee", "p", "G53 G0 Z0\n"), ("Zero Z", "#3b82f6", "pc", "G10 L20 P0 Z0\n"),
                             ("Warm-up", "#eab308", "pc", "M3 S6000\nG4 P5\nM5\n")]
+                for k in range(int(os.environ.get("MOCK_MACROS", "3")) - 3):  # more, to test layout
+                    starters.append((f"Macro {k + 4}", "#a855f7", "p", "G4 P1\n"))
                 lines = []
                 for i, (n, c, f, b) in enumerate(starters, 1):
                     FILES["sd"][f"/.dpc/macros/{i}.nc"] = b.encode()

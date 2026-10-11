@@ -60,7 +60,10 @@ h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: v
 .layout {
   flex: 1; display: grid; gap: 10px; padding: 10px; min-height: 0;
   grid-template-columns: minmax(320px, 360px) 1fr minmax(300px, 380px);
-  grid-template-rows: auto 1.25fr 1fr;
+  /* Files keeps room for a few files + its buttons, the console a few lines;
+     on a short screen the work area scrolls a little instead of squeezing. */
+  grid-template-rows: auto minmax(220px, 1.5fr) minmax(150px, 1fr);
+  overflow-y: auto;
   grid-template-areas: "control viewer machine" "control viewer files" "control viewer console";
   height: calc(100vh - 92px - var(--mon-h, 74px));
 }
@@ -99,6 +102,7 @@ body {
   .layout {
     grid-template-columns: minmax(300px, 360px) 1fr;
     grid-template-rows: auto auto minmax(320px, auto);
+    overflow-y: visible;
     grid-template-areas: "control viewer" "machine viewer" "files console";
     height: auto;
     flex: none;
@@ -246,6 +250,19 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   .foot { padding: 2px 14px 4px; }
 }
 .file-run-btns { flex-wrap: nowrap; }
+/* Files: the list shrinks and scrolls; the selected file's buttons (Prepare)
+   always stay in the panel, never under the console. */
+.files { overflow: hidden; }
+.files .file-list { min-height: 34px; }
+.files .file-run { flex: none; }
+.console { overflow: hidden; }
+.console .log { min-height: 0; }
+.console .cmd { flex: none; }
+@media (min-width: 1200px) {  /* the list already highlights the file: just the buttons */
+  .files .file-run { padding-top: 6px; margin-top: 4px; }
+  .files .file-run > div:first-child { display: none; }
+  .files .file-run-btns { margin-top: 0; }
+}
 .file-run-btns .btn { padding: 5px 8px; white-space: nowrap; flex: 0 1 auto; }
 
 /* ---------- axis monitor (bottom strip) ---------- */
@@ -381,8 +398,14 @@ dialog::backdrop { background: rgba(0, 0, 0, .6); }
 .rw-info { font-size: 12px; color: var(--muted); }
 .rw-info.err { color: var(--err); }
 /* ---------- macros ---------- */
-.macro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; }
-.macro-grid .mbtn { border-left: 4px solid var(--mc, var(--accent)); text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Compact: small chips, 4 a row; on desktop at most 2 rows show (the rest
+   scroll), so many macros never push the Files panel down. */
+.macro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 4px; }
+.macro-grid .mbtn { border-left: 3px solid var(--mc, var(--accent)); text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  padding: 3px 6px; font-size: 12px; min-height: 26px; }
+@media (min-width: 1200px) {
+  .macro-grid { max-height: 60px; overflow-y: auto; scrollbar-width: thin; padding-right: 2px; }
+}
 .macro-grid .mbtn.ask::after { content: " ?"; color: var(--muted); }
 #macros-dlg { width: min(1000px, 96vw); }
 .mdlg-body { display: grid; grid-template-columns: 240px 1fr; gap: 12px; }
