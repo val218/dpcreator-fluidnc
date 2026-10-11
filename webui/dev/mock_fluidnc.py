@@ -108,7 +108,8 @@ def sample_gcode() -> str:
 
 
 FILES = {
-    "sd": {"/job1.nc": sample_gcode().encode(), "/notes.txt": b"hello\n"},
+    "sd": {"/job1.nc": sample_gcode().encode(), "/notes.txt": b"hello\n",
+           "/.dpc/jobs.log": b"1760200000|/sd/job1.nc|187|done|58\n1760203600|/sd/big.nc|42|stopped|5\n"},
     "flash": {"/config.yaml": b"name: mock\nboard: mock\n"},
 }
 
@@ -240,6 +241,10 @@ class Machine:
                 return ["[MSG:TLO Z reset to 0]", "ok"]
             self.state = "Hold:0"
             return [f"[MSG: Install tool #{self.tool} then resume to continue]", "ok"]
+        if u == "$STATS":
+            return ["[MSG:Stats:run=45000:spindle=52000:service=7200:jobs=12]", "ok"]
+        if u.startswith("$STATS/"):
+            return ["ok"]
         if u == "$I":
             return ["[VER:4.1 FluidNC v4.1.1 (mock) (esp32s3-wifi):]", "ok"]
         if u == "$#":

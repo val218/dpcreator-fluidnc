@@ -281,6 +281,14 @@ with sync_playwright() as p:
     page.wait_for_selector("#recovery[hidden]", state="attached", timeout=4000)
     page.click("#code-toggle")
 
+    # job history + hour counters
+    page.click("#hist-open")
+    page.wait_for_function("document.querySelector('#hist-stats').textContent.includes('12.5 h')", timeout=4000)
+    page.wait_for_selector("#hist-table td:has-text('big.nc')", timeout=4000)
+    check("Run from line" in page.inner_text("#hist-table"), "history: stopped job offers run from line")
+    page.screenshot(path=str(OUT / "desktop-history.png"))
+    page.click("#hist-close")
+
     # tools: table, setter info from $/atc_manual, M6 with the install prompt
     page.wait_for_function("document.querySelector('#state').textContent === 'Idle'", timeout=8000)
     page.click("#tools-open")

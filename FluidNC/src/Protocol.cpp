@@ -26,6 +26,7 @@
 #include "Recovery.h"      // job recovery
 #include "ZAdjust.h"
 #include "Rewind.h"
+#include "Stats.h"
 #include "Driver/restart.h"
 #include "Driver/watchdog.h"
 #include "Driver/heap.h"
@@ -322,6 +323,7 @@ static void poll_once() {
         heap_monitor_poll();
         pendant_poll();
         zadj_poll();  // live Z adjust: job start/end, pending -> active
+        stats_poll();  // run / spindle hour counters
 
         // Checks unwind_cause against the job stack and aborts atomically
         // with it, so a nest() that concurrently starts a fresh job (and
@@ -593,6 +595,7 @@ void protocol_main_loop() {
         // Build pendant .viz previews queued by uploads (only when Idle, no job).
         viz_poll();
         recov_poll();  // job recovery: progress record, restart scans
+        stats_save_if_due();  // hour counters to the SD card now and then
 
         // check to see if we should disable the stepper drivers
         // If idleEndTime is 0, no disable is pending.

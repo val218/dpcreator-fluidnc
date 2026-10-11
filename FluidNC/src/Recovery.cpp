@@ -2,6 +2,7 @@
 #include "Recovery.h"
 #include "ResumeScan.h"
 #include "Rewind.h"
+#include "Stats.h"
 
 #include "Job.h"
 #include "InputFile.h"
@@ -317,6 +318,7 @@ void recov_init() {
 void recov_job_start(Channel* file, const std::string& path) {
     if (Job::active()) return;  // a file run from inside a job: the outer job is tracked
     rewind_job_start();         // a new job: its own path to rewind
+    stats_job_start(path);      // job history
     _r          = Record();
     _r.st       = St::Running;
     _r.path     = path;
@@ -347,12 +349,14 @@ void recov_poll() {
             if (_r.line != _savedLine && millis() - _lastSaveMs > 5000) save();
         } else if (_eof == _file) {
             // Reached the end of the file: finished, nothing to recover.
+            stats_job_end("done", _r.line);
             _r    = Record();
             _file = nullptr;
             save();
         } else {
             _r.st     = St::Interrupted;
             _r.reason = state_is(State::Alarm) ? std::string("alarm ") + std::to_string((int)lastAlarm) : "stopped";
+            stats_job_end(_r.reason.c_str(), _r.line);
             _file     = nullptr;
             save();
             report();

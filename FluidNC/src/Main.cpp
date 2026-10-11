@@ -29,6 +29,7 @@
 #    include "Recovery.h"      // job recovery
 #    include "ZAdjust.h"       // live Z adjust
 #    include "Rewind.h"        // handwheel rewind
+#    include "Stats.h"         // job history, hour counters
 
 #    include <Arduino.h>
 
@@ -170,6 +171,7 @@ void setup() {
         recov_init();
         zadj_init();
         rewind_init();
+        stats_init();
 
     } catch (std::exception& ex) {
         // Log exception:

@@ -6,6 +6,7 @@
 #include "VizGenerator.h"  // VizGenerator plugin (TabUI pendant)
 #include "ZAdjust.h"
 #include "Rewind.h"
+#include "Stats.h"
 #include "MacroLib.h"
 #include "PendantLink.h"   // $Pendant/Status
 #include "Parameters.h"  // global_named_params
@@ -1407,6 +1408,10 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
             }
             return execute_line(runLine.c_str(), channel, auth_level, on_protocol_task);
         }
+    }
+    // Job history / hour counters
+    if (stats_command(line, channel)) {
+        return Error::Ok;
     }
     // Handwheel rewind: requests answered here; the Hold loop moves the tool.
     if (rewind_command(line, channel)) {

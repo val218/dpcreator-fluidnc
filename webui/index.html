@@ -220,7 +220,7 @@
 
   <!-- ======== RIGHT TOP: machine, spindle, overrides ======== -->
   <section class="panel machine" data-pane="control">
-    <div class="panel-head"><h2>Machine</h2><span class="status-line" id="feedspeed">F 0 · S 0</span></div>
+    <div class="panel-head"><h2>Machine</h2><span class="status-line" id="feedspeed">F 0 · S 0</span><button class="btn small" id="hist-open" title="Job history, cutting and spindle hours">History…</button></div>
     <div class="grid-btn">
       <button data-cmd="home" class="btn">Home</button>
       <button data-cmd="unlock" class="btn">Unlock</button>
@@ -368,6 +368,17 @@ Runs like a file job: Hold / Stop work, the machine must be Idle to start.</pre>
     <button class="btn" id="offsets-g92" title="Clear the temporary G92 offset">Clear G92</button>
     <button class="btn" id="offsets-refresh">Refresh</button>
     <button class="btn accent" id="offsets-close">Close</button>
+  </div>
+</dialog>
+<dialog id="hist-dlg">
+  <div class="panel-head"><h2>Job history</h2><span class="muted mdlg-note">kept on the SD card by the controller</span></div>
+  <div class="hist-stats" id="hist-stats"></div>
+  <div class="offsets-wrap hist-wrap"><table class="offsets hist" id="hist-table"></table></div>
+  <div class="mdlg-btns">
+    <span class="mdlg-status">Stopped jobs can be started again from the line they stopped at.</span>
+    <button class="btn" id="hist-service">Reset service counter</button>
+    <button class="btn" id="hist-clear">Clear history</button>
+    <button class="btn accent" id="hist-close">Close</button>
   </div>
 </dialog>
 <dialog id="tools-dlg">

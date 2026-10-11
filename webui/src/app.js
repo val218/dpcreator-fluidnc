@@ -100,6 +100,10 @@
       log(line, "msg");
       return;
     }
+    if ((m = /^\[MSG:Stats:(.*)\]$/.exec(line))) {
+      History.onStats(m[1]);
+      return;
+    }
     if ((m = /^\$\/atc_manual\/(\w+)=(.*)$/.exec(line))) {
       Tools.onAtc(m[1], m[2]);
       return;
@@ -763,6 +767,70 @@
       info();
       draw();
     };
+  })();
+
+  // ------------------------------------------------------------- history / hour counters
+  // The board keeps /sd/.dpc/jobs.log (one line per job) and run / spindle /
+  // service hour counters ($Stats). The page tells the board the time on
+  // connect ($Stats/Time) so the log has dates.
+  const History = (() => {
+    const dlg = $("#hist-dlg"), LOG = "/.dpc/jobs.log";
+    let stats = null;
+    const hrs = (s) => (s / 3600).toFixed(1) + " h";
+    function onStats(body) {
+      stats = Object.fromEntries(body.split(":").map((kv) => kv.split("=")).map(([k, v]) => [k, +v || 0]));
+      if (dlg.open) paintStats();
+    }
+    function paintStats() {
+      const s = stats || {};
+      $("#hist-stats").textContent = stats
+        ? `Cutting time ${hrs(s.run)} · spindle ${hrs(s.spindle)} · spindle since service ${hrs(s.service)} · jobs ${s.jobs}`
+        : "Counters: waiting for the controller…";
+    }
+    async function paintLog() {
+      const t = $("#hist-table");
+      t.textContent = "";
+      let txt = "";
+      try {
+        const have = (await Files.list("sd", "/.dpc").catch(() => [])).some((f) => f.name === "jobs.log");
+        if (have) txt = await Files.getText("sd", LOG);
+      } catch {}
+      const rows = txt.split("\n").filter((l) => l.trim()).map((l) => l.split("|")).reverse().slice(0, 200);
+      t.append(el("tr", {}, el("th", {}, "When"), el("th", {}, "File"), el("th", {}, "Time"), el("th", {}, "Result"), el("th", {}, "Line"), el("th", {}, "")));
+      if (!rows.length) t.append(el("tr", {}, el("td", { colspan: 6, class: "muted" }, "No jobs recorded yet.")));
+      rows.forEach(([ep, file = "", sec = "0", res = "", line = "0"]) => {
+        const d = +ep ? new Date(+ep * 1000).toLocaleString() : "—";
+        const ok = res === "done";
+        const tr = el("tr", { class: ok ? "" : "bad" },
+          el("td", {}, d), el("td", { title: file }, file.replace(/^\/sd\//, "")), el("td", {}, fmtTime(+sec)),
+          el("td", { class: ok ? "ok" : "err" }, res), el("td", {}, line));
+        const td = el("td", {});
+        if (!ok && +line > 0 && /^\/sd\//.test(file)) {
+          const b = el("button", { class: "btn", title: "Start this file again from the line it stopped at (recovery screens)" }, "Run from line");
+          b.onclick = () => {
+            if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+            if (confirm(`Start ${file.replace(/^.*\//, "")} from line ${line}?\n\nThe job recovery screens open: check the restart point, then Dry run / Resume.`)) {
+              send(`$Job/RunFrom=${line}:${file}`);
+              dlg.close();
+            }
+          };
+          td.append(b);
+        }
+        tr.append(td);
+        t.append(tr);
+      });
+    }
+    $("#hist-open").onclick = () => { paintStats(); paintLog(); dlg.showModal(); send("$Stats"); };
+    $("#hist-close").onclick = () => dlg.close();
+    $("#hist-service").onclick = () => {
+      if (confirm("Reset the spindle service counter to 0 (after a bearing / brush service)?")) send("$Stats/ResetService");
+    };
+    $("#hist-clear").onclick = async () => {
+      if (!confirm("Delete the job history? (the hour counters stay)")) return;
+      try { await Files.remove("sd", LOG); } catch {}
+      paintLog();
+    };
+    return { onStats };
   })();
 
   // ------------------------------------------------------------- tools
