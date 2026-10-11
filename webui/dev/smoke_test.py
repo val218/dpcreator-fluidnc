@@ -71,6 +71,9 @@ with sync_playwright() as p:
     page.evaluate("fetch('/mock/pendant?state=connected')")
     page.wait_for_function("document.querySelector('#pendant').textContent === 'Pendant'", timeout=3000)
     page.screenshot(path=str(OUT / "desktop-viz.png"))
+    page.wait_for_selector("#crash:not([hidden])", timeout=3000)
+    check("PC=0x42001234" in page.inner_text("#crash-text"), "crash banner shows the backtrace ($Crash)")
+    page.click("#crash-hide")
     # monitor strip present with one row per axis
     check(page.locator(".mon-axis").count() == 4, "axis monitor has 4 axes")
 

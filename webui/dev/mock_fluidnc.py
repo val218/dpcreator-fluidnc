@@ -190,6 +190,8 @@ class Machine:
         if u == "$JOB/UNPREPARE":
             PREP[0], PREP[1] = "none", ""
             return ["[MSG:Prepared:none:]", "ok"]
+        if u == "$CRASH":
+            return ["[MSG:Crash:PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]", "ok"]
         if u == "$JOB/PREPARED":
             return [f"[MSG:Prepared:{PREP[0]}:{PREP[1]}]", "ok"]
         if u.startswith("G0") or u.startswith("G90 G0"):

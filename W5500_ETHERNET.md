@@ -435,6 +435,7 @@ While a preview is being built or sent, the WebUI terminal shows `VizBusy`,
 | Browser / Windows calls the firmware zip *dangerous* | False alarm on an unknown download; the firmware zip now holds only the `.bin` files. If it is still blocked: keep / "Download anyway", or check the file in Windows Security → Protection history and allow it. |
 | Board stops answering (WebUI, pendant, serial) after the pendant was plugged in / rebooted | Fixed: XON/XOFF is off on the pendant UART — a noise byte that looked like XOFF paused the board's transmitter and blocked it. |
 | Hold / door / reset when the pendant is plugged in or rebooted | Fixed: line noise on the pendant UART is dropped. `$Pendant/Debug` shows how many bytes were dropped. |
+| WebUI shows *"The controller restarted after a crash"* | Press **Copy details** and send the text (it is the crash backtrace; `$Crash` prints it too). Since 6.x of this branch one crash restarts with your `config.yaml`; only 3 crash restarts in a row fall back to the default config (WiFi AP `FluidNC`, no Ethernet) - reset the board to try again. |
 | Boot shows *"Showing startup log from previous panic"* | Capture serial output at 115200 including `Guru Meditation` and `Backtrace:` lines and decode via **Actions → Run workflow** with the backtrace input. |
 
 Windows has no telnet client by default; test the port with PowerShell:

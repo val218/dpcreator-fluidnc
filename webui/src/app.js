@@ -77,6 +77,16 @@
       log(line, "msg");
       return;
     }
+    if ((m = /^\[MSG:Crash:(.*)\]$/.exec(line))) {
+      // Last restart was a crash: show it with the backtrace to copy
+      const info = m[1];
+      if (info !== "none") {
+        $("#crash-text").textContent = info === "unknown" ? "(no backtrace saved)" : info;
+        $("#crash").hidden = false;
+      }
+      log(line, info === "none" ? "msg" : "err");
+      return;
+    }
     if ((m = /^\[MSG:Prepared:(\w+):(.*)\]$/.exec(line))) {
       setPrepared(m[1], m[2]);
       log(line, "msg");
@@ -591,6 +601,13 @@
     showPane("viewer");
   }
   $("#preview").onclick = previewSelected;
+
+  $("#crash-hide").onclick = () => ($("#crash").hidden = true);
+  $("#crash-copy").onclick = async () => {
+    const t = "dpCREATOR FluidNC crash: " + $("#crash-text").textContent;
+    try { await navigator.clipboard.writeText(t); toast("Crash details copied - paste them to the developer"); }
+    catch { prompt("Copy the crash details:", t); }
+  };
 
   // ------------------------------------------------------------- prepared job
   // "Prepare" puts the file on the pendant's screen (and in this viewer); the

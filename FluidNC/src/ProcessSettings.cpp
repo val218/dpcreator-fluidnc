@@ -29,6 +29,7 @@
 #include "StartupLog.h"           // startupLog
 #include "Driver/gpio_dump.h"     // gpio_dump()
 #include "Driver/backtrace.h"     // backtrace_get(), etc.
+#include "Driver/restart.h"       // restart_was_panic ($Crash)
 #include "FileCommands.h"         // make_file_commands()
 #include "Job.h"                  // Job::active()
 
@@ -1359,6 +1360,29 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
     // Read-only link state; answer right here on any task.
     if (strcasecmp(line, "$Pendant/Status") == 0 || strcasecmp(line, "$Pendant") == 0) {
         pendant_report(channel);
+        return Error::Ok;
+    }
+    // Last crash, for the WebUI banner / decoding: [MSG:Crash:none] or
+    // [MSG:Crash:PC=0x... cause=N Backtrace: 0x...:0x00000000 ...]
+    if (strcasecmp(line, "$Crash") == 0) {
+        backtrace_t bt;
+        if (restart_was_panic() && backtrace_get(&bt)) {
+            char        b[24];
+            std::string m = "[MSG:Crash:";
+            snprintf(b, sizeof(b), "PC=0x%08x", (unsigned)bt.pc);
+            m += b;
+            snprintf(b, sizeof(b), " cause=%u", (unsigned)bt.exccause);
+            m += b;
+            m += " Backtrace:";
+            for (size_t i = 0; i < bt.num_addresses; i++) {
+                snprintf(b, sizeof(b), " 0x%08x:0x00000000", (unsigned)bt.addresses[i]);
+                m += b;
+            }
+            m += "]\n";
+            channel.print(m.c_str());
+        } else {
+            channel.print(restart_was_panic() ? "[MSG:Crash:unknown]\n" : "[MSG:Crash:none]\n");
+        }
         return Error::Ok;
     }
     if (strcasecmp(line, "$Pendant/Debug") == 0) {

@@ -26,6 +26,9 @@
 #include "Driver/backtrace.h"
 
 #include <cstdio>
+#if __has_include(<esp_attr.h>)
+#    include <esp_attr.h>  // RTC_NOINIT_ATTR
+#endif
 #include <cstring>
 #include <atomic>
 #include <memory>
@@ -251,11 +254,34 @@ namespace Machine {
 
     const char defaultConfig[] = "name: Default (Test Drive)\nboard: None\n";
 
-    void MachineConfig::load() {
-        // If the system crashes we skip the config file and use the default
-        // builtin config.  This helps prevent reset loops on bad config files.
+    // Crash restarts in a row (survives the restart in RTC memory).
+#if __has_include(<esp_attr.h>)
+    static RTC_NOINIT_ATTR uint32_t s_crash_magic;
+    static RTC_NOINIT_ATTR uint32_t s_crash_streak;
+#else
+    static uint32_t s_crash_magic, s_crash_streak;
+#endif
+    static uint32_t crash_streak_update() {
+        const uint32_t MAGIC  = 0xC0A5F00D;
+        uint32_t       streak = 0;
         if (restart_was_panic()) {
-            log_error("Skipping configuration file due to panic");
+            streak = (s_crash_magic == MAGIC && s_crash_streak < 100) ? s_crash_streak + 1 : 1;
+        }
+        s_crash_magic  = MAGIC;
+        s_crash_streak = streak;
+        return streak;
+    }
+
+    void MachineConfig::load() {
+        // After a crash the config file used to be skipped right away, so one
+        // crash at runtime left the machine on the default config (WiFi AP,
+        // no Ethernet, no pendant) until the next manual reset. Now only a
+        // crash loop - 3 crash restarts in a row - falls back to the default
+        // config; a single crash restarts normally (the backtrace is logged
+        // and $Crash reports it).
+        uint32_t streak = crash_streak_update();
+        if (streak > 0) {
+            log_error("Restarted after a crash (" << streak << " in a row)");
             backtrace_t bt;
             if (backtrace_get(&bt)) {
                 char buf[16];
@@ -269,6 +295,9 @@ namespace Machine {
                 }
                 log_error(btLine.c_str());
             }
+        }
+        if (streak >= 3) {
+            log_error("Skipping configuration file due to repeated panics");
             log_info("Using default configuration");
             load_yaml(defaultConfig);
             set_state(State::ConfigAlarm);
