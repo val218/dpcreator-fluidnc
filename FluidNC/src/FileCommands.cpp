@@ -8,6 +8,7 @@
 #include "InputFile.h"    // InputFile
 #include "VizGenerator.h"  // viz_job_started
 #include "Recovery.h"      // recov_job_start
+#include "MacroLib.h"      // macros: no preview / recovery
 #include "Job.h"          // Job::
 #include "xmodem.h"       // xmodemReceive(), xmodemTransmit()
 #include "Protocol.h"     // pollingPaused
@@ -359,13 +360,18 @@ static Error runFile(const Volume& fs, const char* parameter, AuthenticationLeve
     // leader, not the inner job source whose processing ref this dispatch
     // holds. Job::dispatch_channel is that one -- see its declaration and
     // FluidNC issue #1862.
-    viz_job_started(theFile->path());  // preview for the pendant / WebUI if it has none yet
-    // A connected pendant first gets the preview on screen; the job starts after.
-    // Prepared and shown on the pendant already: start now.
-    if (!viz_prepared_ready(theFile->path()) && viz_hold_job(theFile, theFile->path(), &out, ack)) {
-        return nested ? Error::Deferred : Error::Ok;
+    // A user macro (MacroLib.h) runs like a file, but is not a job to preview
+    // on the pendant or to recover.
+    const bool isMacro = macrolib_is_macro_path(theFile->path());
+    if (!isMacro) {
+        viz_job_started(theFile->path());  // preview for the pendant / WebUI if it has none yet
+        // A connected pendant first gets the preview on screen; the job starts after.
+        // Prepared and shown on the pendant already: start now.
+        if (!viz_prepared_ready(theFile->path()) && viz_hold_job(theFile, theFile->path(), &out, ack)) {
+            return nested ? Error::Deferred : Error::Ok;
+        }
+        recov_job_start(theFile, theFile->path());  // job recovery: record its progress
     }
-    recov_job_start(theFile, theFile->path());  // job recovery: record its progress
     Job::nest(theFile, &out, ack);
 
     return nested ? Error::Deferred : Error::Ok;

@@ -92,6 +92,11 @@
       log(line, "msg");
       return;
     }
+    if ((m = /^\[MSG:Macro(Item|End|Err|Lib):(.*)\]$/.exec(line))) {
+      Macros.onMsg(m[1], m[2]);
+      if (m[1] === "Err") log(line, "err");
+      return;
+    }
     if ((m = /^\[MSG:Rewind(Err)?:(.*)\]$/.exec(line))) {
       Rewind.onMsg(m[1] || "", m[2]);
       log(line, m[1] ? "err" : "msg");
@@ -155,11 +160,13 @@
 
   var recovHook = null;  // var: hoisted, set by the recovery panel
   var rwHook = null;     // var: hoisted, set by the rewind bar
+  var macroHook = null;  // var: hoisted, set by the macros panel
   var rwLineNow = 0;     // line being retraced (3D marker)
   function setStateBadge(state) {
     S.state = state;
     zadjEnable();
     if (recovHook) recovHook();
+    if (macroHook) macroHook();
     if (rwHook) rwHook();
     const b = $("#state");
     b.textContent = state === "Unknown" ? "--" : state;
@@ -238,7 +245,7 @@
     const jobEl = $("#job");
     if (running) {
       if (!S.job || S.job.file !== st.sdFile) S.job = { file: st.sdFile, start: Date.now() };
-      ensurePreview(st.sdFile);
+      if (!st.sdFile.includes("/.dpc/")) ensurePreview(st.sdFile);  // a macro has no preview
       const filePct = Math.max(0, Math.min(100, st.sdPct));
       // Accurate %: where the tool is on the parsed path, weighted by estimated
       // time. Falls back to FluidNC's file-read % (runs ahead of the tool by
@@ -656,6 +663,193 @@
     $("#uiold").hidden = false;
   }
   $("#uiold-hide").onclick = () => ($("#uiold").hidden = true);
+
+  // ------------------------------------------------------------- macros
+  // Kept on the SD card by the board (/.dpc/macros.txt + /.dpc/macros/<id>.nc,
+  // MacroLib.h); the pendant shows the ones marked "on the pendant". This page
+  // edits the files (WebDAV) and tells the board ($MacroLib/Reload).
+  const Macros = (() => {
+    const INDEX = "/.dpc/macros.txt", DIR = "/.dpc/macros";
+    let items = [], stage = [];
+    const grid = $("#macro-grid");
+
+    function paint() {
+      grid.textContent = "";
+      if (!items.length) { grid.append(el("span", { class: "muted" }, "no macros (SD card?)")); return; }
+      for (const it of items) {
+        const b = el("button", { class: "btn mbtn" + (it.flags.includes("c") ? " ask" : ""), title: it.name }, it.name);
+        b.style.setProperty("--mc", it.color);
+        b.onclick = () => run(it);
+        grid.append(b);
+      }
+      enable();
+    }
+    function enable() { $$(".mbtn", grid).forEach((b) => (b.disabled = !idle())); }
+    function run(it) {
+      if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+      if (it.flags.includes("c") && !confirm(`Run macro "${it.name}"?`)) return;
+      send("$MacroLib/Run=" + it.id);
+    }
+    function onMsg(kind, body) {
+      if (kind === "Item") {
+        // <id>:<#color>:<flags>:<name>
+        const p = body.split(":");
+        stage.push({ id: +p[0], color: p[1] || "#26acff", flags: p[2] || "", name: p.slice(3).join(":") });
+      } else if (kind === "End") {
+        items = stage; stage = [];
+        paint();
+      } else if (kind === "Lib") {
+        if (body === "changed") list();
+      } else if (kind === "Err") {
+        toast("Macro: " + body, true);
+      }
+    }
+    function list() { stage = []; send("$MacroLib/List"); }
+
+    // ---- editor ----
+    const dlg = $("#macros-dlg");
+    let rows = [], sel = -1, dirty = false;   // rows: {id, name, color, flags, code, loaded}
+    const status = (t) => ($("#mdlg-status").textContent = t);
+    function parseIndex(text) {
+      return text.split(/\r?\n/).filter((l) => l.includes("|")).map((l) => {
+        const [id, name, color, flags] = l.split("|");
+        return { id: +id, name, color: color || "#26acff", flags: flags || "", code: "", loaded: false };
+      }).filter((r) => r.id > 0);
+    }
+    const indexText = () => rows.map((r) => [r.id, r.name.replace(/[|\n]/g, " "), r.color, r.flags].join("|")).join("\n") + "\n";
+    async function open() {
+      status("loading…");
+      dlg.showModal();
+      try { rows = parseIndex(await Files.getText("sd", INDEX)); }
+      catch { rows = []; status("no macro list yet - press + New (an SD card is needed)"); }
+      sel = rows.length ? 0 : -1;
+      drawList();
+      await select(sel);
+    }
+    function drawList() {
+      const ul = $("#mdlg-list");
+      ul.textContent = "";
+      rows.forEach((r, i) => {
+        const li = el("li", { class: i === sel ? "sel" : "" }, r.name || "(no name)");
+        li.style.setProperty("--mc", r.color);
+        if (r.flags.includes("p")) li.append(el("small", {}, "pendant"));
+        if (r.flags.includes("b")) li.append(el("small", {}, "button"));
+        li.onclick = () => { store(); select(i); };
+        ul.append(li);
+      });
+      $("#mdlg-edit").style.visibility = sel >= 0 ? "visible" : "hidden";
+    }
+    async function select(i) {
+      sel = i;
+      drawList();
+      if (i < 0) return;
+      const r = rows[i];
+      if (!r.loaded) {
+        try { r.code = await Files.getText("sd", `${DIR}/${r.id}.nc`); } catch { r.code = ""; }
+        r.loaded = true;
+      }
+      $("#mdlg-name").value = r.name;
+      $("#mdlg-color").value = /^#[0-9a-f]{6}$/i.test(r.color) ? r.color : "#26acff";
+      $("#mdlg-p").checked = r.flags.includes("p");
+      $("#mdlg-c").checked = r.flags.includes("c");
+      $("#mdlg-b").checked = r.flags.includes("b");
+      $("#mdlg-code").value = r.code;
+      status("");
+    }
+    function store() {  // form -> row
+      if (sel < 0) return;
+      const r = rows[sel];
+      r.name = $("#mdlg-name").value.trim() || "Macro";
+      r.color = $("#mdlg-color").value;
+      r.flags = ($("#mdlg-p").checked ? "p" : "") + ($("#mdlg-c").checked ? "c" : "") + ($("#mdlg-b").checked ? "b" : "");
+      r.code = $("#mdlg-code").value;
+    }
+    const nextId = () => rows.reduce((m, r) => Math.max(m, r.id), 0) + 1;
+    async function saveAll(changedRows) {
+      status("saving…");
+      for (const r of changedRows) await Files.putText("sd", `${DIR}/${r.id}.nc`, r.code.endsWith("\n") ? r.code : r.code + "\n");
+      await Files.putText("sd", INDEX, indexText());
+      send("$MacroLib/Reload");
+      dirty = false;
+      status("saved");
+      drawList();
+    }
+    async function save(andRun) {
+      store();
+      if (sel < 0) return;
+      try {
+        await saveAll([rows[sel]]);
+        if (andRun) {
+          if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+          send("$MacroLib/Run=" + rows[sel].id);
+        }
+      } catch (e) { status(e.message); toast(e.message, true); }
+    }
+    $("#macros-edit").onclick = () => open().catch((e) => toast(e.message, true));
+    $("#mdlg-close").onclick = () => { if (!dirty || confirm("Close without saving the changes?")) dlg.close(); };
+    $("#mdlg-save").onclick = () => save(false);
+    $("#mdlg-run").onclick = () => save(true);
+    ["#mdlg-name", "#mdlg-color", "#mdlg-p", "#mdlg-c", "#mdlg-b", "#mdlg-code"].forEach((s) =>
+      $(s).addEventListener("input", () => { dirty = true; status("not saved"); }));
+    $("#mdlg-new").onclick = () => {
+      store();
+      rows.push({ id: nextId(), name: "New macro", color: "#26acff", flags: "p", code: "(new macro)\n", loaded: true });
+      dirty = true;
+      select(rows.length - 1);
+      status("new - edit and Save");
+    };
+    $("#mdlg-dup").onclick = () => {
+      if (sel < 0) return;
+      store();
+      const r = rows[sel];
+      rows.splice(sel + 1, 0, { ...r, id: nextId(), name: r.name + " copy", loaded: true });
+      dirty = true;
+      select(sel + 1);
+      status("copy - Save to keep it");
+    };
+    const move = (d) => {
+      if (sel < 0 || sel + d < 0 || sel + d >= rows.length) return;
+      store();
+      [rows[sel], rows[sel + d]] = [rows[sel + d], rows[sel]];
+      sel += d;
+      drawList();
+      Files.putText("sd", INDEX, indexText()).then(() => send("$MacroLib/Reload")).catch((e) => toast(e.message, true));
+    };
+    $("#mdlg-up").onclick = () => move(-1);
+    $("#mdlg-down").onclick = () => move(1);
+    $("#mdlg-del").onclick = async () => {
+      if (sel < 0 || !confirm(`Delete macro "${rows[sel].name}"?`)) return;
+      const [r] = rows.splice(sel, 1);
+      try {
+        await Files.putText("sd", INDEX, indexText());
+        await Files.remove("sd", `${DIR}/${r.id}.nc`).catch(() => {});
+        send("$MacroLib/Reload");
+      } catch (e) { toast(e.message, true); }
+      select(Math.min(sel, rows.length - 1));
+    };
+    $("#mdlg-export").onclick = async () => {
+      store();
+      for (const r of rows) if (!r.loaded) { try { r.code = await Files.getText("sd", `${DIR}/${r.id}.nc`); } catch {} r.loaded = true; }
+      const data = JSON.stringify({ dpcreatorMacros: 1, macros: rows.map(({ name, color, flags, code }) => ({ name, color, flags, code })) }, null, 1);
+      const a = el("a", { href: URL.createObjectURL(new Blob([data], { type: "application/json" })), download: "dpcreator-macros.json" });
+      document.body.append(a); a.click(); a.remove();
+    };
+    $("#mdlg-import").onchange = async (e) => {
+      const f = e.target.files[0];
+      e.target.value = "";
+      if (!f) return;
+      try {
+        const d = JSON.parse(await f.text());
+        const add = (d.macros || []).map((m) => ({ id: 0, name: String(m.name || "Macro"), color: m.color || "#26acff", flags: m.flags || "", code: String(m.code || ""), loaded: true }));
+        for (const r of add) { r.id = nextId(); rows.push(r); }
+        await saveAll(add);
+        toast(`Imported ${add.length} macros`);
+        select(rows.length - 1);
+      } catch (err) { toast("Import failed: " + err.message, true); }
+    };
+    macroHook = enable;
+    return { onMsg, list, enable, get items() { return items; } };
+  })();
 
   // ------------------------------------------------------------- handwheel rewind
   // In Hold the board moves the tool back along the path it cut ($Rewind/Move),

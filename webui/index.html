@@ -223,6 +223,9 @@
       <button data-cmd="mist" class="btn" id="btn-mist">Mist</button>
     </div>
 
+    <div class="panel-head"><h2>Macros</h2><button class="btn small" id="macros-edit" title="Add, edit, reorder macros (kept on the SD card, also on the pendant)">Edit…</button></div>
+    <div class="macro-grid" id="macro-grid"><span class="muted">loading…</span></div>
+
   </section>
 
   <!-- ======== RIGHT: files + console ======== -->
@@ -288,6 +291,57 @@
       <button value="save" class="btn accent" id="editor-save">Save</button>
     </div>
   </form>
+</dialog>
+<dialog id="macros-dlg">
+  <div class="mdlg">
+    <div class="panel-head"><h2>Macros</h2><span class="muted mdlg-note">kept on the SD card · shared with the pendant</span></div>
+    <div class="mdlg-body">
+      <div class="mdlg-side">
+        <ul class="mdlg-list" id="mdlg-list"></ul>
+        <div class="mdlg-side-btns">
+          <button class="btn small" id="mdlg-new">+ New</button>
+          <button class="btn small" id="mdlg-dup" title="Duplicate">Copy</button>
+          <button class="btn small" id="mdlg-up" title="Move up">▲</button>
+          <button class="btn small" id="mdlg-down" title="Move down">▼</button>
+          <button class="btn small danger" id="mdlg-del">Delete</button>
+        </div>
+        <div class="mdlg-side-btns">
+          <button class="btn small" id="mdlg-export" title="Download all macros as one file">Export</button>
+          <label class="btn small" title="Load macros from an exported file (added to the list)">Import<input type="file" id="mdlg-import" accept=".json" hidden></label>
+        </div>
+      </div>
+      <div class="mdlg-edit" id="mdlg-edit">
+        <div class="mdlg-row">
+          <label class="field">Name <input id="mdlg-name" maxlength="24"></label>
+          <label class="field">Colour <input id="mdlg-color" type="color" value="#26acff"></label>
+        </div>
+        <div class="mdlg-row mdlg-flags">
+          <label><input type="checkbox" id="mdlg-p"> on the pendant</label>
+          <label><input type="checkbox" id="mdlg-c"> ask before running</label>
+          <label><input type="checkbox" id="mdlg-b"> button on the Control panel</label>
+        </div>
+        <textarea id="mdlg-code" spellcheck="false" placeholder="G-code, $ commands, FluidNC expressions"></textarea>
+        <details class="mdlg-help"><summary>Script help</summary>
+<pre>G-code and $ commands, one per line. FluidNC also has:
+  #&lt;depth&gt; = 2.5            named variable (#&lt;_name&gt; = kept between macros)
+  G1 Z[0 - #&lt;depth&gt;] F300   maths in [ ]
+  o100 if [#&lt;depth&gt; GT 3]   ... o100 elseif [...] ... o100 else ... o100 endif
+  o101 while [#&lt;n&gt; LT 5]    ... o101 endwhile     (also do/while, repeat [n])
+  (PRINT, depth %.2f mm, #&lt;depth&gt;)   message to the terminals
+  #5061 #5062 #5063  last probe position (machine)   #5070 = 1 if it touched
+  #&lt;_x&gt; #&lt;_y&gt; #&lt;_z&gt;  current work position
+  G38.2 Z-20 F100            probe down until it touches (error if not)
+Runs like a file job: Hold / Stop work, the machine must be Idle to start.</pre>
+        </details>
+        <div class="mdlg-btns">
+          <span class="mdlg-status" id="mdlg-status"></span>
+          <button class="btn" id="mdlg-close">Close</button>
+          <button class="btn" id="mdlg-run" title="Save, then run it">Save &amp; run</button>
+          <button class="btn accent" id="mdlg-save">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </dialog>
 <div id="toast" class="toast" hidden></div>
 <footer class="foot">dpCREATOR WebUI <span id="ui-ver">__VERSION__</span> · FluidNC <span id="fw-ver"></span></footer>

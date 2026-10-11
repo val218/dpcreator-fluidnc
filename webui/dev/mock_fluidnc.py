@@ -229,6 +229,32 @@ class Machine:
             return ["[MSG:Crash:PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]", "ok"]
         if u == "$I":
             return ["[VER:4.1 FluidNC v4.1.1 (mock) (esp32s3-wifi):]", "ok"]
+        if u == "$MACROLIB/LIST":
+            idx = FILES["sd"].get("/.dpc/macros.txt")
+            if idx is None:
+                starters = [("Park", "#22d3ee", "p", "G53 G0 Z0\n"), ("Zero Z", "#3b82f6", "pc", "G10 L20 P0 Z0\n"),
+                            ("Warm-up", "#eab308", "pc", "M3 S6000\nG4 P5\nM5\n")]
+                lines = []
+                for i, (n, c, f, b) in enumerate(starters, 1):
+                    FILES["sd"][f"/.dpc/macros/{i}.nc"] = b.encode()
+                    lines.append(f"{i}|{n}|{c}|{f}")
+                idx = ("\n".join(lines) + "\n").encode()
+                FILES["sd"]["/.dpc/macros.txt"] = idx
+            out = []
+            for l in idx.decode().splitlines():
+                p = l.split("|")
+                if len(p) >= 3 and p[0].isdigit():
+                    out.append(f"[MSG:MacroItem:{p[0]}:{p[2]}:{p[3] if len(p) > 3 else ''}:{p[1]}]")
+            return out + [f"[MSG:MacroEnd:{len(out)}]", "ok"]
+        if u == "$MACROLIB/RELOAD":
+            asyncio.get_event_loop().create_task(broadcast(["[MSG:MacroLib:changed]"]))
+            return ["ok"]
+        if u.startswith("$MACROLIB/RUN="):
+            n = u.split("=", 1)[1]
+            if f"/.dpc/macros/{n}.nc" not in FILES["sd"]:
+                return ["error:60"]
+            self.job = (f"/.dpc/macros/{n}.nc", time.time(), 3)
+            return ["ok"]
         if u == "$REWIND":
             return [rw_msg(), "ok"]
         if u == "$REWIND/START":

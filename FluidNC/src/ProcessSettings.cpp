@@ -6,6 +6,7 @@
 #include "VizGenerator.h"  // VizGenerator plugin (TabUI pendant)
 #include "ZAdjust.h"
 #include "Rewind.h"
+#include "MacroLib.h"
 #include "PendantLink.h"   // $Pendant/Status
 #include "Parameters.h"  // global_named_params
 
@@ -1395,6 +1396,17 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
         const char* v = line + 15;
         pendant_trace(channel, strcasecmp(v, "on") == 0 || strcmp(v, "1") == 0);
         return Error::Ok;
+    }
+    // User macros on the SD card: list / reload answered here; Run becomes a
+    // file run of the macro ($SD/Run=/.dpc/macros/<id>.nc).
+    {
+        std::string runLine;
+        if (macrolib_command(line, channel, runLine)) {
+            if (runLine.empty()) {
+                return Error::Ok;
+            }
+            return execute_line(runLine.c_str(), channel, auth_level, on_protocol_task);
+        }
     }
     // Handwheel rewind: requests answered here; the Hold loop moves the tool.
     if (rewind_command(line, channel)) {
