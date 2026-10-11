@@ -7,6 +7,7 @@
 #include "Configuration/JsonGenerator.h"
 #include "InputFile.h"    // InputFile
 #include "VizGenerator.h"  // viz_job_started
+#include "Recovery.h"      // recov_job_start
 #include "Job.h"          // Job::
 #include "xmodem.h"       // xmodemReceive(), xmodemTransmit()
 #include "Protocol.h"     // pollingPaused
@@ -356,6 +357,7 @@ static Error runFile(const Volume& fs, const char* parameter, AuthenticationLeve
     if (!viz_prepared_ready(theFile->path()) && viz_hold_job(theFile, theFile->path(), &out, Job::dispatch_channel)) {
         return Error::Deferred;
     }
+    recov_job_start(theFile, theFile->path());  // job recovery: record its progress
     Job::nest(theFile, &out, Job::dispatch_channel);
 
     return Error::Deferred;
