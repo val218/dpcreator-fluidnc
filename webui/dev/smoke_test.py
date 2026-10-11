@@ -112,6 +112,9 @@ with sync_playwright() as p:
     page.click("button[data-cmd='stop']")
     page.wait_for_function("document.querySelector('#viewer-file').textContent === 'big.nc'", timeout=8000)
     check(True, "full 3D path loads once the machine stops")
+    page.wait_for_selector("#recovery:not([hidden])", timeout=4000)
+    check("big.nc" in page.inner_text("#rec-file"), "stopped job offered for recovery")
+    page.click("#rec-later")
     page.wait_for_function("document.querySelector('#state').textContent === 'Idle'", timeout=5000)
     page.wait_for_timeout(500)
     page.click("#file-list li:has-text('job1.nc')")
@@ -146,6 +149,32 @@ with sync_playwright() as p:
     page.click("button[data-cmd='stop']")
     page.wait_for_function("document.querySelector('#state').textContent === 'Idle'", timeout=4000)
     check(True, "stop returns to Idle")
+
+    # job recovery: the board keeps the stopped job; the panel offers restart points
+    page.wait_for_selector("#recovery:not([hidden])", timeout=4000)
+    page.wait_for_function("document.querySelector('#rec-choices').textContent.includes('line 32')", timeout=4000)
+    check("job1.nc" in page.inner_text("#rec-file") and "line 45" in page.inner_text("#rec-why"),
+          "recovery panel: file and stop line shown")
+    check(page.inner_text("#rec-go").strip() == "▶ Resume from line 32", "last retract preselected ($Job/Points)")
+    page.wait_for_function("document.querySelector('#rec-text .here') !== null", timeout=4000)
+    check("G0 X10 Y10" in page.inner_text("#rec-text .here") or page.inner_text("#rec-text .here").strip().startswith("32"),
+          "G-code around the restart line shown: " + page.inner_text("#rec-text .here"))
+    page.fill("#rec-choices input[type=number]", "40")
+    check(page.inner_text("#rec-go").strip() == "▶ Resume from line 40", "custom line")
+    page.screenshot(path=str(OUT / "desktop-recovery.png"))
+    page.click("#rec-later")
+    check(not page.is_visible("#rec-body") and page.is_visible("#rec-show"), "Later collapses the panel")
+    page.click("#rec-show")
+    page.click("#rec-choices .rec-choice >> nth=0")
+    page.click("#rec-go")
+    page.wait_for_selector("#recovery[hidden]", state="attached", timeout=4000)
+    page.wait_for_function("!document.querySelector('#job').hidden", timeout=6000)
+    check(True, "Resume continues the job and closes the panel")
+    page.click("button[data-cmd='stop']")
+    page.wait_for_selector("#recovery:not([hidden])", timeout=4000)
+    page.click("#rec-discard")
+    page.wait_for_selector("#recovery[hidden]", state="attached", timeout=4000)
+    check(True, "Discard forgets the interrupted job")
 
     # tablet + phone layouts
     page.set_viewport_size({"width": 1024, "height": 768})

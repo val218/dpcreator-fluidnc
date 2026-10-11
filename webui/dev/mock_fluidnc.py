@@ -37,6 +37,13 @@ def make_viz(gcode: bytes) -> bytes:
 
 
 PREP = ["none", ""]  # prepared job: state, /sd/file
+# Job recovery record kept by the board: state, stop line, retract, tool, reason, file
+REC = {"st": "none", "stop": 0, "retract": 0, "tool": 0, "why": "", "file": ""}
+
+
+def rec_msg():
+    r = REC
+    return f"[MSG:Recovery:{r['st']}:{r['stop']}:{r['retract']}:{r['tool']}:{r['why']}:{r['file'] if r['st'] != 'none' else ''}]"
 
 
 async def broadcast(texts):
@@ -192,6 +199,29 @@ class Machine:
             return ["[MSG:Prepared:none:]", "ok"]
         if u == "$CRASH":
             return ["[MSG:Crash:PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]", "ok"]
+        if u == "$JOB/RECOVERY":
+            return [rec_msg(), "ok"]
+        if u == "$JOB/DISCARD":
+            REC.update(st="none", stop=0, retract=0, tool=0, why="", file="")
+            return [rec_msg(), "ok"]
+        if u == "$JOB/POINTS" and REC["st"] == "interrupted":
+            lines = FILES["sd"].get(REC["file"][3:], b"").decode().split("\n")
+            last = max((i + 1 for i, l in enumerate(lines[: REC["stop"] - 1]) if l.startswith("G0 Z")), default=0)
+            REC["retract"] = last + 1 if last else 0
+            REC["st"] = "scanning"
+            first = rec_msg()
+            REC["st"] = "interrupted"
+            return [first, rec_msg(), "ok"]
+        if u.startswith("$JOB/RESUME=") and REC["st"] == "interrupted":
+            ln, _, dry = u.split("=", 1)[1].partition(":")
+            if self.state != "Idle":
+                return ["[MSG:RecoveryErr:machine must be Idle - unlock or home first]", "ok"]
+            if dry:
+                return ["[MSG:RecoveryInfo:dry run - moving to the start point at safe height]", rec_msg(), "ok"]
+            name = REC["file"][3:]
+            REC.update(st="none", stop=0, retract=0, tool=0, why="", file="")
+            self.job = (name, time.time(), 20)
+            return [f"[MSG:RecoveryInfo:continuing from line {ln}]", rec_msg(), "ok"]
         if u == "$JOB/PREPARED":
             return [f"[MSG:Prepared:{PREP[0]}:{PREP[1]}]", "ok"]
         if u.startswith("G0") or u.startswith("G90 G0"):
@@ -232,8 +262,12 @@ class Machine:
         if b == 0x7E and self.state.startswith("Hold"):
             self.state = "Run" if self.job else "Idle"
         if b == 0x18:
+            out = []
+            if self.job:  # interrupted: the board keeps it for recovery
+                REC.update(st="interrupted", stop=45, retract=0, tool=0, why="stopped", file="/sd" + self.job[0])
+                out = [rec_msg()]
             self.target, self.job, self.state = None, None, "Idle"
-            return ["", "Grbl 4.0 [FluidNC mock (wifi) '$' for help]"]
+            return out + ["", "Grbl 4.0 [FluidNC mock (wifi) '$' for help]"]
         return []
 
 

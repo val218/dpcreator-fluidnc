@@ -182,7 +182,9 @@ namespace {
         if (s.mist) addf(g, "M7");
         if (s.flood) addf(g, "M8");
         float feed_mm = s.inch ? s.feed * 25.4f : s.feed;
-        if (s.known[2]) {
+        // Lower only over the restart point; if X/Y are not known the file's
+        // next move starts from safe height.
+        if (s.known[0] && s.known[1] && s.known[2]) {
             float plunge = feed_mm > 0 ? std::min(feed_mm, 500.0f) : 300.0f;
             addf(g, "G0 Z%.4f", s.pos[2] + 3.0f);
             addf(g, "G1 Z%.4f F%.1f", s.pos[2], plunge);
