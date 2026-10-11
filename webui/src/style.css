@@ -422,6 +422,19 @@ dialog::backdrop { background: rgba(0, 0, 0, .6); }
 .code-row.run { background: color-mix(in srgb, var(--ok) 25%, transparent); }
 .code-row.sel { outline: 1px solid var(--accent); outline-offset: -1px; }
 @media (max-width: 759px) { .code-scroll { height: 30vh; } }
+/* ---------- steps calibration ---------- */
+#calib-dlg { width: min(760px, 96vw); }
+.calib { display: grid; gap: 10px; margin: 8px 0; }
+.calib-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.calib-lbl { min-width: 170px; color: var(--muted); font-size: 13px; }
+.calib input[type=number] { width: 110px; font: 14px var(--mono); }
+#calib-meas { width: 140px; font-size: 16px; }
+.calib-result { padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); font-size: 13px; display: grid; gap: 4px; }
+.calib-new { font-size: 15px; }
+.calib-new b { font: 700 18px var(--mono); color: var(--accent); }
+.calib-warn { color: var(--warn); }
+.calib-hwbox summary { cursor: pointer; font-weight: 600; margin-bottom: 6px; }
+.calib-tip { font-size: 12px; margin: 0; }
 /* ---------- tools ---------- */
 #tools-dlg { width: min(900px, 96vw); }
 .tools-setter { margin: 4px 0 10px; font-size: 13px; }

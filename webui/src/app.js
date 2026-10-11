@@ -111,6 +111,11 @@
       History.onStats(m[1]);
       return;
     }
+    if ((m = /^\$\/?(axes\/[xyzabc]\/steps_per_mm|Config\/Filename)=(.*)$/i.exec(line))) {
+      Calib.onSetting(m[1], m[2]);
+      log(line, "msg");
+      return;
+    }
     if ((m = /^\$\/atc_manual\/(\w+)=(.*)$/.exec(line))) {
       Tools.onAtc(m[1], m[2]);
       return;
@@ -841,6 +846,166 @@
       paintLog();
     };
     return { onStats };
+  })();
+
+  // ------------------------------------------------------------- steps per mm calibration
+  // Move an axis a known distance, measure, enter what it really moved: new
+  // steps/mm = current x commanded / measured. "Apply" sets it live
+  // ($/axes/<a>/steps_per_mm=...), "Save" changes only that line in the
+  // config file on the flash (a copy is kept as <file>.bak).
+  const Calib = (() => {
+    const dlg = $("#calib-dlg");
+    let axis = "x", cur = NaN, orig = {}, dist = 100, moved = 0, cfgFile = "config.yaml";
+    const unit = () => (axis === "a" ? "°" : "mm");
+    const num = (id) => parseFloat($(id).value);
+    function onSetting(path, v) {
+      let m;
+      if ((m = /^axes\/([xyzabc])\/steps_per_mm$/i.exec(path))) {
+        const a = m[1].toLowerCase(), x = parseFloat(v);
+        if (!(a in orig)) orig[a] = x;
+        if (a === axis) { cur = x; paint(); }
+        return true;
+      }
+      if (/^Config\/Filename$/i.test(path)) { cfgFile = v.trim().replace(/^\/?(localfs\/|littlefs\/)?/i, ""); return true; }
+      return false;
+    }
+    function ask() { Conn.sendLine(`$/axes/${axis}/steps_per_mm`, true); }
+    function result() {
+      const meas = num("#calib-meas");
+      if (!(meas > 0) || !(cur > 0) || !moved) return null;
+      const cmd = Math.abs(moved);
+      return { meas, cmd, err: meas - cmd, pct: ((meas - cmd) / cmd) * 100, next: (cur * cmd) / meas };
+    }
+    function paint() {
+      $$(".calib-unit").forEach((e) => (e.textContent = unit()));
+      $("#calib-cur").textContent = Number.isFinite(cur) ? cur.toFixed(3) : "…";
+      const o = orig[axis];
+      $("#calib-orig").textContent = Number.isFinite(o) && Math.abs(o - cur) > 1e-6 ? `(was ${o.toFixed(3)} when opened)` : "";
+      $("#calib-moved").textContent = moved ? `moved ${moved > 0 ? "+" : ""}${moved} ${unit()} from the start` : "at the start";
+      const r = result(), out = $("#calib-result");
+      $("#calib-apply").disabled = $("#calib-save").disabled = !r;
+      if (!r) { out.textContent = moved ? `Measure how far it really moved and enter it.` : `Mark the start, then Move.`; return; }
+      const lead = num("#calib-lead");
+      out.innerHTML = "";
+      out.append(
+        el("div", {}, `Commanded ${r.cmd} ${unit()}, measured ${r.meas} ${unit()}: error ${r.err >= 0 ? "+" : ""}${r.err.toFixed(3)} ${unit()} (${r.pct >= 0 ? "+" : ""}${r.pct.toFixed(2)} %)`),
+        el("div", { class: "calib-new" }, `New steps/${unit()}: `, el("b", {}, r.next.toFixed(3)), ` (now ${cur.toFixed(3)})`),
+        el("div", { class: "muted" }, `per 1 ${unit()}: ${r.next.toFixed(3)} steps · per 10: ${(r.next * 10).toFixed(1)} · per 100: ${(r.next * 100).toFixed(0)}` +
+          (lead > 0 ? ` · per motor turn (${lead} ${unit()}/turn): ${(r.next * lead).toFixed(1)} steps` : "")),
+      );
+      const hw = hwValue();
+      if (hw > 0 && Math.abs(r.next - hw) / hw > 0.1) out.append(el("div", { class: "calib-warn" }, `More than 10 % away from the hardware value (${hw.toFixed(3)}): check the driver microstepping / pulley / screw lead.`));
+    }
+    function hwValue() {
+      const steps = num("#calib-motor"), micro = num("#calib-micro"), lead = num("#calib-lead");
+      return steps > 0 && micro > 0 && lead > 0 ? (steps * micro) / lead : NaN;
+    }
+    function paintHw() {
+      const v = hwValue();
+      $("#calib-hw").textContent = v > 0 ? `${v.toFixed(3)} steps/${unit()}` : "—";
+      $("#calib-hw-use").disabled = !(v > 0);
+      paint();
+    }
+    function move(sign) {
+      if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+      const d = sign * dist, f = Math.max(10, num("#calib-feed") || 300);
+      send(`$J=G91 G21 ${axis.toUpperCase()}${d} F${f}`);
+      moved = +(moved + d).toFixed(4);
+      $("#calib-meas").value = "";
+      paint();
+    }
+    function back() {
+      if (!moved) return;
+      if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+      const f = Math.max(10, num("#calib-feed") || 300);
+      send(`$J=G91 G21 ${axis.toUpperCase()}${-moved} F${f}`);
+      moved = 0;
+      $("#calib-meas").value = "";
+      paint();
+    }
+    function setValue(v, why) {
+      if (!(v > 0)) return;
+      if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+      send(`$/axes/${axis}/steps_per_mm=${v.toFixed(3)}`);
+      setTimeout(ask, 300);
+      moved = 0;
+      $("#calib-meas").value = "";
+      $("#calib-status").textContent = `${why}: ${axis.toUpperCase()} = ${v.toFixed(3)} steps/${unit()} (live, not saved). Move and measure again to check. Positions changed: home again before cutting.`;
+    }
+    // Change only the steps_per_mm line of this axis in the YAML text
+    function patchYaml(text, a, v) {
+      const lines = text.split("\n");
+      const ind = (s) => s.match(/^\s*/)[0].length;
+      const isKey = (s, k) => new RegExp(`^\\s*${k}\\s*:`).test(s);
+      let i = lines.findIndex((l) => /^axes\s*:/.test(l));
+      if (i < 0) throw new Error("no axes: section in the config file");
+      let j = -1;
+      for (let k = i + 1; k < lines.length; k++) {
+        if (lines[k].trim() && ind(lines[k]) === 0) break;
+        if (isKey(lines[k], a) && ind(lines[k]) > 0) { j = k; break; }
+      }
+      if (j < 0) throw new Error(`no ${a}: axis in the config file`);
+      const ai = ind(lines[j]);
+      let childInd = -1;
+      for (let k = j + 1; k < lines.length; k++) {
+        const l = lines[k];
+        if (!l.trim() || /^\s*#/.test(l)) continue;
+        if (ind(l) <= ai) break;
+        if (childInd < 0) childInd = ind(l);
+        if (ind(l) === childInd && isKey(l, "steps_per_mm")) {
+          lines[k] = l.replace(/(steps_per_mm\s*:\s*)([^#\s]*)/, `$1${v.toFixed(3)}`);
+          return lines.join("\n");
+        }
+      }
+      lines.splice(j + 1, 0, " ".repeat(childInd > ai ? childInd : ai + 2) + `steps_per_mm: ${v.toFixed(3)}`);
+      return lines.join("\n");
+    }
+    async function save() {
+      const r = result();
+      const v = r ? r.next : cur;
+      if (!(v > 0)) return;
+      if (!confirm(`Save ${axis.toUpperCase()} steps_per_mm = ${v.toFixed(3)} in ${cfgFile}?\n\nOnly that line changes; the old file is kept as ${cfgFile}.bak.`)) return;
+      try {
+        const path = "/" + cfgFile;
+        const text = await Files.getText("flash", path);
+        const next = patchYaml(text, axis, v);
+        await Files.putText("flash", path + ".bak", text);
+        await Files.putText("flash", path, next);
+        if (r) setValue(v, "Saved and applied");
+        $("#calib-status").textContent = `Saved in ${cfgFile} (old file: ${cfgFile}.bak). It is used from now on, also after a restart.`;
+        toast(`${axis.toUpperCase()} steps/${unit()} saved`);
+      } catch (e) { toast("Save failed: " + e.message, true); }
+    }
+    $$("#calib-axis button").forEach((b) => (b.onclick = () => {
+      $$("#calib-axis button").forEach((x) => x.classList.toggle("active", x === b));
+      axis = b.dataset.ax; cur = NaN; moved = 0; $("#calib-meas").value = ""; $("#calib-status").textContent = "";
+      ask(); paint(); paintHw();
+    }));
+    $$("#calib-dist button").forEach((b) => (b.onclick = () => {
+      $$("#calib-dist button").forEach((x) => x.classList.toggle("active", x === b));
+      dist = parseFloat(b.dataset.d); $("#calib-custom").value = "";
+    }));
+    $("#calib-custom").oninput = () => {
+      const v = num("#calib-custom");
+      if (v > 0) { dist = v; $$("#calib-dist button").forEach((x) => x.classList.remove("active")); }
+    };
+    $("#calib-plus").onclick = () => move(1);
+    $("#calib-minus").onclick = () => move(-1);
+    $("#calib-back").onclick = back;
+    $("#calib-meas").oninput = paint;
+    ["#calib-motor", "#calib-micro", "#calib-lead"].forEach((id) => ($(id).oninput = paintHw));
+    $("#calib-apply").onclick = () => { const r = result(); if (r) setValue(r.next, "Applied"); };
+    $("#calib-hw-use").onclick = () => setValue(hwValue(), "Hardware value applied");
+    $("#calib-revert").onclick = () => { const o = orig[axis]; if (o > 0) setValue(o, "Back to the value when opened"); };
+    $("#calib-save").onclick = save;
+    $("#calib-close").onclick = () => dlg.close();
+    $("#calib-open").onclick = () => {
+      if (!S.nAxes || S.nAxes < 4) $$("#calib-axis button[data-ax='a']").forEach((b) => (b.hidden = true));
+      Conn.sendLine("$Config/Filename", true);
+      ask(); paint(); paintHw();
+      dlg.showModal();
+    };
+    return { onSetting };
   })();
 
   // ------------------------------------------------------------- tools

@@ -37,6 +37,7 @@ def make_viz(gcode: bytes) -> bytes:
 
 
 PREP = ["none", ""]  # prepared job: state, /sd/file
+STEPS = {}  # steps_per_mm set at runtime
 # Job recovery record kept by the board: state, stop line, retract, tool, reason, file
 REC = {"st": "none", "stop": 0, "retract": 0, "tool": 0, "why": "", "file": ""}
 
@@ -110,7 +111,7 @@ def sample_gcode() -> str:
 FILES = {
     "sd": {"/job1.nc": sample_gcode().encode(), "/notes.txt": b"hello\n",
            "/.dpc/jobs.log": b"1760200000|/sd/job1.nc|187|done|58\n1760203600|/sd/big.nc|42|stopped|5\n"},
-    "flash": {"/config.yaml": b"name: mock\nboard: mock\n"},
+    "flash": {"/config.yaml": b"name: mock\nboard: mock\n\naxes:\n  shared_stepper_disable_pin: NO_PIN\n  x:\n    steps_per_mm: 80.000  # 20T GT2\n    max_rate_mm_per_min: 5000\n  y:\n    steps_per_mm: 80.000\n  z:\n    steps_per_mm: 400.000\n"},
 }
 
 
@@ -230,6 +231,16 @@ class Machine:
         if u == "$CRASH":
             return ["[MSG:Crash:reason=panic PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]",
                     "[MSG:CrashLast:$Rewind/Start]", "[MSG:CrashLast:$Rewind/Move=-1.000]", "ok"]
+        msp = re.fullmatch(r"\$/AXES/([XYZA])/STEPS_PER_MM(?:=([\d.]+))?", u)
+        if msp:
+            a = msp.group(1).lower()
+            STEPS.setdefault(a, 80.0 if a in "xy" else 400.0)
+            if msp.group(2):
+                STEPS[a] = float(msp.group(2))
+                return ["ok"]
+            return [f"$/axes/{a}/steps_per_mm={STEPS[a]:.3f}", "ok"]
+        if u == "$CONFIG/FILENAME":
+            return ["$Config/Filename=config.yaml", "ok"]
         if u.startswith("$/ATC_MANUAL/"):
             k = ln.strip().split("/")[-1]
             vals = {"safe_z_mpos_mm": "-1.000", "probe_seek_rate_mm_per_min": "800.000", "probe_feed_rate_mm_per_min": "80.000",

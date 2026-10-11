@@ -381,6 +381,43 @@ Runs like a file job: Hold / Stop work, the machine must be Idle to start.</pre>
     <button class="btn accent" id="hist-close">Close</button>
   </div>
 </dialog>
+<dialog id="calib-dlg">
+  <div class="panel-head"><h2>Calibrate steps per mm</h2><span class="muted mdlg-note">now <b id="calib-cur">…</b> steps/<span class="calib-unit">mm</span> <span id="calib-orig"></span></span></div>
+  <div class="calib">
+    <div class="calib-row"><span class="calib-lbl">Axis</span>
+      <span class="seg" id="calib-axis"><button data-ax="x" class="active">X</button><button data-ax="y">Y</button><button data-ax="z">Z</button><button data-ax="a">A</button></span></div>
+    <div class="calib-row"><span class="calib-lbl">Distance</span>
+      <span class="seg" id="calib-dist"><button data-d="1">1</button><button data-d="10">10</button><button data-d="100" class="active">100</button></span>
+      <input id="calib-custom" type="number" step="any" min="0" placeholder="other"> <span class="calib-unit">mm</span>
+      <label class="field">Feed <input id="calib-feed" type="number" value="300" min="10"> mm/min</label></div>
+    <div class="calib-row"><span class="calib-lbl">1. Mark the start, move</span>
+      <button class="btn" id="calib-minus">Move −</button><button class="btn accent" id="calib-plus">Move +</button>
+      <button class="btn" id="calib-back" title="Back to where the test started">Back to start</button>
+      <span class="muted" id="calib-moved">at the start</span></div>
+    <div class="calib-row"><span class="calib-lbl">2. Measured</span>
+      <input id="calib-meas" type="number" step="any" min="0" placeholder="real distance"> <span class="calib-unit">mm</span></div>
+    <div class="calib-result" id="calib-result"></div>
+    <div class="calib-row calib-btns">
+      <button class="btn" id="calib-apply" title="Use the new value now (not saved): move and measure again to check">3. Apply (try)</button>
+      <button class="btn accent" id="calib-save" title="Write steps_per_mm of this axis into the config file">4. Save to config.yaml</button>
+      <button class="btn" id="calib-revert" title="Back to the value it had when this window opened">Revert</button>
+    </div>
+    <details class="calib-hwbox"><summary>From the hardware (starting value)</summary>
+      <div class="calib-row">
+        <label class="field">Motor steps/turn <input id="calib-motor" type="number" value="200"></label>
+        <label class="field">Microstepping <input id="calib-micro" type="number" value="16"></label>
+        <label class="field"><span class="calib-unit">mm</span> per motor turn <input id="calib-lead" type="number" step="any" placeholder="lead / teeth×pitch"></label>
+      </div>
+      <div class="calib-row"><span>= <b id="calib-hw">—</b></span><button class="btn small" id="calib-hw-use">Apply this</button>
+        <span class="muted">screw: its lead (e.g. 5) · belt: pulley teeth × belt pitch (20 × 2 = 40) · A axis: 360 ÷ gear ratio</span></div>
+    </details>
+    <p class="muted calib-tip">Use the longest distance you can measure well (100 mm with a ruler / calipers, 1–10 mm with a dial indicator). Approach the start and the end from the same direction (backlash). Two-motor axes share one value.</p>
+  </div>
+  <div class="mdlg-btns">
+    <span class="mdlg-status" id="calib-status"></span>
+    <button class="btn accent" id="calib-close">Close</button>
+  </div>
+</dialog>
 <dialog id="tools-dlg">
   <div class="panel-head"><h2>Tools</h2><span class="muted mdlg-note" id="tools-now"></span></div>
   <div class="tools-setter" id="tools-setter">Tool setter: checking…</div>
@@ -388,6 +425,7 @@ Runs like a file job: Hold / Stop work, the machine must be Idle to start.</pre>
   <div class="mdlg-btns">
     <span class="mdlg-status" id="tools-status">The list is kept on the SD card. "Change" runs M6: tool change position, install, Resume, measured on the tool setter.</span>
     <button class="btn" id="tools-add">+ Tool</button>
+    <button class="btn" id="calib-open" title="Calibrate steps per mm: move, measure, correct, save in config.yaml">Calibrate axes…</button>
     <button class="btn" id="tools-reset" title="Start of a new job / new work zero: forget the tool setter reference and set the tool length to 0 (M6 T0)">Reset (M6 T0)</button>
     <button class="btn" id="tools-save">Save list</button>
     <button class="btn accent" id="tools-close">Close</button>

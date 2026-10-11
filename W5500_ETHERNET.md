@@ -670,6 +670,28 @@ the tool length offset and G28 / G30.
   `atc: atc_manual` under your spindle and check the probe pin. If it is set
   up, the dialog shows the setter and change positions from the running config.
 
+**Calibrate axes…** (in Tools) corrects steps per mm:
+
+1. Pick the axis and a distance (1 / 10 / 100 mm or your own; A in degrees)
+   and the feed. Mark the start, press **Move +** or **Move −** (a jog, only
+   when Idle). **Back to start** returns.
+2. Enter the distance you measured: the page shows the error (mm and %) and the
+   new value = current × commanded ÷ measured, also per 10 / 100 mm and per
+   motor turn when you give the mm per turn.
+3. **Apply (try)** sets it now (`$/axes/<axis>/steps_per_mm=...`, not saved);
+   move and measure again — it should now come out right. **Revert** puts back
+   the value from when the window opened. Changing it shifts the machine
+   position: home again before cutting.
+4. **Save to config.yaml** changes only the `steps_per_mm:` line of that axis
+   in the active config file on the flash (comments and the rest stay); the old
+   file is kept as `config.yaml.bak`.
+
+*From the hardware* gives the starting value: motor steps per turn ×
+microstepping ÷ mm per motor turn (screw lead, or pulley teeth × belt pitch);
+the page warns when the measured value is more than 10 % away from it (wrong
+microstepping, pulley or lead). Use the longest distance you can measure well
+and approach both marks from the same direction (backlash).
+
 ## 14. G-code view, run from line, job history
 
 - **G-code** (3D view bar) shows the file as text under the view: the line being
