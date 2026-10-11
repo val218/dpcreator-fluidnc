@@ -94,7 +94,10 @@ the config has the `ethernet:` section.
 9. [Job recovery](#9-job-recovery)
 10. [Live Z adjust](#10-live-z-adjust)
 11. [Handwheel rewind](#11-handwheel-rewind)
-12. [Troubleshooting](#12-troubleshooting)
+12. [Macros](#12-macros)
+13. [Work offsets and tools](#13-work-offsets-and-tools)
+14. [G-code view, run from line, job history](#14-g-code-view-run-from-line-job-history)
+15. [Troubleshooting](#15-troubleshooting)
 
 ---
 
@@ -606,7 +609,84 @@ Reports: `[MSG:Rewind:<off|active|continuing|returning>:<back_mm>:<z_mm>:<line>:
 machine positions (jogging is refused in Hold) and resumed the held job from
 the wrong place.
 
-## 12. Troubleshooting
+## 12. Macros
+
+Macros are kept by the board on the SD card, so the WebUI and the pendant use
+the same list and it survives firmware updates:
+
+```
+/sd/.dpc/macros.txt        one line per macro, in button order: <id>|<name>|<#rrggbb>|<flags>
+                           flags: p = on the pendant, c = ask before running, b = button on the Control panel
+/sd/.dpc/macros/<id>.nc    the macro itself
+```
+
+- **WebUI:** Control panel → **Macros** shows the buttons; **Edit…** opens the
+  editor: name, colour, *on the pendant*, *ask before running*, *button on the
+  Control panel*, the script, reorder, copy, delete, **Save & run**, and
+  **Export / Import** (one JSON file) to back up or share macros.
+- **Pendant:** the Macros tab shows the macros marked *on the pendant* (tap twice
+  for the ones that ask first). It loads the list when it connects and again
+  when it is changed.
+- **Scripts:** any number of lines — G-code, `$` commands and FluidNC's
+  expressions: `#<name>` variables (`#<_name>` kept between macros), maths in
+  `[ ]`, `o100 if / elseif / else / endif`, `while`, `do`, `repeat`,
+  `(PRINT, ...)` / `(MSG, ...)`, `#5061..#5063` last probe position, `#5070`
+  probe touched, `#<_x> #<_y> #<_z>` position. The editor has a help box.
+- A macro runs like a file job (Hold / Stop work, the machine must be Idle to
+  start) but is not offered for job recovery and has no preview.
+- The first time, a starter set is created (Park, Zero X / Y / Z / all,
+  coolant, spindle, a spindle warm-up).
+
+```
+$MacroLib/List         [MSG:MacroItem:<id>:<#rrggbb>:<flags>:<name>] ... [MSG:MacroEnd:<count>]
+$MacroLib/Run=<id>     run it
+$MacroLib/Reload       tell every screen the list changed
+```
+
+## 13. Work offsets and tools
+
+**Offsets…** (next to the coordinate system selector) shows G54–G59 as a table
+(machine position of each work zero, from `$#`): edit a value and press Enter
+(`G10 L2`), **Zero XY here / Zero Z here** (`G10 L20`, the tool position becomes
+0 in that system), **Use** to switch to it. Below: G92 (with **Clear G92**),
+the tool length offset and G28 / G30.
+
+**Tools…** is the tool table and tool change with a **fixed tool setter**:
+
+- The list (number, name, diameter, notes) is kept on the SD card
+  (`/sd/.dpc/tools.txt`).
+- **Change** runs `M6 T<n>` with FluidNC's `atc_manual` tool changer: Z to safe
+  height; the first time, the tool in the spindle is measured on the setter as
+  the reference; then the machine goes to the change position and waits. A bar
+  *"Install tool T<n> … Resume"* appears (the pendant shows Hold / Resume);
+  after **Resume** the new tool is measured and the tool length offset (G43.1)
+  is set from the difference. Set the work Z zero with the first tool, then
+  change tools with M6.
+- **Reset (M6 T0)** forgets the reference and sets the tool length to 0 — for a
+  new job / new work zero.
+- **Set up the tool setter** builds the `atc_manual:` section for config.yaml
+  from positions you jog to (**Here** buttons): change position, setter X/Y,
+  lowest Z (fails below it: no tool), rapid-down Z, safe Z, probe speeds. Add
+  `atc: atc_manual` under your spindle and check the probe pin. If it is set
+  up, the dialog shows the setter and change positions from the running config.
+
+## 14. G-code view, run from line, job history
+
+- **G-code** (3D view bar) shows the file as text under the view: the line being
+  cut is highlighted and followed (untick *follow* to look around). Click a line
+  and **Run from line**: the board offers it like an interrupted job
+  (`$Job/RunFrom=<line>:<file>`), so the job recovery screens on the WebUI and
+  the pendant take over — restart point (that line, last retract before it,
+  start of the tool), Unlock / Home if needed, Dry run, Resume.
+- **History…** (Machine panel): the jobs the board ran — date, file, time,
+  done / stopped / alarm and the line — newest first, from
+  `/sd/.dpc/jobs.log`; stopped jobs have **Run from line**. Above it the hour
+  counters: cutting time, spindle time, spindle time since the last service
+  (**Reset service counter**) and the number of jobs (`$Stats`,
+  `/sd/.dpc/stats.txt`). The board has no clock: the WebUI tells it the time
+  when it connects, so jobs run with no page open have no date.
+
+## 15. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|
@@ -622,7 +702,7 @@ the wrong place.
 | Pendant keeps the *E-stop released* menu after the job was unlocked / resumed from the WebUI | Fixed (pendant firmware): the menu closes by itself when the alarm is cleared anywhere. |
 | Board stops answering (WebUI, pendant, serial) after the pendant was plugged in / rebooted | Fixed: XON/XOFF is off on the pendant UART — a noise byte that looked like XOFF paused the board's transmitter and blocked it. |
 | Hold / door / reset when the pendant is plugged in or rebooted | Fixed: line noise on the pendant UART is dropped. `$Pendant/Debug` shows how many bytes were dropped. |
-| WebUI shows *"The controller restarted after a crash"* | Press **Copy details** and send the text (it is the crash backtrace; `$Crash` prints it too). One crash restarts with your `config.yaml`; only 3 crash restarts in a row fall back to the default config (WiFi AP `FluidNC`, no Ethernet) - reset the board to try again. |
+| WebUI shows *"The controller restarted after a crash"* | Press **Copy details** and send the text: the reason (panic, task / interrupt watchdog), the crash backtrace and the last commands sent before it (`$Crash` prints them too). One crash restarts with your `config.yaml`; only 3 crash restarts in a row fall back to the default config (WiFi AP `FluidNC`, no Ethernet) - reset the board to try again. |
 | Boot shows *"Showing startup log from previous panic"* | Capture serial output at 115200 including `Guru Meditation` and `Backtrace:` lines and decode via **Actions → Run workflow** with the backtrace input. |
 
 Windows has no telnet client by default; test the port with PowerShell:

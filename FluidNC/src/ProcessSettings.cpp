@@ -34,6 +34,7 @@
 #include "Driver/gpio_dump.h"     // gpio_dump()
 #include "Driver/backtrace.h"     // backtrace_get(), etc.
 #include "Driver/restart.h"       // restart_was_panic ($Crash)
+#include "CrashTrail.h"           // last commands before a crash
 #include "FileCommands.h"         // make_file_commands()
 #include "Job.h"                  // Job::active()
 
@@ -1353,6 +1354,9 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
     if (line[0] == 0) {
         return Error::Ok;
     }
+    if ((line[0] == '$' || line[0] == '[') && strcasecmp(line, "$Crash") != 0) {
+        crash_trail_note(line);  // kept across a crash restart ($Crash lists them)
+    }
 
     // PathRetrace / VizGenerator plugin commands (TabUI pendant).
     // 4.0.x ran every '$' line on one task; 4.1.x splits a polling task and a
@@ -1372,7 +1376,7 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
         backtrace_t bt;
         if (restart_was_panic() && backtrace_get(&bt)) {
             char        b[24];
-            std::string m = "[MSG:Crash:";
+            std::string m = std::string("[MSG:Crash:reason=") + restart_reason() + " ";
             snprintf(b, sizeof(b), "PC=0x%08x", (unsigned)bt.pc);
             m += b;
             snprintf(b, sizeof(b), " cause=%u", (unsigned)bt.exccause);
@@ -1384,8 +1388,17 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
             }
             m += "]\n";
             channel.print(m.c_str());
+        } else if (restart_was_panic()) {
+            std::string m = std::string("[MSG:Crash:reason=") + restart_reason() + " (no backtrace)]\n";
+            channel.print(m.c_str());
         } else {
-            channel.print(restart_was_panic() ? "[MSG:Crash:unknown]\n" : "[MSG:Crash:none]\n");
+            channel.print("[MSG:Crash:none]\n");
+        }
+        if (restart_was_panic()) {  // what was sent last before it
+            for (int i = 0; i < crash_trail_count(); i++) {
+                std::string m = std::string("[MSG:CrashLast:") + crash_trail_line(i) + "]\n";
+                channel.print(m.c_str());
+            }
         }
         return Error::Ok;
     }

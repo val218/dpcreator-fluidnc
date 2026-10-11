@@ -82,11 +82,18 @@
     if ((m = /^\[MSG:Crash:(.*)\]$/.exec(line))) {
       // Last restart was a crash: show it with the backtrace to copy
       const info = m[1];
+      crashLast = [];
       if (info !== "none") {
         $("#crash-text").textContent = info === "unknown" ? "(no backtrace saved)" : info;
         $("#crash").hidden = false;
       }
       log(line, info === "none" ? "msg" : "err");
+      return;
+    }
+    if ((m = /^\[MSG:CrashLast:(.*)\]$/.exec(line))) {
+      crashLast.push(m[1]);  // commands sent just before the crash
+      $("#crash-text").title = "Last commands before the crash:\n" + crashLast.join("\n");
+      log(line, "err");
       return;
     }
     if ((m = /^\[VER:.*FluidNC (.*)\]?/.exec(line))) {
@@ -181,6 +188,7 @@
 
   var codeHook = null;      // G-code view: file shown changed
   var codeLineHook = null;  // G-code view: line being cut
+  var crashLast = [];    // [MSG:CrashLast:...] lines
   var recovHook = null;  // var: hoisted, set by the recovery panel
   var rwHook = null;     // var: hoisted, set by the rewind bar
   var macroHook = null;  // var: hoisted, set by the macros panel
@@ -669,7 +677,9 @@
 
   $("#crash-hide").onclick = () => ($("#crash").hidden = true);
   $("#crash-copy").onclick = async () => {
-    const t = "dpCREATOR FluidNC crash: " + $("#crash-text").textContent;
+    const t = "dpCREATOR FluidNC crash: " + $("#crash-text").textContent +
+      (crashLast.length ? "\nLast commands: " + crashLast.join(" | ") : "") +
+      "\nWebUI " + $("#ui-ver").textContent + " firmware " + $("#fw-ver").textContent;
     try { await navigator.clipboard.writeText(t); toast("Crash details copied - paste them to the developer"); }
     catch { prompt("Copy the crash details:", t); }
   };

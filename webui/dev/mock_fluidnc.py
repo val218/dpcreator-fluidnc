@@ -228,7 +228,8 @@ class Machine:
             PREP[0], PREP[1] = "none", ""
             return ["[MSG:Prepared:none:]", "ok"]
         if u == "$CRASH":
-            return ["[MSG:Crash:PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]", "ok"]
+            return ["[MSG:Crash:reason=panic PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]",
+                    "[MSG:CrashLast:$Rewind/Start]", "[MSG:CrashLast:$Rewind/Move=-1.000]", "ok"]
         if u.startswith("$/ATC_MANUAL/"):
             k = ln.strip().split("/")[-1]
             vals = {"safe_z_mpos_mm": "-1.000", "probe_seek_rate_mm_per_min": "800.000", "probe_feed_rate_mm_per_min": "80.000",

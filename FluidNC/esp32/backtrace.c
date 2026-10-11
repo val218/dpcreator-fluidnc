@@ -3,6 +3,9 @@
 
 #include "Driver/backtrace.h"
 
+// ESP32-S3 builds capture the panic backtrace (esp32s3/panic_capture.c).
+#ifndef FNC_PANIC_CAPTURE
+
 bool backtrace_available(void) {
     return false;
 }
@@ -13,3 +16,4 @@ bool backtrace_get(backtrace_t* bt) {
 }
 
 void backtrace_clear(void) {}
+#endif
