@@ -5,6 +5,7 @@
 #include "PathRetrace.h"   // PathRetrace plugin (TabUI pendant)
 #include "VizGenerator.h"  // VizGenerator plugin (TabUI pendant)
 #include "ZAdjust.h"
+#include "Rewind.h"
 #include "PendantLink.h"   // $Pendant/Status
 #include "Parameters.h"  // global_named_params
 
@@ -1393,6 +1394,10 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
     if (strncasecmp(line, "$Pendant/Trace=", 15) == 0) {
         const char* v = line + 15;
         pendant_trace(channel, strcasecmp(v, "on") == 0 || strcmp(v, "1") == 0);
+        return Error::Ok;
+    }
+    // Handwheel rewind: requests answered here; the Hold loop moves the tool.
+    if (rewind_command(line, channel)) {
         return Error::Ok;
     }
     // Live Z adjust: answered right here on any task, also while a job runs

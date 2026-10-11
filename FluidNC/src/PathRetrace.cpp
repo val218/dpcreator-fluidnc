@@ -382,19 +382,14 @@ bool retrace_handle_command(const char* line) {
     if (strncmp(line, "$Retrace/", 9) != 0) return false;
     const char* cmd = line + 9;
 
-    if (strcmp(cmd, "Start") == 0)   { retrace_enter();  return true; }
-    if (strcmp(cmd, "Rev") == 0)     { retrace_rev();    return true; }
-    if (strcmp(cmd, "Fwd") == 0)     { retrace_fwd();    return true; }
-    if (strcmp(cmd, "Resume") == 0)  { retrace_resume(); return true; }
-    if (strcmp(cmd, "Cancel") == 0)  { retrace_cancel(); return true; }
-    if (strcmp(cmd, "SafeZ") == 0)   { retrace_safe_z(); return true; }
-    if (strcmp(cmd, "Return") == 0)  { retrace_return(); return true; }
-
-    if (strncmp(cmd, "ZOffset=", 8) == 0) {
-        retrace_z_offset(strtof(cmd + 8, nullptr)); return true;
-    }
-    if (strncmp(cmd, "ZSet=", 5) == 0) {
-        retrace_z_set(strtof(cmd + 5, nullptr)); return true;
+    // The old retrace jogged to recorded planner targets: refused in Hold, in
+    // the wrong coordinates, and it resumed the held job from the wrong place.
+    // Replaced by $Rewind/... (Rewind.h); these do nothing now.
+    if (strcmp(cmd, "Start") == 0 || strcmp(cmd, "Rev") == 0 || strcmp(cmd, "Fwd") == 0 || strcmp(cmd, "Resume") == 0 ||
+        strcmp(cmd, "Cancel") == 0 || strcmp(cmd, "SafeZ") == 0 || strcmp(cmd, "Return") == 0 || strncmp(cmd, "ZOffset=", 8) == 0 ||
+        strncmp(cmd, "ZSet=", 5) == 0) {
+        rt_msg("Replaced:use $Rewind - update the pendant firmware");
+        return true;
     }
     if (strncmp(cmd, "RunFrom=", 8) == 0) {
         const char* args = cmd + 8;
