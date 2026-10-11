@@ -22,6 +22,8 @@ plus dpCREATOR additions:
 - **Live Z adjust** while a job cuts or is in Hold, from the WebUI or the
   pendant handwheel: a temporary offset kept by the board that ends with the
   job (see section 10)
+- **Handwheel rewind** in Hold: go back along the cut path with the pendant
+  wheel or the WebUI, change Z, and re-cut to where it stopped (section 11)
 - PathRetrace / VizGenerator commands for the TabUI pendant
 
 Tested on a dpCREATOR R2/R3 (ESP32-S3-WROOM-1-N16R8).
@@ -91,7 +93,8 @@ the config has the `ethernet:` section.
 8. [Job preview on the TabUI pendant (Prepare → Run)](#8-job-preview-on-the-tabui-pendant)
 9. [Job recovery](#9-job-recovery)
 10. [Live Z adjust](#10-live-z-adjust)
-11. [Troubleshooting](#11-troubleshooting)
+11. [Handwheel rewind](#11-handwheel-rewind)
+12. [Troubleshooting](#12-troubleshooting)
 
 ---
 
@@ -553,7 +556,57 @@ step, limit reached, …).
 > the opposite way round, and FluidNC 4.1 refuses G-code from a second
 > channel during a job). Flash both firmwares.
 
-## 11. Troubleshooting
+## 11. Handwheel rewind
+
+While a job is in **Hold**, move the tool back along the path it has cut,
+change the height there, and re-cut to where it stopped — *manual handle
+retrace* as on industrial controls.
+
+1. **Hold**, then **Rewind** (pendant: REWIND in the Hold strip; WebUI: the
+   Rewind bar under the 3D view).
+2. **Back / forward** along the path: pendant wheel (enable held) CCW / CW,
+   0.1 / 1 / 5 mm per click by the step switch; WebUI ◀◀ 5 · ◀ 1 · ◀ 0.1 and
+   0.1 ▶ · 1 ▶ · 5 ▶▶ (hold a button to repeat). Never past the hold point.
+3. **Z** −0.1 / −0.01 / +0.01 / +0.1 there.
+4. **Continue** (or cycle start / Resume): re-cut at the programmed feed from
+   there to the hold point at the new height, then the job resumes; the height
+   change becomes the job's live Z adjust (section 10).
+   **Cancel**: back to the hold point at the old height, still in Hold.
+
+How it works:
+
+- The board records every move of the running job (end point, feed, file
+  line, spindle) when it is planned — up to 8192 moves in PSRAM. In Hold the
+  moves still queued are left out, so the path starts exactly where the tool
+  stopped.
+- The rewind moves are *system motions* — what FluidNC uses to park for the
+  safety door — so the held job, its planner and the spindle stay as they are.
+  Retracing goes at the programmed feed, at most 1500 mm/min (rapids at
+  1000 mm/min), one path segment or 1 mm per move.
+- It goes back through the recorded moves and stops at a tool change / spindle
+  start or speed change. Not in laser mode.
+- **Continue** only resumes the job when the tool is back at the hold point
+  (X/Y/A exact). A reset or alarm while rewound ends the job as any other —
+  use *Job recovery*.
+- Live Z adjust commands are refused while rewinding (use the Rewind Z
+  buttons).
+
+```
+$Rewind/Start              enter rewind (job in Hold)
+$Rewind/Move=-0.5          0.5 mm back along the path (+ = forward)
+$Rewind/Z=+0.05            raise (+) / lower (-) the tool there
+$Rewind/Continue           re-cut to the hold point and resume (also ~)
+$Rewind/Cancel             back to the hold point, stay in Hold
+$Rewind                    report
+```
+
+Reports: `[MSG:Rewind:<off|active|continuing|returning>:<back_mm>:<z_mm>:<line>:<max_back_mm>]`,
+`[MSG:RewindErr:<text>]`. The old `$Retrace/...` motion commands (pendant
+*PATH RETRACE*) are removed: they jogged in work coordinates to recorded
+machine positions (jogging is refused in Hold) and resumed the held job from
+the wrong place.
+
+## 12. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|

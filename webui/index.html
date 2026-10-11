@@ -150,6 +150,18 @@
       <button class="zadj-reset" title="Back to 0">0</button>
       <span class="zadj-state">+ = shallower</span>
     </div>
+    <div class="rewind" id="rewind" hidden title="Handwheel rewind: in Hold, move the tool back along the path it cut, change the height there, then Continue re-cuts to where it stopped and resumes the job.">
+      <span class="prep-label">Rewind</span>
+      <button class="btn" id="rw-start">⟲ Rewind</button>
+      <span class="rw-ctl" id="rw-ctl" hidden>
+        <span class="rw-grp"><button data-rw="-5" title="5 mm back">◀◀ 5</button><button data-rw="-1">◀ 1</button><button data-rw="-0.1">◀ 0.1</button>
+        <b id="rw-pos">0.00 mm</b>
+        <button data-rw="0.1">0.1 ▶</button><button data-rw="1">1 ▶</button><button data-rw="5" title="5 mm forward">5 ▶▶</button></span>
+        <span class="rw-grp">Z <button data-rwz="-0.1">−0.1</button><button data-rwz="-0.01">−0.01</button><b id="rw-z">±0.000</b><button data-rwz="+0.01">+0.01</button><button data-rwz="+0.1">+0.1</button></span>
+        <span class="rw-grp"><button class="btn" id="rw-cancel">Cancel</button><button class="btn accent" id="rw-go">Continue ▶</button></span>
+      </span>
+      <span class="rw-info" id="rw-info"></span>
+    </div>
     <div id="recovery" class="recovery" hidden>
       <div class="rec-head">
         <b>Job interrupted</b>

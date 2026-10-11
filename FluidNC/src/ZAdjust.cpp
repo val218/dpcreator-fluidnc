@@ -106,6 +106,22 @@ void zadj_init() {
 }
 
 float zadj_shown() { return zadj_isr_done / spm(); }
+float zadj_requested() { return _req; }
+float zadj_limit() { return _limit; }
+
+static volatile bool _frozen = false;
+void zadj_freeze(bool on) {
+    if (on) zadj_isr_target = zadj_isr_done;  // finish nothing more
+    _frozen = on;
+}
+void zadj_add_steps(int32_t steps) {
+    if (!steps) return;
+    // The tool is already there: count the steps as made.
+    zadj_isr_done   = zadj_isr_done + steps;
+    zadj_isr_target = zadj_isr_done;
+    _req            = std::round(zadj_isr_done / spm() * 1000.0f) / 1000.0f;
+    _report         = true;
+}
 
 // ── Polling task ─────────────────────────────────────────────────────────────
 void zadj_poll() {
@@ -231,6 +247,10 @@ bool zadj_command(const char* line, Channel& channel, bool on_protocol_task, boo
     bool  relative = (*v == '+' || *v == '-');
     float want     = relative ? _req + n : n;
 
+    if (_frozen) {
+        report_err("use the Rewind height buttons while rewinding");
+        return true;
+    }
     if (!Job::active()) {
         if (want == 0.0f) {  // "No" to the end-of-job offer, or nothing to clear
             _hasEnded = false;

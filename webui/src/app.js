@@ -92,6 +92,12 @@
       log(line, "msg");
       return;
     }
+    if ((m = /^\[MSG:Rewind(Err)?:(.*)\]$/.exec(line))) {
+      Rewind.onMsg(m[1] || "", m[2]);
+      log(line, m[1] ? "err" : "msg");
+      return;
+    }
+    if ((m = /^\[MSG:PathRetrace:/.exec(line))) return;  // old plugin
     if ((m = /^\[MSG:ZAdjust(Err|Info|Limit)?:(.*)\]$/.exec(line))) {
       ZAdj.onMsg(m[1] || "", m[2]);
       log(line, m[1] === "Err" ? "err" : "msg");
@@ -148,10 +154,13 @@
   }
 
   var recovHook = null;  // var: hoisted, set by the recovery panel
+  var rwHook = null;     // var: hoisted, set by the rewind bar
+  var rwLineNow = 0;     // line being retraced (3D marker)
   function setStateBadge(state) {
     S.state = state;
     zadjEnable();
     if (recovHook) recovHook();
+    if (rwHook) rwHook();
     const b = $("#state");
     b.textContent = state === "Unknown" ? "--" : state;
     b.className = "state state-" + state.toLowerCase();
@@ -236,7 +245,7 @@
       // the planner buffer, and counts bytes, not machining time).
       const [jfs, jpath] = jobFsPath(st.sdFile);
       const onScreen = Viewer.job && $("#viewer-file").dataset.path === cacheKey(jfs, jpath);
-      const p = onScreen ? Viewer.setProgress(filePct / 100, wpos, st.line) : null;
+      const p = onScreen ? Viewer.setProgress(filePct / 100, wpos, rwLineNow > 0 ? rwLineNow : st.line) : null;
       const pct = p === null ? filePct : p * 100;
       const elapsed = (Date.now() - S.job.start) / 1000;
       // Page opened mid-job: measure the rate from the first % we saw.
@@ -647,6 +656,73 @@
     $("#uiold").hidden = false;
   }
   $("#uiold-hide").onclick = () => ($("#uiold").hidden = true);
+
+  // ------------------------------------------------------------- handwheel rewind
+  // In Hold the board moves the tool back along the path it cut ($Rewind/Move),
+  // changes the height there ($Rewind/Z) and Continue re-cuts to the hold point
+  // and resumes the job (Rewind.h in the firmware). Buttons repeat while held.
+  const Rewind = (() => {
+    const bar = $("#rewind");
+    let st = "off", back = 0, z = 0, line = 0, max = 0, starting = false;
+    function show() {
+      const hold = /^Hold/.test(S.state) && !!S.job;
+      const on = st !== "off";
+      bar.hidden = !(hold || on);
+      $("#rw-start").hidden = on;
+      $("#rw-start").disabled = starting;
+      $("#rw-ctl").hidden = !on;
+      $("#rw-pos").textContent = back.toFixed(2) + " mm";
+      $("#rw-z").textContent = (z > 0 ? "+" : z < 0 ? "−" : "±") + Math.abs(z).toFixed(3);
+      const busy = st === "continuing" || st === "returning";
+      $$("[data-rw], [data-rwz], #rw-cancel, #rw-go", bar).forEach((b) => (b.disabled = busy));
+      const info = $("#rw-info");
+      if (!info.classList.contains("err")) {
+        info.textContent = st === "continuing" ? "re-cutting to the hold point, then the job continues…"
+          : st === "returning" ? "back to the hold point at the old height…"
+          : on ? `line ${line} · up to ${max.toFixed(1)} mm back` : "move back along the cut path, adjust Z, continue";
+      }
+      rwLineNow = on ? line : 0;
+    }
+    function onMsg(kind, body) {
+      const info = $("#rw-info");
+      if (kind === "Err") {
+        starting = false;
+        info.textContent = body;
+        info.classList.add("err");
+        setTimeout(() => info.classList.remove("err"), 5000);
+        toast("Rewind: " + body, true);
+        return show();
+      }
+      const p = body.split(":");
+      const was = st;
+      st = p[0]; back = +p[1] || 0; z = +p[2] || 0; line = +p[3] || 0; max = +p[4] || 0;
+      starting = false;
+      if (was !== "off" && st === "off") toast(was === "continuing" ? "Rewind: job continues" : "Rewind: back at the hold point");
+      show();
+    }
+    // press and hold = repeat
+    function repeat(btn, fn) {
+      let t = null;
+      const stop = () => { clearInterval(t); t = null; };
+      btn.addEventListener("pointerdown", (e) => {
+        if (btn.disabled) return;
+        e.preventDefault();
+        fn();
+        stop();
+        t = setInterval(fn, 250);
+      });
+      ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => btn.addEventListener(ev, stop));
+    }
+    $$("[data-rw]", bar).forEach((b) => repeat(b, () => send("$Rewind/Move=" + b.dataset.rw)));
+    $$("[data-rwz]", bar).forEach((b) => repeat(b, () => send("$Rewind/Z=" + b.dataset.rwz)));
+    $("#rw-start").onclick = () => { starting = true; send("$Rewind/Start"); show(); };
+    $("#rw-cancel").onclick = () => send("$Rewind/Cancel");
+    $("#rw-go").onclick = () => {
+      if (confirm(`Continue: re-cut ${back.toFixed(2)} mm to where the job stopped${z ? ` at Z ${z > 0 ? "+" : ""}${z.toFixed(3)}` : ""}, then resume the job?`)) send("$Rewind/Continue");
+    };
+    rwHook = show;
+    return { onMsg };
+  })();
 
   // ------------------------------------------------------------- live Z adjust
   // A temporary Z offset for the running job, kept by the board (like a wear

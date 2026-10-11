@@ -25,6 +25,7 @@
 #include "VizGenerator.h"  // queued .viz builds
 #include "Recovery.h"      // job recovery
 #include "ZAdjust.h"
+#include "Rewind.h"
 #include "Driver/restart.h"
 #include "Driver/watchdog.h"
 #include "Driver/heap.h"
@@ -1051,6 +1052,9 @@ static void protocol_do_cycle_start() {
             protocol_initiate_homing_cycle();
             break;
         case State::Hold:
+            if (rewind_cycle_start()) {  // rewound: cycle start = Continue (re-cut to the hold point, then resume)
+                break;
+            }
             // Normally resume only when the hold is complete and ready to resume.
             // Also resume when there is no motion pending AND no deceleration is
             // in progress: a hold entered from a non-moving state (a spurious
@@ -1207,6 +1211,7 @@ static void protocol_do_late_reset() {
     // before after_reset ever nests.
     Job::abort();
     viz_cancel_pending_job();  // a file waiting for the pendant's preview
+    rewind_reset();
     unwind_cause = "Reset";
 }
 
@@ -1350,6 +1355,7 @@ static void protocol_exec_rt_suspend() {
                 }
             } else {
                 protocol_manage_spindle();
+                rewind_suspend_poll();  // handwheel rewind in Hold (system motions)
             }
         }
         protocol_exec_rt_system();

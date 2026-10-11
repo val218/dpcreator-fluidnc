@@ -28,6 +28,7 @@
 #    include "VizGenerator.h"  // VizGenerator plugin (TabUI pendant)
 #    include "Recovery.h"      // job recovery
 #    include "ZAdjust.h"       // live Z adjust
+#    include "Rewind.h"        // handwheel rewind
 
 #    include <Arduino.h>
 
@@ -168,6 +169,7 @@ void setup() {
         viz_init();
         recov_init();
         zadj_init();
+        rewind_init();
 
     } catch (std::exception& ex) {
         // Log exception:

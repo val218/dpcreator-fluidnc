@@ -45,6 +45,13 @@ REC = {"st": "none", "stop": 0, "retract": 0, "tool": 0, "why": "", "file": ""}
 ZA = {"req": 0.0, "ended": 0.0}
 
 
+RW = {"st": "off", "back": 0.0, "z": 0.0, "max": 30.0}
+
+
+def rw_msg():
+    return f"[MSG:Rewind:{RW['st']}:{RW['back']:.3f}:{RW['z']:+.3f}:{20 - int(RW['back'] / 2) if RW['st'] != 'off' else 0}:{RW['max'] if RW['st'] != 'off' else 0:.3f}]"
+
+
 def za_msg(state=None):
     if state == "ended":
         return f"[MSG:ZAdjust:{ZA['ended']:+.3f}:ended:0]"
@@ -222,6 +229,34 @@ class Machine:
             return ["[MSG:Crash:PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]", "ok"]
         if u == "$I":
             return ["[VER:4.1 FluidNC v4.1.1 (mock) (esp32s3-wifi):]", "ok"]
+        if u == "$REWIND":
+            return [rw_msg(), "ok"]
+        if u == "$REWIND/START":
+            if not (self.job and self.state.startswith("Hold")):
+                return ["[MSG:RewindErr:only in Hold while a job runs]", "ok"]
+            RW.update(st="active", back=0.0, z=0.0)
+            return [rw_msg(), "ok"]
+        if u.startswith("$REWIND/") and RW["st"] == "off":
+            return ["[MSG:RewindErr:rewind is not active - Hold, then Rewind]", "ok"]
+        if u.startswith("$REWIND/MOVE="):
+            RW["back"] = max(0.0, min(RW["max"], RW["back"] - float(u.split("=", 1)[1])))
+            return [rw_msg(), "ok"]
+        if u.startswith("$REWIND/Z="):
+            RW["z"] = round(RW["z"] + float(u.split("=", 1)[1]), 3)
+            return [rw_msg(), "ok"]
+        if u in ("$REWIND/CONTINUE", "$REWIND/CANCEL"):
+            cont = u.endswith("CONTINUE")
+            RW["st"] = "continuing" if cont else "returning"
+            async def done(cont=cont):
+                await asyncio.sleep(0.8)
+                if cont and RW["z"]:
+                    ZA["req"] = round(ZA["req"] + RW["z"], 3)
+                RW.update(st="off", back=0.0, z=0.0)
+                if cont:
+                    self.state = "Run"
+                await broadcast([rw_msg()] + ([za_msg("active")] if cont and ZA["req"] else []))
+            asyncio.get_event_loop().create_task(done())
+            return [rw_msg(), "ok"]
         if u == "$JOB/ZADJUST":
             return [za_msg("ended") if ZA["ended"] and not self.job else za_msg(), "ok"]
         if u == "$JOB/ZADJUST/APPLY":

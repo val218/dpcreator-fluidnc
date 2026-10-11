@@ -9,7 +9,7 @@
 */
 
 #include "Planner.h"
-#include "PathRetrace.h"  // PathRetrace plugin (TabUI pendant)
+#include "Rewind.h"  // handwheel rewind: records the job's path
 #include "Machine/MachineConfig.h"
 
 #include <cstdlib>  // PSoc Required for labs
@@ -198,6 +198,13 @@ static void planner_recalculate() {
 void plan_reset() {
     memset(&pl, 0, sizeof(planner_t));  // Clear planner struct
     plan_reset_buffer();
+}
+
+// Blocks queued, including the one being executed (handwheel rewind)
+int plan_blocks_queued() {
+    int n = int(block_buffer_head) - int(block_buffer_tail);
+    if (n < 0) n += config->_planner_blocks;
+    return n;
 }
 
 void plan_reset_buffer() {
@@ -427,13 +434,8 @@ bool plan_buffer_line(float* target, plan_line_data_t* pl_data) {
         // Finish up by recalculating the plan with the new block.
         planner_recalculate();
     }
-    // PathRetrace plugin: record this block for rewind
-    retrace_record_block(target,
-                         pl_data->feed_rate,
-                         (float)pl_data->spindle_speed,
-                         (uint8_t)pl_data->spindle,
-                         pl_data->coolant.Flood,
-                         pl_data->coolant.Mist);
+    // Handwheel rewind: record this block of the job's path
+    rewind_record(target, pl_data);
     return true;
 }
 

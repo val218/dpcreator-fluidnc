@@ -40,6 +40,12 @@ void zadj_poll();                        // polling task, every pass
 void zadj_protocol_poll();               // protocol task, before taking a line (job-end resync)
 bool zadj_command(const char* line, Channel& channel, bool on_protocol_task, bool& deferred);  // false = not ours
 float zadj_shown();                      // offset the tool is at now, mm (WCO in status reports)
+float zadj_requested();                  // offset asked for, mm
+float zadj_limit();                      // largest total offset, mm
+// Rewind (Rewind.h): while it moves the tool itself, no added steps and no
+// commands; afterwards the height it left the tool at becomes part of the offset.
+void zadj_freeze(bool on);
+void zadj_add_steps(int32_t steps);
 
 // Stepper interrupt (Stepper.cpp): steps wanted / made
 extern volatile int32_t zadj_isr_target;

@@ -1,6 +1,7 @@
 // Recovery.cpp - see Recovery.h
 #include "Recovery.h"
 #include "ResumeScan.h"
+#include "Rewind.h"
 
 #include "Job.h"
 #include "InputFile.h"
@@ -315,6 +316,7 @@ void recov_init() {
 
 void recov_job_start(Channel* file, const std::string& path) {
     if (Job::active()) return;  // a file run from inside a job: the outer job is tracked
+    rewind_job_start();         // a new job: its own path to rewind
     _r          = Record();
     _r.st       = St::Running;
     _r.path     = path;

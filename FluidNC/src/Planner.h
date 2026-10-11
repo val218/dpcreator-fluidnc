@@ -101,6 +101,7 @@ plan_block_t* plan_get_system_motion_block();
 
 // Gets the current block. Returns NULL if buffer empty
 plan_block_t* plan_get_current_block();
+int           plan_blocks_queued();  // blocks queued incl. the executing one
 
 // Called by step segment buffer when computing executing block velocity profile.
 float plan_get_exec_block_exit_speed_sqr();
