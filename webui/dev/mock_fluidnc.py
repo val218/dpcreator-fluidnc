@@ -219,6 +219,8 @@ class Machine:
             return ["[MSG:Prepared:none:]", "ok"]
         if u == "$CRASH":
             return ["[MSG:Crash:PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]", "ok"]
+        if u == "$I":
+            return ["[VER:4.1 FluidNC v4.1.1 (mock) (esp32s3-wifi):]", "ok"]
         if u == "$JOB/ZADJUST":
             return [za_msg("ended") if ZA["ended"] and not self.job else za_msg(), "ok"]
         if u == "$JOB/ZADJUST/APPLY":
@@ -436,6 +438,10 @@ async def handle(reader, writer):
             reply(204)
         else:
             reply(405)
+    elif path == "/mock/ver":  # pretend the firmware is from another commit
+        sha = urllib.parse.parse_qs(urllib.parse.urlsplit(target).query).get("sha", ["abcdef1"])[0]
+        await broadcast([f"[VER:4.1 FluidNC v4.1.1 (fluidnc-4.1.1-w5500-{sha}) (esp32s3-wifi):]"])
+        reply(200, b"ok")
     elif path == "/mock/pendant":
         PENDANT[0] = urllib.parse.parse_qs(urllib.parse.urlsplit(target).query).get("state", ["connected"])[0]
         await broadcast([f"[MSG:Pendant:{PENDANT[0]}]"])

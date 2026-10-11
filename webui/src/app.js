@@ -87,6 +87,11 @@
       log(line, info === "none" ? "msg" : "err");
       return;
     }
+    if ((m = /^\[VER:.*FluidNC (.*)\]?/.exec(line))) {
+      checkUiVersion(m[1]);
+      log(line, "msg");
+      return;
+    }
     if ((m = /^\[MSG:ZAdjust(Err|Info|Limit)?:(.*)\]$/.exec(line))) {
       ZAdj.onMsg(m[1] || "", m[2]);
       log(line, m[1] === "Err" ? "err" : "msg");
@@ -621,6 +626,25 @@
     catch { prompt("Copy the crash details:", t); }
   };
 
+  // ------------------------------------------------------------- page vs firmware
+  // The page lives in the filesystem image (littlefs.bin / merged-flash.bin);
+  // a firmware-only update (firmware.bin, OTA) keeps the old page, which then
+  // lacks the controls for the new firmware features. Both come from the same
+  // commit in a release build: compare the commit ids.
+  function checkUiVersion(fw) {
+    const ui = $("#ui-ver").textContent.trim();
+    const m = /-([0-9a-f]{7,})(-dirty)?\)/.exec(fw);
+    $("#fw-ver").textContent = m ? m[1] : "";
+    if (!m || !/^[0-9a-f]{7,}$/.test(ui) || m[1].startsWith(ui) || ui.startsWith(m[1])) {
+      $("#uiold").hidden = true;
+      return;
+    }
+    $("#uiold-text").textContent = `Page ${ui}, firmware ${m[1]}: newer controls are missing. ` +
+      "Flash merged-flash.bin (or littlefs.bin) from the release - firmware.bin alone keeps the old page - then reload with Ctrl+F5.";
+    $("#uiold").hidden = false;
+  }
+  $("#uiold-hide").onclick = () => ($("#uiold").hidden = true);
+
   // ------------------------------------------------------------- live Z adjust
   // A temporary Z offset for the running job, kept by the board (like a wear
   // offset): + raises the tool. It reaches the tool after the moves already
@@ -628,19 +652,26 @@
   // offers to move the work zero by it ($Job/ZAdjust/Apply).
   function zadjEnable() {  // hoisted: called on every state change
     const on = !!S.job || /^(Run|Hold)/.test(S.state);
-    $$("[data-zadj], #zadj-reset").forEach((x) => (x.disabled = !on));
+    $$("[data-zadj], .zadj-reset").forEach((x) => (x.disabled = !on));
+    const bar = $("#jobzadj");
+    if (bar) bar.hidden = !on;  // big bar above the 3D view while a job runs
   }
   const ZAdj = (() => {
     let val = 0;
     function paint(state, line) {
-      const b = $("#zadj");
-      b.textContent = (val > 0 ? "+" : val < 0 ? "−" : "±") + Math.abs(val).toFixed(3);
-      b.className = val > 0 ? "up" : val < 0 ? "down" : "";
-      const n = $("#zadj-note");
-      n.className = "zadj-note " + (state || "");
-      n.textContent = state === "pending" ? (line > 0 ? `applies at line ${line}` : "applies with the next move")
+      $$(".zadj-val").forEach((b) => {
+        b.textContent = (val > 0 ? "+" : val < 0 ? "−" : "±") + Math.abs(val).toFixed(3);
+        b.classList.toggle("up", val > 0);
+        b.classList.toggle("down", val < 0);
+      });
+      const t = state === "pending" ? (line > 0 ? `applies at line ${line}` : "applies with the next move")
         : state === "active" ? (val > 0 ? "active · tool higher (shallower)" : "active · tool lower (deeper)")
-        : "while a job runs · + = shallower";
+        : "+ = shallower";
+      $$(".zadj-state").forEach((n) => {
+        n.classList.toggle("pending", state === "pending");
+        n.classList.toggle("active", state === "active");
+        n.textContent = t;
+      });
       enable();
     }
     const enable = zadjEnable;
@@ -662,7 +693,7 @@
       paint(state === "none" ? "" : state, +line || 0);
     }
     $$("[data-zadj]").forEach((b) => (b.onclick = () => send("$Job/ZAdjust=" + b.dataset.zadj)));
-    $("#zadj-reset").onclick = () => send("$Job/ZAdjust=0");
+    $$(".zadj-reset").forEach((b) => (b.onclick = () => send("$Job/ZAdjust=0")));
     $("#zadj-apply").onclick = () => {
       if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
       send("$Job/ZAdjust/Apply");

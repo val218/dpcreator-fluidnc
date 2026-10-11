@@ -512,15 +512,20 @@ Not changed: moves in machine coordinates (`G53`), `G28` / `G30`, probing
 
 ### Using it
 
-- **WebUI:** Control panel → Overrides → **Z adjust**: −0.1 / −0.01 /
-  +0.01 / +0.1 and **0** (reset). Enabled only while a job runs; the line
-  below shows `applies at line N` or `active`.
-- **Pendant:** while the job runs, tap the **Z +/-** pill at the top right of
-  the path view (in Hold also the **Z ADJ** button, or turn the wheel CCW).
-  Hold the enable button and turn: **CW raises, CCW lowers**, by the step
-  switch (0.01 / 0.1 / 1 mm; FluidNC takes at most 0.5 mm per step).
-  **Reset to 0** / **Done** (in Hold **Resume**). The pill shows the offset
-  (yellow = pending, green = active).
+- **WebUI:** while a job runs a **Z ADJUST** bar appears under the 3D view:
+  ▼ 0.1 / ▼ 0.01 / ▲ 0.01 / ▲ 0.1 and **0** (reset), with `applies at line N`
+  or `active`. The same row is under Control panel → Overrides.
+- **Pendant:** while the job runs the bottom bar is **Hold | Z adj | Abort**.
+  Tap **Z adj**, hold the enable button and tap −0.1 / −0.01 / +0.01 / +0.1,
+  or turn the wheel (**CW raises, CCW lowers**, by the step switch). **Reset 0**
+  clears it, **Done** (the middle button) closes the panel. The middle button
+  shows the offset (yellow = pending).
+
+If the WebUI has no Z adjust bar, the page is older than the firmware: the page
+is in the filesystem image, so a `firmware.bin`-only (OTA) update keeps the
+old page. Flash `merged-flash.bin` (or `littlefs.bin`) and reload with
+Ctrl+F5. The WebUI now warns about this (it compares its build with the
+firmware's, footer shows both).
 
 ### After the job
 

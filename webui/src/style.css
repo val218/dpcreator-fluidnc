@@ -328,12 +328,26 @@ dialog::backdrop { background: rgba(0, 0, 0, .6); }
 .btn.danger { border-color: var(--err); color: var(--err); }
 /* Live Z adjust (board keeps it for the running job) */
 .zadj-row b { min-width: 64px; }
-.zadj-row b.up { color: var(--ok); }
-.zadj-row b.down { color: var(--err); }
+.zadj-val.up { color: var(--ok); }
+.zadj-val.down { color: var(--err); }
 .zadj-row button:disabled { opacity: .4; cursor: default; }
 .zadj-note { font-size: 11px; color: var(--muted); padding-left: 60px; }
-.zadj-note.pending { color: var(--warn); }
-.zadj-note.active { color: var(--ok); }
+.zadj-state { color: var(--muted); }
+.zadj-state.pending { color: var(--warn); }
+.zadj-state.active { color: var(--ok); }
+.jobzadj { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; padding: 6px 10px;
+  border: 1px solid #3b82f6; border-radius: 8px; background: color-mix(in srgb, #3b82f6 10%, transparent); }
+.jobzadj[hidden] { display: none; }
+.jobzadj .prep-label { color: #60a5fa; }
+.jobzadj button { padding: 6px 10px; font-size: 13px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--panel-2); color: var(--text); cursor: pointer; }
+.jobzadj button:hover { border-color: #3a5488; }
+.jobzadj .zadj-val { font: 600 16px var(--mono); min-width: 72px; text-align: center; }
+.jobzadj .zadj-state { font-size: 12px; }
+.uiold { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 12px; font-size: 13px;
+  background: color-mix(in srgb, var(--warn) 18%, var(--panel, #0b1426)); border-bottom: 1px solid var(--warn); }
+.uiold[hidden] { display: none; }
+#uiold-text { color: var(--muted); }
 .zadj-end { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 12px; font-size: 13px;
   background: color-mix(in srgb, var(--accent) 14%, var(--panel, #0b1426)); border-bottom: 1px solid var(--accent); }
 .zadj-end[hidden] { display: none; }
