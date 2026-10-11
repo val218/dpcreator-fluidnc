@@ -86,7 +86,8 @@ the config has the `ethernet:` section.
 6. [SD card as a network drive (Windows)](#6-sd-card-as-a-network-drive-windows)
 7. [Pendant connection status](#7-pendant-connection-status)
 8. [Job preview on the TabUI pendant (Prepare → Run)](#8-job-preview-on-the-tabui-pendant)
-9. [Troubleshooting](#9-troubleshooting)
+9. [Job recovery](#9-job-recovery)
+10. [Troubleshooting](#10-troubleshooting)
 
 ---
 
