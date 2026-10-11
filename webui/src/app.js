@@ -97,7 +97,7 @@
       log(line, m[1] === "Err" ? "err" : "msg");
       return;
     }
-    if ((m = /^\[MSG:Recovery(Err|Info)?:(.*)\]$/.exec(line))) {
+    if ((m = /^\[MSG:Recovery(Err|Info|Ready)?:(.*)\]$/.exec(line))) {
       Recovery.onMsg(m[1] || "", m[2]);
       log(line, m[1] === "Err" ? "err" : "msg");
       return;
@@ -147,9 +147,11 @@
     p.title = st === "connected" ? "TabUI pendant connected (UART1)" : "No TabUI pendant on UART1";
   }
 
+  var recovHook = null;  // var: hoisted, set by the recovery panel
   function setStateBadge(state) {
     S.state = state;
     zadjEnable();
+    if (recovHook) recovHook();
     const b = $("#state");
     b.textContent = state === "Unknown" ? "--" : state;
     b.className = "state state-" + state.toLowerCase();
@@ -251,6 +253,7 @@
         log(`Job ended: ${S.job.file} (${fmtTime((Date.now() - S.job.start) / 1000)})`, "msg");
         if ($("#viewer-file").dataset.partial) ensurePreview(S.job.file);
         S.job = null;
+        zadjEnable();
         jobEl.hidden = true;
       }
     }
@@ -651,7 +654,7 @@
   // planned ("pending" -> "active") and ends with the job; then the board
   // offers to move the work zero by it ($Job/ZAdjust/Apply).
   function zadjEnable() {  // hoisted: called on every state change
-    const on = !!S.job || /^(Run|Hold)/.test(S.state);
+    const on = /^(Run|Hold)/.test(S.state) || (!!S.job && !/^(Alarm|Unknown)/.test(S.state));
     $$("[data-zadj], .zadj-reset").forEach((x) => (x.disabled = !on));
     const bar = $("#jobzadj");
     if (bar) bar.hidden = !on;  // big bar above the 3D view while a job runs
@@ -676,6 +679,7 @@
     }
     const enable = zadjEnable;
     function onMsg(kind, body) {
+      waitAns = 0;
       if (kind === "Err") return toast("Z adjust: " + body, true);
       if (kind === "Info") return toast(body);
       if (kind === "Limit") return;
@@ -692,8 +696,18 @@
       val = n;
       paint(state === "none" ? "" : state, +line || 0);
     }
-    $$("[data-zadj]").forEach((b) => (b.onclick = () => send("$Job/ZAdjust=" + b.dataset.zadj)));
-    $$(".zadj-reset").forEach((b) => (b.onclick = () => send("$Job/ZAdjust=0")));
+    // No answer at all = the controller did not run it (old firmware, or the
+    // channel was blocked): say so instead of silently doing nothing.
+    let waitAns = 0;
+    function zsend(v) {
+      send("$Job/ZAdjust=" + v);
+      const t = (waitAns = Date.now());
+      setTimeout(() => {
+        if (waitAns === t) toast("Z adjust: no answer from the controller - update the firmware (merged-flash.bin)", true);
+      }, 2500);
+    }
+    $$("[data-zadj]").forEach((b) => (b.onclick = () => zsend(b.dataset.zadj)));
+    $$(".zadj-reset").forEach((b) => (b.onclick = () => zsend("0")));
     $("#zadj-apply").onclick = () => {
       if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
       send("$Job/ZAdjust/Apply");
@@ -715,7 +729,35 @@
     let choice = -1, custom = 0, asked = "", later = "", text = null, textFor = "", busy = false;
     const key = () => rec.file + "@" + rec.stop;
 
+    // Ready to continue? The board says alarm / unhomed / busy / ok; Alarm in
+    // the status report counts too (older firmware, or before the message).
+    let ready = "ok";
+    function readiness() { return /^Alarm/.test(S.state) ? "alarm" : ready; }
+    function renderReady() {
+      const r = readiness(), box2 = $("#rec-ready");
+      const show = rec.st === "interrupted" && r !== "ok";
+      box2.hidden = !show;
+      if (show) {
+        $("#rec-ready-text").textContent =
+          r === "alarm" ? "The machine is in alarm: Unlock it (Home if the position was lost), then Dry run / Resume."
+          : r === "unhomed" ? "The position was lost: Home the machine, then Dry run / Resume."
+          : "Waiting for the machine to be Idle…";
+        $("#rec-unlock").classList.toggle("go", r === "alarm");
+        $("#rec-home").classList.toggle("go", r === "unhomed");
+        $("#rec-unlock").disabled = r !== "alarm";
+        $("#rec-home").disabled = !(r === "alarm" || r === "unhomed" || S.state === "Idle");
+      }
+      const ok = rec.st === "interrupted" && !busy && pick() > 0 && r === "ok";
+      $("#rec-go").disabled = $("#rec-dry").disabled = !ok;
+    }
+    recovHook = () => { if (!box.hidden) renderReady(); };
+    $("#rec-unlock").onclick = () => send("$X");
+    $("#rec-home").onclick = () => {
+      if (confirm("Home the machine now?\n\nIt moves to the home switches (Z first). Make sure the tool can lift out of the part.")) send("$H");
+    };
+
     function onMsg(kind, body) {
+      if (kind === "Ready") { ready = body; return render(); }
       if (kind === "Err") { busy = false; msg(body, true); toast("Recovery: " + body, true); return render(); }
       if (kind === "Info") { msg(body); toast(body); return; }
       // <state>:<stop>:<retract>:<tool>:<reason>:<file>
@@ -773,9 +815,8 @@
       inp.onfocus = () => { choice = 3; markChoices(); };
       c.append(el("b", {}, "Line"), " ", inp);
       ch.append(c);
-      const ready = rec.st === "interrupted" && !busy && pick() > 0;
-      $("#rec-go").disabled = $("#rec-dry").disabled = !ready;
       $("#rec-go").textContent = pick() ? `▶ Resume from line ${pick()}` : "▶ Resume";
+      renderReady();
       showLine();
     }
     function markChoices() {

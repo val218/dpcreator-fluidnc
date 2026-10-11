@@ -184,7 +184,8 @@ class Machine:
             return ["ok"]
         if u == "$X":
             self.state = "Idle"
-            return ["[MSG:Caution: Unlocked]", "ok"]
+            ready = ["[MSG:RecoveryReady:ok]"] if REC["st"] == "interrupted" else []
+            return ["[MSG:Caution: Unlocked]"] + ready + ["ok"]
         if u.startswith("G10 L20 P0"):
             for m in re.findall(r"([XYZA])([-\d.]+)", u):
                 i = "XYZA".index(m[0])
@@ -260,7 +261,7 @@ class Machine:
         if u.startswith("$JOB/RESUME=") and REC["st"] == "interrupted":
             ln, _, dry = u.split("=", 1)[1].partition(":")
             if self.state != "Idle":
-                return ["[MSG:RecoveryErr:machine must be Idle - unlock or home first]", "ok"]
+                return ["[MSG:RecoveryErr:machine is in alarm - press Unlock (or Home)]", "[MSG:RecoveryReady:alarm]", "ok"]
             if dry:
                 return ["[MSG:RecoveryInfo:dry run - moving to the start point at safe height]", rec_msg(), "ok"]
             name = REC["file"][3:]
@@ -308,10 +309,14 @@ class Machine:
             self.state = "Run" if self.job else "Idle"
         if b == 0x18:
             out = []
+            was_job = bool(self.job)
             if self.job:  # interrupted: the board keeps it for recovery
                 REC.update(st="interrupted", stop=45, retract=0, tool=0, why="stopped", file="/sd" + self.job[0])
                 out = [rec_msg()] + za_job_end()
-            self.target, self.job, self.state = None, None, "Idle"
+            # like FluidNC: a reset while moving loses the position -> alarm
+            self.target, self.job, self.state = None, None, ("Alarm" if was_job else "Idle")
+            if was_job:
+                out += ["ALARM:3", "[MSG:RecoveryReady:alarm]"]
             return out + ["", "Grbl 4.0 [FluidNC mock (wifi) '$' for help]"]
         return []
 

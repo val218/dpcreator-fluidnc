@@ -27,33 +27,6 @@
   <button class="btn small" id="crash-hide" title="Hide">✕</button>
 </div>
 
-<div id="recovery" class="recovery" hidden>
-  <div class="rec-head">
-    <b>Job interrupted</b>
-    <span class="rec-file" id="rec-file"></span>
-    <span class="rec-why" id="rec-why"></span>
-    <button class="btn small" id="rec-show" hidden>Show</button>
-  </div>
-  <div class="rec-body" id="rec-body">
-    <div class="rec-step">1. Restart from</div>
-    <div class="rec-choices" id="rec-choices"></div>
-    <pre class="rec-text" id="rec-text"></pre>
-    <div class="rec-step">2. Before starting</div>
-    <ul class="rec-check">
-      <li>Machine homed, work and Z zero not changed</li>
-      <li>The right tool is in the spindle (no automatic tool change)</li>
-      <li>Nothing in the way: the tool lifts to safe height, moves over the start, lowers there</li>
-    </ul>
-    <div class="rec-msg" id="rec-msg"></div>
-    <div class="rec-btns">
-      <button class="btn" id="rec-dry" title="Move above the restart point at safe height, nothing else">Dry run</button>
-      <button class="btn accent" id="rec-go">▶ Resume</button>
-      <span class="rec-gap"></span>
-      <button class="btn" id="rec-later">Later</button>
-      <button class="btn danger" id="rec-discard">Discard</button>
-    </div>
-  </div>
-</div>
 
 <div id="zadj-end" class="zadj-end" hidden>
   <b>The job ran with Z adjust <span id="zadj-end-v"></span> mm.</b>
@@ -176,6 +149,42 @@
       <button data-zadj="+0.01">▲ 0.01</button><button data-zadj="+0.1">▲ 0.1</button>
       <button class="zadj-reset" title="Back to 0">0</button>
       <span class="zadj-state">+ = shallower</span>
+    </div>
+    <div id="recovery" class="recovery" hidden>
+      <div class="rec-head">
+        <b>Job interrupted</b>
+        <span class="rec-file" id="rec-file"></span>
+        <span class="rec-why" id="rec-why"></span>
+        <button class="btn small" id="rec-show" hidden>Show</button>
+      </div>
+      <div class="rec-body" id="rec-body">
+       <div class="rec-col">
+        <div class="rec-step">1. Restart from</div>
+        <div class="rec-choices" id="rec-choices"></div>
+        <pre class="rec-text" id="rec-text"></pre>
+       </div>
+       <div class="rec-col">
+        <div class="rec-step">2. Before starting</div>
+        <ul class="rec-check">
+          <li>Machine homed, work and Z zero not changed</li>
+          <li>The right tool is in the spindle (no automatic tool change)</li>
+          <li>Nothing in the way: the tool lifts to safe height, moves over the start, lowers there</li>
+        </ul>
+        <div class="rec-ready" id="rec-ready" hidden>
+          <span id="rec-ready-text"></span>
+          <button class="btn" id="rec-unlock" title="Clear the alarm ($X)">Unlock</button>
+          <button class="btn" id="rec-home" title="Home the machine ($H)">Home</button>
+        </div>
+        <div class="rec-msg" id="rec-msg"></div>
+        <div class="rec-btns">
+          <button class="btn" id="rec-dry" title="Move above the restart point at safe height, nothing else">Dry run</button>
+          <button class="btn accent" id="rec-go">▶ Resume</button>
+          <span class="rec-gap"></span>
+          <button class="btn" id="rec-later">Later</button>
+          <button class="btn danger" id="rec-discard">Discard</button>
+        </div>
+       </div>
+      </div>
     </div>
     <div class="viewer-info" id="viewer-info"></div>
     <div class="progress"><div id="progress-bar"></div></div>

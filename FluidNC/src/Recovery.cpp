@@ -67,6 +67,23 @@ namespace {
         }
     }
 
+    // Can the job be continued now? alarm -> unlock ($X); unhomed -> home ($H);
+    // busy -> wait for Idle; ok. Sent with every report and when it changes,
+    // so the screens can offer Unlock / Home right in the recovery dialog.
+    const char* ready_name() {
+        if (state_is(State::Alarm) || state_is(State::ConfigAlarm) || state_is(State::Critical)) return "alarm";
+        if (Machine::Homing::unhomed_axes()) return "unhomed";
+        if (!state_is(State::Idle)) return "busy";
+        return "ok";
+    }
+    const char* _readySent = "";
+    void report_ready() {
+        _readySent = ready_name();
+        char m[48];
+        snprintf(m, sizeof(m), "[MSG:RecoveryReady:%s]\r\n", _readySent);
+        allChannels.print(m);
+    }
+
     void report() {
         St s = _r.st == St::Running ? St::None : _r.st;  // a running job is not "recovery"
         std::string reason = _r.reason;
@@ -76,6 +93,7 @@ namespace {
                  (unsigned)_r.tool);
         std::string m = head + reason + ":" + (s == St::None ? std::string() : _r.path) + "]\r\n";
         allChannels.print(m.c_str());
+        if (s == St::Interrupted) report_ready();
     }
     void report_err(const char* text) {
         std::string m = std::string("[MSG:RecoveryErr:") + text + "]\r\n";
@@ -340,6 +358,7 @@ void recov_poll() {
         return;
     }
     if (_r.st == St::Scanning || _r.st == St::Resuming) scan_step();
+    if (_r.st == St::Interrupted && strcmp(ready_name(), _readySent) != 0) report_ready();
 }
 
 bool recov_command(const char* line) {
@@ -366,8 +385,16 @@ bool recov_command(const char* line) {
     }
     if (strncasecmp(cmd, "Resume=", 7) == 0) {
         if (_r.st != St::Interrupted) { report_err("no interrupted job"); return true; }
-        if (!state_is(State::Idle)) { report_err("machine must be Idle - unlock or home first"); return true; }
-        if (Machine::Homing::unhomed_axes()) { report_err("home the machine first"); return true; }
+        if (!state_is(State::Idle)) {
+            report_err(state_is(State::Alarm) ? "machine is in alarm - press Unlock (or Home)" : "machine must be Idle");
+            report_ready();
+            return true;
+        }
+        if (Machine::Homing::unhomed_axes()) {
+            report_err("home the machine first - press Home");
+            report_ready();
+            return true;
+        }
         char*    end;
         uint32_t ln  = strtoul(cmd + 7, &end, 10);
         bool     dry = *end == ':' && strncasecmp(end + 1, "dry", 3) == 0;

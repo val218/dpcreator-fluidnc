@@ -338,6 +338,14 @@ static Error runFile(const Volume& fs, const char* parameter, AuthenticationLeve
         log_string(out, "Alarm");
         return Error::IdleError;
     }
+    // A file run from inside a job (an SD file with "$SD/Run=...") keeps its
+    // reply until the inner file is done, so the outer file waits for it.
+    // Started from a WebUI / pendant / terminal it is answered now: a deferred
+    // reply would block every further command line from that channel for the
+    // whole job (Z adjust, $Job/..., $Pendant/...) - only realtime keys got
+    // through.
+    const bool nested = Job::active();
+    Channel*   ack    = nested ? Job::dispatch_channel : nullptr;
     Job::save();
     InputFile* theFile;
     if ((err = openFile(fs, parameter, out, theFile)) != Error::Ok) {
@@ -354,13 +362,13 @@ static Error runFile(const Volume& fs, const char* parameter, AuthenticationLeve
     viz_job_started(theFile->path());  // preview for the pendant / WebUI if it has none yet
     // A connected pendant first gets the preview on screen; the job starts after.
     // Prepared and shown on the pendant already: start now.
-    if (!viz_prepared_ready(theFile->path()) && viz_hold_job(theFile, theFile->path(), &out, Job::dispatch_channel)) {
-        return Error::Deferred;
+    if (!viz_prepared_ready(theFile->path()) && viz_hold_job(theFile, theFile->path(), &out, ack)) {
+        return nested ? Error::Deferred : Error::Ok;
     }
     recov_job_start(theFile, theFile->path());  // job recovery: record its progress
-    Job::nest(theFile, &out, Job::dispatch_channel);
+    Job::nest(theFile, &out, ack);
 
-    return Error::Deferred;
+    return nested ? Error::Deferred : Error::Ok;
 }
 
 static Error runSDFile(const char* parameter, AuthenticationLevel auth_level, Channel& out) {  // ESP220

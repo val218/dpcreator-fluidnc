@@ -298,11 +298,16 @@ dialog::backdrop { background: rgba(0, 0, 0, .6); }
   background: color-mix(in srgb, var(--err) 18%, var(--panel, #0b1426)); border-bottom: 1px solid var(--err); }
 .crash[hidden] { display: none; }
 /* Job recovery (the board keeps the interrupted job; this only shows it) */
-.recovery { position: fixed; z-index: 60; top: 56px; right: 16px; width: min(560px, calc(100vw - 32px));
-  max-height: calc(100vh - 72px); overflow: auto; box-sizing: border-box; padding: 10px 12px; font-size: 13px;
-  border: 1px solid var(--warn); border-radius: var(--radius); box-shadow: 0 8px 30px rgba(0, 0, 0, .5);
-  background: color-mix(in srgb, var(--warn) 12%, var(--panel, #0b1426)); }
-.recovery.collapsed { width: auto; max-width: calc(100vw - 32px); padding: 6px 10px; }
+.recovery { margin-bottom: 8px; padding: 8px 12px; font-size: 13px; border: 1px solid var(--warn);
+  border-radius: var(--radius); background: color-mix(in srgb, var(--warn) 12%, var(--panel, #0b1426)); }
+.recovery.collapsed { padding: 5px 10px; }
+@media (min-width: 1100px) {
+  .rec-body { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 16px; }
+}
+@media (max-width: 759px) {  /* phone: a sheet at the bottom, over whatever pane is shown */
+  .recovery { position: fixed; z-index: 60; left: 8px; right: 8px; bottom: 8px; margin: 0;
+    max-height: 70vh; overflow: auto; box-shadow: 0 8px 30px rgba(0, 0, 0, .5); }
+}
 .recovery[hidden] { display: none; }
 .rec-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .rec-file { font-family: var(--mono); overflow-wrap: anywhere; }
@@ -316,7 +321,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .6); }
 .rec-choice.off { opacity: .45; cursor: default; }
 .rec-choice input[type=number] { width: 7em; }
 .rec-choice small { color: var(--muted); }
-.rec-text { margin: 8px 0 0; padding: 6px 8px; max-height: 9.5em; overflow: auto; font: 12px/1.45 var(--mono);
+.rec-text { margin: 8px 0 0; padding: 6px 8px; max-height: 8em; overflow: auto; font: 12px/1.45 var(--mono);
   background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); white-space: pre; }
 .rec-text .here { background: color-mix(in srgb, var(--accent) 30%, transparent); display: block; }
 .rec-text .ln { color: var(--muted); }
@@ -325,6 +330,11 @@ dialog::backdrop { background: rgba(0, 0, 0, .6); }
 .rec-msg.err { color: var(--err); }
 .rec-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
 .rec-gap { flex: 1; }
+.rec-ready { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding: 6px 8px;
+  border: 1px solid var(--err); border-radius: var(--radius); background: color-mix(in srgb, var(--err) 12%, transparent); }
+.rec-ready[hidden] { display: none; }
+.rec-ready #rec-ready-text { flex: 1; min-width: 12em; }
+.rec-ready .btn.go { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
 .btn.danger { border-color: var(--err); color: var(--err); }
 /* Live Z adjust (board keeps it for the running job) */
 .zadj-row b { min-width: 64px; }

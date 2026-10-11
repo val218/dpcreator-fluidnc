@@ -434,9 +434,9 @@ While a preview is being built or sent, the WebUI terminal shows `VizBusy`,
 The board writes down the line every SD file job is at (every few seconds,
 and at once on Hold or a stop) to its flash, so a power cut doesn't lose it.
 A job that ends any way other than reaching the end of the file is kept as
-**interrupted**. The WebUI (a card at the top right) and the pendant (a
-screen of its own; "Interrupted job – tap to recover" on the DRO after
-**Later**) show the same three steps:
+**interrupted**. The WebUI (a card under the 3D view; a sheet at the bottom on
+a phone) and the pendant (a screen of its own; "Interrupted job – tap to
+recover" on the DRO after **Later**) show the same three steps:
 
 1. **Job interrupted** – file, line it stopped at, why. *Resume…*, *Later*,
    *Discard*.
@@ -459,8 +459,12 @@ screen of its own; "Interrupted job – tap to recover" on the DRO after
    - restore G90/G91, G20/G21, feed and motion mode, then continue the file
      from the chosen line
 
-The machine must be **Idle and homed**; otherwise the card shows why it
-can't start. If the chosen line is in the middle of an arc, a note asks you to
+The machine must be **Idle and homed**. A stop or E-stop while cutting
+leaves it in **alarm**, so the recovery screens have their own **Unlock**
+(`$X`) and **Home** (`$H`, asks first) buttons: the WebUI card shows them in a
+red row with what to do, the pendant's last screen swaps *Dry run / START* for
+*Unlock / Home* until the machine is ready. The board reports this as
+`[MSG:RecoveryReady:<alarm|unhomed|busy|ok>]` whenever it changes. If the chosen line is in the middle of an arc, a note asks you to
 check the first move.
 
 ```
@@ -562,6 +566,7 @@ step, limit reached, …).
 | gSender: *Unable to connect* | IP/port in Config → Ethernet don't match the board; click **Apply Settings**. |
 | Pendant shows no path / a wrong path | Check the WebUI terminal for `VizErr`; press **.viz** on the file to rebuild it. On the pendant's terminal tab, `RX overflow` or `garbled msgs dropped` mean bytes are lost on the pendant cable — use a shorter / shielded cable or a lower baud rate (same on both ends). |
 | Browser / Windows calls the firmware zip *dangerous* | False alarm on an unknown download; the firmware zip now holds only the `.bin` files. If it is still blocked: keep / "Download anyway", or check the file in Windows Security → Protection history and allow it. |
+| Z adjust (or any `$` command) from the WebUI does nothing while a job runs that was started from the WebUI | Fixed: `$SD/Run` started from a WebUI / pendant / terminal now answers `ok` at once. Before, the reply waited for the end of the job and the board took no further command lines from that page until then (only Hold / Resume / overrides). |
 | Board stops answering (WebUI, pendant, serial) after the pendant was plugged in / rebooted | Fixed: XON/XOFF is off on the pendant UART — a noise byte that looked like XOFF paused the board's transmitter and blocked it. |
 | Hold / door / reset when the pendant is plugged in or rebooted | Fixed: line noise on the pendant UART is dropped. `$Pendant/Debug` shows how many bytes were dropped. |
 | WebUI shows *"The controller restarted after a crash"* | Press **Copy details** and send the text (it is the crash backtrace; `$Crash` prints it too). One crash restarts with your `config.yaml`; only 3 crash restarts in a row fall back to the default config (WiFi AP `FluidNC`, no Ethernet) - reset the board to try again. |
