@@ -37,6 +37,7 @@ def make_viz(gcode: bytes) -> bytes:
 
 
 PREP = ["none", ""]  # prepared job: state, /sd/file
+CRASH = [True]  # last restart was a crash until $Crash/Clear
 STEPS = {}  # steps_per_mm set at runtime
 # Job recovery record kept by the board: state, stop line, retract, tool, reason, file
 REC = {"st": "none", "stop": 0, "retract": 0, "tool": 0, "why": "", "file": ""}
@@ -228,7 +229,13 @@ class Machine:
         if u == "$JOB/UNPREPARE":
             PREP[0], PREP[1] = "none", ""
             return ["[MSG:Prepared:none:]", "ok"]
+        if u == "$CRASH/CLEAR":
+            CRASH[0] = False
+            asyncio.get_event_loop().create_task(broadcast(["[MSG:Crash:none]"]))
+            return ["ok"]
         if u == "$CRASH":
+            if not CRASH[0]:
+                return ["[MSG:Crash:none]", "ok"]
             return ["[MSG:Crash:reason=panic PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]",
                     "[MSG:CrashLast:$Rewind/Start]", "[MSG:CrashLast:$Rewind/Move=-1.000]", "ok"]
         msp = re.fullmatch(r"\$/AXES/([XYZA])/STEPS_PER_MM(?:=([\d.]+))?", u)

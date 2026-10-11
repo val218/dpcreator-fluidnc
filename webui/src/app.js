@@ -80,11 +80,22 @@
       return;
     }
     if ((m = /^\[MSG:Crash:(.*)\]$/.exec(line))) {
-      // Last restart was a crash: show it with the backtrace to copy
+      // Last restart was a crash: a one-line notice; the details go to Copy.
+      // [MSG:Crash:none] (also sent to all after $Crash/Clear) hides it.
       const info = m[1];
       crashLast = [];
-      if (info !== "none") {
-        $("#crash-text").textContent = info === "unknown" ? "(no backtrace saved)" : info;
+      crashRaw = info;
+      crashInfo = info === "unknown" ? "panic (no backtrace saved - older firmware)" : info;
+      let gone = false;
+      try { gone = sessionStorage.getItem("crashSeen") === info; } catch {}
+      if (info === "none" || gone) {
+        $("#crash").hidden = true;
+      } else {
+        const r = /reason=([\w-]+)/.exec(info);
+        const why = { "panic": "software crash", "task-watchdog": "a task stopped responding",
+          "int-watchdog": "an interrupt stopped responding", "watchdog": "watchdog reset" };
+        $("#crash-text").textContent = "(" + (r ? (why[r[1]] || r[1]) : "software crash") + ")";
+        $("#crash-text").title = crashInfo;
         $("#crash").hidden = false;
       }
       log(line, info === "none" ? "msg" : "err");
@@ -92,7 +103,7 @@
     }
     if ((m = /^\[MSG:CrashLast:(.*)\]$/.exec(line))) {
       crashLast.push(m[1]);  // commands sent just before the crash
-      $("#crash-text").title = "Last commands before the crash:\n" + crashLast.join("\n");
+      $("#crash-text").title = crashInfo + "\nLast commands before the crash:\n" + crashLast.join("\n");
       log(line, "err");
       return;
     }
@@ -194,6 +205,8 @@
   var codeHook = null;      // G-code view: file shown changed
   var codeLineHook = null;  // G-code view: line being cut
   var crashLast = [];    // [MSG:CrashLast:...] lines
+  var crashInfo = "";    // [MSG:Crash:...] text (reason, backtrace), for Copy
+  var crashRaw = "";     // as sent, to remember a dismissed one
   var recovHook = null;  // var: hoisted, set by the recovery panel
   var rwHook = null;     // var: hoisted, set by the rewind bar
   var macroHook = null;  // var: hoisted, set by the macros panel
@@ -680,9 +693,15 @@
   }
   $("#preview").onclick = previewSelected;
 
-  $("#crash-hide").onclick = () => ($("#crash").hidden = true);
+  $("#crash-hide").onclick = () => {
+    // Seen: the board forgets it until the next crash (all UIs hide it);
+    // older firmware without $Crash/Clear: at least not again in this tab.
+    $("#crash").hidden = true;
+    try { sessionStorage.setItem("crashSeen", crashRaw); } catch {}
+    Conn.sendLine("$Crash/Clear", true);
+  };
   $("#crash-copy").onclick = async () => {
-    const t = "dpCREATOR FluidNC crash: " + $("#crash-text").textContent +
+    const t = "dpCREATOR FluidNC crash: " + crashInfo +
       (crashLast.length ? "\nLast commands: " + crashLast.join(" | ") : "") +
       "\nWebUI " + $("#ui-ver").textContent + " firmware " + $("#fw-ver").textContent;
     try { await navigator.clipboard.writeText(t); toast("Crash details copied - paste them to the developer"); }

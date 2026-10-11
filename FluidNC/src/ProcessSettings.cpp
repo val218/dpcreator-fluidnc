@@ -1354,7 +1354,7 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
     if (line[0] == 0) {
         return Error::Ok;
     }
-    if ((line[0] == '$' || line[0] == '[') && strcasecmp(line, "$Crash") != 0) {
+    if ((line[0] == '$' || line[0] == '[') && strncasecmp(line, "$Crash", 6) != 0) {
         crash_trail_note(line);  // kept across a crash restart ($Crash lists them)
     }
 
@@ -1372,9 +1372,19 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
     }
     // Last crash, for the WebUI banner / decoding: [MSG:Crash:none] or
     // [MSG:Crash:PC=0x... cause=N Backtrace: 0x...:0x00000000 ...]
+    // $Crash/Clear: the crash was seen - every UI drops its notice and $Crash
+    // says none until the next crash (RAM flag, so a new crash shows again).
+    static bool crash_cleared = false;
+    if (strcasecmp(line, "$Crash/Clear") == 0) {
+        crash_cleared = true;
+        allChannels.print("[MSG:Crash:none]\n");
+        return Error::Ok;
+    }
     if (strcasecmp(line, "$Crash") == 0) {
         backtrace_t bt;
-        if (restart_was_panic() && backtrace_get(&bt)) {
+        if (crash_cleared) {
+            channel.print("[MSG:Crash:none]\n");
+        } else if (restart_was_panic() && backtrace_get(&bt)) {
             char        b[24];
             std::string m = std::string("[MSG:Crash:reason=") + restart_reason() + " ";
             snprintf(b, sizeof(b), "PC=0x%08x", (unsigned)bt.pc);
@@ -1394,7 +1404,7 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
         } else {
             channel.print("[MSG:Crash:none]\n");
         }
-        if (restart_was_panic()) {  // what was sent last before it
+        if (restart_was_panic() && !crash_cleared) {  // what was sent last before it
             for (int i = 0; i < crash_trail_count(); i++) {
                 std::string m = std::string("[MSG:CrashLast:") + crash_trail_line(i) + "]\n";
                 channel.print(m.c_str());
