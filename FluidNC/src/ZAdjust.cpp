@@ -3,6 +3,8 @@
 
 #include "Job.h"
 #include "Planner.h"
+#include "Protocol.h"
+#include "System.h"
 #include "State.h"
 #include "Serial.h"
 #include "GCode.h"
@@ -10,22 +12,28 @@
 #include "FileStream.h"
 #include "FluidPath.h"
 #include "Machine/MachineConfig.h"
+#include "Driver/delay_usecs.h"  // usToCpuTicks
 
+#include <Arduino.h>  // millis
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
 #include <strings.h>
 
+// Stepper interrupt interface (see ZAdjust.h). target is written only here,
+// done only by the interrupt, so neither needs a lock.
+volatile int32_t zadj_isr_target   = 0;
+volatile int32_t zadj_isr_done     = 0;
+int32_t          zadj_isr_interval = 0;
+
 namespace {
-    // Written by the command handler (polling task), read by the parser
-    // (protocol task): single 32-bit values.
-    volatile float    _req      = 0.0f;   // wanted offset
-    volatile float    _applied  = 0.0f;   // offset in the parser position
-    volatile uint32_t _pendLine = 0;      // file line the last change starts at
-    volatile bool     _pending  = false;  // that line is not executing yet
-    volatile bool     _report   = false;  // something to tell the channels
-    volatile float    _shown    = 0.0f;   // in the moves executing now (WCO)
+    volatile float _req       = 0.0f;   // wanted offset, mm
+    volatile bool  _report    = false;  // something to tell the channels
+    volatile bool  _resync    = false;  // job over: protocol task takes the real position over
+    float          _spm       = 0.0f;   // Z steps per mm
+    int32_t        _lastDone  = 0;      // for WCO / pending -> active reports
+    uint32_t       _lastWcoMs = 0;
 
     float      _limit     = 1.0f;
     bool       _wasActive = false;
@@ -33,8 +41,16 @@ namespace {
     float      _ended     = 0.0f;
     CoordIndex _endedWcs  = CoordIndex::G54;
 
-    const char*   LIMIT_FILE = "zadjust.txt";  // local filesystem
-    constexpr float MAX_STEP = 0.5f;           // per command
+    const char*     LIMIT_FILE = "zadjust.txt";  // local filesystem
+    constexpr float MAX_STEP   = 0.5f;           // per command
+
+    float spm() {
+        if (_spm <= 0.0f && config && config->_axes && Axes::_numberAxis > Z_AXIS && Axes::_axis[Z_AXIS]) {
+            _spm = Axes::_axis[Z_AXIS]->_stepsPerMm;
+        }
+        return _spm > 0.0f ? _spm : 1.0f;
+    }
+    float done_mm() { return zadj_isr_done / spm(); }
 
     const char* wcs_name(CoordIndex c) {
         static const char* n[] = { "G54", "G55", "G56", "G57", "G58", "G59" };
@@ -47,22 +63,18 @@ namespace {
     void report() {
         char        m[96];
         const char* st;
-        float       v    = _req;
-        unsigned    line = 0;
+        float       v = _req;
         if (!Job::active() && _hasEnded) {
             st = "ended";
             v  = _ended;
-        } else if (_req == 0.0f && _applied == 0.0f) {
+        } else if (_req == 0.0f && zadj_isr_done == 0 && zadj_isr_target == 0) {
             st = "none";
-        } else if (_req != _applied) {
-            st = "pending";  // waiting for the next move to be read
-        } else if (_pending) {
-            st   = "pending";
-            line = _pendLine;  // applies when the machine gets to this line
+        } else if (zadj_isr_done != zadj_isr_target) {
+            st = "pending";  // the tool is moving to it (or waits for Resume)
         } else {
             st = "active";
         }
-        snprintf(m, sizeof(m), "[MSG:ZAdjust:%+.3f:%s:%u]\r\n", v, st, line);
+        snprintf(m, sizeof(m), "[MSG:ZAdjust:%+.3f:%s:0]\r\n", v, st);
         print_all(m);
     }
     void report_err(const char* t) {
@@ -82,6 +94,7 @@ namespace {
 }
 
 void zadj_init() {
+    zadj_isr_interval = usToCpuTicks(1000);  // at most 1000 added steps per second
     try {
         FileStream f(LIMIT_FILE, "r", LocalFS);
         char       b[24] = {};
@@ -92,22 +105,7 @@ void zadj_init() {
     } catch (...) {}
 }
 
-// ── Parser hooks (protocol task) ─────────────────────────────────────────────
-float zadj_applied() { return _applied; }
-float zadj_shown() { return _shown; }
-
-float zadj_target(bool canApply) { return canApply ? (float)_req : (float)_applied; }
-
-void zadj_moved(float applied) {
-    if (applied == _applied) return;
-    Channel* jc = Job::channel();
-    _applied    = applied;
-    _pendLine   = jc ? jc->lineNumber() : 0;
-    _pending    = _pendLine != 0;
-    _report     = true;
-}
-
-void zadj_reset_position() { _applied = 0.0f; }
+float zadj_shown() { return zadj_isr_done / spm(); }
 
 // ── Polling task ─────────────────────────────────────────────────────────────
 void zadj_poll() {
@@ -119,34 +117,52 @@ void zadj_poll() {
             _report   = true;
         }
     } else if (!active && _wasActive) {
-        _wasActive = false;
-        if (_applied != 0.0f) {
-            _ended    = _applied;
+        _wasActive      = false;
+        zadj_isr_target = zadj_isr_done;  // no more added steps
+        float made      = done_mm();
+        if (zadj_isr_done != 0) {
+            _ended    = std::round(made * 1000.0f) / 1000.0f;
             _endedWcs = gc_state.modal.coord_select;
-            _hasEnded = true;
+            _hasEnded = _ended != 0.0f;
+            _resync   = true;  // the protocol task takes the real position over
         }
-        if (_req != 0.0f || _applied != 0.0f || _hasEnded) _report = true;
-        _req     = 0.0f;
-        _applied = 0.0f;
-        _pending = false;
-        if (_shown != 0.0f) {
-            _shown = 0.0f;
-            allChannels.notifyWco();
-        }
+        if (_req != 0.0f || _hasEnded) _report = true;
+        _req = 0.0f;
     }
-    if (_pending) {
-        plan_block_t* b = plan_get_current_block();
-        if (!b || b->line_number >= (int32_t)_pendLine) {
-            _pending = false;
-            _report  = true;
-            _shown   = _applied;
-            allChannels.notifyWco();  // WPos keeps showing the file's Z
+    // Tool position changed: WCO follows (so WPos keeps the file's Z), and
+    // "pending" becomes "active" once all steps are out.
+    int32_t done = zadj_isr_done;
+    if (done != _lastDone) {
+        bool settled = (done == zadj_isr_target);
+        if (settled || millis() - _lastWcoMs > 150) {
+            _lastDone  = done;
+            _lastWcoMs = millis();
+            allChannels.notifyWco();
+            if (settled && active) _report = true;
         }
     }
     if (_report) {
         _report = false;
         report();
     }
+}
+
+// ── Protocol task: after the job ─────────────────────────────────────────────
+void zadj_protocol_poll() {
+    if (!_resync || Job::active()) return;
+    // The tool is zadj_isr_done steps away from where the planner and the
+    // parser think: let the last moves finish, then take the real position
+    // over, so the next move goes where it is told and nothing moves back.
+    protocol_buffer_synchronize();
+    if (!sys.abort()) {
+        plan_sync_position();
+        gc_sync_position();
+    }
+    _resync         = false;
+    zadj_isr_target = 0;
+    zadj_isr_done   = 0;  // the interrupt is idle (planner empty)
+    _lastDone       = 0;
+    allChannels.notifyWco();
 }
 
 // ── Commands ─────────────────────────────────────────────────────────────────
@@ -236,8 +252,9 @@ bool zadj_command(const char* line, Channel& channel, bool on_protocol_task, boo
     }
     want = std::round(want * 1000.0f) / 1000.0f;
     if (want != _req) {
-        _req = want;
-        report();  // "pending" until the parser reaches a move
+        _req            = want;
+        zadj_isr_target = (int32_t)lroundf(want * spm());  // the stepper interrupt moves the tool there
+        report();
     }
     return true;
 }

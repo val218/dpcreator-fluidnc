@@ -498,26 +498,25 @@ offset on an industrial control or "babystepping" on a 3D printer:
 
 ### When it reaches the tool
 
-The board adds the offset to Z of the next move it reads from the file (any
-G0 / G1, and G2 / G3 arcs in the XY plane; a move with no Z word ramps by the
-change). FluidNC plans moves ahead, so the machine gets there after the moves
-already planned:
+**Live.** Like babystepping on a 3D printer, the board's stepper interrupt
+adds single Z steps between the job's own steps (on ticks where the job does
+not step Z, at most one step per millisecond), so the tool moves to the new
+height within a fraction of a second while it cuts — whatever the moves are.
+The screens show `pending` ("moving to it…") until all steps are out, then
+`active`.
 
-- `pending` – the change is on its way; the screens show "applies at line N"
-  (or "with the next move" until the board has read it).
-- `active` – the machine is cutting with it.
-
-With short moves (3D carving) that is almost immediate; with long straight
-moves it can be the rest of the current move or pass. In Hold the change waits
-until you resume.
-
-Not changed: moves in machine coordinates (`G53`), `G28` / `G30`, probing
-(`G38.x`); arcs in the XZ / YZ planes keep the offset they had.
+- The steps only go out while the machine moves. **In Hold** a change waits
+  for **Resume** ("applies on Resume").
+- MPos is the real tool position. The work offset (WCO) includes the steps
+  made, so WPos, the DRO and the 3D views keep showing the file's Z.
+- When the job ends (finished, stopped, alarm) the board takes the real
+  position over: nothing moves back, and the next move goes where it is
+  told. Use **Apply** afterwards if the next run should cut the same.
 
 ### Using it
 
 - **WebUI:** while a job runs a **Z ADJUST** bar appears under the 3D view:
-  ▼ 0.1 / ▼ 0.01 / ▲ 0.01 / ▲ 0.1 and **0** (reset), with `applies at line N`
+  ▼ 0.1 / ▼ 0.01 / ▲ 0.01 / ▲ 0.1 and **0** (reset), with `moving to it…`
   or `active`. The same row is under Control panel → Overrides.
 - **Pendant:** while the job runs the bottom bar is **Hold | Z adj | Abort**.
   Tap **Z adj**, hold the enable button and tap −0.1 / −0.01 / +0.01 / +0.1,
@@ -567,6 +566,7 @@ step, limit reached, …).
 | Pendant shows no path / a wrong path | Check the WebUI terminal for `VizErr`; press **.viz** on the file to rebuild it. On the pendant's terminal tab, `RX overflow` or `garbled msgs dropped` mean bytes are lost on the pendant cable — use a shorter / shielded cable or a lower baud rate (same on both ends). |
 | Browser / Windows calls the firmware zip *dangerous* | False alarm on an unknown download; the firmware zip now holds only the `.bin` files. If it is still blocked: keep / "Download anyway", or check the file in Windows Security → Protection history and allow it. |
 | Z adjust (or any `$` command) from the WebUI does nothing while a job runs that was started from the WebUI | Fixed: `$SD/Run` started from a WebUI / pendant / terminal now answers `ok` at once. Before, the reply waited for the end of the job and the board took no further command lines from that page until then (only Hold / Resume / overrides). |
+| Pendant keeps the *E-stop released* menu after the job was unlocked / resumed from the WebUI | Fixed (pendant firmware): the menu closes by itself when the alarm is cleared anywhere. |
 | Board stops answering (WebUI, pendant, serial) after the pendant was plugged in / rebooted | Fixed: XON/XOFF is off on the pendant UART — a noise byte that looked like XOFF paused the board's transmitter and blocked it. |
 | Hold / door / reset when the pendant is plugged in or rebooted | Fixed: line noise on the pendant UART is dropped. `$Pendant/Debug` shows how many bytes were dropped. |
 | WebUI shows *"The controller restarted after a crash"* | Press **Copy details** and send the text (it is the crash backtrace; `$Crash` prints it too). One crash restarts with your `config.yaml`; only 3 crash restarts in a row fall back to the default config (WiFi AP `FluidNC`, no Ethernet) - reset the board to try again. |

@@ -667,7 +667,7 @@
         b.classList.toggle("up", val > 0);
         b.classList.toggle("down", val < 0);
       });
-      const t = state === "pending" ? (line > 0 ? `applies at line ${line}` : "applies with the next move")
+      const t = state === "pending" ? (line > 0 ? `applies at line ${line}` : /^Hold/.test(S.state) ? "applies on Resume" : "moving to it…")
         : state === "active" ? (val > 0 ? "active · tool higher (shallower)" : "active · tool lower (deeper)")
         : "+ = shallower";
       $$(".zadj-state").forEach((n) => {

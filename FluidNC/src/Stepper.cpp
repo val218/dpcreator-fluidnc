@@ -15,6 +15,8 @@
 #include "StepperPrivate.h"
 #include "Planner.h"
 #include "Protocol.h"
+#include "ZAdjust.h"               // live Z adjust: extra Z steps
+#include "Driver/delay_usecs.h"   // getCpuTicks
 #include <cmath>
 
 using namespace Stepper;
@@ -190,6 +192,12 @@ uint32_t Stepper::isr_count;  // for debugging only
  * is to keep pulse timing as regular as possible.
  * Returns true if step interrupts should continue
  */
+// Live Z adjust (ZAdjust.h): an extra Z step goes out on a tick where the job
+// does not step Z, with its own direction for that one tick.
+static bool    zadj_inject     = false;
+static bool    zadj_inject_neg = false;
+static int32_t zadj_next_tick  = 0;
+
 bool IRAM_ATTR Stepper::pulse_func() {
 #ifdef DEBUG_STEPPER_ISR
     isr_count++;
@@ -200,7 +208,16 @@ bool IRAM_ATTR Stepper::pulse_func() {
     }
     auto n_axis = Axes::_numberAxis;
 
-    Stepping::step(st.step_outbits, st.dir_outbits);
+    AxisMask dirs = st.dir_outbits;
+    if (zadj_inject) {
+        zadj_inject = false;
+        if (zadj_inject_neg) {
+            set_bitnum(dirs, Z_AXIS);  // a set direction bit = negative
+        } else {
+            clear_bitnum(dirs, Z_AXIS);
+        }
+    }
+    Stepping::step(st.step_outbits, dirs);
     st.step_outbits = 0;
 
     // If there is no step segment, attempt to pop one from the stepper buffer
@@ -258,6 +275,19 @@ bool IRAM_ATTR Stepper::pulse_func() {
         if (st.counter[axis] > st.exec_block->step_event_count) {
             set_bitnum(st.step_outbits, axis);
             st.counter[axis] -= st.exec_block->step_event_count;
+        }
+    }
+
+    // Live Z adjust: one added Z step, at most one per zadj_isr_interval
+    if (n_axis > Z_AXIS && zadj_isr_target != zadj_isr_done && !bitnum_is_true(st.step_outbits, Z_AXIS)) {
+        int32_t now = getCpuTicks();
+        if (now - zadj_next_tick >= 0) {
+            zadj_next_tick  = now + zadj_isr_interval;
+            bool neg        = zadj_isr_target < zadj_isr_done;
+            zadj_inject     = true;
+            zadj_inject_neg = neg;
+            set_bitnum(st.step_outbits, Z_AXIS);
+            zadj_isr_done = zadj_isr_done + (neg ? -1 : 1);
         }
     }
 

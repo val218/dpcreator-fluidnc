@@ -481,6 +481,7 @@ void protocol_main_loop() {
         }
         // A line collected by the polling task.  xQueueReceive supplies the
         // barrier that makes item.line fully visible here.
+        zadj_protocol_poll();  // live Z adjust: after a job, take the real position over
         LineItem item;
         if (xQueueReceive(cmd_queue, &item, 0)) {
             Channel* channel = item.channel;
