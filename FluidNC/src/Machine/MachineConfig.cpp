@@ -23,6 +23,7 @@
 #include "Config.h"  // ENABLE_*
 
 #include "Driver/restart.h"
+#include "CrashTrail.h"
 #include "Driver/backtrace.h"
 
 #include <cstdio>
@@ -279,6 +280,7 @@ namespace Machine {
         // crash loop - 3 crash restarts in a row - falls back to the default
         // config; a single crash restarts normally (the backtrace is logged
         // and $Crash reports it).
+        crash_trail_boot();  // last commands of the previous run, if it crashed
         uint32_t streak = crash_streak_update();
         if (streak > 0) {
             log_error("Restarted after a crash (" << streak << " in a row)");

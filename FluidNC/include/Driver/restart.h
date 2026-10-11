@@ -1,2 +1,3 @@
-bool restart_was_panic();
-void restart();
+bool        restart_was_panic();   // last restart was a crash (panic or watchdog)
+const char* restart_reason();      // "panic", "task-watchdog", "int-watchdog", "watchdog", "brownout", "power-on", ...
+void        restart();
