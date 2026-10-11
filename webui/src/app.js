@@ -87,6 +87,11 @@
       log(line, info === "none" ? "msg" : "err");
       return;
     }
+    if ((m = /^\[MSG:Recovery(Err|Info)?:(.*)\]$/.exec(line))) {
+      Recovery.onMsg(m[1] || "", m[2]);
+      log(line, m[1] === "Err" ? "err" : "msg");
+      return;
+    }
     if ((m = /^\[MSG:Prepared:(\w+):(.*)\]$/.exec(line))) {
       setPrepared(m[1], m[2]);
       log(line, "msg");
@@ -608,6 +613,137 @@
     try { await navigator.clipboard.writeText(t); toast("Crash details copied - paste them to the developer"); }
     catch { prompt("Copy the crash details:", t); }
   };
+
+  // ------------------------------------------------------------- job recovery
+  // The board records the line a file job was at and keeps an interrupted job
+  // (alarm, E-stop, reset, Stop, power loss). It works out safe restart points
+  // ($Job/Points) and continues from a chosen line ($Job/Resume=<line>[:dry]),
+  // setting up coordinates, units, feed, spindle and coolant first. The pendant
+  // shows the same choices; this panel only displays and sends them.
+  const Recovery = (() => {
+    const box = $("#recovery");
+    let rec = { st: "none", stop: 0, retract: 0, tool: 0, why: "", file: "" };
+    let choice = -1, custom = 0, asked = "", later = "", text = null, textFor = "", busy = false;
+    const key = () => rec.file + "@" + rec.stop;
+
+    function onMsg(kind, body) {
+      if (kind === "Err") { busy = false; msg(body, true); toast("Recovery: " + body, true); return render(); }
+      if (kind === "Info") { msg(body); toast(body); return; }
+      // <state>:<stop>:<retract>:<tool>:<reason>:<file>
+      const p = body.split(":");
+      const was = key();
+      rec = { st: p[0], stop: +p[1] || 0, retract: +p[2] || 0, tool: +p[3] || 0, why: p[4] || "", file: p.slice(5).join(":") };
+      if (rec.st === "none") { busy = false; box.hidden = true; return; }
+      if (key() !== was) { choice = -1; custom = rec.stop; msg(""); }
+      if (rec.st === "interrupted") {
+        busy = false;
+        if (!rec.retract && !rec.tool && asked !== key()) { asked = key(); send("$Job/Points"); }
+        if (choice < 0 || (choice === 2 && (rec.retract || rec.tool))) choice = rec.retract ? 0 : rec.tool ? 1 : 2;
+      }
+      render();
+      loadText();
+    }
+
+    const lineOf = (c) => [rec.retract, rec.tool, rec.stop, custom][c] || 0;
+    const pick = () => lineOf(choice);
+
+    function msg(t, err = false) {
+      const m = $("#rec-msg");
+      delete m.dataset.work;
+      m.textContent = t;
+      m.className = "rec-msg" + (err ? " err" : "");
+    }
+
+    function render() {
+      box.hidden = false;
+      const collapsed = later === key();
+      box.classList.toggle("collapsed", collapsed);
+      $("#rec-show").hidden = !collapsed;
+      $("#rec-file").textContent = rec.file.replace(/^\/sd\//i, "");
+      $("#rec-why").textContent = `stopped at line ${rec.stop}` + (rec.why ? ` (${rec.why})` : "");
+      const work = rec.st === "scanning" ? "finding safe restart points…" : rec.st === "resuming" ? "reading up to the line, then starting…" : "";
+      const m = $("#rec-msg");
+      if (work) { msg(work); m.dataset.work = "1"; }
+      else if (m.dataset.work) { msg(""); delete m.dataset.work; }
+      const opts = [
+        ["Last retract", "tool was up, safest", rec.retract],
+        ["Start of this tool", "after the last tool change", rec.tool],
+        ["Where it stopped", "may restart mid-cut", rec.stop],
+      ];
+      const ch = $("#rec-choices");
+      ch.textContent = "";
+      opts.forEach(([name, hint, ln], i) => {
+        const b = el("label", { class: "rec-choice" + (choice === i ? " on" : "") + (ln ? "" : " off") });
+        b.append(el("b", {}, name), " ", ln ? "line " + ln : rec.st === "scanning" ? "…" : "none", " ", el("small", {}, hint));
+        if (ln) b.onclick = () => { choice = i; render(); showLine(); };
+        ch.append(b);
+      });
+      const c = el("label", { class: "rec-choice" + (choice === 3 ? " on" : "") });
+      const inp = el("input", { type: "number", min: 1, max: rec.stop || undefined, value: custom || rec.stop });
+      inp.oninput = () => { custom = Math.max(1, Math.min(rec.stop || 1e9, parseInt(inp.value, 10) || 1)); choice = 3; showLine(); markChoices(); };
+      inp.onfocus = () => { choice = 3; markChoices(); };
+      c.append(el("b", {}, "Line"), " ", inp);
+      ch.append(c);
+      const ready = rec.st === "interrupted" && !busy && pick() > 0;
+      $("#rec-go").disabled = $("#rec-dry").disabled = !ready;
+      $("#rec-go").textContent = pick() ? `▶ Resume from line ${pick()}` : "▶ Resume";
+      showLine();
+    }
+    function markChoices() {
+      $$(".rec-choice", $("#rec-choices")).forEach((b, i) => b.classList.toggle("on", i === choice));
+      $("#rec-go").textContent = `▶ Resume from line ${pick()}`;
+    }
+
+    // G-code around the chosen line, and the path up to it in the 3D view
+    async function loadText() {
+      if (rec.st !== "interrupted" || textFor === rec.file) return;
+      textFor = rec.file;
+      text = null;
+      const [fs, path] = jobFsPath(rec.file);
+      try {
+        const t = await Files.getText(fs, path);
+        const lines = t.split("\n"), offs = new Array(lines.length + 1);
+        let o = 0;
+        for (let i = 0; i < lines.length; i++) { offs[i] = o; o += lines[i].length + 1; }
+        offs[lines.length] = o;
+        text = { lines, offs, bytes: o };
+        showLine();
+        await previewFile(fs, path).catch(() => {});
+        showLine();
+      } catch { textFor = ""; }
+    }
+    function showLine() {
+      const pre = $("#rec-text"), ln = pick();
+      if (!text || !ln) { pre.textContent = text ? "" : "(loading the file…)"; return; }
+      pre.textContent = "";
+      for (let i = Math.max(1, ln - 3); i <= Math.min(text.lines.length, ln + 3); i++) {
+        const row = el("span", i === ln ? { class: "here" } : {});
+        row.append(el("span", { class: "ln" }, String(i).padStart(6) + "  "), text.lines[i - 1].replace(/\r$/, ""));
+        pre.append(row, i === ln ? "" : "\n");
+      }
+      const [fs, path] = jobFsPath(rec.file);
+      if ($("#viewer-file").dataset.path === cacheKey(fs, path) && !S.job)
+        Viewer.setProgress(text.offs[Math.min(ln - 1, text.lines.length)] / text.bytes, null, ln);
+    }
+
+    function go(dry) {
+      const ln = pick();
+      if (!ln) return;
+      if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+      if (!dry && !confirm(`Resume ${rec.file.replace(/^.*\//, "")} from line ${ln}?\n\nThe tool lifts to safe height, moves over the start, starts the spindle and lowers to the cut.`)) return;
+      busy = !dry;
+      send(`$Job/Resume=${ln}` + (dry ? ":dry" : ""));
+      render();
+    }
+    $("#rec-go").onclick = () => go(false);
+    $("#rec-dry").onclick = () => go(true);
+    $("#rec-later").onclick = () => { later = key(); render(); };
+    $("#rec-show").onclick = () => { later = ""; render(); };
+    $("#rec-discard").onclick = () => {
+      if (confirm("Forget the interrupted job? It can't be resumed afterwards.")) send("$Job/Discard");
+    };
+    return { onMsg };
+  })();
 
   // ------------------------------------------------------------- prepared job
   // "Prepare" puts the file on the pendant's screen (and in this viewer); the

@@ -23,6 +23,7 @@
 #include "Job.h"
 #include "PendantLink.h"   // TabUI pendant presence
 #include "VizGenerator.h"  // queued .viz builds
+#include "Recovery.h"      // job recovery
 #include "Driver/restart.h"
 #include "Driver/watchdog.h"
 #include "Driver/heap.h"
@@ -371,6 +372,7 @@ static void poll_once() {
                         case Error::Eof:
                             notifyf("Job done", "%s job sent", channel->name());
                             log_debug(channel->name() << " job sent");
+                            recov_job_eof(channel);  // finished, not interrupted
                             Job::unnest();
                             break;
                         default: {
@@ -586,6 +588,7 @@ void protocol_main_loop() {
 
         // Build pendant .viz previews queued by uploads (only when Idle, no job).
         viz_poll();
+        recov_poll();  // job recovery: progress record, restart scans
 
         // check to see if we should disable the stepper drivers
         // If idleEndTime is 0, no disable is pending.

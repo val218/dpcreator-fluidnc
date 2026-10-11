@@ -17,6 +17,7 @@
 #include "UartChannel.h"
 #include "Logging.h"          // message_queue, MsgLevelNone
 #include "Error.h"
+#include "Recovery.h"  // job recovery ($Job/Recovery, Resume...)
 #include "FluidPath.h"        // keeps the SD card mounted while we use it
 #include "Planner.h"          // plan_get_block_buffer_available
 #include "Machine/MachineConfig.h"  // config->_planner_blocks
@@ -908,8 +909,10 @@ static void pending_poll() {
         allChannels.print(timeout ? "[MSG:JobWait:pendant did not confirm - starting]\r\n"
                                   : "[MSG:JobWait:pendant disconnected - starting]\r\n");
     }
-    Channel* in = _pj.in; Channel* out = _pj.out; Channel* ack = _pj.ack;
+    Channel*    in = _pj.in; Channel* out = _pj.out; Channel* ack = _pj.ack;
+    std::string nc = _pj.nc;
     _pj = PendingJob();
+    recov_job_start(in, nc);
     Job::nest(in, out, ack);
 }
 
@@ -1006,7 +1009,7 @@ static std::atomic<int>    _cmd_len { 0 };
 
 static void run_command(const std::string& line, bool from_pendant) {
     if (strncasecmp(line.c_str(), "$Job/", 5) == 0) {
-        job_command(line.c_str(), from_pendant);
+        if (!job_command(line.c_str(), from_pendant)) recov_command(line.c_str());
     } else {
         viz_handle_command(line.c_str());
     }

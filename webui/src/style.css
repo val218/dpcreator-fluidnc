@@ -297,4 +297,33 @@ dialog::backdrop { background: rgba(0, 0, 0, .6); }
 .crash { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 12px; font-size: 13px;
   background: color-mix(in srgb, var(--err) 18%, var(--panel, #0b1426)); border-bottom: 1px solid var(--err); }
 .crash[hidden] { display: none; }
+/* Job recovery (the board keeps the interrupted job; this only shows it) */
+.recovery { position: fixed; z-index: 60; top: 56px; right: 16px; width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 72px); overflow: auto; box-sizing: border-box; padding: 10px 12px; font-size: 13px;
+  border: 1px solid var(--warn); border-radius: var(--radius); box-shadow: 0 8px 30px rgba(0, 0, 0, .5);
+  background: color-mix(in srgb, var(--warn) 12%, var(--panel, #0b1426)); }
+.recovery.collapsed { width: auto; max-width: calc(100vw - 32px); padding: 6px 10px; }
+.recovery[hidden] { display: none; }
+.rec-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rec-file { font-family: var(--mono); overflow-wrap: anywhere; }
+.rec-why { color: var(--muted); }
+.recovery.collapsed .rec-body { display: none; }
+.rec-step { margin: 10px 0 4px; font-weight: 600; color: var(--warn); }
+.rec-choices { display: flex; flex-wrap: wrap; gap: 6px; }
+.rec-choice { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--line);
+  border-radius: var(--radius); background: var(--panel); cursor: pointer; }
+.rec-choice.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel)); }
+.rec-choice.off { opacity: .45; cursor: default; }
+.rec-choice input[type=number] { width: 7em; }
+.rec-choice small { color: var(--muted); }
+.rec-text { margin: 8px 0 0; padding: 6px 8px; max-height: 9.5em; overflow: auto; font: 12px/1.45 var(--mono);
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); white-space: pre; }
+.rec-text .here { background: color-mix(in srgb, var(--accent) 30%, transparent); display: block; }
+.rec-text .ln { color: var(--muted); }
+.rec-check { margin: 0; padding-left: 18px; color: var(--muted); }
+.rec-msg { min-height: 1.2em; margin-top: 6px; }
+.rec-msg.err { color: var(--err); }
+.rec-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.rec-gap { flex: 1; }
+.btn.danger { border-color: var(--err); color: var(--err); }
 .crash-text { font: 11px var(--mono); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }

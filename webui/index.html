@@ -27,6 +27,34 @@
   <button class="btn small" id="crash-hide" title="Hide">✕</button>
 </div>
 
+<div id="recovery" class="recovery" hidden>
+  <div class="rec-head">
+    <b>Job interrupted</b>
+    <span class="rec-file" id="rec-file"></span>
+    <span class="rec-why" id="rec-why"></span>
+    <button class="btn small" id="rec-show" hidden>Show</button>
+  </div>
+  <div class="rec-body" id="rec-body">
+    <div class="rec-step">1. Restart from</div>
+    <div class="rec-choices" id="rec-choices"></div>
+    <pre class="rec-text" id="rec-text"></pre>
+    <div class="rec-step">2. Before starting</div>
+    <ul class="rec-check">
+      <li>Machine homed, work and Z zero not changed</li>
+      <li>The right tool is in the spindle (no automatic tool change)</li>
+      <li>Nothing in the way: the tool lifts to safe height, moves over the start, lowers there</li>
+    </ul>
+    <div class="rec-msg" id="rec-msg"></div>
+    <div class="rec-btns">
+      <button class="btn" id="rec-dry" title="Move above the restart point at safe height, nothing else">Dry run</button>
+      <button class="btn accent" id="rec-go">▶ Resume</button>
+      <span class="rec-gap"></span>
+      <button class="btn" id="rec-later">Later</button>
+      <button class="btn danger" id="rec-discard">Discard</button>
+    </div>
+  </div>
+</div>
+
 <nav class="tabs" id="tabs">
   <button data-view="control" class="active">Control</button>
   <button data-view="viewer">3D View</button>

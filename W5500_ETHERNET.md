@@ -16,6 +16,9 @@ plus dpCREATOR additions:
 - TabUI pendant connection status (`$Pendant/Status`, badge in the WebUI)
 - Job preview on the pendant: **Prepare** a file in the WebUI, it appears on
   the pendant, then **Run** or **Cancel** from either one (see section 8)
+- **Job recovery** kept by the board: an interrupted job (alarm, E-stop,
+  Stop, reset, power loss) is offered for restart from a safe line, with the
+  same screens on the WebUI and the pendant (see section 9)
 - PathRetrace / VizGenerator commands for the TabUI pendant
 
 Tested on a dpCREATOR R2/R3 (ESP32-S3-WROOM-1-N16R8).
@@ -421,7 +424,53 @@ $Pendant/Debug            link counters: bytes, lines, noise / dropped bytes
 While a preview is being built or sent, the WebUI terminal shows `VizBusy`,
 `VizPush: ... N of M points, X mm detail` and `VizReady` / `VizErr` lines.
 
-## 9. Troubleshooting
+## 9. Job recovery
+
+The board writes down the line every SD file job is at (every few seconds,
+and at once on Hold or a stop) to its flash, so a power cut doesn't lose it.
+A job that ends any way other than reaching the end of the file is kept as
+**interrupted**. The WebUI (a card at the top right) and the pendant (a
+screen of its own; "Interrupted job – tap to recover" on the DRO after
+**Later**) show the same three steps:
+
+1. **Job interrupted** – file, line it stopped at, why. *Resume…*, *Later*,
+   *Discard*.
+2. **Restart from** – the board scans the file and suggests:
+   - **Last retract** – just after the last rapid move that lifted Z (the
+     tool was clear of the part): the safest choice, recuts a little.
+   - **Start of this tool** – just after the last tool change.
+   - **Where it stopped** – may restart in the middle of a cut.
+   - **Any line** – WebUI: type it; pendant: turn the handwheel.
+   The G-code lines around the choice are shown so you can check it, and the
+   WebUI's 3D view marks the path done up to that line.
+3. **Before starting** – home the machine, keep the same work / Z zero, put
+   the right tool in (there is no automatic tool change). **Dry run** moves
+   to safe height and over the restart point only. **Resume** (confirm):
+
+   - lift Z to machine top, set coordinate system, plane, units
+   - rapid to X/Y (and A) of the restart point
+   - spindle on with the file's direction and speed, 2 s spin-up, coolant
+   - rapid to 3 mm above, feed down to the cut depth
+   - restore G90/G91, G20/G21, feed and motion mode, then continue the file
+     from the chosen line
+
+The machine must be **Idle and homed**; otherwise the card shows why it
+can't start. If the chosen line is in the middle of an arc, a note asks you to
+check the first move.
+
+```
+$Job/Recovery            report: [MSG:Recovery:<state>:<stop>:<retract>:<tool>:<reason>:<file>]
+                         state: none | interrupted | scanning | resuming
+$Job/Points              work out the suggested restart lines
+$Job/Resume=<line>       continue the interrupted job from <line>
+$Job/Resume=<line>:dry   only move above that line's start point
+$Job/Discard             forget the interrupted job
+```
+
+The pendant no longer keeps its own checkpoint: with an older board
+firmware, the pendant shows no recovery at all. Flash both.
+
+## 10. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|
