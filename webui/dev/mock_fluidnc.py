@@ -41,6 +41,24 @@ PREP = ["none", ""]  # prepared job: state, /sd/file
 REC = {"st": "none", "stop": 0, "retract": 0, "tool": 0, "why": "", "file": ""}
 
 
+# Live Z adjust: wanted offset, offset the last job ended with
+ZA = {"req": 0.0, "ended": 0.0}
+
+
+def za_msg(state=None):
+    if state == "ended":
+        return f"[MSG:ZAdjust:{ZA['ended']:+.3f}:ended:0]"
+    return f"[MSG:ZAdjust:{ZA['req']:+.3f}:{state or ('active' if ZA['req'] else 'none')}:0]"
+
+
+def za_job_end():
+    """The job ended: the offset goes; the board offers to move the work zero."""
+    if ZA["req"]:
+        ZA["ended"], ZA["req"] = ZA["req"], 0.0
+        return [za_msg("ended")]
+    return []
+
+
 def rec_msg():
     r = REC
     return f"[MSG:Recovery:{r['st']}:{r['stop']}:{r['retract']}:{r['tool']}:{r['why']}:{r['file'] if r['st'] != 'none' else ''}]"
@@ -106,6 +124,8 @@ class Machine:
             if pct >= 100:
                 self.job = None
                 self.state = "Idle"
+                for t in za_job_end():
+                    asyncio.get_event_loop().create_task(broadcast([t]))
             elif not self.state.startswith("Hold"):
                 self.state = "Run"
         f = "|SD:%.2f,/sd%s" % (pct, name) if self.job else ""
@@ -199,6 +219,29 @@ class Machine:
             return ["[MSG:Prepared:none:]", "ok"]
         if u == "$CRASH":
             return ["[MSG:Crash:PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]", "ok"]
+        if u == "$JOB/ZADJUST":
+            return [za_msg("ended") if ZA["ended"] and not self.job else za_msg(), "ok"]
+        if u == "$JOB/ZADJUST/APPLY":
+            if not ZA["ended"]:
+                return ["[MSG:ZAdjustErr:nothing to apply]", "ok"]
+            self.wco[2] += ZA["ended"]
+            v, ZA["ended"] = ZA["ended"], 0.0
+            return [f"[MSG:ZAdjustInfo:G54 Z zero moved {v:+.3f} mm]", za_msg(), "ok"]
+        if u.startswith("$JOB/ZADJUST="):
+            v = u.split("=", 1)[1]
+            n = float(v)
+            want = ZA["req"] + n if v[0] in "+-" else n
+            if not self.job:
+                if want == 0:
+                    ZA["ended"] = 0.0
+                    return [za_msg(), "ok"]
+                return ["[MSG:ZAdjustErr:no job running]", "ok"]
+            ZA["req"] = round(max(-1.0, min(1.0, want)), 3)
+            async def active():
+                await asyncio.sleep(0.8)
+                await broadcast([za_msg("active" if ZA["req"] else "none")])
+            asyncio.get_event_loop().create_task(active())
+            return [za_msg("pending" if ZA["req"] else "none"), "ok"]
         if u == "$JOB/RECOVERY":
             return [rec_msg(), "ok"]
         if u == "$JOB/DISCARD":
@@ -265,7 +308,7 @@ class Machine:
             out = []
             if self.job:  # interrupted: the board keeps it for recovery
                 REC.update(st="interrupted", stop=45, retract=0, tool=0, why="stopped", file="/sd" + self.job[0])
-                out = [rec_msg()]
+                out = [rec_msg()] + za_job_end()
             self.target, self.job, self.state = None, None, "Idle"
             return out + ["", "Grbl 4.0 [FluidNC mock (wifi) '$' for help]"]
         return []

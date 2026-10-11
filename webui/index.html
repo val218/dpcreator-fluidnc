@@ -55,6 +55,13 @@
   </div>
 </div>
 
+<div id="zadj-end" class="zadj-end" hidden>
+  <b>The job ran with Z adjust <span id="zadj-end-v"></span> mm.</b>
+  <span class="zadj-end-text">Move the work Z zero by that much, so the next run cuts the same?</span>
+  <button class="btn small accent" id="zadj-apply">Apply to work zero</button>
+  <button class="btn small" id="zadj-no">No</button>
+</div>
+
 <nav class="tabs" id="tabs">
   <button data-view="control" class="active">Control</button>
   <button data-view="viewer">3D View</button>
@@ -125,6 +132,10 @@
         <b id="ov-r">100%</b><button data-ovr="0x95">100</button></div>
       <div class="ovr-row"><span>Spindle</span><button data-ovr="0x9B">−10</button><button data-ovr="0x9D">−1</button>
         <b id="ov-s">100%</b><button data-ovr="0x9C">+1</button><button data-ovr="0x9A">+10</button><button data-ovr="0x99">100</button></div>
+      <div class="ovr-row zadj-row" title="Live Z adjust for the running job: + raises the tool (shallower), − lowers it (deeper). Cleared when the job ends.">
+        <span>Z adjust</span><button data-zadj="-0.1">−0.1</button><button data-zadj="-0.01">−0.01</button>
+        <b id="zadj">±0.000</b><button data-zadj="+0.01">+0.01</button><button data-zadj="+0.1">+0.1</button><button id="zadj-reset">0</button></div>
+      <div class="zadj-note" id="zadj-note">while a job runs · + = shallower</div>
     </div>
     <div class="pins" id="pins"></div>
   </section>
