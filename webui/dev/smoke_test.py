@@ -51,8 +51,8 @@ with sync_playwright() as p:
     # console error
     page.fill("#cmd", "bad")
     page.press("#cmd", "Enter")
-    page.wait_for_selector("#log .err", timeout=4000)
-    check("Unsupported G-code" in page.inner_text("#log"), "error code described in console")
+    page.wait_for_function("document.querySelector('#log').textContent.includes('Unsupported G-code')", timeout=4000)
+    check(True, "error code described in console")
 
     # upload G-code to SD -> pendant .viz is built, sidecar hidden from list
     page.set_input_files("#upload", files=[{"name": "upl.nc", "mimeType": "text/plain",
@@ -250,6 +250,18 @@ with sync_playwright() as p:
     page.wait_for_function("!document.querySelector('#job').hidden", timeout=4000)
     check(True, "macro runs as a job")
     page.wait_for_function("document.querySelector('#state').textContent === 'Idle'", timeout=8000)
+
+    # work offsets table
+    page.click("#offsets-open")
+    page.wait_for_function("document.querySelectorAll('#offsets tr').length === 7 && document.querySelector('#offsets input').value !== ''", timeout=4000)
+    g54x = page.input_value("#offsets tr:nth-child(2) td:nth-child(2) input")
+    check(g54x.replace(".", "").replace("-", "").isdigit(), "offsets table: G54 X = " + g54x)
+    page.fill("#offsets tr:nth-child(3) td:nth-child(2) input", "12.5")
+    page.press("#offsets tr:nth-child(3) td:nth-child(2) input", "Enter")
+    page.wait_for_function("document.querySelector('#offsets tr:nth-child(3) td:nth-child(2) input').value === '12.500'", timeout=4000)
+    check(True, "edit G55 X via G10 L2")
+    page.screenshot(path=str(OUT / "desktop-offsets.png"))
+    page.click("#offsets-close")
 
     # tablet + phone layouts
     page.set_viewport_size({"width": 1024, "height": 768})

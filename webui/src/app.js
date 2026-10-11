@@ -92,6 +92,11 @@
       log(line, "msg");
       return;
     }
+    if ((m = /^\[(G5[4-9]|G28|G30|G92|TLO):([-\d.,]+)\]$/.exec(line))) {
+      Offsets.onLine(m[1], m[2]);
+      log(line, "msg");
+      return;
+    }
     if ((m = /^\[MSG:Macro(Item|End|Err|Lib):(.*)\]$/.exec(line))) {
       Macros.onMsg(m[1], m[2]);
       if (m[1] === "Err") log(line, "err");
@@ -663,6 +668,66 @@
     $("#uiold").hidden = false;
   }
   $("#uiold-hide").onclick = () => ($("#uiold").hidden = true);
+
+  // ------------------------------------------------------------- work offsets
+  // G54–G59 from $# (machine position of each work zero). Edit = G10 L2 P<n>,
+  // "Zero here" = G10 L20 P<n> (current position becomes 0), "Use" selects it.
+  const Offsets = (() => {
+    const dlg = $("#offsets-dlg");
+    const data = {};
+    const WCS = ["G54", "G55", "G56", "G57", "G58", "G59"];
+    function onLine(name, vals) {
+      data[name] = vals.split(",").map(Number);
+      if (dlg.open) paint();
+    }
+    function paint() {
+      const n = S.nAxes || 3, axes = AXES.slice(0, n);
+      const t = $("#offsets");
+      t.textContent = "";
+      const head = el("tr", {}, el("th", {}, ""));
+      axes.forEach((a) => head.append(el("th", {}, a)));
+      head.append(el("th", {}, ""));
+      t.append(head);
+      const active = $("#wcs").value;
+      WCS.forEach((w, i) => {
+        const tr = el("tr", { class: w === active ? "active" : "" }, el("td", {}, w));
+        const v = data[w] || [];
+        axes.forEach((a, k) => {
+          const inp = el("input", { type: "number", step: "0.001", value: v[k] !== undefined ? v[k].toFixed(3) : "" });
+          inp.onkeydown = (e) => { if (e.key === "Enter") inp.blur(); };
+          inp.onchange = () => {
+            const x = parseFloat(inp.value);
+            if (!Number.isFinite(x)) return;
+            if (!idle()) { toast(`The machine must be Idle (now ${S.state})`, true); return paint(); }
+            send(`G10 L2 P${i + 1} ${a}${x.toFixed(4)}`);
+            refresh();
+          };
+          tr.append(el("td", {}, inp));
+        });
+        const use = el("button", { class: "btn", title: `Work in ${w}` }, "Use");
+        use.onclick = () => { send(w); send("$G"); setTimeout(paint, 300); };
+        const zxy = el("button", { class: "btn", title: `Current X/Y position = 0 in ${w}` }, "Zero XY here");
+        zxy.onclick = () => zeroHere(i + 1, "X0 Y0");
+        const zz = el("button", { class: "btn", title: `Current Z position = 0 in ${w}` }, "Zero Z here");
+        zz.onclick = () => zeroHere(i + 1, "Z0");
+        tr.append(el("td", {}, use, " ", zxy, " ", zz));
+        t.append(tr);
+      });
+      const f = (k) => (data[k] ? data[k].slice(0, n).map((x) => x.toFixed(3)).join(", ") : "—");
+      $("#offsets-extra").textContent = `G92: ${f("G92")}   ·   tool length (TLO): ${data.TLO ? data.TLO[0].toFixed(3) : "—"}   ·   G28: ${f("G28")}   ·   G30: ${f("G30")}`;
+    }
+    function zeroHere(p, axes) {
+      if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+      send(`G10 L20 P${p} ${axes}`);
+      refresh();
+    }
+    function refresh() { setTimeout(() => send("$#"), 150); }
+    $("#offsets-open").onclick = () => { paint(); dlg.showModal(); send("$#"); };
+    $("#offsets-refresh").onclick = () => send("$#");
+    $("#offsets-close").onclick = () => dlg.close();
+    $("#offsets-g92").onclick = () => { send("G92.1"); refresh(); };
+    return { onLine };
+  })();
 
   // ------------------------------------------------------------- macros
   // Kept on the SD card by the board (/.dpc/macros.txt + /.dpc/macros/<id>.nc,

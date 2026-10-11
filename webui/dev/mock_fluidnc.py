@@ -123,6 +123,7 @@ class Machine:
         self.job = None  # (name, start, duration)
         self.report_ms = 0
         self.wcs = "G54"
+        self.offs = {}
 
     def status(self) -> str:
         if self.job:
@@ -229,6 +230,24 @@ class Machine:
             return ["[MSG:Crash:PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]", "ok"]
         if u == "$I":
             return ["[VER:4.1 FluidNC v4.1.1 (mock) (esp32s3-wifi):]", "ok"]
+        if u == "$#":
+            out = []
+            for i, w in enumerate(["G54", "G55", "G56", "G57", "G58", "G59"]):
+                v = self.offs.setdefault(w, [0.0, 0.0, 0.0, 0.0])
+                if w == self.wcs:
+                    v = self.wco
+                out.append(f"[{w}:" + ",".join("%.3f" % x for x in v) + "]")
+            return out + ["[G28:0.000,0.000,0.000,0.000]", "[G30:0.000,0.000,0.000,0.000]",
+                          "[G92:0.000,0.000,0.000,0.000]", "[TLO:0.000]", "ok"]
+        ml2 = re.fullmatch(r"G10 L2 P(\d) ([XYZA])([-\d.]+)", u)
+        if ml2:
+            w = ["G54", "G55", "G56", "G57", "G58", "G59"][int(ml2.group(1)) - 1]
+            i = "XYZA".index(ml2.group(2))
+            if w == self.wcs:
+                self.wco[i] = float(ml2.group(3))
+            else:
+                self.offs.setdefault(w, [0.0, 0.0, 0.0, 0.0])[i] = float(ml2.group(3))
+            return ["ok"]
         if u == "$MACROLIB/LIST":
             idx = FILES["sd"].get("/.dpc/macros.txt")
             if idx is None:

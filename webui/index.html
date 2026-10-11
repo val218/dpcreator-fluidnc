@@ -57,6 +57,7 @@
         <option>G54</option><option>G55</option><option>G56</option>
         <option>G57</option><option>G58</option><option>G59</option>
       </select>
+      <button class="btn small" id="offsets-open" title="Work offsets table (G54–G59, G92, tool length)">Offsets…</button>
     </div>
     <div class="dro" id="dro"></div>
     <div class="dro-actions">
@@ -341,6 +342,17 @@ Runs like a file job: Hold / Stop work, the machine must be Idle to start.</pre>
         </div>
       </div>
     </div>
+  </div>
+</dialog>
+<dialog id="offsets-dlg">
+  <div class="panel-head"><h2>Work offsets</h2><span class="muted mdlg-note">machine position of each work zero · saved on the controller</span></div>
+  <div class="offsets-wrap"><table class="offsets" id="offsets"></table></div>
+  <div class="offsets-extra" id="offsets-extra"></div>
+  <div class="mdlg-btns">
+    <span class="mdlg-status" id="offsets-status">Edit a value and press Enter. "Zero here" makes the current tool position 0 in that system.</span>
+    <button class="btn" id="offsets-g92" title="Clear the temporary G92 offset">Clear G92</button>
+    <button class="btn" id="offsets-refresh">Refresh</button>
+    <button class="btn accent" id="offsets-close">Close</button>
   </div>
 </dialog>
 <div id="toast" class="toast" hidden></div>
