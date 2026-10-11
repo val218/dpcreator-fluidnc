@@ -27,6 +27,7 @@
 #    include "PathRetrace.h"   // PathRetrace plugin (TabUI pendant)
 #    include "VizGenerator.h"  // VizGenerator plugin (TabUI pendant)
 #    include "Recovery.h"      // job recovery
+#    include "ZAdjust.h"       // live Z adjust
 
 #    include <Arduino.h>
 
@@ -166,6 +167,7 @@ void setup() {
         retrace_init();
         viz_init();
         recov_init();
+        zadj_init();
 
     } catch (std::exception& ex) {
         // Log exception:

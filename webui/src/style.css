@@ -326,4 +326,16 @@ dialog::backdrop { background: rgba(0, 0, 0, .6); }
 .rec-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
 .rec-gap { flex: 1; }
 .btn.danger { border-color: var(--err); color: var(--err); }
+/* Live Z adjust (board keeps it for the running job) */
+.zadj-row b { min-width: 64px; }
+.zadj-row b.up { color: var(--ok); }
+.zadj-row b.down { color: var(--err); }
+.zadj-row button:disabled { opacity: .4; cursor: default; }
+.zadj-note { font-size: 11px; color: var(--muted); padding-left: 60px; }
+.zadj-note.pending { color: var(--warn); }
+.zadj-note.active { color: var(--ok); }
+.zadj-end { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 12px; font-size: 13px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel, #0b1426)); border-bottom: 1px solid var(--accent); }
+.zadj-end[hidden] { display: none; }
+.zadj-end-text { color: var(--muted); }
 .crash-text { font: 11px var(--mono); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }

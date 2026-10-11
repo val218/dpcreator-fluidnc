@@ -24,6 +24,7 @@
 #include "PendantLink.h"   // TabUI pendant presence
 #include "VizGenerator.h"  // queued .viz builds
 #include "Recovery.h"      // job recovery
+#include "ZAdjust.h"
 #include "Driver/restart.h"
 #include "Driver/watchdog.h"
 #include "Driver/heap.h"
@@ -319,6 +320,7 @@ static void poll_once() {
 
         heap_monitor_poll();
         pendant_poll();
+        zadj_poll();  // live Z adjust: job start/end, pending -> active
 
         // Checks unwind_cause against the job stack and aborts atomically
         // with it, so a nest() that concurrently starts a fresh job (and

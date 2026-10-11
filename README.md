@@ -4,7 +4,7 @@
 > - [Connect gSender over Ethernet](W5500_ETHERNET.md#5-connect-gsender-over-ethernet)
 > - [SD card as a network drive + automatic pendant .viz](W5500_ETHERNET.md#6-sd-card-as-a-network-drive-windows)
 > - [Pendant connection status](W5500_ETHERNET.md#7-pendant-connection-status)
-> - [Job preview on the pendant: Prepare → Run](W5500_ETHERNET.md#8-job-preview-on-the-tabui-pendant) · [Job recovery](W5500_ETHERNET.md#9-job-recovery) · [Troubleshooting](W5500_ETHERNET.md#10-troubleshooting)
+> - [Job preview on the pendant: Prepare → Run](W5500_ETHERNET.md#8-job-preview-on-the-tabui-pendant) · [Job recovery](W5500_ETHERNET.md#9-job-recovery) · [Live Z adjust](W5500_ETHERNET.md#10-live-z-adjust) · [Troubleshooting](W5500_ETHERNET.md#11-troubleshooting)
 > - WebUI sources and build: [webui/README.md](webui/README.md)
 
 <img src="https://github.com/bdring/FluidNC/wiki/images/logos/FluidNC.svg" width="600">

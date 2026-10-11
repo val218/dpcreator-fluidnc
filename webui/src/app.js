@@ -87,6 +87,11 @@
       log(line, info === "none" ? "msg" : "err");
       return;
     }
+    if ((m = /^\[MSG:ZAdjust(Err|Info|Limit)?:(.*)\]$/.exec(line))) {
+      ZAdj.onMsg(m[1] || "", m[2]);
+      log(line, m[1] === "Err" ? "err" : "msg");
+      return;
+    }
     if ((m = /^\[MSG:Recovery(Err|Info)?:(.*)\]$/.exec(line))) {
       Recovery.onMsg(m[1] || "", m[2]);
       log(line, m[1] === "Err" ? "err" : "msg");
@@ -138,6 +143,8 @@
   }
 
   function setStateBadge(state) {
+    S.state = state;
+    zadjEnable();
     const b = $("#state");
     b.textContent = state === "Unknown" ? "--" : state;
     b.className = "state state-" + state.toLowerCase();
@@ -613,6 +620,57 @@
     try { await navigator.clipboard.writeText(t); toast("Crash details copied - paste them to the developer"); }
     catch { prompt("Copy the crash details:", t); }
   };
+
+  // ------------------------------------------------------------- live Z adjust
+  // A temporary Z offset for the running job, kept by the board (like a wear
+  // offset): + raises the tool. It reaches the tool after the moves already
+  // planned ("pending" -> "active") and ends with the job; then the board
+  // offers to move the work zero by it ($Job/ZAdjust/Apply).
+  function zadjEnable() {  // hoisted: called on every state change
+    const on = !!S.job || /^(Run|Hold)/.test(S.state);
+    $$("[data-zadj], #zadj-reset").forEach((x) => (x.disabled = !on));
+  }
+  const ZAdj = (() => {
+    let val = 0;
+    function paint(state, line) {
+      const b = $("#zadj");
+      b.textContent = (val > 0 ? "+" : val < 0 ? "−" : "±") + Math.abs(val).toFixed(3);
+      b.className = val > 0 ? "up" : val < 0 ? "down" : "";
+      const n = $("#zadj-note");
+      n.className = "zadj-note " + (state || "");
+      n.textContent = state === "pending" ? (line > 0 ? `applies at line ${line}` : "applies with the next move")
+        : state === "active" ? (val > 0 ? "active · tool higher (shallower)" : "active · tool lower (deeper)")
+        : "while a job runs · + = shallower";
+      enable();
+    }
+    const enable = zadjEnable;
+    function onMsg(kind, body) {
+      if (kind === "Err") return toast("Z adjust: " + body, true);
+      if (kind === "Info") return toast(body);
+      if (kind === "Limit") return;
+      const [v, state, line] = body.split(":");
+      const n = parseFloat(v) || 0;
+      if (state === "ended") {
+        val = 0;
+        paint("", 0);
+        $("#zadj-end-v").textContent = (n > 0 ? "+" : "") + n.toFixed(3);
+        $("#zadj-end").hidden = false;
+        return;
+      }
+      $("#zadj-end").hidden = true;
+      val = n;
+      paint(state === "none" ? "" : state, +line || 0);
+    }
+    $$("[data-zadj]").forEach((b) => (b.onclick = () => send("$Job/ZAdjust=" + b.dataset.zadj)));
+    $("#zadj-reset").onclick = () => send("$Job/ZAdjust=0");
+    $("#zadj-apply").onclick = () => {
+      if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+      send("$Job/ZAdjust/Apply");
+    };
+    $("#zadj-no").onclick = () => { send("$Job/ZAdjust=0"); $("#zadj-end").hidden = true; };
+    paint("", 0);
+    return { onMsg, enable };
+  })();
 
   // ------------------------------------------------------------- job recovery
   // The board records the line a file job was at and keeps an interrupted job

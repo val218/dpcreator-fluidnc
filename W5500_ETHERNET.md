@@ -19,6 +19,9 @@ plus dpCREATOR additions:
 - **Job recovery** kept by the board: an interrupted job (alarm, E-stop,
   Stop, reset, power loss) is offered for restart from a safe line, with the
   same screens on the WebUI and the pendant (see section 9)
+- **Live Z adjust** while a job cuts or is in Hold, from the WebUI or the
+  pendant handwheel: a temporary offset kept by the board that ends with the
+  job (see section 10)
 - PathRetrace / VizGenerator commands for the TabUI pendant
 
 Tested on a dpCREATOR R2/R3 (ESP32-S3-WROOM-1-N16R8).
@@ -87,7 +90,8 @@ the config has the `ethernet:` section.
 7. [Pendant connection status](#7-pendant-connection-status)
 8. [Job preview on the TabUI pendant (Prepare → Run)](#8-job-preview-on-the-tabui-pendant)
 9. [Job recovery](#9-job-recovery)
-10. [Troubleshooting](#10-troubleshooting)
+10. [Live Z adjust](#10-live-z-adjust)
+11. [Troubleshooting](#11-troubleshooting)
 
 ---
 
@@ -471,7 +475,77 @@ $Job/Discard             forget the interrupted job
 The pendant no longer keeps its own checkpoint: with an older board
 firmware, the pendant shows no recovery at all. Flash both.
 
-## 10. Troubleshooting
+## 10. Live Z adjust
+
+Raise or lower the cut while the job runs, e.g. when the first pass shows the
+material is thicker or the zero was a little off. It works like a wear
+offset on an industrial control or "babystepping" on a 3D printer:
+
+- **Temporary.** The board keeps the offset for the running job only. It is
+  not written to the work coordinates or to flash, and it ends with the job
+  (finished, stopped, alarm, reset).
+- **+ = tool higher = shallower, − = tool lower = deeper.**
+- **Limited:** at most 0.5 mm per step and ±1 mm in total by default
+  (`$Job/ZAdjust/Limit=<mm>`, 0.05 … 5 mm, kept across restarts).
+- **Works while cutting and in Hold**, from the WebUI and the pendant.
+- **The DRO keeps showing the file's Z.** The offset is part of the work
+  offset (WCO) while it is active, so the WebUI 3D view and the pendant path
+  still line up with the file.
+
+### When it reaches the tool
+
+The board adds the offset to Z of the next move it reads from the file (any
+G0 / G1, and G2 / G3 arcs in the XY plane; a move with no Z word ramps by the
+change). FluidNC plans moves ahead, so the machine gets there after the moves
+already planned:
+
+- `pending` – the change is on its way; the screens show "applies at line N"
+  (or "with the next move" until the board has read it).
+- `active` – the machine is cutting with it.
+
+With short moves (3D carving) that is almost immediate; with long straight
+moves it can be the rest of the current move or pass. In Hold the change waits
+until you resume.
+
+Not changed: moves in machine coordinates (`G53`), `G28` / `G30`, probing
+(`G38.x`); arcs in the XZ / YZ planes keep the offset they had.
+
+### Using it
+
+- **WebUI:** Control panel → Overrides → **Z adjust**: −0.1 / −0.01 /
+  +0.01 / +0.1 and **0** (reset). Enabled only while a job runs; the line
+  below shows `applies at line N` or `active`.
+- **Pendant:** while the job runs, tap the **Z +/-** pill at the top right of
+  the path view (in Hold also the **Z ADJ** button, or turn the wheel CCW).
+  Hold the enable button and turn: **CW raises, CCW lowers**, by the step
+  switch (0.01 / 0.1 / 1 mm; FluidNC takes at most 0.5 mm per step).
+  **Reset to 0** / **Done** (in Hold **Resume**). The pill shows the offset
+  (yellow = pending, green = active).
+
+### After the job
+
+If the job ended with an offset, both screens ask **"Move the work Z zero by
+it, so the next run cuts the same?"** – **Apply** adds it to Z of the
+coordinate system the job used (G54…G59), **No** forgets it. Starting a new
+job also forgets it. A job continued with *Job recovery* starts with no offset;
+set it again if needed.
+
+```
+$Job/ZAdjust               report: [MSG:ZAdjust:<offset>:<none|pending|active|ended>:<line>]
+$Job/ZAdjust=+0.05         add (with sign) - only while a job runs
+$Job/ZAdjust=0.2           set (no sign); =0 clears (and declines the end-of-job offer)
+$Job/ZAdjust/Apply         move the work Z zero by the offset the last job ended with (Idle)
+$Job/ZAdjust/Limit=1.0     largest total offset in mm (0.05 .. 5)
+```
+
+Errors come as `[MSG:ZAdjustErr:<text>]` (no job running, at most 0.5 mm per
+step, limit reached, …).
+
+> The pendant's old Z nudge sent `G10 L20 P1 Z…` (it changed G54 in flash,
+> the opposite way round, and FluidNC 4.1 refuses G-code from a second
+> channel during a job). Flash both firmwares.
+
+## 11. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|
