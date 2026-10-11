@@ -186,7 +186,7 @@ class Machine:
         if u == "[ESP111]":
             return ["127.0.0.1", "ok"]
         if u == "$G":
-            return [f"[GC:G0 {self.wcs} G17 G21 G90 G94 M5 M9 T0 F0 S0]", "ok"]
+            return [f"[GC:G0 {self.wcs} G17 G21 G90 G94 M5 M9 T{getattr(self, 'tool', 0)} F0 S0]", "ok"]
         if u == "$H":
             self.target, self.speed, self.state = [0, 0, 0, 0], 50, "Home"
             return ["ok"]
@@ -228,6 +228,18 @@ class Machine:
             return ["[MSG:Prepared:none:]", "ok"]
         if u == "$CRASH":
             return ["[MSG:Crash:PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]", "ok"]
+        if u.startswith("$/ATC_MANUAL/"):
+            k = ln.strip().split("/")[-1]
+            vals = {"safe_z_mpos_mm": "-1.000", "probe_seek_rate_mm_per_min": "800.000", "probe_feed_rate_mm_per_min": "80.000",
+                    "change_mpos_mm": "80.000 0.000 -1.000", "ets_mpos_mm": "5.000 -17.000 -40.000", "ets_rapid_z_mpos_mm": "-10.000"}
+            return [f"$/atc_manual/{k}={vals.get(k, '0')}", "ok"]
+        mt = re.fullmatch(r"M6 ?T(\d+)", u)
+        if mt:
+            self.tool = int(mt.group(1))
+            if self.tool == 0:
+                return ["[MSG:TLO Z reset to 0]", "ok"]
+            self.state = "Hold:0"
+            return [f"[MSG: Install tool #{self.tool} then resume to continue]", "ok"]
         if u == "$I":
             return ["[VER:4.1 FluidNC v4.1.1 (mock) (esp32s3-wifi):]", "ok"]
         if u == "$#":

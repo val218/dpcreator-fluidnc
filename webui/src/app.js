@@ -74,6 +74,8 @@
     if ((m = /^\[GC:(.*)\]/.exec(line))) {
       const wcs = /G5[4-9](\.\d)?/.exec(m[1]);
       if (wcs) $("#wcs").value = wcs[0].slice(0, 3);
+      const tool = /\bT(\d+)/.exec(m[1]);
+      if (tool) Tools.onTool(+tool[1]);
       log(line, "msg");
       return;
     }
@@ -94,6 +96,16 @@
     }
     if ((m = /^\[(G5[4-9]|G28|G30|G92|TLO):([-\d.,]+)\]$/.exec(line))) {
       Offsets.onLine(m[1], m[2]);
+      if (m[1] === "TLO") Tools.onTlo(m[2]);
+      log(line, "msg");
+      return;
+    }
+    if ((m = /^\$\/atc_manual\/(\w+)=(.*)$/.exec(line))) {
+      Tools.onAtc(m[1], m[2]);
+      return;
+    }
+    if ((m = /^\[MSG:\s*Install tool #(\d+)/i.exec(line))) {
+      Tools.onInstall(+m[1]);
       log(line, "msg");
       return;
     }
@@ -173,6 +185,7 @@
     if (recovHook) recovHook();
     if (macroHook) macroHook();
     if (rwHook) rwHook();
+    if (!/^Hold/.test(state) && state !== "Unknown") $("#toolprompt").hidden = true;
     const b = $("#state");
     b.textContent = state === "Unknown" ? "--" : state;
     b.className = "state state-" + state.toLowerCase();
@@ -668,6 +681,154 @@
     $("#uiold").hidden = false;
   }
   $("#uiold-hide").onclick = () => ($("#uiold").hidden = true);
+
+  // ------------------------------------------------------------- tools
+  // Tool table (SD card, /.dpc/tools.txt: T|name|diameter|notes) and tool
+  // change with FluidNC's atc_manual + a fixed tool setter: M6 T<n> goes to
+  // the change position, waits (M0) for the new tool, Resume measures it and
+  // sets the tool length offset. The setter settings are shown from
+  // $/atc_manual/...; if there are none, a config.yaml snippet is built here.
+  const Tools = (() => {
+    const dlg = $("#tools-dlg"), FILE = "/.dpc/tools.txt";
+    const KEYS = ["safe_z_mpos_mm", "probe_seek_rate_mm_per_min", "probe_feed_rate_mm_per_min", "change_mpos_mm", "ets_mpos_mm", "ets_rapid_z_mpos_mm"];
+    let rows = [], cur = 0, tlo = null, atc = {}, atcAsked = 0, loaded = false;
+    const f3 = (v) => (Number.isFinite(v) ? v.toFixed(3) : "");
+
+    function onTool(t) { cur = t; if (dlg.open) paint(); }
+    function onTlo(v) { tlo = parseFloat(v); if (dlg.open) head(); }
+    function onAtc(k, v) { atc[k] = v.trim(); if (dlg.open) { setter(); fillForm(); } }
+    function onInstall(n) {
+      $("#toolprompt-text").textContent = `Install tool T${n}` + (rows.find((r) => r.t === n) ? ` (${rows.find((r) => r.t === n).name})` : "");
+      $("#toolprompt").hidden = false;
+      toast(`Tool change: install T${n}, then Resume`);
+    }
+    $("#toolprompt-resume").onclick = () => { Conn.realtime(0x7e); $("#toolprompt").hidden = true; };
+
+    function head() {
+      $("#tools-now").textContent = `in the spindle: T${cur}` + (tlo !== null && Number.isFinite(tlo) ? ` · tool length offset ${tlo.toFixed(3)} mm` : "");
+    }
+    function setter() {
+      const s = $("#tools-setter");
+      if (atc.ets_mpos_mm) {
+        const e = atc.ets_mpos_mm.split(/\s+/).map(Number), c = (atc.change_mpos_mm || "").split(/\s+/).map(Number);
+        s.textContent = `Tool setter at X ${f3(e[0])} Y ${f3(e[1])} (lowest Z ${f3(e[2])}) · change position X ${f3(c[0])} Y ${f3(c[1])} Z ${f3(c[2])} · safe Z ${atc.safe_z_mpos_mm}`;
+        s.className = "tools-setter ok";
+      } else if (Date.now() - atcAsked > 1500) {
+        s.textContent = "No tool setter set up (atc_manual not in config.yaml) — see \"Set up the tool setter\" below. M6 then only stops for the change.";
+        s.className = "tools-setter no";
+        $("#tools-setup").open = true;
+      }
+    }
+    function paint() {
+      head();
+      const t = $("#tools-table");
+      t.textContent = "";
+      t.append(el("tr", {}, el("th", {}, "T"), el("th", {}, "Name"), el("th", {}, "Ø mm"), el("th", {}, "Notes"), el("th", {}, "")));
+      rows.sort((a, b) => a.t - b.t);
+      rows.forEach((r) => {
+        const tr = el("tr", { class: r.t === cur ? "cur" : "" });
+        const tn = el("input", { type: "number", min: 1, max: 999, value: r.t });
+        tn.onchange = () => { r.t = Math.max(1, parseInt(tn.value, 10) || 1); dirty(); };
+        const nm = el("input", { class: "tname", value: r.name, maxlength: 40 });
+        nm.oninput = () => { r.name = nm.value.replace(/\|/g, "/"); dirty(); };
+        const di = el("input", { type: "number", step: "0.01", value: r.dia });
+        di.oninput = () => { r.dia = di.value; dirty(); };
+        const no = el("input", { class: "tnote", value: r.note, maxlength: 60 });
+        no.oninput = () => { r.note = no.value.replace(/\|/g, "/"); dirty(); };
+        const ch = el("button", { class: "btn", title: `M6 T${r.t}` }, r.t === cur ? "Re-measure" : "Change");
+        ch.onclick = () => change(r.t);
+        const del = el("button", { class: "btn", title: "Remove from the list" }, "✕");
+        del.onclick = () => { rows = rows.filter((x) => x !== r); dirty(); paint(); };
+        tr.append(el("td", {}, tn), el("td", {}, nm), el("td", {}, di), el("td", {}, no), el("td", {}, ch, " ", del));
+        t.append(tr);
+      });
+      setter();
+    }
+    function dirty() { $("#tools-status").textContent = "Changed — Save list to keep it."; }
+    function change(t) {
+      if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+      const r = rows.find((x) => x.t === t);
+      const msg = atc.ets_mpos_mm
+        ? `Change to T${t}${r ? " " + r.name : ""}?\n\nZ lifts to safe height` + (cur ? "; the first time the tool in the spindle is measured on the setter as the reference" : "") +
+          `; then the machine goes to the change position and waits. Install the tool and press Resume: it is measured and the tool length is set.`
+        : `Change to T${t}? No tool setter is set up: the machine only stops (M6) — set Z zero again after the change.`;
+      if (!confirm(msg)) return;
+      send(`M6 T${t}`);
+      setTimeout(() => send("$G"), 500);
+    }
+    async function load() {
+      try {
+        // ask the folder first: a missing file would log a 404 in the browser
+        const have = (await Files.list("sd", "/.dpc").catch(() => [])).some((f) => f.name === "tools.txt");
+        if (!have) throw new Error("none");
+        const txt = await Files.getText("sd", FILE);
+        rows = txt.split("\n").filter((l) => l.trim()).map((l) => {
+          const [t, name = "", dia = "", note = ""] = l.split("|");
+          return { t: parseInt(t, 10) || 1, name, dia, note };
+        });
+      } catch { rows = [{ t: 1, name: "", dia: "", note: "" }]; }
+      loaded = true;
+    }
+    async function save() {
+      const txt = rows.map((r) => [r.t, r.name, r.dia, r.note].join("|")).join("\n") + "\n";
+      try { await Files.putText("sd", FILE, txt); $("#tools-status").textContent = "Saved on the SD card."; }
+      catch (e) { toast("Save failed: " + e.message, true); }
+    }
+    // setup helper
+    const form = () => Object.fromEntries($$("#tools-form input").map((i) => [i.dataset.k, i.value]));
+    function fillForm() {
+      const set = (k, v) => { const i = $(`#tools-form input[data-k="${k}"]`); if (i && v !== undefined && v !== "" && !i.value) i.value = v; };
+      const c = (atc.change_mpos_mm || "").split(/\s+/), e = (atc.ets_mpos_mm || "").split(/\s+/);
+      set("cx", c[0]); set("cy", c[1]); set("cz", c[2]); set("ex", e[0]); set("ey", e[1]); set("ez", e[2]);
+      set("rz", atc.ets_rapid_z_mpos_mm); set("sz", atc.safe_z_mpos_mm);
+      set("seek", atc.probe_seek_rate_mm_per_min || "800"); set("feed", atc.probe_feed_rate_mm_per_min || "80");
+      yaml();
+    }
+    function yaml() {
+      const v = form(), n = (x, d) => { const f = parseFloat(x); return (Number.isFinite(f) ? f : d).toFixed(3); };
+      $("#tools-yaml").textContent =
+        "atc_manual:\n" +
+        `  safe_z_mpos_mm: ${n(v.sz, -1)}\n` +
+        `  probe_seek_rate_mm_per_min: ${n(v.seek, 800)}\n` +
+        `  probe_feed_rate_mm_per_min: ${n(v.feed, 80)}\n` +
+        `  change_mpos_mm: ${n(v.cx, 0)} ${n(v.cy, 0)} ${n(v.cz, -1)}\n` +
+        `  ets_mpos_mm: ${n(v.ex, 0)} ${n(v.ey, 0)} ${n(v.ez, -50)}\n` +
+        `  ets_rapid_z_mpos_mm: ${n(v.rz, -10)}\n\n` +
+        "# and under your spindle section (e.g. pwm: / Huanyang: ...):\n#   atc: atc_manual\n";
+    }
+    $$("#tools-form input").forEach((i) => (i.oninput = yaml));
+    $$("#tools-form [data-here]").forEach((b) => (b.onclick = (e) => {
+      e.preventDefault();
+      const p = S.mpos || [];
+      const k = b.dataset.here;
+      $(`#tools-form input[data-k="${k}x"]`).value = f3(p[0]);
+      $(`#tools-form input[data-k="${k}y"]`).value = f3(p[1]);
+      const z = $(`#tools-form input[data-k="${k}z"]`);
+      if (z) z.value = f3(p[2]);
+      yaml();
+    }));
+    $("#tools-copy").onclick = async () => {
+      try { await navigator.clipboard.writeText($("#tools-yaml").textContent); toast("Copied"); }
+      catch { prompt("Copy:", $("#tools-yaml").textContent); }
+    };
+    $("#tools-open").onclick = async () => {
+      atc = {}; atcAsked = Date.now();
+      KEYS.forEach((k) => Conn.sendLine(`$/atc_manual/${k}`, true));
+      send("$G"); send("$#");
+      if (!loaded) await load();
+      paint(); fillForm();
+      dlg.showModal();
+      setTimeout(() => dlg.open && setter(), 1600);
+    };
+    $("#tools-add").onclick = () => { rows.push({ t: (rows.reduce((m, r) => Math.max(m, r.t), 0) || 0) + 1, name: "", dia: "", note: "" }); dirty(); paint(); };
+    $("#tools-save").onclick = save;
+    $("#tools-reset").onclick = () => {
+      if (!idle()) return toast(`The machine must be Idle (now ${S.state})`, true);
+      if (confirm("Reset tool length (M6 T0)?\n\nForgets the tool setter reference and sets the tool length offset to 0 — use it when starting with a new work Z zero.")) { send("M6 T0"); setTimeout(() => send("$#"), 500); }
+    };
+    $("#tools-close").onclick = () => dlg.close();
+    return { onTool, onTlo, onAtc, onInstall };
+  })();
 
   // ------------------------------------------------------------- work offsets
   // G54–G59 from $# (machine position of each work zero). Edit = G10 L2 P<n>,

@@ -28,6 +28,11 @@
 </div>
 
 
+<div id="toolprompt" class="zadj-end toolprompt" hidden>
+  <b id="toolprompt-text">Install the tool</b>
+  <span class="zadj-end-text">then Resume: the new tool is measured on the tool setter.</span>
+  <button class="btn small accent" id="toolprompt-resume">Resume</button>
+</div>
 <div id="zadj-end" class="zadj-end" hidden>
   <b>The job ran with Z adjust <span id="zadj-end-v"></span> mm.</b>
   <span class="zadj-end-text">Move the work Z zero by that much, so the next run cuts the same?</span>
@@ -58,6 +63,7 @@
         <option>G57</option><option>G58</option><option>G59</option>
       </select>
       <button class="btn small" id="offsets-open" title="Work offsets table (G54–G59, G92, tool length)">Offsets…</button>
+      <button class="btn small" id="tools-open" title="Tool table, tool change with the tool setter">Tools…</button>
     </div>
     <div class="dro" id="dro"></div>
     <div class="dro-actions">
@@ -354,6 +360,38 @@ Runs like a file job: Hold / Stop work, the machine must be Idle to start.</pre>
     <button class="btn" id="offsets-refresh">Refresh</button>
     <button class="btn accent" id="offsets-close">Close</button>
   </div>
+</dialog>
+<dialog id="tools-dlg">
+  <div class="panel-head"><h2>Tools</h2><span class="muted mdlg-note" id="tools-now"></span></div>
+  <div class="tools-setter" id="tools-setter">Tool setter: checking…</div>
+  <div class="offsets-wrap"><table class="offsets tools" id="tools-table"></table></div>
+  <div class="mdlg-btns">
+    <span class="mdlg-status" id="tools-status">The list is kept on the SD card. "Change" runs M6: tool change position, install, Resume, measured on the tool setter.</span>
+    <button class="btn" id="tools-add">+ Tool</button>
+    <button class="btn" id="tools-reset" title="Start of a new job / new work zero: forget the tool setter reference and set the tool length to 0 (M6 T0)">Reset (M6 T0)</button>
+    <button class="btn" id="tools-save">Save list</button>
+    <button class="btn accent" id="tools-close">Close</button>
+  </div>
+  <details class="tools-setup" id="tools-setup">
+    <summary>Set up the tool setter (config.yaml)</summary>
+    <p class="muted">FluidNC's <code>atc_manual</code> tool changer with a fixed tool setter: on <code>M6 T&lt;n&gt;</code> it lifts to safe Z,
+      (the first time) measures the tool in the spindle on the setter as the reference, goes to the change position and waits;
+      after Resume it measures the new tool and sets the tool length offset (G43.1) from the difference. Set the work Z zero with
+      the first tool, then change tools with M6. All positions are machine coordinates — jog there and press "Here".</p>
+    <div class="tools-form" id="tools-form">
+      <label>Change position X / Y / Z <span><input data-k="cx"><input data-k="cy"><input data-k="cz"><button class="btn small" data-here="c">Here</button></span></label>
+      <label>Tool setter X / Y <span><input data-k="ex"><input data-k="ey"><button class="btn small" data-here="e">Here</button></span></label>
+      <label>Lowest Z on the setter (fails below: no tool) <span><input data-k="ez"></span></label>
+      <label>Rapid down to Z above the setter <span><input data-k="rz"></span></label>
+      <label>Safe Z for travel <span><input data-k="sz"></span></label>
+      <label>Probe seek / feed mm/min <span><input data-k="seek"><input data-k="feed"></span></label>
+    </div>
+    <pre class="tools-yaml" id="tools-yaml"></pre>
+    <div class="mdlg-btns">
+      <span class="mdlg-status">Add this to config.yaml (Files → Flash → config.yaml → Edit), add <code>atc: atc_manual</code> under your spindle, check the probe pin, restart.</span>
+      <button class="btn" id="tools-copy">Copy</button>
+    </div>
+  </details>
 </dialog>
 <div id="toast" class="toast" hidden></div>
 <footer class="foot">dpCREATOR WebUI <span id="ui-ver">__VERSION__</span> · FluidNC <span id="fw-ver"></span></footer>

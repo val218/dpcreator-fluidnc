@@ -263,6 +263,25 @@ with sync_playwright() as p:
     page.screenshot(path=str(OUT / "desktop-offsets.png"))
     page.click("#offsets-close")
 
+    # tools: table, setter info from $/atc_manual, M6 with the install prompt
+    page.wait_for_function("document.querySelector('#state').textContent === 'Idle'", timeout=8000)
+    page.click("#tools-open")
+    page.wait_for_selector("#tools-setter.ok", timeout=4000)
+    check("5.000" in page.inner_text("#tools-setter"), "tool setter read from $/atc_manual: " + page.inner_text("#tools-setter"))
+    page.click("#tools-add")
+    page.fill("#tools-table tr:nth-child(3) input.tname", "6 mm flat end mill")
+    page.click("#tools-save")
+    page.wait_for_function("document.querySelector('#tools-status').textContent.includes('Saved')", timeout=4000)
+    check(True, "tool list saved on the SD card")
+    page.screenshot(path=str(OUT / "desktop-tools.png"))
+    page.click("#tools-table tr:nth-child(3) button:has-text('Change')")
+    page.wait_for_selector("#toolprompt:not([hidden])", timeout=4000)
+    check("T2" in page.inner_text("#toolprompt-text"), "M6 T2: install prompt shown: " + page.inner_text("#toolprompt-text"))
+    page.click("#tools-close")
+    page.click("#toolprompt-resume")
+    page.wait_for_selector("#toolprompt[hidden]", state="attached", timeout=3000)
+    check(True, "Resume from the install prompt")
+
     # tablet + phone layouts
     page.set_viewport_size({"width": 1024, "height": 768})
     page.wait_for_timeout(500)
