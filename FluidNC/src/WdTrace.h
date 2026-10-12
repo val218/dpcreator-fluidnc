@@ -23,6 +23,7 @@ enum WdSlot { WD_POLL = 0, WD_PROTO = 1, WD_NET = 2, WD_SLOTS = 3 };
 void wd_task(WdSlot slot);                                   // the calling task is this slot's
 void wd_mark(WdSlot slot, const char* where);                // where: a string literal
 void wd_mark_text(WdSlot slot, const char* what, const char* text);  // text is copied (a URL)
+void wd_mark_here(const char* where);                        // the calling task's slot, if it has one
 void wd_boot();                                              // at boot: keep the last report, start fresh
 int         wd_report_count();                               // lines of the previous run's report (0 = none)
 const char* wd_report_line(int i);

@@ -1376,6 +1376,19 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
     // $Crash/Clear: the crash was seen - every UI drops its notice and $Crash
     // says none until the next crash (RAM flag, so a new crash shows again).
     static bool crash_cleared = false;
+    // $Crash/TestWatchdog: check the watchdog report on the real board - this
+    // task waits 8 s on purpose, the task watchdog restarts the board, and
+    // $Crash / the WebUI then show the report naming this command. Idle only.
+    if (strcasecmp(line, "$Crash/TestWatchdog") == 0) {
+        if (!state_is(State::Idle) || Job::active()) {
+            channel.print("[MSG:ERR:$Crash/TestWatchdog only when Idle, no job running]\n");
+            return Error::Ok;
+        }
+        channel.print("[MSG:INFO:Watchdog test: this task now waits 8 s, the board will restart]\n");
+        wd_mark_here("$Crash/TestWatchdog (waiting on purpose)");
+        vTaskDelay(pdMS_TO_TICKS(8000));
+        return Error::Ok;  // only if the watchdog is off
+    }
     if (strcasecmp(line, "$Crash/Clear") == 0) {
         crash_cleared = true;
         allChannels.print("[MSG:Crash:none]\n");

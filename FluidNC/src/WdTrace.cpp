@@ -97,6 +97,13 @@ void wd_mark(WdSlot slot, const char* where) {
     }
 }
 
+void wd_mark_here(const char* where) {
+    void* me = xTaskGetCurrentTaskHandle();
+    for (int s = 0; s < WD_SLOTS; s++) {
+        if (_m[s].task == me) wd_mark(WdSlot(s), where);
+    }
+}
+
 void wd_mark_text(WdSlot slot, const char* what, const char* text) {
     Buf b { _text[slot], 0, (int)sizeof(_text[slot]) };
     b.s(what);
