@@ -35,6 +35,7 @@
 #include "Driver/backtrace.h"     // backtrace_get(), etc.
 #include "Driver/restart.h"       // restart_was_panic ($Crash)
 #include "CrashTrail.h"           // last commands before a crash
+#include "WdTrace.h"              // task watchdog report
 #include "FileCommands.h"         // make_file_commands()
 #include "Job.h"                  // Job::active()
 
@@ -1389,8 +1390,10 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
             std::string m = std::string("[MSG:Crash:reason=") + restart_reason() + " ";
             snprintf(b, sizeof(b), "PC=0x%08x", (unsigned)bt.pc);
             m += b;
-            snprintf(b, sizeof(b), " cause=%u", (unsigned)bt.exccause);
-            m += b;
+            if (strstr(restart_reason(), "watchdog") == nullptr) {  // a watchdog abort has no exception cause
+                snprintf(b, sizeof(b), " cause=%u", (unsigned)bt.exccause);
+                m += b;
+            }
             m += " Backtrace:";
             for (size_t i = 0; i < bt.num_addresses; i++) {
                 snprintf(b, sizeof(b), " 0x%08x:0x00000000", (unsigned)bt.addresses[i]);
@@ -1403,6 +1406,12 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
             channel.print(m.c_str());
         } else {
             channel.print("[MSG:Crash:none]\n");
+        }
+        if (restart_was_panic() && !crash_cleared) {  // task watchdog: who missed it, where each task was
+            for (int i = 0; i < wd_report_count(); i++) {
+                std::string m = std::string("[MSG:CrashWdt:") + wd_report_line(i) + "]\n";
+                channel.print(m.c_str());
+            }
         }
         if (restart_was_panic() && !crash_cleared) {  // what was sent last before it
             for (int i = 0; i < crash_trail_count(); i++) {

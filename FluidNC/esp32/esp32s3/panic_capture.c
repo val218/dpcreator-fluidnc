@@ -93,6 +93,56 @@ static void IRAM_ATTR capture(panic_info_t* info) {
     _saved_bt.magic = BACKTRACE_MAGIC;
 }
 
+// Call stack of a task that is not running (WdTrace: the watched task the
+// watchdog fired for is usually *waiting*). Its saved context is either an
+// interrupt frame (preempted) or the solicited frame of vPortYield() (blocked
+// in a FreeRTOS call), whose register windows were spilled to the stack.
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_private/freertos_debug.h"
+#include "esp_memory_utils.h"
+
+int wd_task_backtrace(void* task, uint32_t* out, int max) {
+    TaskSnapshot_t snap;
+    if (!task || max <= 0 || vTaskGetSnapshot((TaskHandle_t)task, &snap) != pdTRUE) {
+        return 0;
+    }
+    uint32_t top = (uint32_t)snap.pxTopOfStack;
+    if (!esp_stack_ptr_is_sane(top)) {
+        return 0;
+    }
+    esp_backtrace_frame_t f;
+    int                   n = 0;
+    if (((const XtSolFrame*)top)->exit != 0) {  // preempted: full interrupt frame
+        const XtExcFrame* x = (const XtExcFrame*)top;
+        f.pc                = x->pc;
+        f.sp                = x->a1;
+        f.next_pc           = x->a0;
+        f.exc_frame         = x;
+        out[n++]            = stack_pc(f.pc);
+    } else {  // blocked: the frame is vPortYield's, its caller comes next
+        const XtSolFrame* s = (const XtSolFrame*)top;
+        f.pc                = 0;
+        f.sp                = top;
+        f.next_pc           = s->pc;
+        f.exc_frame         = NULL;
+    }
+    while (n < max && f.next_pc != 0) {
+        if (!esp_backtrace_get_next_frame(&f)) {
+            if (n < max && f.pc) out[n++] = stack_pc(f.pc);  // last good PC
+            break;
+        }
+        out[n++] = stack_pc(f.pc);
+    }
+    return n;
+}
+
+// IDF hook, called from the task watchdog interrupt before it aborts.
+void wd_trace_on_timeout(void);
+void esp_task_wdt_isr_user_handler(void) {
+    wd_trace_on_timeout();
+}
+
 void __real_esp_panic_handler(panic_info_t* info);
 
 void IRAM_ATTR __wrap_esp_panic_handler(panic_info_t* info) {

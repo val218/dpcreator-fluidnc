@@ -24,6 +24,7 @@
 
 #include "Driver/restart.h"
 #include "CrashTrail.h"
+#include "WdTrace.h"
 #include "Driver/backtrace.h"
 
 #include <cstdio>
@@ -281,6 +282,7 @@ namespace Machine {
         // config; a single crash restarts normally (the backtrace is logged
         // and $Crash reports it).
         crash_trail_boot();  // last commands of the previous run, if it crashed
+        wd_boot();           // task watchdog report of the previous run, if any
         uint32_t streak = crash_streak_update();
         if (streak > 0) {
             log_error("Restarted after a crash (" << streak << " in a row)");
@@ -296,6 +298,9 @@ namespace Machine {
                     btLine += ":0x00000000";
                 }
                 log_error(btLine.c_str());
+            }
+            for (int i = 0; i < wd_report_count(); i++) {
+                log_error("Watchdog: " << wd_report_line(i));
             }
         }
         if (streak >= 3) {

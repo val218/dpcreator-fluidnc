@@ -35,6 +35,7 @@
 
 #include <cstring>  // strncpy
 #include <memory>   // std::unique_ptr
+#include "WdTrace.h"  // where the watched tasks are (task watchdog report)
 
 volatile ExecAlarm lastAlarm;  // The most recent alarm code
 
@@ -295,6 +296,7 @@ bool pollingPaused = false;
 static void poll_once() {
 
         // Poll the input sources waiting for a complete line to arrive
+        wd_mark(WD_POLL, "sleep");
         /*feedLoopWDT(), */ vTaskDelay(1);
         // Polling is paused when xmodem is using a channel for binary upload
         if (pollingPaused) {
@@ -310,20 +312,28 @@ static void poll_once() {
         // Polling without an argument checks for realtime characters
         // Polling with an argument both checks for realtime characters and
         // returns a line-oriented command if one is ready.
+        wd_mark(WD_POLL, "pollChannels (realtime input)");
         pollChannels();
 
         // Ship queued log output (formerly the dedicated "output" task).
+        wd_mark(WD_POLL, "drain_output (sending to channels)");
         drain_output(MESSAGE_QUEUE_DEPTH);
 
         for (auto const& module : Modules()) {
+            wd_mark(WD_POLL, module->name());
             module->poll();
             feed_watchdog();
         }
 
+        wd_mark(WD_POLL, "heap_monitor_poll");
         heap_monitor_poll();
+        wd_mark(WD_POLL, "pendant_poll");
         pendant_poll();
+        wd_mark(WD_POLL, "zadj_poll");
         zadj_poll();  // live Z adjust: job start/end, pending -> active
+        wd_mark(WD_POLL, "stats_poll");
         stats_poll();  // run / spindle hour counters
+        wd_mark(WD_POLL, "input lines (inline $ commands, job file)");
 
         // Checks unwind_cause against the job stack and aborts atomically
         // with it, so a nest() that concurrently starts a fresh job (and
@@ -402,6 +412,7 @@ static void poll_once() {
 
         // Ship anything an inline command just produced, this pass rather than
         // next.
+        wd_mark(WD_POLL, "drain_output (after commands)");
         drain_output(MESSAGE_QUEUE_DEPTH);
     }
 
@@ -421,6 +432,7 @@ static void report_poll_exception(const char* what) {
 // not allocate, so the job keeps running.
 void polling_loop(void* unused) {
     add_watchdog_to_task();
+    wd_task(WD_POLL);
     for (;;) {
         if (should_exit()) {
             break;
@@ -472,6 +484,7 @@ static void alarm_msg(ExecAlarm alarm_code) {
 
 void protocol_main_loop() {
     add_watchdog_to_task();
+    wd_task(WD_PROTO);
     start_polling();
 
     // ---------------------------------------------------------------------------------
@@ -484,10 +497,13 @@ void protocol_main_loop() {
         }
         // A line collected by the polling task.  xQueueReceive supplies the
         // barrier that makes item.line fully visible here.
+        wd_mark(WD_PROTO, "zadj_protocol_poll");
         zadj_protocol_poll();  // live Z adjust: after a job, take the real position over
         LineItem item;
+        wd_mark(WD_PROTO, "main loop");
         if (xQueueReceive(cmd_queue, &item, 0)) {
             Channel* channel = item.channel;
+            wd_mark_text(WD_PROTO, "line", item.line);
             if (channel->is_closing()) {
                 // No ack() -- the channel is on its way out -- but still
                 // clear its pending-ack gate: the ref release just below is
@@ -584,6 +600,7 @@ void protocol_main_loop() {
         }
 
         // Auto-cycle start any queued moves.
+        wd_mark(WD_PROTO, "protocol_execute_realtime");
         protocol_auto_cycle_start();
         protocol_execute_realtime();  // Runtime command check point.
         sys.process_changes();
@@ -593,9 +610,13 @@ void protocol_main_loop() {
         }
 
         // Build pendant .viz previews queued by uploads (only when Idle, no job).
+        wd_mark(WD_PROTO, "viz_poll");
         viz_poll();
+        wd_mark(WD_PROTO, "recov_poll (recovery record)");
         recov_poll();  // job recovery: progress record, restart scans
+        wd_mark(WD_PROTO, "stats_save_if_due (SD)");
         stats_save_if_due();  // hour counters to the SD card now and then
+        wd_mark(WD_PROTO, "main loop");
 
         // check to see if we should disable the stepper drivers
         // If idleEndTime is 0, no disable is pending.
@@ -1358,9 +1379,11 @@ static void protocol_exec_rt_suspend() {
                 }
             } else {
                 protocol_manage_spindle();
+                wd_mark(WD_PROTO, "hold: rewind_suspend_poll");
                 rewind_suspend_poll();  // handwheel rewind in Hold (system motions)
             }
         }
+        wd_mark(WD_PROTO, "hold/suspend loop");
         protocol_exec_rt_system();
     }
 }

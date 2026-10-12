@@ -74,6 +74,7 @@ with sync_playwright() as p:
     page.wait_for_selector("#crash:not([hidden])", timeout=3000)
     check("software crash" in page.inner_text("#crash-text"), "crash notice says why in words")
     check("PC=0x42001234" in (page.get_attribute("#crash-text", "title") or ""), "crash backtrace kept for details ($Crash)")
+    check("missed: poller" in (page.get_attribute("#crash-text", "title") or ""), "watchdog report kept for details (CrashWdt)")
     check(not page.is_visible("#uiold"), "no page/firmware mismatch warning for a matching build")
     page.evaluate("fetch('/mock/ver?sha=abcdef1')")
     page.wait_for_selector("#uiold:not([hidden])", timeout=3000)

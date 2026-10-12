@@ -1,6 +1,7 @@
 // Copyright (c) 2014 Luc Lebosse. All rights reserved.
 // Use of this source code is governed by a GPLv3 license that can be found in the LICENSE file.
 
+#include "../WdTrace.h"  // network task marks (task watchdog report)
 #include "Platform.h"  // HOSTED
 #include "Machine/MachineConfig.h"
 #include "Serial.h"    // is_realtime_command()
@@ -221,6 +222,7 @@ namespace {
                 // directory on a slow or failing card can take a long time, and
                 // rebooting mid-listing helps nobody.
                 feed_watchdog();
+                wd_mark(WD_NET, "sending a file list");
                 (void)total;
 
                 size_t written = 0;
@@ -335,6 +337,13 @@ namespace WebUI {
         _headerFilter->keep("Destination");
 
         _webserver->addMiddlewares({ _headerFilter });
+        // Task watchdog report: which request async_tcp is in (WdTrace.h).
+        _webserver->addMiddleware([](AsyncWebServerRequest* request, ArMiddlewareNext next) {
+            wd_task(WD_NET);
+            wd_mark_text(WD_NET, request->methodToString(), request->url().c_str());
+            next();
+            wd_mark(WD_NET, "idle (after a request)");
+        });
 
         // No metadata on the FLASH filesystem; it consumes too much space
         auto flash_dav = new WebDAV("/flash", LocalFS, true);
@@ -354,7 +363,11 @@ namespace WebUI {
         _socket_server = new AsyncWebSocket("/");
         _socket_server->onEvent(
             [](AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len) {
+                wd_task(WD_NET);
+                wd_mark(WD_NET, type == WS_EVT_DATA ? "websocket data" : type == WS_EVT_CONNECT ? "websocket connect" :
+                                type == WS_EVT_DISCONNECT ? "websocket disconnect" : "websocket event");
                 WSChannels::handleEvent(server, client, type, arg, data, len);
+                wd_mark(WD_NET, "idle (after a websocket event)");
             });
 
         _webserver->addHandler(_socket_server);
@@ -583,6 +596,7 @@ namespace WebUI {
                     return 0;  //RESPONSE_TRY_AGAIN; // This only works for ChunkedResponse
                 }
                 feed_watchdog();
+                wd_mark(WD_NET, "sending a file");
                 if (total >= file->size() || request->method() != HTTP_GET) {
                     file = nullptr;
                     return 0;

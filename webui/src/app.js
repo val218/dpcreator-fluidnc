@@ -84,6 +84,7 @@
       // [MSG:Crash:none] (also sent to all after $Crash/Clear) hides it.
       const info = m[1];
       crashLast = [];
+      crashWdt = [];
       crashRaw = info;
       crashInfo = info === "unknown" ? "panic (no backtrace saved - older firmware)" : info;
       let gone = false;
@@ -101,9 +102,16 @@
       log(line, info === "none" ? "msg" : "err");
       return;
     }
+    if ((m = /^\[MSG:CrashWdt:(.*)\]$/.exec(line))) {
+      crashWdt.push(m[1]);  // task watchdog: which task missed it, where each one was
+      $("#crash-text").title = crashInfo + "\n" + crashWdt.join("\n");
+      log(line, "err");
+      return;
+    }
     if ((m = /^\[MSG:CrashLast:(.*)\]$/.exec(line))) {
       crashLast.push(m[1]);  // commands sent just before the crash
-      $("#crash-text").title = crashInfo + "\nLast commands before the crash:\n" + crashLast.join("\n");
+      $("#crash-text").title = crashInfo + (crashWdt.length ? "\n" + crashWdt.join("\n") : "") +
+        "\nLast commands before the crash:\n" + crashLast.join("\n");
       log(line, "err");
       return;
     }
@@ -205,6 +213,7 @@
   var codeHook = null;      // G-code view: file shown changed
   var codeLineHook = null;  // G-code view: line being cut
   var crashLast = [];    // [MSG:CrashLast:...] lines
+  var crashWdt = [];     // [MSG:CrashWdt:...] lines (task watchdog report)
   var crashInfo = "";    // [MSG:Crash:...] text (reason, backtrace), for Copy
   var crashRaw = "";     // as sent, to remember a dismissed one
   var recovHook = null;  // var: hoisted, set by the recovery panel
@@ -702,6 +711,7 @@
   };
   $("#crash-copy").onclick = async () => {
     const t = "dpCREATOR FluidNC crash: " + crashInfo +
+      (crashWdt.length ? "\nWatchdog: " + crashWdt.join("\nWatchdog: ") : "") +
       (crashLast.length ? "\nLast commands: " + crashLast.join(" | ") : "") +
       "\nWebUI " + $("#ui-ver").textContent + " firmware " + $("#fw-ver").textContent;
     try { await navigator.clipboard.writeText(t); toast("Crash details copied - paste them to the developer"); }

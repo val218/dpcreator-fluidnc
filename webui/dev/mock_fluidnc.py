@@ -238,6 +238,8 @@ class Machine:
             if not CRASH[0]:
                 return ["[MSG:Crash:none]", "ok"]
             return ["[MSG:Crash:reason=panic PC=0x42001234 cause=28 Backtrace: 0x42001234:0x00000000 0x42005678:0x00000000]",
+                    "[MSG:CrashWdt:missed: poller (CPU 0) | running: CPU0 IDLE0, CPU1 loopTask]",
+                    "[MSG:CrashWdt:poller (poller) at drain_output (sending to channels) for 5012 ms, waiting. Backtrace: 0x4200abcd:0x00000000]",
                     "[MSG:CrashLast:$Rewind/Start]", "[MSG:CrashLast:$Rewind/Move=-1.000]", "ok"]
         msp = re.fullmatch(r"\$/AXES/([XYZA])/STEPS_PER_MM(?:=([\d.]+))?", u)
         if msp:

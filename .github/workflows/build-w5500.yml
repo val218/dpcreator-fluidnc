@@ -2,7 +2,9 @@ name: Build FluidNC 4.1.1 W5500 (ESP32-S3)
 
 on:
   push:
-    branches: [ fluidnc-4.1.1-w5500 ]
+    # bt-decode: a copy of a released commit plus .github/backtrace.txt, to
+    # decode a crash backtrace against that build (see the Decode step)
+    branches: [ fluidnc-4.1.1-w5500, bt-decode ]
   workflow_dispatch:
     inputs:
       backtrace:
@@ -73,16 +75,19 @@ jobs:
           ls -l out debug
 
       - name: Decode backtrace
-        if: ${{ inputs.backtrace != '' }}
+        if: ${{ inputs.backtrace != '' || hashFiles('.github/backtrace.txt') != '' }}
         env:
           BT: ${{ inputs.backtrace }}
         run: |
+          [ -z "$BT" ] && BT=$(cat .github/backtrace.txt)
           A2L=$(find ~/.platformio/packages -name 'xtensa-esp32s3-elf-addr2line' -type f | head -1)
           [ -z "$A2L" ] && A2L=$(find ~/.platformio/packages -name '*addr2line' -type f | head -1)
           echo "Using $A2L"
           ADDRS=$(echo "$BT" | grep -oE '0x[0-9a-fA-F]{8}:0x[0-9a-fA-F]{8}' | cut -d: -f1 | tr '\n' ' ')
           echo "=== DECODED BACKTRACE ==="
-          "$A2L" -pfiaC -e .pio/build/wifi_s3/firmware.elf $ADDRS
+          "$A2L" -pfiaC -e .pio/build/wifi_s3/firmware.elf $ADDRS | tee decoded.txt
+          # also as annotations (readable without the job log)
+          while IFS= read -r l; do echo "::notice title=backtrace::$l"; done < decoded.txt
 
       - name: Upload firmware
         uses: actions/upload-artifact@v4
