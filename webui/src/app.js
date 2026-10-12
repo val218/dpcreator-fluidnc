@@ -453,8 +453,28 @@
     const label = $("#viewer-file");
     let job = parsedCache.get(key);
     if (!job) {
-      label.textContent = "Loading " + path + "…";
-      const text = await Files.getText(fs, path);
+      // Loading can fail while the controller is busy (it shares one SPI
+      // bus between the Ethernet chip and the SD card): try again a few times
+      // and say so, instead of leaving an empty view.
+      let text;
+      for (let attempt = 1; ; attempt++) {
+        label.textContent = "Loading " + path + "…" + (attempt > 1 ? ` (try ${attempt})` : "");
+        try {
+          text = await Files.getText(fs, path);
+          break;
+        } catch (e) {
+          if (e.status === 404 || attempt >= 4) {
+            label.textContent = path.replace(/^.*\//, "");
+            $("#viewer-info").textContent = `Could not load the path (${e.message}) - press Load path to try again`;
+            $("#load-full").hidden = false;
+            label.dataset.path = key;
+            label.dataset.partial = "1";
+            throw e;
+          }
+          $("#viewer-info").textContent = `Loading the path failed (${e.message}), trying again…`;
+          await new Promise((ok) => setTimeout(ok, attempt * 2000));
+        }
+      }
       textCache.set(key, text);
       while (textCache.size > 2) textCache.delete(textCache.keys().next().value);
       label.textContent = "Parsing " + path + "…";
@@ -1763,19 +1783,42 @@
     const path = file.replace(/^\/sd/i, "");
     if ($("#viewer-file").dataset.path !== "sd:" + path) previewFile("sd", path).catch(() => {});
   }
-  $("#prep-run").onclick = () => {
+  $("#prep-run").onclick = async () => {
     if (!prepFile) return;
-    if (!idle()) return toast(`Can't start a job while ${S.state}`, true);
+    if (!(await readyToRun())) return;
     const path = prepFile.replace(/^\/sd/i, "");
     if (!confirm(`Run ${path.replace(/^.*\//, "")}?`)) return;
     send(Files.runCommand("sd", path));
   };
   $("#prep-cancel").onclick = () => send("$Job/Unprepare");
 
+  // "Unknown" only means no status report has arrived yet (just connected,
+  // or the controller was busy): ask for one and wait a moment before saying
+  // no, instead of refusing outright.
+  async function readyToRun() {
+    if (Conn.state !== "open") {
+      toast("Not connected to the controller - wait until it shows online", true);
+      return false;
+    }
+    if (S.state === "Unknown") {
+      Conn.realtime(0x3f);  // '?'
+      for (let i = 0; i < 25 && S.state === "Unknown"; i++) await new Promise((ok) => setTimeout(ok, 100));
+    }
+    if (S.state === "Unknown") {
+      toast("The controller has not reported its state yet - try again in a moment", true);
+      return false;
+    }
+    if (!idle()) {
+      toast(`Can't start a job while ${S.state}`, true);
+      return false;
+    }
+    return true;
+  }
+
   $("#run").onclick = async () => {
     const it = S.sel;
     if (!it) return;
-    if (!idle()) return toast(`Can't start a job while ${S.state}`, true);
+    if (!(await readyToRun())) return;
     if (S.fs === "sd" && GCODE_RE.test(it.name)) {
       // Prepare: pendant + this viewer show it; Run / Cancel from the bar
       send("$Job/Prepare=" + it.path);

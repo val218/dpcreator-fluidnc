@@ -7,11 +7,48 @@ const Files = (() => {
   const encPath = (p) => p.split("/").map(encodeURIComponent).join("/");
   const url = (fs, path) => HTTP_BASE + roots[fs] + encPath(path);
 
+  // At most MAX_PARALLEL requests to the controller at once. A browser opens
+  // up to 6 connections; every one costs the controller network buffers and
+  // shares one SPI Ethernet chip with the SD card - a burst of them (reload:
+  // file list, tools, macros, preview, G-code text) is what overloaded it.
+  // A request that gets no answer in time is aborted, so one stuck request
+  // never blocks the others.
+  const MAX_PARALLEL = 2;
+  let running = 0;
+  const waiting = [];
+  function limited(fn) {
+    return new Promise((resolve, reject) => {
+      waiting.push({ fn, resolve, reject });
+      next();
+    });
+  }
+  function next() {
+    while (running < MAX_PARALLEL && waiting.length) {
+      const { fn, resolve, reject } = waiting.shift();
+      running++;
+      Promise.resolve().then(fn).then(resolve, reject).finally(() => { running--; next(); });
+    }
+  }
+  async function req(u, opts = {}, timeoutMs = 30000) {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), timeoutMs);
+    try {
+      return await fetch(u, { ...opts, signal: ctl.signal });
+    } catch (e) {
+      throw new Error(e.name === "AbortError" ? "no answer from the controller" : "network error");
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
   async function list(fs, dir) {
     const d = dir.endsWith("/") ? dir : dir + "/";
-    const r = await fetch(url(fs, d), { method: "PROPFIND", headers: { Depth: "1" } });
-    if (!r.ok) throw new Error(`List failed (${r.status})`);
-    const xml = new DOMParser().parseFromString(await r.text(), "application/xml");
+    const body = await limited(async () => {
+      const r = await req(url(fs, d), { method: "PROPFIND", headers: { Depth: "1" } }, 20000);
+      if (!r.ok) throw new Error(`List failed (${r.status})`);
+      return r.text();
+    });
+    const xml = new DOMParser().parseFromString(body, "application/xml");
     const out = [];
     for (const resp of xml.getElementsByTagNameNS("*", "response")) {
       const href = (resp.getElementsByTagNameNS("*", "href")[0] || {}).textContent || "";
@@ -42,20 +79,36 @@ const Files = (() => {
     });
   }
 
-  async function getText(fs, path) {
-    const r = await fetch(url(fs, path), { cache: "no-store" });
-    if (!r.ok) throw new Error(`Read failed (${r.status})`);
-    return r.text();
+  // Reads of the same file at the same time share one request; a read that
+  // fails on the network (not a 404) is tried once more.
+  const reading = new Map();
+  function getText(fs, path) {
+    const k = fs + ":" + path;
+    if (reading.has(k)) return reading.get(k);
+    const once = () => limited(async () => {
+      const r = await req(url(fs, path), { cache: "no-store" }, 60000);
+      if (!r.ok) { const e = new Error(`Read failed (${r.status})`); e.status = r.status; throw e; }
+      return r.text();
+    });
+    const p = once()
+      .catch((e) => (e.status ? Promise.reject(e) : new Promise((ok) => setTimeout(ok, 1500)).then(once)))
+      .finally(() => reading.delete(k));
+    reading.set(k, p);
+    return p;
   }
 
-  async function putText(fs, path, text) {
-    const r = await fetch(url(fs, path), { method: "PUT", body: new Blob([text], { type: "text/plain" }) });
-    if (!r.ok) throw new Error(`Save failed (${r.status})`);
+  function putText(fs, path, text) {
+    return limited(async () => {
+      const r = await req(url(fs, path), { method: "PUT", body: new Blob([text], { type: "text/plain" }) });
+      if (!r.ok) throw new Error(`Save failed (${r.status})`);
+    });
   }
 
-  async function remove(fs, path) {
-    const r = await fetch(url(fs, path), { method: "DELETE" });
-    if (!r.ok) throw new Error(`Delete failed (${r.status})`);
+  function remove(fs, path) {
+    return limited(async () => {
+      const r = await req(url(fs, path), { method: "DELETE" }, 20000);
+      if (!r.ok) throw new Error(`Delete failed (${r.status})`);
+    });
   }
 
   // FluidNC command that runs a file from the given filesystem.

@@ -38,6 +38,7 @@ def make_viz(gcode: bytes) -> bytes:
 
 
 PREP = ["none", ""]  # prepared job: state, /sd/file
+CONC = [0, 0]  # file requests now / most at once
 CRASH = [True]  # last restart was a crash until $Crash/Clear
 STEPS = {}  # steps_per_mm set at runtime
 # Job recovery record kept by the board: state, stop line, retract, tool, reason, file
@@ -552,6 +553,10 @@ async def handle(reader, writer):
     m = re.match(r"^/(sd|flash)(/.*)?$", path)
     if m:
         fs, p = m.group(1), m.group(2) or "/"
+        CONC[0] += 1  # file requests in progress (the WebUI keeps it at <= 2)
+        CONC[1] = max(CONC[1], CONC[0])
+        await asyncio.sleep(0.12)  # a slow controller
+        CONC[0] -= 1
         if method == "PROPFIND":
             reply(207, propfind(fs, p), "application/xml")
         elif method == "GET":
@@ -568,6 +573,8 @@ async def handle(reader, writer):
             reply(204)
         else:
             reply(405)
+    elif path == "/mock/conc":
+        reply(200, str(CONC[1]).encode())
     elif path == "/mock/ver":  # pretend the firmware is from another commit
         sha = urllib.parse.parse_qs(urllib.parse.urlsplit(target).query).get("sha", ["abcdef1"])[0]
         await broadcast([f"[VER:4.1 FluidNC v4.1.1 (fluidnc-4.1.1-w5500-{sha}) (esp32s3-wifi):]"])

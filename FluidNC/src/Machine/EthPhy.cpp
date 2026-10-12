@@ -144,6 +144,13 @@ namespace Machine {
             w5500Diagnose(int(csPin), rstPin);
         }
 
+        // No INT pin: the W5500 is polled. The Arduino default (10 ms) delays
+        // every received packet - TCP ACKs included - by up to 10 ms, which
+        // throttles everything sent to the WebUI. 2 ms costs one short SPI
+        // read per poll.
+        if (intPin < 0) {
+            ETH.setPollPeriod(2);
+        }
         bool ok = ETH.begin(arduinoPhyType(_phy_type),
                             _phy_addr,
                             int(csPin),

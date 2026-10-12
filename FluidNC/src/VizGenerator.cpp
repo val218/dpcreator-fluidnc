@@ -541,6 +541,7 @@ struct VizPush {
     ThinState                  thin;
     std::vector<std::string>   outq;
     uint32_t                   last_ms = 0;
+    int32_t                    credit  = 0;      // bytes it may send now (see push_step)
 };
 static VizPush _p;
 
@@ -592,6 +593,7 @@ static void push_begin(const std::string& vpath) {
     _p.sent     = 0;
     _p.sending  = false;
     _p.last_ms  = 0;
+    _p.credit   = 0;
     _p.active   = true;
     push_rewind();
 }
@@ -647,17 +649,23 @@ static void push_step() {
         }
         return;
     }
-    if (now - _p.last_ms < (job ? 20u : 8u)) return;
-    if (uxQueueMessagesWaiting(message_queue) > 16) return;  // let the output drain first
+    // Paced by bytes: about 25 KB/s idle (an 8000-point preview in ~8 s),
+    // 8 KB/s during a job. Faster overran the pendant's receive buffer while
+    // it redrew the screen (lost data, "asking again", partial previews) and
+    // kept the polling task busy with the UART instead of the WebUI.
+    const int32_t rate = job ? 8 : 25;  // bytes per ms
+    if (_p.last_ms == 0) _p.last_ms = now;
+    _p.credit  = std::min<int32_t>(_p.credit + (int32_t)(now - _p.last_ms) * rate, 1200);
     _p.last_ms = now;
+    if (_p.credit < 140) return;
+    if (uxQueueMessagesWaiting(message_queue) > 8) return;  // let the output drain first
     auto keep = [&](const char* l) {
         if ((_p.idx++ % _p.stride) != 0) return;
         std::string s(l);
         while (!s.empty() && (s.back() == '\n' || s.back() == '\r' || s.back() == ' ')) s.pop_back();
         _p.outq.push_back(s);
     };
-    const int msgs = job ? 3 : 6;
-    for (int m = 0; m < msgs; ++m) {
+    for (int m = 0; m < 12 && _p.credit >= 140; ++m) {
         bool eof = false;
         while (_p.outq.size() < 4) {
             if (!fgets(line, sizeof(line), _p.f)) {
@@ -681,6 +689,7 @@ static void push_step() {
             std::string out = head + pts + "]";
             _p.outq.erase(_p.outq.begin(), _p.outq.begin() + take);
             to_pendant(out);
+            _p.credit -= (int32_t)out.size() + 2;
             ++_p.seq;
             _p.sent += take;
         }
