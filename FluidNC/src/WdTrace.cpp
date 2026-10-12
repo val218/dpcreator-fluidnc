@@ -7,8 +7,11 @@
 #include <freertos/task.h>
 #if __has_include(<esp_attr.h>)
 #    include <esp_attr.h>
-#else
-#    define RTC_NOINIT_ATTR
+#endif
+// The report goes to .noinit RAM: like RTC memory it is not cleared by a panic
+// or watchdog restart, and RTC slow memory has no room for it.
+#ifndef __NOINIT_ATTR
+#    define __NOINIT_ATTR
 #endif
 #ifdef FNC_PANIC_CAPTURE
 #    include <esp_task_wdt.h>
@@ -29,7 +32,8 @@ namespace {
 
     uint32_t now_ms() { return (uint32_t)(xTaskGetTickCount() * portTICK_PERIOD_MS); }
 
-    // The report, written once by the watchdog interrupt, kept across the restart.
+    // The report, written once by the watchdog interrupt, kept across the restart
+    // (not across a power cycle).
     constexpr int      LINES = 4;
     constexpr int      LEN   = 300;
     constexpr uint32_t MAGIC = 0x57445431;  // "WDT1"
@@ -38,7 +42,7 @@ namespace {
         uint32_t n;
         char     line[LINES][LEN];
     };
-    RTC_NOINIT_ATTR Report _rtc;
+    __NOINIT_ATTR Report   _rtc;
     Report                 _prev;
     int                    _prevCount = 0;
 

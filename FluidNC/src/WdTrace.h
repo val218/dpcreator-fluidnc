@@ -12,7 +12,7 @@
 //    cheap enough for every pass; HTTP requests mark their method and URL;
 //  - when the watchdog fires (IDF hook esp_task_wdt_isr_user_handler) the
 //    tasks that missed it, every mark with its age and the call stack of each
-//    waiting watched task are written to RTC memory, which survives the
+//    waiting watched task are kept in memory that survives the
 //    restart;
 //  - $Crash reports them as [MSG:CrashWdt:...] lines (decode the
 //    "Backtrace:" parts like the crash backtrace).
