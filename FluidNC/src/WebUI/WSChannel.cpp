@@ -100,10 +100,18 @@ namespace WebUI {
                 }
             }
         } else {
-            // To test this mechanism, try setting WS_MAX_QUEUED_MESSAGES to 2 and have 2 browsers on different PCs or your smartphone
-            if (client->queueIsFull() && (millis() - _last_queue_full) > 1000) {
-                _last_queue_full = millis();
-                log_debug_to(Console, "Websocket queue full while sending to cid#" << _clientNum << ", dropping");
+            // In motion (jogging, a job): a full send queue used to fall
+            // through to binary(), which fails and then *closes* the client -
+            // the WebUI dropped offline during every fast handwheel jog. Keep
+            // the data pending instead (the next poll pass retries); a client
+            // that really stops draining hits the backlog limit in write().
+            const auto queue_limit = max(WS_MAX_QUEUED_MESSAGES - 2, 1);
+            if (client->queueLen() >= queue_limit) {
+                if ((millis() - _last_queue_full) > 1000) {
+                    _last_queue_full = millis();
+                    log_debug_to(Console, "Websocket queue full while moving, cid#" << _clientNum << ", waiting");
+                }
+                return false;
             }
         }
         client = get_client(_server, _clientNum);
@@ -145,6 +153,26 @@ namespace WebUI {
         }
     }
 
+    // Remove every "<...>" status report line from the backlog but the newest.
+    void WSChannel::drop_old_reports() {
+        size_t last = std::string::npos;
+        for (size_t pos = 0; pos < _output_line.size();) {
+            size_t eol = _output_line.find('\n', pos);
+            if (eol == std::string::npos) break;
+            if (_output_line[pos] == '<') last = pos;
+            pos = eol + 1;
+        }
+        std::string kept;
+        kept.reserve(_output_line.size());
+        for (size_t pos = 0; pos < _output_line.size();) {
+            size_t eol = _output_line.find('\n', pos);
+            size_t end = eol == std::string::npos ? _output_line.size() : eol + 1;
+            if (_output_line[pos] != '<' || pos == last || eol == std::string::npos) kept.append(_output_line, pos, end - pos);
+            pos = end;
+        }
+        _output_line.swap(kept);
+    }
+
     void WSChannel::flush() {
         // Non-blocking: the tail ships from pollLine() on the next poll pass.
         // (Was flush_output(true) - a blocking spin that is unacceptable now
@@ -163,6 +191,11 @@ namespace WebUI {
         // the backlog limit *before* appending - otherwise one large write
         // could grow _output_line past WS_OUT_MAX_BACKLOG before the drop
         // fires, briefly defeating the bounded-heap guarantee this is for.
+        // A slow client first loses only superseded status reports: a newer
+        // "<...>" line replaces every older one still waiting here.
+        if (_output_line.length() + size > WS_OUT_MAX_BACKLOG) {
+            drop_old_reports();
+        }
         if (_output_line.length() + size > WS_OUT_MAX_BACKLOG) {
             size_t dropped = _output_line.length();
             std::string().swap(_output_line);

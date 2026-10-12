@@ -91,6 +91,8 @@ protected:
 
     uint32_t _reportInterval = 0;
     int32_t  _nextReportTime = 0;
+    TickType_t _lastReportTick = 0;  // last status report (events are spaced, see autoReport)
+    static constexpr uint32_t REPORT_EVENT_MIN_MS = 50;
 
     gc_modal_t  _lastModal        = modal_defaults;
     uint8_t     _lastTool         = 0;

@@ -68,6 +68,7 @@ namespace WebUI {
         // _output_line without bound.  ~8 frames.
         static constexpr size_t WS_OUT_MAX_BACKLOG = 8 * WS_OUT_FLUSH_LEN;
         std::string               _output_line;
+        void                      drop_old_reports();
         uint32_t                  _output_pending_since = 0;
         unsigned long             _last_queue_full      = 0;
         std::atomic<uint32_t>     _lastActivityMs { 0 };

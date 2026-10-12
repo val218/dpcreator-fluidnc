@@ -276,9 +276,17 @@ void Channel::autoReportGCodeState() {
 void Channel::autoReport() {
     if (_reportInterval) {
         const char* stateName = state_name();
-        if (_reportOvr || _reportWco || _reportState || _lastPinString != report_pin_string ||
-            ((motionState() || _report_when_idle) && (int32_t(xTaskGetTickCount()) - _nextReportTime) >= 0) ||
-            (_lastJobActive != Job::active())) {
+        const bool  due       = (motionState() || _report_when_idle) && (int32_t(xTaskGetTickCount()) - _nextReportTime) >= 0;
+        const bool  event     = _reportOvr || _reportWco || _reportState || _lastPinString != report_pin_string ||
+                         (_lastJobActive != Job::active());
+        // Events (a state change above all) report at once, but not more than
+        // every REPORT_EVENT_MIN_MS: short handwheel jogs flipped Jog/Idle
+        // dozens of times a second and every flip sent a report to every
+        // channel, flooding the WebSocket. A held-back event stays pending
+        // and goes out within that time, so the last state is always sent.
+        const bool spaced = (int32_t(xTaskGetTickCount()) - _lastReportTick) >= (int32_t)pdMS_TO_TICKS(REPORT_EVENT_MIN_MS);
+        if (due || (event && spaced)) {
+            _lastReportTick = xTaskGetTickCount();
             _reportState = false;
             if (_reportOvr) {
                 report_ovr_counter = 0;
