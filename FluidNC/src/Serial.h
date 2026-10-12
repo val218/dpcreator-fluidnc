@@ -26,6 +26,7 @@ class AllChannels : public Channel {
 
     Channel*      _lastChannel = nullptr;
     QueueHandle_t _killQueue;
+    QueueHandle_t _addQueue;
 
     static SemaphoreHandle_t _mutex_general;
     static SemaphoreHandle_t _mutex_pollLine;
@@ -36,7 +37,18 @@ class AllChannels : public Channel {
 public:
     // Depth covers the worst realistic burst: every WebSocket client plus the
     // telnet and HTTP-command channels being torn down between two poll cycles.
-    AllChannels() : Channel("all") { _killQueue = xQueueCreate(32, sizeof(Channel*)); }
+    AllChannels() : Channel("all") {
+        _killQueue = xQueueCreate(32, sizeof(Channel*));
+        _addQueue  = xQueueCreate(16, sizeof(Channel*));
+    }
+
+    // Queues a new channel to be registered by the polling task (at the start
+    // of its next pass, before it takes the channel locks). For callers that
+    // run under another library's lock - the WebSocket connect event holds
+    // AsyncWebSocket's lock, and the polling task takes that lock (to send)
+    // while it holds _mutex_pollLine: registering right there deadlocked both
+    // tasks (task watchdog). Returns false if it could not be queued.
+    bool registerLater(Channel* channel);
 
     // Queues a channel for deletion by the polling task.  Returns false if it
     // could not be queued (kill queue full, or never created); the caller still

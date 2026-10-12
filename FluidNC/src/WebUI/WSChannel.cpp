@@ -1,6 +1,7 @@
 // Copyright (c) 2022 Mitch Bradley
 // Use of this source code is governed by a GPLv3 license that can be found in the LICENSE file.
 
+#include <stdexcept>
 #include "WSChannel.h"
 
 #include "Driver/Console.h"
@@ -512,7 +513,11 @@ namespace WebUI {
                 }
 
                 try {
-                    allChannels.registration(newChannel);
+                    // Not registration(): this runs under AsyncWebSocket's lock
+                    // (see AllChannels::registerLater) - the polling task adds it.
+                    if (!allChannels.registerLater(newChannel)) {
+                        throw std::runtime_error("channel add queue full");
+                    }
                 } catch (...) {
                     // erase/remove/back on a vector of pointers do not allocate.
                     const bool unwindHeld = xSemaphoreTake(ws_channels_mutex, portMAX_DELAY) == pdTRUE;

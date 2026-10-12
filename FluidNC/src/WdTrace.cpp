@@ -35,7 +35,7 @@ namespace {
     // The report, written once by the watchdog interrupt, kept across the restart
     // (not across a power cycle).
     constexpr int      LINES = 4;
-    constexpr int      LEN   = 300;
+    constexpr int      LEN   = 440;  // a 10-entry backtrace line is ~280 characters plus the label
     constexpr uint32_t MAGIC = 0x57445431;  // "WDT1"
     struct Report {
         uint32_t magic;
