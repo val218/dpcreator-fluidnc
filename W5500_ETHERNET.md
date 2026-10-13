@@ -10,7 +10,11 @@ everything works when the network is Ethernet instead of WiFi:
 
 plus dpCREATOR additions:
 
-- dpCREATOR WebUI (3D toolpath view, DRO, jog, files, console) built into the firmware
+- stock FluidNC WebUI in the filesystem image; the dpCREATOR WebUI (3D toolpath
+  view, job recovery, Z adjust, history) is a separate product installed on the
+  board from dpcreator.eu. The commands below work from any sender or console.
+- `$Board/ID`: the board's chip ID and the level of the dpCREATOR commands
+  (`[MSG:BoardID:<12 hex>:api=1]`)
 - SD card usable as a **network drive** on your PC, with TabUI pendant `.viz`
   previews built automatically for every G-code file copied onto it
 - TabUI pendant connection status (`$Pendant/Status`, badge in the WebUI)
