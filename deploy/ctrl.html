@@ -1,0 +1,58 @@
+  <!-- CONTROLLER FIRMWARE -->
+  <div id="dpc-ctrl" class="dpc-fw-panel active">
+    <div class="dpc-fw-grid">
+      <div class="dpc-fw-card">
+        <p class="dpc-fw-title">dpCREATOR controller firmware</p>
+        <div class="dpc-fw-meta">
+          <span class="dpc-fw-badge dpc-fw-badge-free">Free</span>
+          <span class="dpc-fw-badge dpc-fw-badge-chip">ESP32-S3 · 8 MB PSRAM</span>
+          <span class="dpc-fw-badge dpc-fw-badge-ver dpc-fw-ver" data-fw="controller">checking version…</span>
+        </div>
+        <p class="dpc-fw-changelog">FluidNC 4.1.1 with W5500 Ethernet, the newest build, updated automatically. Flashing writes a complete image and <strong>replaces config.yaml</strong>: save a copy first.</p>
+        <div class="dpc-fw-actions">
+          <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" data-manifest="https://dpcreator.eu/fw.php?fw=controller&amp;f=manifest" data-name="dpCREATOR controller firmware" onclick="dpcFlash(this)">&#9889;&nbsp; Flash via browser</button>
+          <a href="https://dpcreator.eu/fw.php?fw=controller&amp;f=bin" class="dpc-fw-btn dpc-fw-btn-ghost">&#8659;&nbsp; Download .bin</a>
+        </div>
+        <p class="dpc-fw-notice">Needs an ESP32-S3 module with 8 MB PSRAM: N8R8, N16R8 or N32R8V. <a href="#" onclick="dpcTab(document.querySelector('[onclick*=dpc-tools]'),'dpc-tools');return false">Check your board</a></p>
+      </div>
+      <aside class="dpc-fw-aside">
+        <h5>How to flash</h5>
+        <ol>
+          <li>Use Chrome or Edge on a computer.</li>
+          <li>Save your <code>config.yaml</code>: Board tools → Files → Download.</li>
+          <li>Connect the controller by USB and click <strong>Flash via browser</strong>.</li>
+          <li>Upload your <code>config.yaml</code> again, then install the WebUI if you use it.</li>
+        </ol>
+        <p>Port not listed? Hold BOOT while plugging in the USB cable.</p>
+      </aside>
+    </div>
+  </div>
+
+  <!-- PENDANT FIRMWARE -->
+  <div id="dpc-pendant" class="dpc-fw-panel">
+    <div class="dpc-fw-grid">
+      <div class="dpc-fw-card">
+        <p class="dpc-fw-title">TabUi pendant firmware</p>
+        <div class="dpc-fw-meta">
+          <span class="dpc-fw-badge dpc-fw-badge-paid">€24.99 licence</span>
+          <span class="dpc-fw-badge dpc-fw-badge-chip">ESP32 · 2.8" touch screen</span>
+          <span class="dpc-fw-badge dpc-fw-badge-ver dpc-fw-ver" data-fw="pendant">checking version…</span>
+        </div>
+        <p class="dpc-fw-changelog">The newest pendant build, updated automatically. Licensed firmware: it is flashed straight from this page with the account you bought it with, there is no download.</p>
+        <div class="dpc-fw-actions">
+          <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" data-manifest="https://dpcreator.eu/fw.php?fw=pendant&amp;f=manifest" data-name="TabUi pendant firmware" onclick="dpcFlash(this)">&#9889;&nbsp; Flash via browser</button>
+          <a href="https://dpcreator.eu/index.php?route=product/product&amp;product_id=377" class="dpc-fw-btn dpc-fw-btn-ghost">Licence details</a>
+        </div>
+      </div>
+      <aside class="dpc-fw-aside">
+        <h5>How to flash</h5>
+        <ol>
+          <li>Use Chrome or Edge on a computer.</li>
+          <li>Unplug the controller cable from the pendant.</li>
+          <li>Connect the pendant by USB and click <strong>Flash via browser</strong>.</li>
+          <li>Plug the controller cable back in.</li>
+        </ol>
+      </aside>
+    </div>
+  </div>
+

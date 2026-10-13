@@ -1,0 +1,19 @@
+
+/* 2026-10 layout pass: one button style, badges on every card, side help */
+.dpc-fw-grid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; align-items: start; }
+@media (max-width: 860px) { .dpc-fw-grid { grid-template-columns: 1fr; } }
+.dpc-fw-aside { background: #f7f9fb; border: 1px solid #e8edf2; border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.55; color: #444; }
+.dpc-fw-aside h5 { font-size: 13px; font-weight: 600; margin: 0 0 8px; color: #1a1a1a; }
+.dpc-fw-aside ol { margin: 0; padding-left: 18px; }
+.dpc-fw-aside li { margin-bottom: 6px; }
+.dpc-fw-aside p { margin: 10px 0 0; font-size: 12px; color: #777; }
+.dpc-fw-aside a { color: #185FA5; }
+.dpc-fw-btn-ghost { background: #fff; color: #185FA5; border: 1px solid #cfd9e4; }
+.dpc-fw-btn-ghost:hover { background: #f2f6fa; color: #0C447C; }
+.dpc-fw-badge:empty { display: none; }
+.dpc-fw-card > p:not([class]) { font-size: 13px; color: #555; line-height: 1.6; }
+.dpc-fw-panel > .dpc-fw-card:first-child, .dpc-fw-panel > .dpc-fw-grid:first-child { margin-top: 4px; }
+#dpc-tools .dpct-quiet { background: #fff; color: #185FA5; border: 1px solid #cfd9e4; }
+#dpc-tools .dpct-tab[aria-selected=true] { border-bottom-color: #185FA5; color: #185FA5; }
+#dpc-tools .dpct-name, #dpc-tools .dpct-acts button, #dpc-tools .dpct-path a { color: #185FA5; }
+#dpc-tools .dpct-acts button.del { color: #9b1c1c; }
