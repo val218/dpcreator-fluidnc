@@ -26,6 +26,9 @@
 #include "CrashTrail.h"
 #include "WdTrace.h"
 #include "Driver/backtrace.h"
+#ifdef ARDUINO_ARCH_ESP32
+#    include "Driver/ram_guard.h"
+#endif
 
 #include <cstdio>
 #if __has_include(<esp_attr.h>)
@@ -283,6 +286,9 @@ namespace Machine {
         // and $Crash reports it).
         crash_trail_boot();  // last commands of the previous run, if it crashed
         wd_boot();           // task watchdog report of the previous run, if any
+#ifdef ARDUINO_ARCH_ESP32
+        ram_guard_init();    // internal RAM reserve + the previous run's RAM numbers
+#endif
         uint32_t streak = crash_streak_update();
         if (streak > 0) {
             log_error("Restarted after a crash (" << streak << " in a row)");
