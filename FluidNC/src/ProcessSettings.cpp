@@ -34,6 +34,7 @@
 #include "Driver/gpio_dump.h"     // gpio_dump()
 #include "Driver/backtrace.h"     // backtrace_get(), etc.
 #include "Driver/restart.h"       // restart_was_panic ($Crash)
+#include "Driver/board_id.h"      // board_id() ($Board/ID)
 #include "CrashTrail.h"           // last commands before a crash
 #include "WdTrace.h"              // task watchdog report
 #include "FileCommands.h"         // make_file_commands()
@@ -583,6 +584,21 @@ static Error go_to_sleep(const char* value, AuthenticationLevel auth_level, Chan
     protocol_send_event(&sleepEvent);
     return Error::Ok;
 }
+// $Board/ID -> [MSG:BoardID:<12 hex digits>:api=<n>]
+// The chip ID identifies the board (WebUI licence installs from dpcreator.eu);
+// api is the level of the dpCREATOR commands this firmware has, so a WebUI can
+// tell when it is older than the firmware.
+static constexpr int DPC_API_LEVEL = 1;
+static Error showBoardId(const char* value, AuthenticationLevel auth_level, Channel& out) {
+    if (value && *value) {
+        return Error::InvalidStatement;
+    }
+    char buf[48];
+    snprintf(buf, sizeof(buf), "[MSG:BoardID:%s:api=%d]\n", board_id(), DPC_API_LEVEL);
+    out.print(buf);
+    return Error::Ok;
+}
+
 static Error get_report_build_info(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (value && *value) {
         return Error::InvalidStatement;
@@ -1129,6 +1145,7 @@ void make_user_commands() {
 
     new UserCommand("SLP", "System/Sleep", go_to_sleep, notIdleOrAlarm);
     new ReportCommand("I", "Build/Info", get_report_build_info, anyState);
+    new ReportCommand("BID", "Board/ID", showBoardId, anyState);
     new UserCommand("RST", "Settings/Restore", restore_settings, notIdleOrAlarm, WA);
 
     new ReportCommand("SA", "Alarm/Send", sendAlarm, anyState);
