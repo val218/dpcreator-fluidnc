@@ -173,6 +173,23 @@ extern "C" void* IRAM_ATTR __wrap_heap_caps_aligned_alloc(size_t alignment, size
 }
 #endif
 
+uint32_t psram_total_kb() {
+    return heap_caps_get_total_size(MALLOC_CAP_SPIRAM) / 1024;
+}
+
+const char* psram_problem() {
+    uint32_t kb = psram_total_kb();
+    if (kb == 0) {
+        return "No PSRAM found. This firmware needs an ESP32-S3 module with 8 MB octal PSRAM (WROOM-1 N8R8 / N16R8 / N32R8V). "
+               "Without it the board runs out of RAM and restarts during jobs.";
+    }
+    if (kb < 4096) {
+        return "Only 2 MB PSRAM found (quad PSRAM module, e.g. N8R2). This firmware is built for 8 MB octal PSRAM (N8R8 / N16R8); "
+               "use a supported module.";
+    }
+    return "";
+}
+
 void ram_guard_init() {
     s_have_prev = s_rtc.magic == RTC_MAGIC;
     if (s_have_prev) {
@@ -181,6 +198,9 @@ void ram_guard_init() {
     take_reserve();
     rtc_update();
     log_info("RAM: " << ram_report());
+    if (*psram_problem()) {
+        log_error(psram_problem());
+    }
 }
 
 void ram_guard_poll() {

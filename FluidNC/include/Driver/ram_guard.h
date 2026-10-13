@@ -42,6 +42,10 @@ struct RamInfo {
     bool     reserve_held;  // the reserve is in place
 };
 RamInfo     ram_info();
+uint32_t    psram_total_kb();  // 0: no PSRAM (wrong module, or it did not start)
+// The firmware needs PSRAM (ESP32-S3 module with 8 MB octal PSRAM, "R8").
+// One line for the boot log / WebUI; empty when the board has it.
+const char* psram_problem();
 std::string ram_report();  // one line for $Heap/Show and logs
 
 // The previous run's numbers, kept in RTC RAM across a crash restart.
