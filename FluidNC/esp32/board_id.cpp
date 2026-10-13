@@ -1,6 +1,12 @@
 #include "Driver/board_id.h"
 
-#include <esp_mac.h>
+// ESP-IDF 5 (ESP32-S3 builds) has esp_mac.h; ESP-IDF 4.4 (classic ESP32
+// Arduino 2.x builds) declares esp_efuse_mac_get_default() in esp_system.h.
+#if __has_include(<esp_mac.h>)
+#    include <esp_mac.h>
+#else
+#    include <esp_system.h>
+#endif
 #include <cstdio>
 
 const char* board_id() {
