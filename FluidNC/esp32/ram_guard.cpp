@@ -89,6 +89,43 @@ namespace {
 // ---------------------------------------------------------------------------
 #ifdef FNC_DMA_ALLOC_GUARD
 extern "C" void* __real_heap_caps_aligned_alloc(size_t alignment, size_t size, uint32_t caps);
+extern "C" void  __real_free(void* p);
+
+// Last resort when the heap has nothing: a few small static buffers (static
+// internal RAM is DMA-capable).  The SPI driver's bounce buffers for SD
+// commands and sectors are small; it releases them with free(), which is
+// wrapped below to recognise these.  Without this, a receive buffer that
+// could not be allocated crashed the board (the driver copies from NULL).
+namespace {
+    constexpr int    POOL_SLOTS = 6;
+    constexpr size_t POOL_SLOT  = 1088;  // a 1 KB transfer, rounded up to 64-byte alignment
+    alignas(64) DRAM_ATTR uint8_t s_pool[POOL_SLOTS][POOL_SLOT];
+    std::atomic<bool>             s_pool_used[POOL_SLOTS];
+    std::atomic<uint32_t>         s_pool_hits { 0 };
+
+    void* pool_take(size_t alignment, size_t size) {
+        if (size > POOL_SLOT || alignment > 64) {
+            return nullptr;
+        }
+        for (int i = 0; i < POOL_SLOTS; ++i) {
+            bool expected = false;
+            if (s_pool_used[i].compare_exchange_strong(expected, true)) {
+                s_pool_hits.fetch_add(1);
+                return s_pool[i];
+            }
+        }
+        return nullptr;
+    }
+}
+
+extern "C" void IRAM_ATTR __wrap_free(void* p) {
+    uint8_t* b = static_cast<uint8_t*>(p);
+    if (b >= &s_pool[0][0] && b < &s_pool[0][0] + sizeof(s_pool)) {
+        s_pool_used[(b - &s_pool[0][0]) / POOL_SLOT].store(false);
+        return;
+    }
+    __real_free(p);
+}
 
 static void* __attribute__((noinline)) dma_alloc_retry(size_t alignment, size_t size, uint32_t caps) {
     // 1. The reserve: no waiting, so the transfer (and the job) goes on.
@@ -106,7 +143,7 @@ static void* __attribute__((noinline)) dma_alloc_retry(size_t alignment, size_t 
     if (!xPortCanYield() || xTaskGetSchedulerState() != taskSCHEDULER_RUNNING) {
         return nullptr;
     }
-    for (int i = 0; i < 50; ++i) {
+    for (int i = 0; i < 10; ++i) {
         vTaskDelay(pdMS_TO_TICKS(2));
         void* p = __real_heap_caps_aligned_alloc(alignment, size, caps);
         if (p) {
@@ -124,6 +161,12 @@ extern "C" void* IRAM_ATTR __wrap_heap_caps_aligned_alloc(size_t alignment, size
     }
     s_fails.fetch_add(1);
     p = dma_alloc_retry(alignment, size, caps);
+    if (!p) {
+        p = pool_take(alignment, size);
+        if (p) {
+            s_rescued.fetch_add(1);
+        }
+    }
     s_rtc.fails   = s_fails.load();
     s_rtc.rescued = s_rescued.load();
     return p;
@@ -187,12 +230,20 @@ RamInfo ram_info() {
     return i;
 }
 
+static uint32_t pool_hits() {
+#ifdef FNC_DMA_ALLOC_GUARD
+    return s_pool_hits.load();
+#else
+    return 0;
+#endif
+}
+
 std::string ram_report() {
     RamInfo i = ram_info();
     char    b[200];
     snprintf(b,
              sizeof(b),
-             "internal %u KB free (lowest %u KB), largest block %u KB, DMA %u KB, PSRAM %u KB, DMA alloc fails %u (saved %u), reserve %s",
+             "internal %u KB free (lowest %u KB), largest block %u KB, DMA %u KB, PSRAM %u KB, DMA alloc fails %u (saved %u, static %u), reserve %s",
              (unsigned)(i.int_free / 1024),
              (unsigned)(i.int_min_free / 1024),
              (unsigned)(i.int_largest / 1024),
@@ -200,6 +251,7 @@ std::string ram_report() {
              (unsigned)(i.psram_free / 1024),
              (unsigned)i.alloc_fails,
              (unsigned)i.rescued,
+             (unsigned)pool_hits(),
              i.reserve_held ? "held" : "in use");
     return b;
 }
