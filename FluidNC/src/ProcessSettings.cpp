@@ -599,6 +599,12 @@ static Error showBoardId(const char* value, AuthenticationLevel auth_level, Chan
     char buf[48];
     snprintf(buf, sizeof(buf), "[MSG:BoardID:%s:api=%d]\n", board_id(), DPC_API_LEVEL);
     out.print(buf);
+#ifdef ARDUINO_ARCH_ESP32
+    // Separate line so older WebUIs / installers (strict BoardID pattern) ignore it.
+    // [MSG:BoardMem:psram=<KB>:ok] or [MSG:BoardMem:psram=<KB>:bad:<why>]
+    std::string mem = "[MSG:BoardMem:psram=" + std::to_string(psram_total_kb()) + (*psram_problem() ? std::string(":bad:") + psram_problem() : std::string(":ok")) + "]\n";
+    out.print(mem.c_str());
+#endif
     return Error::Ok;
 }
 
