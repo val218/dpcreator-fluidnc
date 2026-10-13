@@ -75,3 +75,4 @@
 #dpc-flash-modal .dpc-step-n{background:#2b8fe0}
 #dpc-flash-modal .dpc-modal-close{color:#7f90a0}
 esp-web-install-button button,esp-web-install-button [slot="activate"]{background:#2b8fe0!important;border-radius:2px!important;font:600 18px 'Barlow Condensed',sans-serif!important}
+.dpc-fw-x{margin:-20px 0}
