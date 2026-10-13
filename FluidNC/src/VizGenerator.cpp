@@ -21,6 +21,7 @@
 #include "FluidPath.h"        // keeps the SD card mounted while we use it
 #include "Planner.h"          // plan_get_block_buffer_available
 #include "Machine/MachineConfig.h"  // config->_planner_blocks
+#include "Driver/ram_guard.h"  // ram_tight(): previews wait while internal RAM is short
 
 #include <Arduino.h>  // millis
 #include <atomic>
@@ -625,6 +626,12 @@ static void push_counted() {
 
 static void push_step() {
     if (!_p.active) return;
+    // Every SD read needs a little internal DMA RAM; while it is short the
+    // running job and the network get it, and the preview waits.
+    if (ram_tight()) {
+        _p.last_ms = 0;  // no credit piles up while waiting
+        return;
+    }
     uint32_t   now = millis();
     const bool job = Job::active();
     char       line[64];
@@ -906,7 +913,9 @@ static void pending_poll() {
         return;
     }
     // Building or sending this file's preview counts as progress.
-    bool busy = (_b.active && _b.nc == _pj.nc) || (_p.active && _p.path == viz_path(_pj.nc));
+    // (Not while previews wait for internal RAM: then the job starts after
+    // the usual 15 s instead of waiting for a preview that is not moving.)
+    bool busy = !ram_tight() && ((_b.active && _b.nc == _pj.nc) || (_p.active && _p.path == viz_path(_pj.nc)));
     if (busy) _pj.deadline = now + job_wait_ms;
     bool timeout = (int32_t)(now - _pj.deadline) >= 0;
     if (!_pj.ready && !timeout && pendant_connected()) return;
@@ -1048,11 +1057,27 @@ static void drain_commands() {
     for (auto& c : cmds) run_command(c.line, c.from_pendant);
 }
 
+// One notice per low-RAM episode, so it is clear why a preview stopped.
+static void ram_wait_notice() {
+    static bool waiting = false;
+    bool        busy    = _b.active || _p.active || _q_len > 0;
+    if (ram_tight() && busy && !waiting) {
+        waiting = true;
+        allChannels.print_except("[MSG:VizWait:internal RAM is low - the preview continues when it frees up]\r\n",
+                                 static_cast<Channel*>(pendant_channel()));
+    } else if (!ram_tight() && waiting) {
+        waiting = false;
+    }
+}
+
 void viz_poll() {
     static uint32_t last_slice_ms = 0;
+    ram_guard_poll();
     drain_commands();
     pending_poll();
+    ram_wait_notice();
     push_step();
+    if (ram_tight()) return;  // no new build / build slice until RAM frees up
     if (!_b.active) {
         if (_q_len == 0) return;
         start_next();

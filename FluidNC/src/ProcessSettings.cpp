@@ -28,6 +28,9 @@
 #include "SettingsDefinitions.h"  // build_info
 #include "Protocol.h"             // LINE_BUFFER_SIZE
 #include "Driver/heap.h"          // platform_max_free_block()
+#ifdef ARDUINO_ARCH_ESP32
+#    include "Driver/ram_guard.h"  // ram_report(), ram_crash_report()
+#endif
 #include "UartChannel.h"          // UartChannel
 #include "FileStream.h"           // FileStream()
 #include "StartupLog.h"           // startupLog
@@ -1074,6 +1077,9 @@ static Error showHeap(const char* value, AuthenticationLevel auth_level, Channel
     } else {
         log_info("Heap free: " << xPortGetFreeHeapSize() << " min: " << heapLowWater);
     }
+#ifdef ARDUINO_ARCH_ESP32
+    log_info("RAM: " << ram_report());
+#endif
     return Error::Ok;
 }
 
@@ -1443,6 +1449,14 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
                 channel.print(m.c_str());
             }
         }
+#ifdef ARDUINO_ARCH_ESP32
+        if (restart_was_panic() && !crash_cleared) {  // internal RAM just before it
+            std::string r = ram_crash_report();
+            if (!r.empty()) {
+                channel.print((std::string("[MSG:CrashRam:") + r + "]\n").c_str());
+            }
+        }
+#endif
         if (restart_was_panic() && !crash_cleared) {  // what was sent last before it
             for (int i = 0; i < crash_trail_count(); i++) {
                 std::string m = std::string("[MSG:CrashLast:") + crash_trail_line(i) + "]\n";
