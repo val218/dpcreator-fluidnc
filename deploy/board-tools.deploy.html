@@ -1,0 +1,899 @@
+<div id="dpc-tools" class="dpc-fw-panel">
+  <div class="dpc-fw-section">Board tools</div>
+  <div class="dpc-fw-card">
+    <p class="dpc-fw-title">USB terminal, files and network</p>
+    <div class="dpc-fw-meta"><span class="dpc-fw-badge dpc-fw-badge-free">Free</span><span class="dpc-fw-badge dpc-fw-badge-ver">Any FluidNC board</span></div>
+    <p class="dpc-fw-changelog">Talk to the controller over USB: send commands and read its log, open and edit <code>config.yaml</code>, copy files to and from the board's flash and SD card, and set up its WiFi or Ethernet. Nothing to install; use Chrome or Edge on a computer.</p>
+
+    <div class="dpct-bar">
+      <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" id="dpct-connect">Connect to the board</button>
+      <button type="button" class="dpc-fw-btn dpct-quiet" id="dpct-disconnect" hidden>Disconnect</button>
+      <button type="button" class="dpc-fw-btn dpct-quiet" id="dpct-restart" hidden title="Restarts the controller (like pressing its reset button)">Restart board</button>
+      <span id="dpct-status" class="dpct-status">Not connected</span>
+    </div>
+    <div id="dpct-mem" class="dpc-fw-notice dpct-warn" hidden></div>
+
+    <div id="dpct-main" hidden>
+      <div class="dpct-tabs" role="tablist">
+        <button type="button" role="tab" class="dpct-tab" data-tab="term" aria-selected="true">Terminal</button>
+        <button type="button" role="tab" class="dpct-tab" data-tab="files" aria-selected="false">Files</button>
+        <button type="button" role="tab" class="dpct-tab" data-tab="net" aria-selected="false">Network</button>
+      </div>
+
+      <section id="dpct-term" class="dpct-pane">
+        <pre id="dpct-out" class="dpct-out" aria-live="polite"></pre>
+        <form id="dpct-form" class="dpct-row">
+          <input id="dpct-in" class="dpct-input" autocomplete="off" spellcheck="false" placeholder="Command, for example $I or $SS (Enter sends, ↑ ↓ history)">
+          <button type="submit" class="dpc-fw-btn dpc-fw-btn-flash">Send</button>
+        </form>
+        <div class="dpct-row dpct-small">
+          <button type="button" class="dpct-chip" data-cmd="$I" title="Firmware version and build">Version</button>
+          <button type="button" class="dpct-chip" data-cmd="$SS" title="The log from the last start">Startup log</button>
+          <button type="button" class="dpct-chip" data-cmd="$CD" title="The configuration the board is running">Running config</button>
+          <button type="button" class="dpct-chip" data-cmd="$S" title="All settings">Settings</button>
+          <button type="button" class="dpct-chip" data-cmd="$Heap/Show" title="Memory">Memory</button>
+          <button type="button" class="dpct-chip" data-cmd="$X" title="Clear an alarm">Unlock ($X)</button>
+          <button type="button" class="dpct-chip" data-rt="63" title="Status report">Status ?</button>
+          <button type="button" class="dpct-chip" data-rt="33" title="Feed hold">Hold !</button>
+          <button type="button" class="dpct-chip" data-rt="126" title="Resume">Resume ~</button>
+          <button type="button" class="dpct-chip dpct-danger" data-rt="24" title="Soft reset: stops motion">Reset Ctrl‑X</button>
+          <span class="dpct-grow"></span>
+          <label><input type="checkbox" id="dpct-hidestatus" checked> Hide status reports</label>
+          <button type="button" class="dpct-chip" id="dpct-save">Save log</button>
+          <button type="button" class="dpct-chip" id="dpct-clear">Clear</button>
+        </div>
+      </section>
+
+      <section id="dpct-files" class="dpct-pane" hidden>
+        <div class="dpct-row">
+          <select id="dpct-fs" class="dpct-input dpct-narrow" aria-label="Storage">
+            <option value="localfs">Board flash</option>
+            <option value="sd">SD card</option>
+          </select>
+          <span id="dpct-path" class="dpct-path"></span>
+          <span class="dpct-grow"></span>
+          <span id="dpct-space" class="dpct-small dpct-muted"></span>
+          <button type="button" class="dpc-fw-btn dpct-quiet" id="dpct-refresh">Refresh</button>
+          <label class="dpc-fw-btn dpc-fw-btn-flash dpct-upload">Upload file<input type="file" id="dpct-file" multiple hidden></label>
+        </div>
+        <div id="dpct-fprog" class="dpct-prog" hidden><div id="dpct-fbar"></div><span id="dpct-ftext"></span></div>
+        <table class="dpct-table"><thead><tr><th>Name</th><th class="dpct-num">Size</th><th></th></tr></thead><tbody id="dpct-list"></tbody></table>
+        <p class="dpct-small dpct-muted">Board flash holds <code>config.yaml</code> and the WebUI. Deleting or breaking <code>config.yaml</code> stops the machine from working until it is fixed: download a copy first.</p>
+        <div id="dpct-editor" class="dpct-editor" hidden>
+          <div class="dpct-row"><strong id="dpct-ename"></strong><span class="dpct-grow"></span>
+            <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" id="dpct-esave">Save to board</button>
+            <button type="button" class="dpc-fw-btn dpct-quiet" id="dpct-eclose">Close</button></div>
+          <textarea id="dpct-etext" class="dpct-etext" spellcheck="false"></textarea>
+          <p class="dpct-small dpct-muted">Changes to <code>config.yaml</code> are used after the board restarts.</p>
+        </div>
+      </section>
+
+      <section id="dpct-net" class="dpct-pane" hidden>
+        <p id="dpct-netinfo" class="dpct-small"></p>
+        <div id="dpct-netform"></div>
+        <div class="dpct-row">
+          <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" id="dpct-netsave">Save network settings</button>
+          <button type="button" class="dpc-fw-btn dpct-quiet" id="dpct-netreload">Reload</button>
+          <span id="dpct-netmsg" class="dpct-small"></span>
+        </div>
+      </section>
+    </div>
+    <p id="dpct-noserial" class="dpc-fw-notice" hidden>The board tools need Chrome or Edge on a computer (Web Serial). They don't work on phones, tablets, Firefox or Safari.</p>
+
+    <div class="dpc-fw-notice dpct-req">
+      <strong>Board requirements.</strong> This firmware needs an <strong>ESP32‑S3 with 8 MB octal PSRAM</strong>: an ESP32‑S3‑WROOM‑1 <strong>N8R8</strong>, <strong>N16R8</strong> or <strong>N32R8V</strong> module (the part number on the module's metal shield ends in <strong>R8</strong>). Modules with 2 MB PSRAM (N8R2, N16R2) or none (N4, N8, N16) are not supported: they run out of memory during jobs and restart. Classic ESP32 boards (ESP32‑WROOM‑32) are not supported by this firmware. Connect a board and the tools above tell you what it has.
+    </div>
+  </div>
+</div>
+
+<style>
+#dpc-tools .dpct-bar,#dpc-tools .dpct-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0}
+#dpc-tools .dpct-grow{flex:1}
+#dpc-tools .dpct-status{font-size:13px;color:#555}
+#dpc-tools .dpct-quiet{background:#fff;color:#333;border:1px solid #ccc}
+#dpc-tools .dpct-warn{background:#FCEBEB;color:#791F1F}
+#dpc-tools .dpct-req{margin-top:14px}
+#dpc-tools .dpct-tabs{display:flex;gap:2px;border-bottom:1px solid #ddd;margin-top:6px}
+#dpc-tools .dpct-tab{background:none;border:0;border-bottom:2px solid transparent;padding:8px 14px;font-size:14px;cursor:pointer;color:#555}
+#dpc-tools .dpct-tab[aria-selected=true]{border-bottom-color:#0F6E56;color:#0F6E56;font-weight:600}
+#dpc-tools .dpct-out{height:340px;overflow:auto;background:#10201b;color:#d6efe6;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;padding:8px 10px;margin:10px 0 0;border-radius:4px;white-space:pre-wrap;word-break:break-all}
+#dpc-tools .dpct-out .o{color:#8fd3ff}
+#dpc-tools .dpct-out .e{color:#ff9d9d}
+#dpc-tools .dpct-out .i{color:#9aa}
+#dpc-tools .dpct-input{flex:1;min-width:180px;padding:7px 9px;border:1px solid #ccc;border-radius:4px;font:13px ui-monospace,Menlo,Consolas,monospace}
+#dpc-tools .dpct-narrow{flex:0 0 auto;min-width:0;font-family:inherit}
+#dpc-tools .dpct-small{font-size:12px}
+#dpc-tools .dpct-muted{color:#888}
+#dpc-tools .dpct-chip{background:#f3f5f4;border:1px solid #d9dfdc;border-radius:12px;padding:3px 10px;font-size:12px;cursor:pointer}
+#dpc-tools .dpct-chip:hover{background:#e6ece9}
+#dpc-tools .dpct-danger{color:#9b1c1c;border-color:#e8c4c4}
+#dpc-tools .dpct-path{font:13px ui-monospace,Menlo,Consolas,monospace}
+#dpc-tools .dpct-path a{cursor:pointer}
+#dpc-tools .dpct-table{width:100%;border-collapse:collapse;font-size:13px}
+#dpc-tools .dpct-table td,#dpc-tools .dpct-table th{padding:6px 6px;border-bottom:1px solid #eee;text-align:left}
+#dpc-tools .dpct-table th{font-weight:600;color:#666;font-size:12px}
+#dpc-tools .dpct-num{text-align:right!important;white-space:nowrap}
+#dpc-tools .dpct-acts{text-align:right;white-space:nowrap}
+#dpc-tools .dpct-acts button{background:none;border:0;color:#0F6E56;cursor:pointer;font-size:12px;padding:2px 6px}
+#dpc-tools .dpct-acts button.del{color:#9b1c1c}
+#dpc-tools .dpct-name{cursor:pointer;color:#0F6E56}
+#dpc-tools .dpct-prog{position:relative;height:18px;background:#eee;border-radius:3px;overflow:hidden;margin:6px 0}
+#dpc-tools .dpct-prog div{height:18px;width:0;background:#9fd8c6;transition:width .2s}
+#dpc-tools .dpct-prog span{position:absolute;left:8px;top:1px;font-size:12px}
+#dpc-tools .dpct-editor{border:1px solid #ddd;border-radius:4px;padding:8px 10px;margin-top:10px}
+#dpc-tools .dpct-etext{width:100%;height:380px;box-sizing:border-box;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid #ccc;border-radius:4px;padding:8px}
+#dpc-tools .dpct-upload{cursor:pointer}
+#dpc-tools fieldset{border:1px solid #e3e3e3;border-radius:4px;margin:10px 0;padding:6px 12px 10px}
+#dpc-tools legend{font-weight:600;font-size:13px;padding:0 4px}
+#dpc-tools .dpct-field{display:grid;grid-template-columns:170px 1fr;gap:8px;align-items:center;margin:6px 0;font-size:13px}
+#dpc-tools .dpct-field input,#dpc-tools .dpct-field select{padding:6px 8px;border:1px solid #ccc;border-radius:4px;font-size:13px;max-width:320px}
+@media (max-width:600px){#dpc-tools .dpct-field{grid-template-columns:1fr}}
+</style>
+
+<script>
+/* dpCREATOR board tools: a USB terminal, the board's files and its network
+ * settings, from the dpcreator.eu Flash Firmware page (Chrome or Edge on a
+ * computer: Web Serial). Works with any FluidNC board, not only dpCREATOR.
+ *
+ *   Session(port, {onLine, onSent})   one open USB serial port
+ *     .send(text)                     a line typed in the terminal
+ *     .realtime(byte)                 ?, !, ~, Ctrl-X
+ *     .cmd(text, ms)                  -> {ok, lines, error}   (one at a time)
+ *     .listFiles(fs, dir)             -> {files:[{name,size,dir}], total, used}
+ *     .download(fs, path, size)       -> Uint8Array            (XModem-1K)
+ *     .upload(fs, path, bytes)        -> bytes stored          (XModem-1K)
+ *     .remove(fs, path) / .rename(fs, from, to)
+ *     .getSetting(name) / .setSetting(name, value)
+ *     .network()                      -> what the board has (WiFi / Ethernet) and its settings
+ *     .scanWifi()                     -> [{ssid, signal, secure}]
+ *     .close()
+ *
+ * fs is "localfs" (the board's flash: config.yaml, the WebUI) or "sd".
+ */
+(function (root) {
+  "use strict";
+
+  const SOH = 0x01, STX = 0x02, EOT = 0x04, ACK = 0x06, NAK = 0x15, CAN = 0x18, CTRLZ = 0x1a;
+
+  function crc16(buf, off, len) {
+    let crc = 0;
+    for (let i = off; i < off + len; i++) {
+      crc ^= buf[i] << 8;
+      for (let j = 0; j < 8; j++) crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+    }
+    return crc;
+  }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  function fsPath(fs, path) {
+    const p = String(path || "").replace(/^\/+/, "");
+    return "/" + (fs === "sd" ? "sd" : "localfs") + "/" + p;
+  }
+
+  function Session(port, opts) {
+    opts = opts || {};
+    const onLine = opts.onLine || (() => {});
+    const q = [];            // raw bytes (raw mode)
+    const lines = [];        // text lines waiting for a reader (only while one waits)
+    let waiters = [];
+    let lineBuf = "";
+    let raw = false;
+    let closed = false;
+    let listening = 0;       // >0: an operation collects lines
+    let busy = Promise.resolve();
+
+    function wake() { const w = waiters; waiters = []; w.forEach((f) => f()); }
+    function textByte(b) {
+      if (b === 10) {
+        const l = lineBuf.replace(/\r$/, "");
+        lineBuf = "";
+        onLine(l, "in");
+        if (listening) lines.push(l);
+      } else if (b !== 13 || lineBuf.length) {
+        lineBuf += String.fromCharCode(b);
+      }
+    }
+
+    (async () => {
+      try {
+        for (;;) {
+          const chunk = await port.read();
+          if (!chunk) break;
+          for (const b of chunk) { if (raw) q.push(b); else textByte(b); }
+          wake();
+        }
+      } catch (e) { /* closed */ }
+      closed = true;
+      onLine("(port closed)", "info");
+      wake();
+    })();
+
+    function wait(ms) {
+      return new Promise((res) => {
+        const t = setTimeout(() => { waiters = waiters.filter((x) => x !== done); res(false); }, ms);
+        function done() { clearTimeout(t); res(true); }
+        waiters.push(done);
+      });
+    }
+    async function byte(ms) {
+      const end = Date.now() + ms;
+      while (!q.length) {
+        if (closed) return -1;
+        const left = end - Date.now();
+        if (left <= 0) return -1;
+        await wait(left);
+      }
+      return q.shift();
+    }
+    async function nextLine(ms) {
+      const end = Date.now() + ms;
+      while (!lines.length) {
+        if (closed) return null;
+        const left = end - Date.now();
+        if (left <= 0) return null;
+        await wait(left);
+      }
+      return lines.shift();
+    }
+    function setRaw(on) {
+      raw = on;
+      if (on) { q.length = 0; for (const c of lineBuf) q.push(c.charCodeAt(0)); lineBuf = ""; }
+      else { const rest = q.splice(0); rest.forEach(textByte); }
+    }
+    const write = (bytes) => port.write(bytes);
+    async function sendLine(text) {
+      onLine(text, "out");
+      await write(new TextEncoder().encode(text + "\n"));
+    }
+
+    // One operation at a time (a typed line waits for a running transfer).
+    function exclusive(fn) {
+      const run = busy.then(fn, fn);
+      busy = run.catch(() => {});
+      return run;
+    }
+
+    async function cmdNow(text, ms) {
+      listening++;
+      lines.length = 0;
+      try {
+        await sendLine(text);
+        const got = [];
+        const end = Date.now() + (ms || 5000);
+        for (;;) {
+          const l = await nextLine(Math.max(1, end - Date.now()));
+          if (l === null) return { ok: false, lines: got, error: closed ? "port closed" : "timeout" };
+          if (l === "ok") return { ok: true, lines: got };
+          if (/^error:/.test(l)) return { ok: false, lines: got, error: l };
+          if (l.startsWith("<") && l.endsWith(">")) continue;   // status report
+          got.push(l);
+        }
+      } finally {
+        listening--;
+      }
+    }
+
+    // ---- XModem-1K / CRC-16, both directions (FluidNC xmodem.cpp) --------
+    async function xmodemSend(data, progress) {
+      // The board waits 1 s, then sends 'C' every 2 s. Log lines can contain a
+      // 'C' too, so accept it only at the start of a line.
+      setRaw(true);
+      try {
+        let prev = 10, start = false;
+        const end = Date.now() + 40000;
+        while (Date.now() < end) {
+          const c = await byte(end - Date.now());
+          if (c < 0) break;
+          if (c === 0x43 && (prev === 10 || prev === 13 || prev === 0x43)) { start = true; break; }
+          if (c === CAN) throw new Error("The board refused the file (cannot open it for writing).");
+          prev = c;
+        }
+        if (!start) throw new Error("The board did not start the transfer.");
+        const blocks = Math.max(1, Math.ceil(data.length / 1024));
+        for (let n = 0; n < blocks; n++) {
+          const pkt = new Uint8Array(1029);
+          pkt[0] = STX; pkt[1] = (n + 1) & 0xff; pkt[2] = ~(n + 1) & 0xff;
+          pkt.fill(CTRLZ, 3, 1027);
+          pkt.set(data.subarray(n * 1024, Math.min(data.length, (n + 1) * 1024)), 3);
+          const crc = crc16(pkt, 3, 1024);
+          pkt[1027] = crc >> 8; pkt[1028] = crc & 0xff;
+          let sent = false;
+          for (let tries = 0; tries < 10 && !sent; tries++) {
+            await write(pkt);
+            for (;;) {
+              const r = await byte(5000);
+              if (r === ACK) { sent = true; break; }
+              if (r === NAK || r < 0) break;
+              if (r === CAN) {
+                if ((await byte(1000)) === CAN) throw new Error("The board cancelled the transfer (not enough space?).");
+              }
+            }
+          }
+          if (!sent) throw new Error("Transfer failed at block " + (n + 1) + " of " + blocks + ".");
+          progress && progress((n + 1) / blocks);
+        }
+        for (let tries = 0; tries < 10; tries++) {
+          await write(new Uint8Array([EOT]));
+          const r = await byte(5000);
+          if (r === ACK) return;
+          if (r === CAN) throw new Error("The board cancelled the transfer (not enough space?).");
+        }
+        throw new Error("The board did not confirm the end of the transfer.");
+      } finally {
+        setRaw(false);
+      }
+    }
+
+    async function quiet(ms) {   // drop bytes until the line is quiet for ms
+      for (;;) {
+        const c = await byte(ms);
+        if (c < 0) return;
+      }
+    }
+
+    async function xmodemReceive(expect, progress) {
+      // FluidNC's sender waits (2 s, 16 times) for 'C'. A log line ("Sending
+      // ... via XModem") can arrive around the first packet: bytes before a
+      // packet start are skipped, a damaged packet is asked for again.
+      setRaw(true);
+      try {
+        const out = [];
+        let got = 0, packetno = 1, started = false, tries = 0;
+        for (;;) {
+          // One 'C' per 3 s: the sender reads one byte after each packet, so
+          // a spare 'C' would make it send a packet twice and shift the ACKs.
+          if (!started) await write(new Uint8Array([0x43]));
+          let c = await byte(3000);
+          // skip text until a packet header / end
+          while (c >= 0 && c !== STX && c !== SOH && c !== EOT && c !== CAN) c = await byte(3000);
+          if (c < 0) {
+            if (++tries > 5) throw new Error(started ? "The transfer stopped." : "The board did not start sending (does the file exist?).");
+            if (started) await write(new Uint8Array([NAK]));
+            continue;
+          }
+          if (c === CAN) {
+            if ((await byte(1000)) === CAN) throw new Error("The board cancelled the transfer.");
+            continue;
+          }
+          if (c === EOT) {
+            await write(new Uint8Array([ACK]));
+            break;
+          }
+          started = true;
+          const size = c === STX ? 1024 : 128;
+          const pkt = new Uint8Array(size + 4);
+          let ok = true;
+          for (let i = 0; i < pkt.length; i++) {
+            const b = await byte(1000);
+            if (b < 0) { ok = false; break; }
+            pkt[i] = b;
+          }
+          ok = ok && pkt[0] === ((~pkt[1]) & 0xff) && crc16(pkt, 2, size) === ((pkt[size + 2] << 8) | pkt[size + 3]);
+          if (!ok) {
+            await quiet(150);
+            if (++tries > 20) throw new Error("Too many damaged packets.");
+            await write(new Uint8Array([NAK]));
+            continue;
+          }
+          tries = 0;
+          if (pkt[0] === (packetno & 0xff)) {
+            out.push(pkt.slice(2, 2 + size));
+            got += size;
+            packetno++;
+            progress && expect && progress(Math.min(1, got / expect));
+          }   // else: a repeat of the last packet (our ACK was lost)
+          await write(new Uint8Array([ACK]));
+        }
+        const all = new Uint8Array(got);
+        let p = 0;
+        for (const b of out) { all.set(b, p); p += b.length; }
+        // The last packet is padded with Ctrl-Z: cut to the listed size, or
+        // (size unknown) strip the padding.
+        if (expect != null && expect <= all.length) return all.subarray(0, expect);
+        let n = all.length;
+        while (n > 0 && all[n - 1] === CTRLZ) n--;
+        return all.subarray(0, n);
+      } finally {
+        setRaw(false);
+      }
+    }
+
+    // ---- files -------------------------------------------------------------
+    function parseList(lines) {
+      // $LocalFS/ListJSON / $SD/ListJSON: {"files":[{"name":..,"size":..}],"path":..,"total":..,"used":..}
+      const text = lines.filter((l) => !/^\[MSG:/.test(l)).join("");
+      const a = text.indexOf("{"), b = text.lastIndexOf("}");
+      if (a >= 0 && b > a) {
+        try {
+          const j = JSON.parse(text.slice(a, b + 1));
+          return {
+            files: (j.files || []).map((f) => ({ name: f.name, size: +f.size, dir: +f.size < 0 })),
+            total: j.total || "", used: j.used || "",
+          };
+        } catch (e) { /* fall through */ }
+      }
+      // $LocalFS/List: [FILE: name|SIZE:n] / [DIR:name], recursive (indented)
+      const files = [];
+      let total = "", used = "";
+      for (const l of lines) {
+        let m;
+        if ((m = /^\[FILE: (\S[^|]*)\|SIZE:(\d+)/.exec(l))) files.push({ name: m[1], size: +m[2], dir: false });
+        else if ((m = /^\[DIR:(\S.*)\]?$/.exec(l))) files.push({ name: m[1].replace(/\]$/, ""), size: -1, dir: true });
+        else if ((m = /Used:([^ \]]+) Total:([^ \]]+)/.exec(l))) { used = m[1]; total = m[2]; }
+      }
+      return { files, total, used };
+    }
+
+    const FS = (fs) => (fs === "sd" ? "SD" : "LocalFS");
+
+    async function listFiles(fs, dir) {
+      const r = await cmdNow("$" + FS(fs) + "/ListJSON=" + (dir || "/"), 20000);
+      if (!r.ok) {
+        const msg = (r.lines.find((l) => /error|fail|mount/i.test(l)) || r.error || "").replace(/^\[MSG:(ERR|INFO): ?/, "").replace(/\]$/, "");
+        throw new Error(fs === "sd" ? "Could not read the SD card (" + msg + "). Is a card inserted?" : "Could not list the files (" + msg + ").");
+      }
+      const list = parseList(r.lines);
+      list.files.sort((x, y) => (x.dir !== y.dir ? (x.dir ? -1 : 1) : x.name.localeCompare(y.name)));
+      return list;
+    }
+
+    async function download(fs, path, size, progress) {
+      listening++;
+      lines.length = 0;
+      try {
+        await sendLine("$Xmodem/Send=" + fsPath(fs, path));
+        await sleep(200);   // let "Sending ... via XModem" / "Cannot open" arrive as text
+        const early = lines.splice(0);
+        if (early.some((l) => /Cannot open/.test(l))) throw new Error("The board cannot open " + path + ".");
+        const data = await xmodemReceive(size, progress);
+        const end = Date.now() + 3000;
+        for (;;) {   // "Sent N bytes" / ok
+          const l = await nextLine(Math.max(1, end - Date.now()));
+          if (l === null || l === "ok" || /^error:/.test(l)) break;
+        }
+        return data;
+      } finally {
+        listening--;
+      }
+    }
+
+    async function upload(fs, path, bytes, progress) {
+      if (bytes.length && bytes[bytes.length - 1] === CTRLZ) {
+        // XModem pads with Ctrl-Z and the board strips trailing Ctrl-Z bytes.
+        throw new Error("This file ends with a Ctrl-Z byte, which XModem cannot carry. Add a newline at the end and try again.");
+      }
+      listening++;
+      lines.length = 0;
+      try {
+        await sendLine("$Xmodem/Receive=" + fsPath(fs, path));
+        await xmodemSend(bytes, progress);
+        const end = Date.now() + 8000;
+        let stored = null, failed = null;
+        for (;;) {
+          const l = await nextLine(Math.max(1, end - Date.now()));
+          if (l === null) break;
+          let m;
+          if ((m = /Received (\d+) bytes/.exec(l))) stored = +m[1];
+          if (/Reception failed(.*)/.test(l)) failed = l.replace(/^\[MSG:INFO: ?/, "").replace(/\]$/, "");
+          if (l === "ok" || /^error:/.test(l)) break;
+        }
+        if (failed) throw new Error(failed);
+        if (stored !== bytes.length) throw new Error("The board stored " + stored + " of " + bytes.length + " bytes.");
+        return stored;
+      } finally {
+        listening--;
+      }
+    }
+
+    // ---- settings / network ------------------------------------------------
+    async function getSetting(name) {
+      const r = await cmdNow("$" + name, 4000);
+      if (!r.ok) return null;
+      const re = new RegExp("^\\$" + name.replace(/[/]/g, "\\/") + "=(.*)$", "i");
+      for (const l of r.lines) { const m = re.exec(l); if (m) return m[1]; }
+      return null;
+    }
+    async function setSetting(name, value) {
+      if (/[\r\n]/.test(value)) throw new Error("Line breaks are not allowed in " + name + ".");
+      const r = await cmdNow("$" + name + "=" + value, 6000);
+      if (!r.ok) throw new Error(name + ": " + (r.lines.find((l) => /ERR|error/i.test(l)) || r.error));
+    }
+
+    const NET = {
+      common: ["Hostname", "network/type"],
+      wifi: ["WiFi/Mode", "Sta/SSID", "Sta/IPMode", "Sta/IP", "Sta/Gateway", "Sta/Netmask", "AP/SSID", "AP/Channel", "AP/IP"],
+      eth: ["Ethernet/IPMode", "Ethernet/IP", "Ethernet/Gateway", "Ethernet/Netmask"],
+    };
+    async function network() {
+      const v = {};
+      for (const n of NET.common) v[n] = await getSetting(n);
+      const wifi = (v["WiFi/Mode"] = await getSetting("WiFi/Mode")) !== null;
+      if (wifi) for (const n of NET.wifi.slice(1)) v[n] = await getSetting(n);
+      const eth = (v["Ethernet/IPMode"] = await getSetting("Ethernet/IPMode")) !== null;
+      if (eth) for (const n of NET.eth.slice(1)) v[n] = await getSetting(n);
+      const ip = await cmdNow("$System/IP", 3000);
+      const ipl = ip.ok && ip.lines.map((l) => /(\d+\.\d+\.\d+\.\d+)/.exec(l)).find(Boolean);
+      return { wifi, eth, values: v, ip: ipl ? ipl[1] : "" };
+    }
+    async function scanWifi() {
+      const r = await cmdNow("$WiFi/ListAPs", 20000);
+      const text = r.lines.filter((l) => !/^\[MSG:/.test(l)).join("");
+      const a = text.indexOf("{"), b = text.lastIndexOf("}");
+      if (!r.ok || a < 0) throw new Error("The board could not scan for networks" + (r.error ? " (" + r.error + ")" : "") + ".");
+      const j = JSON.parse(text.slice(a, b + 1));
+      const seen = new Map();
+      for (const ap of j.AP_LIST || j.data || []) {
+        if (!ap.SSID) continue;
+        const prev = seen.get(ap.SSID);
+        if (!prev || +ap.SIGNAL > prev.signal) seen.set(ap.SSID, { ssid: ap.SSID, signal: +ap.SIGNAL, secure: ap.IS_PROTECTED === true || ap.IS_PROTECTED === "1" || ap.IS_PROTECTED === 1 });
+      }
+      return [...seen.values()].sort((x, y) => y.signal - x.signal);
+    }
+
+    return {
+      get closed() { return closed; },
+      send: (text) => exclusive(() => sendLine(text)),
+      realtime: (b) => { onLine({ 0x3f: "?", 0x21: "! (feed hold)", 0x7e: "~ (resume)", 0x18: "Ctrl-X (reset)" }[b] || "0x" + b.toString(16), "out"); return write(new Uint8Array([b])); },
+      cmd: (text, ms) => exclusive(() => cmdNow(text, ms)),
+      listFiles: (fs, dir) => exclusive(() => listFiles(fs, dir)),
+      download: (fs, path, size, progress) => exclusive(() => download(fs, path, size, progress)),
+      upload: (fs, path, bytes, progress) => exclusive(() => upload(fs, path, bytes, progress)),
+      remove: (fs, path) => exclusive(async () => {
+        const r = await cmdNow("$" + FS(fs) + "/Delete=" + fsPath(fs, path), 8000);
+        if (!r.ok) throw new Error("Could not delete " + path + " (" + (r.lines.find((l) => /ERR/.test(l)) || r.error) + ").");
+      }),
+      rename: (fs, from, to) => exclusive(async () => {
+        const r = await cmdNow("$" + FS(fs) + "/Rename=" + fsPath(fs, from) + ">" + fsPath(fs, to), 8000);
+        if (!r.ok) throw new Error("Could not rename " + from + " (" + (r.lines.find((l) => /ERR/.test(l)) || r.error) + ").");
+      }),
+      getSetting: (n) => exclusive(() => getSetting(n)),
+      setSetting: (n, v) => exclusive(() => setSetting(n, v)),
+      network: () => exclusive(network),
+      scanWifi: () => exclusive(scanWifi),
+      close: () => port.close && port.close(),
+    };
+  }
+
+  /** Web Serial port adapter (115200 baud, FluidNC's USB console). */
+  async function openSerial() {
+    const sp = await navigator.serial.requestPort();
+    await sp.open({ baudRate: 115200, bufferSize: 65536 });
+    const reader = sp.readable.getReader();
+    const writer = sp.writable.getWriter();
+    return {
+      read: async () => { const { value, done } = await reader.read(); return done ? null : value; },
+      write: (b) => writer.write(b),
+      // Restart the board the way esptool does (EN low via RTS), staying out of the bootloader.
+      reset: async () => {
+        try { await sp.setSignals({ dataTerminalReady: false, requestToSend: true }); await sleep(120); await sp.setSignals({ dataTerminalReady: false, requestToSend: false }); } catch (e) {}
+      },
+      close: async () => {
+        try { await reader.cancel(); } catch (e) {}
+        try { reader.releaseLock(); writer.releaseLock(); } catch (e) {}
+        try { await sp.close(); } catch (e) {}
+      },
+    };
+  }
+
+  const api = { Session, openSerial, crc16, fsPath };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.DPCBoardTools = api;
+})(typeof window !== "undefined" ? window : globalThis);
+
+(function () {
+  var T = window.DPCBoardTools;
+  var $ = function (id) { return document.getElementById(id); };
+  var session = null, port = null;
+  var cwd = { localfs: "/", sd: "/" };
+  var history = [], hpos = 0, logText = "", psramNote = "";
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function size(n) { return n < 0 ? "" : n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : (n / 1048576).toFixed(2) + " MB"; }
+
+  if (!("serial" in navigator)) {
+    $("dpct-connect").disabled = true;
+    $("dpct-connect").className = "dpc-fw-btn dpc-fw-btn-lock";
+    $("dpct-noserial").hidden = false;
+  }
+
+  // ---------------------------------------------------------------- terminal
+  var out = $("dpct-out"), pending = [], flushQueued = false;
+  function show(text, dir) {
+    if (dir === "in" && $("dpct-hidestatus").checked && /^<.*>$/.test(text)) return;
+    logText += (dir === "out" ? "> " : "") + text + "\n";
+    pending.push([text, dir]);
+    if (!flushQueued) { flushQueued = true; requestAnimationFrame(flush); }
+  }
+  function flush() {
+    flushQueued = false;
+    var stick = out.scrollTop + out.clientHeight >= out.scrollHeight - 30;
+    var frag = document.createDocumentFragment();
+    pending.splice(0).forEach(function (p) {
+      var el = document.createElement("span");
+      if (p[1] === "out") el.className = "o";
+      else if (p[1] === "info") el.className = "i";
+      else if (/^error:|\[MSG:ERR/.test(p[0])) el.className = "e";
+      el.textContent = (p[1] === "out" ? "> " : "") + p[0] + "\n";
+      frag.appendChild(el);
+    });
+    out.appendChild(frag);
+    while (out.childNodes.length > 4000) out.removeChild(out.firstChild);
+    if (stick) out.scrollTop = out.scrollHeight;
+  }
+
+  function memCheck(line) {
+    var m = /^\[MSG:BoardMem:psram=(\d+):(ok|bad)(?::([^\]]*))?\]/.exec(line);
+    if (!m) return;
+    var w = $("dpct-mem");
+    if (m[2] === "bad") { w.hidden = false; w.textContent = "This board is not supported: " + m[3]; }
+    else { w.hidden = true; psramNote = " · PSRAM " + Math.round(+m[1] / 1024) + " MB"; }
+  }
+
+  $("dpct-connect").onclick = async function () {
+    try { port = await T.openSerial(); } catch (e) {
+      if (e && e.name !== "NotFoundError") $("dpct-status").textContent = "Could not open the port: " + (e.message || e) + ". Close other programs that use it (gSender, a terminal, another tab).";
+      return;
+    }
+    session = T.Session(port, { onLine: function (l, dir) {
+      show(l, dir);
+      if (dir === "in") memCheck(l);
+      if (dir === "info" && l === "(port closed)") disconnect();
+    } });
+    $("dpct-connect").hidden = true; $("dpct-disconnect").hidden = false; $("dpct-restart").hidden = false;
+    $("dpct-main").hidden = false;
+    $("dpct-status").textContent = "Connected";
+    show("Connected. Type $I for the firmware version, $SS for the startup log.", "info");
+    setTimeout(async function () {
+      var r = await session.cmd("$Board/ID", 3000);
+      var id = r.ok && r.lines.map(function (l) { return /BoardID:([0-9A-F]{12})/.exec(l); }).find(Boolean);
+      if (id) $("dpct-status").textContent = "Connected to board …" + id[1].slice(-6) + psramNote;
+      else if (!r.ok) $("dpct-status").textContent = "Connected (the board did not answer $Board/ID: older or other firmware)";
+    }, 600);
+  };
+  async function disconnect() {
+    if (port) { try { await port.close(); } catch (e) {} }
+    port = null; session = null;
+    $("dpct-connect").hidden = false; $("dpct-disconnect").hidden = true; $("dpct-restart").hidden = true;
+    $("dpct-status").textContent = "Not connected";
+  }
+  $("dpct-disconnect").onclick = disconnect;
+  $("dpct-restart").onclick = async function () {
+    if (!port) return;
+    show("Restarting the board… (if the terminal stays quiet, click Disconnect and Connect again)", "info");
+    session.send("$Bye");
+  };
+
+  $("dpct-form").onsubmit = function (ev) {
+    ev.preventDefault();
+    var v = $("dpct-in").value;
+    if (!session || !v.trim()) return;
+    history.push(v); if (history.length > 100) history.shift(); hpos = history.length;
+    $("dpct-in").value = "";
+    session.send(v);
+  };
+  $("dpct-in").onkeydown = function (ev) {
+    if (ev.key === "ArrowUp" && hpos > 0) { hpos--; this.value = history[hpos]; ev.preventDefault(); }
+    else if (ev.key === "ArrowDown") { hpos = Math.min(history.length, hpos + 1); this.value = history[hpos] || ""; ev.preventDefault(); }
+  };
+  Array.prototype.forEach.call(document.querySelectorAll("#dpc-tools .dpct-chip[data-cmd]"), function (b) {
+    b.onclick = function () { if (session) session.send(b.getAttribute("data-cmd")); };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("#dpc-tools .dpct-chip[data-rt]"), function (b) {
+    b.onclick = function () { if (session) session.realtime(+b.getAttribute("data-rt")); };
+  });
+  $("dpct-clear").onclick = function () { out.textContent = ""; logText = ""; };
+  $("dpct-save").onclick = function () { saveFile("fluidnc-log.txt", new TextEncoder().encode(logText)); };
+
+  function saveFile(name, bytes) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([bytes]));
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+  }
+
+  // ---------------------------------------------------------------- tabs
+  Array.prototype.forEach.call(document.querySelectorAll("#dpc-tools .dpct-tab"), function (t) {
+    t.onclick = function () {
+      Array.prototype.forEach.call(document.querySelectorAll("#dpc-tools .dpct-tab"), function (x) { x.setAttribute("aria-selected", x === t ? "true" : "false"); });
+      ["term", "files", "net"].forEach(function (n) { $("dpct-" + n).hidden = n !== t.getAttribute("data-tab"); });
+      if (t.getAttribute("data-tab") === "files") listFiles();
+      if (t.getAttribute("data-tab") === "net") loadNet();
+    };
+  });
+
+  // ---------------------------------------------------------------- files
+  function fs() { return $("dpct-fs").value; }
+  function join(dir, name) { return (dir.replace(/\/+$/, "") + "/" + name).replace(/^\/+/, ""); }
+  function progress(text, p) {
+    $("dpct-fprog").hidden = p === null;
+    $("dpct-ftext").textContent = text || "";
+    $("dpct-fbar").style.width = Math.round((p || 0) * 100) + "%";
+  }
+  function crumbs() {
+    var d = cwd[fs()], parts = d.split("/").filter(Boolean), html = '<a data-p="/">' + (fs() === "sd" ? "SD" : "flash") + "</a>", acc = "";
+    parts.forEach(function (p) { acc += "/" + p; html += ' / <a data-p="' + esc(acc) + '">' + esc(p) + "</a>"; });
+    $("dpct-path").innerHTML = html;
+    Array.prototype.forEach.call($("dpct-path").querySelectorAll("a"), function (a) { a.onclick = function () { cwd[fs()] = a.getAttribute("data-p"); listFiles(); }; });
+  }
+  async function listFiles() {
+    if (!session) return;
+    crumbs();
+    var tb = $("dpct-list");
+    tb.innerHTML = '<tr><td colspan="3" class="dpct-muted">Reading…</td></tr>';
+    try {
+      var r = await session.listFiles(fs(), cwd[fs()]);
+      $("dpct-space").textContent = r.used && r.total ? r.used + " of " + r.total + " used" : "";
+      tb.innerHTML = "";
+      if (!r.files.length) tb.innerHTML = '<tr><td colspan="3" class="dpct-muted">No files here.</td></tr>';
+      r.files.forEach(function (f) {
+        var tr = document.createElement("tr");
+        var path = join(cwd[fs()], f.name);
+        tr.innerHTML = '<td><span class="dpct-name">' + (f.dir ? "📁 " : "") + esc(f.name) + '</span></td><td class="dpct-num">' + size(f.size) + '</td><td class="dpct-acts"></td>';
+        var acts = tr.lastChild;
+        function btn(label, fn, cls) { var b = document.createElement("button"); b.type = "button"; b.textContent = label; if (cls) b.className = cls; b.onclick = fn; acts.appendChild(b); }
+        if (f.dir) {
+          tr.querySelector(".dpct-name").onclick = function () { cwd[fs()] = "/" + path; listFiles(); };
+        } else {
+          var editable = f.size < 200000 && /\.(ya?ml|txt|json|nc|gcode|gc|ngc|tap|cnc|g|md|csv|cfg|ini|macro)$/i.test(f.name);
+          tr.querySelector(".dpct-name").onclick = editable ? function () { openEditor(path, f.size); } : function () { download(path, f.size); };
+          if (editable) btn("Edit", function () { openEditor(path, f.size); });
+          btn("Download", function () { download(path, f.size); });
+          btn("Rename", function () { rename(path, f.name); });
+          btn("Delete", function () { remove(path, f.name); }, "del");
+        }
+        tb.appendChild(tr);
+      });
+    } catch (e) {
+      tb.innerHTML = '<tr><td colspan="3" class="dpct-warn">' + esc(e.message) + "</td></tr>";
+    }
+  }
+  $("dpct-fs").onchange = listFiles;
+  $("dpct-refresh").onclick = listFiles;
+
+  async function fetchFile(path, n) {
+    progress("Downloading " + path + "…", 0);
+    try { return await session.download(fs(), path, n, function (p) { progress("Downloading " + path + "…", p); }); }
+    finally { progress("", null); }
+  }
+  async function download(path, n) {
+    try { saveFile(path.split("/").pop(), await fetchFile(path, n)); }
+    catch (e) { alert(e.message); }
+  }
+  async function rename(path, name) {
+    var to = prompt("New name for " + name + ":", name);
+    if (!to || to === name) return;
+    if (/[\/>]/.test(to)) { alert("The name cannot contain / or >."); return; }
+    try { await session.rename(fs(), path, join(cwd[fs()], to)); } catch (e) { alert(e.message); }
+    listFiles();
+  }
+  async function remove(path, name) {
+    var warn = fs() === "localfs" && /^config\.yaml$|^index\.html\.gz$/i.test(name)
+      ? "\n\n" + (name === "config.yaml" ? "Without config.yaml the machine does not work until a config is uploaded again." : "This is the board's web page (WebUI).")
+      : "";
+    if (!confirm("Delete " + name + " from the " + (fs() === "sd" ? "SD card" : "board flash") + "?" + warn)) return;
+    try { await session.remove(fs(), path); } catch (e) { alert(e.message); }
+    listFiles();
+  }
+  $("dpct-file").onchange = async function () {
+    var files = Array.prototype.slice.call(this.files);
+    this.value = "";
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i], path = join(cwd[fs()], f.name);
+      if (/[>]/.test(f.name)) { alert(f.name + ": the name cannot contain >."); continue; }
+      try {
+        var bytes = new Uint8Array(await f.arrayBuffer());
+        progress("Uploading " + f.name + "…", 0);
+        await session.upload(fs(), path, bytes, function (p) { progress("Uploading " + f.name + "…", p); });
+      } catch (e) { alert(f.name + ": " + e.message); }
+    }
+    progress("", null);
+    listFiles();
+  };
+
+  var editing = null;
+  async function openEditor(path, n) {
+    try {
+      var bytes = await fetchFile(path, n);
+      editing = path;
+      $("dpct-ename").textContent = (fs() === "sd" ? "SD: " : "Flash: ") + path;
+      $("dpct-etext").value = new TextDecoder().decode(bytes);
+      $("dpct-editor").hidden = false;
+      $("dpct-etext").focus();
+    } catch (e) { alert(e.message); }
+  }
+  $("dpct-eclose").onclick = function () { $("dpct-editor").hidden = true; editing = null; };
+  $("dpct-esave").onclick = async function () {
+    if (!editing) return;
+    var text = $("dpct-etext").value;
+    if (!/\n$/.test(text)) text += "\n";
+    try {
+      progress("Saving " + editing + "…", 0);
+      await session.upload(fs(), editing, new TextEncoder().encode(text), function (p) { progress("Saving " + editing + "…", p); });
+      progress("", null);
+      show("Saved " + editing + (/config\.ya?ml$/i.test(editing) ? " — restart the board to use it." : "."), "info");
+      $("dpct-ename").textContent = (fs() === "sd" ? "SD: " : "Flash: ") + editing + " (saved)";
+      listFiles();
+    } catch (e) { progress("", null); alert(e.message); }
+  };
+
+  // ---------------------------------------------------------------- network
+  var net = null;
+  function field(label, name, value, kind, opts) {
+    var id = "dpct-n-" + name.replace(/\W/g, "_");
+    var input;
+    if (kind === "select") input = '<select id="' + id + '" data-n="' + name + '">' + opts.map(function (o) { return "<option" + (o === value ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("") + "</select>";
+    else input = '<input id="' + id + '" data-n="' + name + '" type="' + (kind || "text") + '" value="' + esc(value == null ? "" : value) + '"' + (kind === "password" ? ' placeholder="unchanged" autocomplete="new-password"' : "") + ">";
+    return '<label class="dpct-field" for="' + id + '"><span>' + label + "</span>" + input + "</label>";
+  }
+  async function loadNet() {
+    if (!session) return;
+    $("dpct-netform").innerHTML = '<p class="dpct-muted dpct-small">Reading the board\'s settings…</p>';
+    $("dpct-netmsg").textContent = "";
+    try {
+      net = await session.network();
+      var v = net.values, h = "";
+      $("dpct-netinfo").innerHTML = net.ip && net.ip !== "0.0.0.0" ? "The board is on the network at <strong>http://" + esc(net.ip) + "</strong>" + (v.Hostname ? " (or http://" + esc(v.Hostname) + ".local)" : "") + "." : "The board is not on a network right now.";
+      h += "<fieldset><legend>General</legend>" + field("Board name (hostname)", "Hostname", v.Hostname);
+      if (net.wifi && net.eth) h += field("Connect by", "network/type", v["network/type"], "select", ["Ethernet", "WiFi"]);
+      h += "</fieldset>";
+      if (net.eth) {
+        h += "<fieldset><legend>Ethernet</legend>" + field("IP address", "Ethernet/IPMode", v["Ethernet/IPMode"], "select", ["DHCP", "Static"]);
+        h += '<div data-static="Ethernet">' + field("Static IP", "Ethernet/IP", v["Ethernet/IP"]) + field("Gateway", "Ethernet/Gateway", v["Ethernet/Gateway"]) + field("Netmask", "Ethernet/Netmask", v["Ethernet/Netmask"]) + "</div></fieldset>";
+      }
+      if (net.wifi) {
+        h += "<fieldset><legend>WiFi</legend>" + field("WiFi mode", "WiFi/Mode", v["WiFi/Mode"], "select", ["STA>AP", "STA", "AP", "Off"]);
+        h += '<p class="dpct-small dpct-muted">STA joins your network; STA&gt;AP joins it and opens its own access point when that fails; AP only opens its own access point.</p>';
+        h += field("Network (SSID)", "Sta/SSID", v["Sta/SSID"]) + '<div class="dpct-row"><button type="button" class="dpct-chip" id="dpct-scan">Find networks</button><select id="dpct-aps" class="dpct-input dpct-narrow" hidden></select></div>';
+        h += field("Password", "Sta/Password", "", "password");
+        h += field("IP address", "Sta/IPMode", v["Sta/IPMode"], "select", ["DHCP", "Static"]);
+        h += '<div data-static="Sta">' + field("Static IP", "Sta/IP", v["Sta/IP"]) + field("Gateway", "Sta/Gateway", v["Sta/Gateway"]) + field("Netmask", "Sta/Netmask", v["Sta/Netmask"]) + "</div>";
+        h += "</fieldset><fieldset><legend>Board's own access point</legend>" + field("Access point name", "AP/SSID", v["AP/SSID"]) + field("Access point password", "AP/Password", "", "password") + field("Channel", "AP/Channel", v["AP/Channel"], "number") + "</fieldset>";
+      } else {
+        h += '<p class="dpct-small dpct-muted">This firmware has no WiFi settings.</p>';
+      }
+      $("dpct-netform").innerHTML = h;
+      ["Ethernet", "Sta"].forEach(function (k) {
+        var sel = $("dpct-n-" + k + "_IPMode"), box = document.querySelector('#dpc-tools [data-static="' + k + '"]');
+        if (!sel || !box) return;
+        var upd = function () { box.hidden = sel.value !== "Static"; };
+        sel.onchange = upd; upd();
+      });
+      if ($("dpct-scan")) $("dpct-scan").onclick = scan;
+    } catch (e) {
+      $("dpct-netform").innerHTML = '<p class="dpct-warn">' + esc(e.message) + "</p>";
+    }
+  }
+  async function scan() {
+    var b = $("dpct-scan"), sel = $("dpct-aps");
+    b.disabled = true; b.textContent = "Searching…";
+    try {
+      var aps = await session.scanWifi();
+      sel.innerHTML = "<option value=''>Pick a network (" + aps.length + " found)</option>" + aps.map(function (a) { return '<option value="' + esc(a.ssid) + '">' + esc(a.ssid) + " · " + a.signal + "%" + (a.secure ? " 🔒" : "") + "</option>"; }).join("");
+      sel.hidden = false;
+      sel.onchange = function () { if (sel.value) $("dpct-n-Sta_SSID").value = sel.value; };
+    } catch (e) { alert(e.message); }
+    b.disabled = false; b.textContent = "Find networks";
+  }
+  $("dpct-netreload").onclick = loadNet;
+  $("dpct-netsave").onclick = async function () {
+    if (!session || !net) return;
+    var changed = [];
+    Array.prototype.forEach.call(document.querySelectorAll("#dpct-netform [data-n]"), function (el) {
+      var n = el.getAttribute("data-n"), val = el.value;
+      if (el.type === "password") { if (val) changed.push([n, val]); return; }
+      if (val !== (net.values[n] == null ? "" : String(net.values[n]))) changed.push([n, val]);
+    });
+    var msg = $("dpct-netmsg");
+    if (!changed.length) { msg.textContent = "Nothing changed."; return; }
+    var pw = changed.find(function (c) { return /Password/.test(c[0]); });
+    if (pw && pw[0] === "AP/Password" && pw[1].length < 8) { msg.textContent = "The access point password needs at least 8 characters."; return; }
+    try {
+      for (var i = 0; i < changed.length; i++) await session.setSetting(changed[i][0], changed[i][1]);
+      msg.innerHTML = "Saved (" + changed.map(function (c) { return esc(c[0]); }).join(", ") + "). <button type='button' class='dpct-chip' id='dpct-netrestart'>Restart the board to use them</button>";
+      $("dpct-netrestart").onclick = function () { $("dpct-restart").click(); };
+      changed.forEach(function (c) { if (!/Password/.test(c[0])) net.values[c[0]] = c[1]; });
+    } catch (e) { msg.textContent = e.message; }
+  };
+})();
+</script>
