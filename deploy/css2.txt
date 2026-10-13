@@ -1,0 +1,77 @@
+
+/* ===== Firmware & Downloads in the homepage style (dpx): graphite, Barlow, blue ===== */
+.dpc-fw-x .dpx-sec{padding:36px 0 64px}
+.dpc-fw-x .dpc-fw{font-family:'Barlow',Arial,sans-serif;font-size:15px;line-height:1.6;color:#e6e9ec}
+.dpc-fw-x .dpc-fw p{margin:0 0 10px}
+.dpc-fw-x .dpc-fw code{background:rgba(255,255,255,.07);color:#cfe3f5;padding:1px 5px;border-radius:2px;font-size:.92em}
+.dpc-fw-x .dpc-fw a{color:#5fb0ff}
+.dpc-fw-x .dpc-fw a:hover{color:#8fc4f5}
+.dpc-fw-x .dpc-fw strong{color:#fff}
+/* tabs: like the homepage machine-type tabs */
+.dpc-fw-x .dpc-fw-tabs{gap:8px;border-bottom:0;margin-bottom:22px}
+.dpc-fw-x .dpc-fw-tabs .dpc-fw-tab{padding:7px 14px;border:1.5px solid #3a4550;border-radius:2px;margin:0;font:600 16px 'Barlow Condensed',sans-serif;color:#cfd9e2;background:none;line-height:1.3}
+.dpc-fw-x .dpc-fw-tabs .dpc-fw-tab:hover{border-color:#2b8fe0;color:#fff;background:none}
+.dpc-fw-x .dpc-fw-tabs .dpc-fw-tab.active{background:#2b8fe0;border-color:#2b8fe0;color:#fff}
+/* cards: the dark plates of the homepage */
+.dpc-fw-x .dpc-fw-card{background:linear-gradient(180deg,#29313a 0%,#20272e 100%);border:1px solid #36404a;border-radius:6px;padding:22px 24px;margin-bottom:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05);color:#e6e9ec}
+.dpc-fw-x .dpc-fw-title{font:600 26px/1.15 'Barlow Condensed','Arial Narrow',sans-serif;color:#fff;margin:0 0 10px}
+.dpc-fw-x .dpc-fw-meta{gap:6px;margin-bottom:12px}
+.dpc-fw-x .dpc-fw-badge{font:600 14px/1.5 'Barlow Condensed',sans-serif;color:#9fb3c6;border:1px solid #46525e;background:rgba(0,0,0,.25);border-radius:2px;padding:0 7px}
+.dpc-fw-x .dpc-fw-badge-free{color:#7fd8b2;border-color:#2e6553}
+.dpc-fw-x .dpc-fw-badge-paid{color:#ffc46b;border-color:#6d5426}
+.dpc-fw-x .dpc-fw-badge-chip{color:#8fc4f5;border-color:#2c4f70}
+.dpc-fw-x .dpc-fw-changelog{font-size:15px;color:#a3b1be;border-left:2px solid #3a4550;padding-left:12px;margin:0 0 16px;line-height:1.6}
+.dpc-fw-x .dpc-fw-card > p:not([class]){color:#a3b1be;font-size:15px}
+/* buttons: dpx-btn */
+.dpc-fw-x .dpc-fw-btn,#dpc-flash-modal .dpc-fw-btn{font:600 17px/1.2 'Barlow Condensed',sans-serif;padding:10px 20px;border-radius:2px;gap:6px;text-decoration:none!important;transition:background .15s,border-color .15s,color .15s}
+.dpc-fw-x .dpc-fw-btn-flash,.dpc-fw-x .dpc-fw-btn-dl,.dpc-fw-x .dpc-fw-btn-upload{background:#2b8fe0;color:#fff!important;border:0}
+.dpc-fw-x .dpc-fw-btn-flash:hover,.dpc-fw-x .dpc-fw-btn-dl:hover,.dpc-fw-x .dpc-fw-btn-upload:hover{background:#1f74bd}
+.dpc-fw-x .dpc-fw-btn-ghost,.dpc-fw-x .dpc-fw-btn-buy,.dpc-fw-x #dpc-tools .dpct-quiet{background:none;color:#dbe6ef!important;border:1.5px solid #dbe6ef}
+.dpc-fw-x .dpc-fw-btn-ghost:hover,.dpc-fw-x .dpc-fw-btn-buy:hover,.dpc-fw-x #dpc-tools .dpct-quiet:hover{background:#2b8fe0;border-color:#2b8fe0;color:#fff!important}
+.dpc-fw-x .dpc-fw-btn-lock{background:#2d353d;color:#7d8b98!important;border:0}
+.dpc-fw-x .dpc-fw-btn:focus-visible,.dpc-fw-x .dpc-fw-tab:focus-visible{outline:3px solid #ffd24a;outline-offset:2px}
+/* notes and side help */
+.dpc-fw-x .dpc-fw-notice{background:rgba(0,0,0,.22);border:1px solid #36404a;color:#a9b7c4;font-size:14px;border-radius:3px;padding:10px 12px}
+.dpc-fw-x .dpc-fw-section{display:none}
+.dpc-fw-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
+@media (max-width:860px){.dpc-fw-grid{grid-template-columns:1fr}}
+.dpc-fw-aside{background:#161b20;border:1px solid #2a3139;border-radius:6px;padding:18px 20px;font-size:14px;line-height:1.6;color:#a9b7c4}
+.dpc-fw-aside h5{font:600 20px 'Barlow Condensed',sans-serif;margin:0 0 10px;color:#fff}
+.dpc-fw-aside ol{margin:0;padding-left:18px}
+.dpc-fw-aside li{margin-bottom:6px}
+.dpc-fw-aside li::marker{color:#5fb0ff;font-weight:600}
+.dpc-fw-aside p{margin:10px 0 0!important;font-size:13px;color:#7f90a0}
+.dpc-fw-badge:empty{display:none}
+/* WebUI installer bits that had light inline colours */
+.dpc-fw-x #dpcw-step{color:#fff}
+.dpc-fw-x #dpcw-progress > div:last-child{background:#2d353d!important}
+.dpc-fw-x #dpcw-bar{background:#2b8fe0!important}
+.dpc-fw-x #dpcw-log{color:#a9b7c4;background:#161b20;padding:8px;border-radius:3px}
+.dpc-fw-x #dpcw-list button{color:#a9b7c4!important;background:none;border:1px solid #46525e}
+/* Board tools on dark */
+.dpc-fw-x #dpc-tools .dpct-status{color:#a9b7c4}
+.dpc-fw-x #dpc-tools .dpct-tabs{border-bottom-color:#36404a}
+.dpc-fw-x #dpc-tools .dpct-tab{color:#a9b7c4;font:600 17px 'Barlow Condensed',sans-serif}
+.dpc-fw-x #dpc-tools .dpct-tab[aria-selected=true]{border-bottom-color:#2b8fe0;color:#fff}
+.dpc-fw-x #dpc-tools .dpct-out{background:#0f1419;border:1px solid #2a3139;color:#d6e2ec}
+.dpc-fw-x #dpc-tools .dpct-input,.dpc-fw-x #dpc-tools .dpct-field input,.dpc-fw-x #dpc-tools .dpct-field select,.dpc-fw-x #dpc-tools .dpct-etext{background:#11161b;border:1px solid #3a4550;color:#e6e9ec;border-radius:2px}
+.dpc-fw-x #dpc-tools .dpct-chip{background:#20272e;border:1px solid #3a4550;color:#cfd9e2;border-radius:2px}
+.dpc-fw-x #dpc-tools .dpct-chip:hover{border-color:#2b8fe0;color:#fff;background:#20272e}
+.dpc-fw-x #dpc-tools .dpct-danger{color:#ff8a82;border-color:#6b3330}
+.dpc-fw-x #dpc-tools .dpct-muted,.dpc-fw-x #dpc-tools .dpct-table th{color:#7f90a0}
+.dpc-fw-x #dpc-tools .dpct-table td,.dpc-fw-x #dpc-tools .dpct-table th{border-bottom-color:#2a3139}
+.dpc-fw-x #dpc-tools .dpct-name,.dpc-fw-x #dpc-tools .dpct-acts button,.dpc-fw-x #dpc-tools .dpct-path a{color:#5fb0ff}
+.dpc-fw-x #dpc-tools .dpct-acts button.del{color:#ff8a82}
+.dpc-fw-x #dpc-tools .dpct-prog{background:#2d353d}
+.dpc-fw-x #dpc-tools .dpct-prog div{background:#2b8fe0}
+.dpc-fw-x #dpc-tools .dpct-editor,.dpc-fw-x #dpc-tools fieldset{border-color:#36404a}
+.dpc-fw-x #dpc-tools legend{color:#fff;font:600 18px 'Barlow Condensed',sans-serif}
+.dpc-fw-x #dpc-tools .dpct-warn{background:#3a1d1c;color:#ffb3ad;border-color:#6b3330}
+/* flash modal */
+#dpc-flash-modal .dpc-modal{background:#20272e;border:1px solid #36404a;color:#e6e9ec;font-family:'Barlow',Arial,sans-serif;border-radius:6px}
+#dpc-flash-modal .dpc-modal h4{font:600 24px 'Barlow Condensed',sans-serif;color:#fff}
+#dpc-flash-modal .dpc-modal-sub,#dpc-flash-modal .dpc-modal-notice{color:#a9b7c4;border-top-color:#36404a}
+#dpc-flash-modal .dpc-modal-notice strong{color:#fff}
+#dpc-flash-modal .dpc-step-n{background:#2b8fe0}
+#dpc-flash-modal .dpc-modal-close{color:#7f90a0}
+esp-web-install-button button,esp-web-install-button [slot="activate"]{background:#2b8fe0!important;border-radius:2px!important;font:600 18px 'Barlow Condensed',sans-serif!important}
