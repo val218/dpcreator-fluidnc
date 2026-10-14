@@ -1,0 +1,29 @@
+<section class="dpx-sec dpx-lineage" id="earlier-boards"><style>
+.dpx-lineage .dpx-ln-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin:8px 0 0;padding:28px 0 0;list-style:none;position:relative}
+.dpx-lineage .dpx-ln-row:before{content:"";position:absolute;left:0;right:0;top:6px;height:2px;background:linear-gradient(90deg,rgba(255,255,255,.18),rgba(255,255,255,.18) 74%,#2b8fe0 76%)}
+.dpx-lineage .dpx-ln-row li{position:relative;margin:0;padding:0}
+.dpx-lineage .dpx-ln-row li:before{content:"";position:absolute;left:0;top:-28px;width:14px;height:14px;border-radius:50%;background:#14181c;border:2px solid rgba(255,255,255,.45);box-sizing:border-box}
+.dpx-lineage .dpx-ln-row li.dpx-ln-now:before{background:#2b8fe0;border-color:#2b8fe0;box-shadow:0 0 0 5px rgba(43,143,224,.22)}
+.dpx-lineage .dpx-ln-ph{display:block;background:#eceef0;border-radius:2px;aspect-ratio:4/3;overflow:hidden}
+.dpx-lineage .dpx-ln-ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+.dpx-lineage a.dpx-ln-ph:hover img{transform:scale(1.04)}
+.dpx-lineage h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;font-size:26px;line-height:1.1;margin:16px 0 2px;color:#fff}
+.dpx-lineage .dpx-ln-fw{font-family:"Barlow Condensed",Barlow,sans-serif;font-size:16px;color:#8fa3b5;margin:0 0 8px}
+.dpx-lineage .dpx-ln-now .dpx-ln-fw{color:#6db6f2}
+.dpx-lineage li p{font-size:15px;line-height:1.5;color:rgba(255,255,255,.72);margin:0}
+.dpx-lineage .dpx-ln-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 32px;margin-top:40px;padding-top:24px;border-top:1px solid rgba(255,255,255,.12)}
+.dpx-lineage .dpx-ln-foot p{margin:0;max-width:60ch;color:rgba(255,255,255,.72)}
+@media (max-width:900px){.dpx-lineage .dpx-ln-row{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:16px;padding-bottom:8px;margin-right:-16px;padding-right:16px}
+.dpx-lineage .dpx-ln-row li{flex:0 0 72%;scroll-snap-align:start}
+.dpx-lineage .dpx-ln-row:before{right:16px;background:rgba(255,255,255,.18)}}
+@media (prefers-reduced-motion:reduce){.dpx-lineage .dpx-ln-ph img{transition:none}}
+</style><div class="dpx-wrap">
+ <div class="dpx-head"><h2>Where the R2 and R3 come from</h2><p>Each dpCREATOR board was built on what the one before taught us. The earlier boards are discontinued, but owners can still identify theirs and find notes on the legacy page.</p></div>
+ <ol class="dpx-ln-row">
+  <li><a class="dpx-ln-ph" href="legacy-boards"><img src="image/catalog/dpc-site/legacy/legacy-shield-v3-0-2.jpg" alt="v3.0.2 (v1) board with a socket for an ESP32 dev module" loading="lazy" width="1445" height="1088"></a><h3>v3.0.2 (v1)</h3><p class="dpx-ln-fw">ESP32 dev module, plug-in</p><p>A carrier board for a standard ESP32 dev module, plugged in rather than soldered.</p></li>
+  <li><a class="dpx-ln-ph" href="legacy-boards"><img src="image/catalog/dpc-site/legacy/legacy-plc-v4-0-2-r1-din.jpg" alt="R1 v4.0.2 4 Axis CNC PLC in its grey DIN-rail enclosure" loading="lazy" width="1445" height="1088"></a><h3>R1 (v4.0.2)</h3><p class="dpx-ln-fw">ESP32 on board, FluidNC</p><p>The first R-series board: microSD, relay, USB and four step/direction axes, in a DIN-rail case.</p></li>
+  <li><a class="dpx-ln-ph" href="legacy-boards"><img src="image/catalog/dpc-site/legacy/legacy-modular-v4-0-4.jpg" alt="v4.0.4 modular carrier board with plug-in core, motion, PWM and power modules" loading="lazy" width="1445" height="1088"></a><h3>v4.0.4 (modular)</h3><p class="dpx-ln-fw">Plug-in modules, FluidNC</p><p>Core, motion control, 0–10 V spindle and power supply as separate modules, each replaceable.</p></li>
+  <li class="dpx-ln-now"><a class="dpx-ln-ph" href="index.php?route=product/category&amp;path=225"><img src="image/catalog/dpc-site/photo-r2-controller-top.jpg" alt="dpCREATOR R2 controller" loading="lazy" width="1445" height="1088"></a><h3>R2 and R3</h3><p class="dpx-ln-fw">ESP32-S3, W5500 Ethernet, today</p><p>Wired Ethernet, the TabUi pendant port and 16 MB flash with 8 MB PSRAM.</p></li>
+ </ol>
+ <div class="dpx-ln-foot"><p>Before the ESP32 boards there were two GRBL 1.1 boards for the Arduino UNO, made by 3dp.lv: the 3 Axis CNC Shield V1.2 and the UNO R3 CNC Edition.</p><a class="dpx-btn dpx-btn-line" href="legacy-boards">See all earlier boards</a></div>
+</div></section>
