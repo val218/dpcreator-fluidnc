@@ -1,0 +1,26 @@
+<section class="dpx-sec dpx-live dpx-run" id="see-it-run"><style>
+.dpx-run .dpx-run-grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:56px;align-items:center}
+.dpx-run .dpx-run-frame{position:relative;border-radius:2px;overflow:hidden;background:#0c1014;border:1px solid rgba(255,255,255,.12);aspect-ratio:480/864;max-height:600px}
+.dpx-run video{display:block;width:100%;height:100%;object-fit:cover}
+.dpx-run h2{margin-top:0}
+.dpx-run .dpx-run-list{list-style:none;margin:20px 0 28px;padding:0;border-top:1px solid rgba(255,255,255,.12)}
+.dpx-run .dpx-run-list li{display:flex;gap:16px;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12);margin:0}
+.dpx-run .dpx-run-list span{color:#8fa3b5}
+.dpx-run .dpx-run-list b{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:600;color:#fff;text-align:right}
+@media (max-width:820px){.dpx-run .dpx-run-grid{grid-template-columns:1fr;gap:32px}.dpx-run .dpx-run-frame{max-width:340px;margin:0 auto;width:100%}}
+</style><div class="dpx-wrap">
+ <div class="dpx-run-grid">
+  <div class="dpx-run-frame"><video src="image/catalog/dpc-site/video/r2-test-run.mp4" poster="image/catalog/dpc-site/r2-test-run-poster.jpg" muted loop playsinline controls preload="none" width="480" height="864" aria-label="Test run of the dpCREATOR R2 on a gantry router"></video></div>
+  <div>
+   <h2>See it run</h2>
+   <p>A test run of the R2 on a gantry router in our workshop. The job is started from the WebUI, and the board drives the axes and the spindle from inside the control cabinet.</p>
+   <ul class="dpx-run-list">
+    <li><span>Board</span><b>dpCREATOR R2, v4.0.3</b></li>
+    <li><span>Drivers</span><b>4 external step/dir drivers</b></li>
+    <li><span>Spindle</span><b>VFD</b></li>
+    <li><span>Firmware</span><b>FluidNC, dpCREATOR WebUI</b></li>
+   </ul>
+   <a class="dpx-btn dpx-btn-line" href="index.php?route=product/category&amp;path=225">See the controllers</a>
+  </div>
+ </div>
+</div><script>(function(){var v=document.querySelector('#see-it-run video');if(!v)return;if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;v.removeAttribute('controls');v.addEventListener('click',function(){v.paused?v.play():v.pause()});if('IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){v.setAttribute('controls','')})}else{v.pause()}})},{threshold:.35}).observe(v)}else{v.setAttribute('controls','')}})();</script></section>
