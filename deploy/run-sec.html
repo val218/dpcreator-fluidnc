@@ -2,7 +2,7 @@
 .dpx-run .dpx-run-grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:56px;align-items:center}
 .dpx-run .dpx-run-frame{position:relative;border-radius:2px;overflow:hidden;background:#0c1014;border:1px solid rgba(255,255,255,.12);aspect-ratio:480/864;max-height:600px}
 .dpx-run video{display:block;width:100%;height:100%;object-fit:cover}
-.dpx-run h2{margin-top:0}
+.dpx-run .dpx-head{margin-bottom:0}.dpx-run .dpx-head p{max-width:56ch}
 .dpx-run .dpx-run-list{list-style:none;margin:20px 0 28px;padding:0;border-top:1px solid rgba(255,255,255,.12)}
 .dpx-run .dpx-run-list li{display:flex;gap:16px;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12);margin:0}
 .dpx-run .dpx-run-list span{color:#8fa3b5}
@@ -12,8 +12,7 @@
  <div class="dpx-run-grid">
   <div class="dpx-run-frame"><video src="image/catalog/dpc-site/video/r2-test-run.mp4" poster="image/catalog/dpc-site/r2-test-run-poster.jpg" muted loop playsinline controls preload="none" width="480" height="864" aria-label="Test run of the dpCREATOR R2 on a gantry router"></video></div>
   <div>
-   <h2>See it run</h2>
-   <p>A test run of the R2 on a gantry router in our workshop. The job is started from the WebUI, and the board drives the axes and the spindle from inside the control cabinet.</p>
+   <div class="dpx-head"><h2>See it run</h2><p>A test run of the R2 on a gantry router. The job is started from the WebUI, and the board drives the axes and the spindle from inside the control cabinet.</p></div>
    <ul class="dpx-run-list">
     <li><span>Board</span><b>dpCREATOR R2, v4.0.3</b></li>
     <li><span>Drivers</span><b>4 external step/dir drivers</b></li>
