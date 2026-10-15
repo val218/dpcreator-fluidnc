@@ -51,6 +51,9 @@ jobs:
   build:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     strategy:
+      # the plain-ESP32 'wifi' env does not build on this S3 fork; don't let it
+      # cancel the wifi_s3 build (the board's), which is the one that matters
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest
