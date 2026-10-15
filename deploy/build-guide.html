@@ -33,6 +33,8 @@
 <tr><td>1</td><td>GX12 connector, 5-pin</td><td>Panel socket for the cable to the controller</td></tr>
 <tr><td>1</td><td>Printed case</td><td>Front panel with faceplate, main case with handle (DPC-TC1 print files)</td></tr>
 <tr><td>4</td><td>M3 × 5 mm self-tapping screws</td><td>Hold the display in the front panel</td></tr>
+<tr><td>1</td><td>Small speaker with JST plug</td><td>Plugs into P4 (SPEAK) for the click and alarm sounds</td></tr>
+<tr><td>7</td><td>M3 screws (black)</td><td>Fix the front panel to the case</td></tr>
 <tr><td>—</td><td>Hook-up wire and JST cables</td><td>For P1, P6 and CN1 on the display board</td></tr>
 <tr><td>—</td><td>704 silicone rubber (RTV)</td><td>Glues the display and secures the wires</td></tr>
 </tbody></table>
@@ -67,7 +69,7 @@ Then run a bead of 704 silicone around the perimeter of the board, wherever it c
 <figure><img src="image/catalog/dpc-site/build/case-faceplate.jpg" alt="Main case with the faceplate, handle and the ENABLE button on the right side" loading="lazy"><figcaption>The main case with its handle. The ENABLE button is on the right side.</figcaption></figure>
 
 <h3>4. Wire it</h3>
-<p>The wiring uses three connectors on the back of the display board: <strong>P1</strong> (serial and power), <strong>P6</strong> (handwheel and E-stop) and <strong>CN1</strong> (I²C to the PCF8574).</p>
+<p>Everything connects to the connectors on the back of the display board: <strong>P1</strong> (serial and power), <strong>P6</strong> (handwheel and E-stop), <strong>CN1</strong> (I²C to the PCF8574) and <strong>P4</strong> (speaker). Nothing is soldered to the board itself.</p>
 <figure class="wide"><a href="image/catalog/dpc-site/build/pendant-wiring-connectors.png" target="_blank" rel="noopener"><img src="image/catalog/dpc-site/build/pendant-wiring-connectors.png" alt="TabUi wiring diagram: GX12, E-stop, display board connectors P1, P6 and CN1, MPG handwheel, PCF8574 and the selectors" loading="lazy"></a><figcaption>Every connection in the pendant (tap to open full size). Wire colours as in the tables below.</figcaption></figure>
 
 <p><strong>P6 → handwheel and E-stop</strong></p>
@@ -77,7 +79,7 @@ Then run a bead of 704 silicone around the perimeter of the board, wherever it c
 <tr><td>IO16</td><td><span class="sw" style="background:#e3b200"></span>yellow</td><td>MPG A</td></tr>
 <tr><td>GND</td><td><span class="sw" style="background:#2e9b4a"></span>green</td><td>MPG −</td></tr>
 </tbody></table>
-<p>MPG <strong>+</strong> takes the handwheel supply: 5 V from P1 (GX12 pin 1).</p>
+<p>MPG <strong>+</strong> goes to <strong>3.3 V</strong>: take it from the CN1 3.3V pin, together with the PCF8574 VCC wire.</p>
 
 <p><strong>CN1 → PCF8574 module</strong></p>
 <table class="table table-bordered"><thead><tr><th>CN1 pin</th><th>PCF8574</th></tr></thead><tbody>
@@ -117,12 +119,13 @@ Then run a bead of 704 silicone around the perimeter of the board, wherever it c
 </div>
 <ol class="steps">
 <li>Fix the PCF8574 module to the back of the display board with a blob of 704 silicone, clear of the ESP32 module.</li>
+<li>Plug the speaker into <strong>P4 (SPEAK)</strong> and fix it inside the case with a dab of silicone.</li>
 <li>Put a dab of silicone on the solder joints and connector plugs so they can't work loose.</li>
 <li>Fit the GX12 connector in the bottom of the case and solder its five wires.</li>
 </ol>
 
 <h3>5. Close the case</h3>
-<p>Lay the wires flat so nothing is pinched, place the front panel on the case and screw it down. Fit the knobs on the STEP and AXIS switches so the pointer lines up with x1 and OFF.</p>
+<p>Lay the wires flat so nothing is pinched, place the front panel on the case and fix it with the 7 black M3 screws. Fit the knobs on the STEP and AXIS switches so the pointer lines up with x1 and OFF.</p>
 
 <h3>6. Flash and test</h3>
 <ol class="steps">
