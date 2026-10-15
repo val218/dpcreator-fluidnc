@@ -1,6 +1,9 @@
 <style>
 .dpc-bg figure{margin:0 0 18px}
-.dpc-bg figure img{max-width:100%;height:auto;display:block;border-radius:2px}
+.dpc-bg figure img{max-width:100%;max-height:560px;width:auto;height:auto;display:block;margin:0 auto;border-radius:2px}
+.dpc-bg figure.wide img{max-height:none;width:100%}
+.dpc-bg .pair figure img{max-height:440px}
+.dpc-bg figcaption{text-align:center}
 .dpc-bg figcaption{font-size:13px;color:#6b7580;margin-top:6px}
 .dpc-bg .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 18px}
 .dpc-bg .pair figure{margin:0}
@@ -65,7 +68,7 @@ Then run a bead of 704 silicone around the perimeter of the board, wherever it c
 
 <h3>4. Wire it</h3>
 <p>The wiring uses three connectors on the back of the display board: <strong>P1</strong> (serial and power), <strong>P6</strong> (handwheel and E-stop) and <strong>CN1</strong> (I²C to the PCF8574).</p>
-<figure><img src="image/catalog/dpc-site/build/pendant-wiring-connectors.png" alt="TabUi wiring diagram: GX12, E-stop, display board connectors P1, P6 and CN1, MPG handwheel, PCF8574 and the selectors" loading="lazy"><figcaption>Every connection in the pendant. Wire colours as in the tables below.</figcaption></figure>
+<figure class="wide"><img src="image/catalog/dpc-site/build/pendant-wiring-connectors.png" alt="TabUi wiring diagram: GX12, E-stop, display board connectors P1, P6 and CN1, MPG handwheel, PCF8574 and the selectors" loading="lazy"><figcaption>Every connection in the pendant. Wire colours as in the tables below.</figcaption></figure>
 
 <p><strong>P6 → handwheel and E-stop</strong></p>
 <table class="table table-bordered"><thead><tr><th>P6 pin</th><th>Wire</th><th>Goes to</th></tr></thead><tbody>
