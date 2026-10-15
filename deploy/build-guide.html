@@ -15,7 +15,7 @@
 @media (max-width:640px){.dpc-bg .pair{grid-template-columns:1fr}}
 </style>
 <div class="dpc-bg">
-<p>This guide takes you from the parts on the bench to a working TabUi pendant. You need the <a href="index.php?route=product/product&amp;product_id=377">TabUi pendant firmware</a> and, for the case, the <a href="index.php?route=product/product&amp;product_id=378">PETG print files</a>. Prefer it ready-made? Get the <a href="index.php?route=product/product&amp;product_id=382">assembled pendant</a>.</p>
+<p>This guide takes you from the parts on the bench to a working TabUi pendant. You need the <a href="index.php?route=product/product&amp;product_id=377">TabUi pendant firmware</a> and, for the case, the <a href="index.php?route=product/product&amp;product_id=378">PETG print files</a>. Prefer it ready-made? Get the <a href="index.php?route=product/product&amp;product_id=382">assembled pendant</a>: every one is assembled in-house, by the designer or by experienced technicians.</p>
 <div class="note"><strong>A demanding build.</strong> Allow up to four hours. You will solder, strip and route a lot of fine wires in a tight space, so you need a soldering iron and basic electronics tools.</div>
 
 <figure><img src="image/catalog/dpc-site/build/front-panel-front.jpg" alt="Assembled TabUi front panel with the handwheel, display and the STEP and AXIS selectors" loading="lazy"><figcaption>The finished front panel, before it goes onto the case.</figcaption></figure>
@@ -132,14 +132,27 @@ Then run a bead of 704 silicone around the perimeter of the board, wherever it c
 <p>Lay the wires flat so nothing is pinched, place the front panel on the case and fix it with the 7 black M3 screws. Fit the knobs on the STEP and AXIS switches so the pointer lines up with x1 and OFF.</p>
 
 <h3>6. Flash and test</h3>
+<p>Flash the pendant firmware over USB-C from <a href="index.php?route=information/information&amp;information_id=8">Firmware &amp; Downloads</a>. Unplug the controller cable while you flash: the serial pins are shared.</p>
+<p><strong>The test menu.</strong> The pendant has a built-in test menu, so you can check every part of your build before it ever talks to the controller. Hold the ENABLE button during the first second of boot to open the pendant settings, then tap <strong>Inputs</strong> to open the <strong>Input Monitor</strong>.</p>
+<p>The Input Monitor shows, live:</p>
+<ul>
+<li>the raw value of the PCF8574 and each of its inputs, P0 to P7, as HIGH or LOW (active),</li>
+<li>the E-stop on IO17 (open or pressed),</li>
+<li>the handwheel's <strong>encoder delta</strong>, which counts as you turn it,</li>
+<li>the touchscreen: where you touch it.</li>
+</ul>
 <ol class="steps">
-<li>Flash the pendant firmware over USB-C from <a href="index.php?route=information/information&amp;information_id=8">Firmware &amp; Downloads</a>. Unplug the controller cable while you flash: the serial pins are shared.</li>
-<li>Hold the ENABLE button during the first second of boot to open the pendant settings, then tap <strong>Inputs</strong>.</li>
-<li>The <strong>Input Monitor</strong> shows every input live. Turn both selectors through every position, press ENABLE and the E-stop, and turn the handwheel: each one must change its line on the screen. Hold the E-stop for 2 seconds to leave.</li>
+<li>Turn AXIS through OFF, X, Y, Z and A: P0 to P3 go LOW one at a time, and none at OFF.</li>
+<li>Turn STEP through x1, x10 and x100: P4, then P5 go LOW, and none at x1.</li>
+<li>Press ENABLE: P6 goes LOW.</li>
+<li>Press the E-stop, then release it: the E-stop line changes.</li>
+<li>Turn the handwheel both ways: the encoder delta counts up and down. If it counts the wrong way, swap the A and B wires.</li>
+<li>Touch the screen in a few places.</li>
 </ol>
+<p>Hold the E-stop for 2 seconds to leave the Input Monitor.</p>
 <div class="pair">
-<figure><img src="image/catalog/dpc-site/build/test-settings.jpg" alt="Pendant settings screen with the Inputs, UART and Save &amp; Boot buttons" loading="lazy"><figcaption>Pendant settings: open the Input Monitor with <strong>Inputs</strong>.</figcaption></figure>
-<figure><img src="image/catalog/dpc-site/build/test-input-monitor.jpg" alt="Input Monitor screen listing the PCF8574 inputs, the E-stop and the encoder" loading="lazy"><figcaption>Input Monitor: here STEP is at ×100 (P5 active).</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/test-settings.jpg" alt="Pendant settings screen with the Inputs, UART and Save &amp; Boot buttons" loading="lazy"><figcaption>Pendant settings: <strong>Inputs</strong> opens the test menu.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/test-input-monitor.jpg" alt="Input Monitor screen listing the PCF8574 inputs, the E-stop, the encoder and touch" loading="lazy"><figcaption>Input Monitor: here STEP is at ×100 (P5 active).</figcaption></figure>
 </div>
 
 <h3>7. Connect to the controller</h3>
