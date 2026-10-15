@@ -15,7 +15,7 @@
 @media (max-width:640px){.dpc-bg .pair{grid-template-columns:1fr}}
 </style>
 <div class="dpc-bg">
-<p>This guide takes you from the parts on the bench to a working TabUi pendant. It is written for the DIY pack (firmware licence and case print files) and for anyone who builds the pendant from their own parts. Plan for about two hours, plus the time the silicone needs to dry.</p>
+<p>This guide takes you from the parts on the bench to a working TabUi pendant. You need the <a href="index.php?route=product/product&amp;product_id=377">TabUi pendant firmware</a> and, for the case, the <a href="index.php?route=product/product&amp;product_id=378">PETG print files</a>. Prefer it ready-made? Get the <a href="index.php?route=product/product&amp;product_id=382">assembled pendant</a>.</p>
 
 <figure><img src="image/catalog/dpc-site/build/front-panel-front.jpg" alt="Assembled TabUi front panel with the handwheel, display and the STEP and AXIS selectors" loading="lazy"><figcaption>The finished front panel, before it goes onto the case.</figcaption></figure>
 
@@ -137,5 +137,22 @@ Then run a bead of 704 silicone around the perimeter of the board, wherever it c
 <figure><img src="image/catalog/dpc-site/build/test-settings.jpg" alt="Pendant settings screen with the Inputs, UART and Save &amp; Boot buttons" loading="lazy"><figcaption>Pendant settings: open the Input Monitor with <strong>Inputs</strong>.</figcaption></figure>
 <figure><img src="image/catalog/dpc-site/build/test-input-monitor.jpg" alt="Input Monitor screen listing the PCF8574 inputs, the E-stop and the encoder" loading="lazy"><figcaption>Input Monitor: here STEP is at ×100 (P5 active).</figcaption></figure>
 </div>
-<p>When every input checks out, connect the pendant to the controller: see <a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=19">Connecting the TabUi pendant</a>.</p>
+
+<h3>7. Connect to the controller</h3>
+<ol class="steps">
+<li>Plug the pendant into the controller's pendant port and power up. The controller's config.yaml needs the <code>uart1</code> and <code>uart_channel1</code> sections at 1,000,000 baud: see <a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=19">Connecting the TabUi pendant</a>.</li>
+<li>The WebUI header shows the pendant badge, and <code>$Pendant/Status</code> answers <code>connected</code>.</li>
+<li>Test the E-stop while jogging slowly: the motors must stop at once and the machine must go to Alarm. Release it and use the recovery menu to unlock.</li>
+</ol>
+
+<h3>Using a display from a FluidDial build</h3>
+<p>TabUi uses the same JC2432W328C display and 60 mm handwheel as the original <a href="https://github.com/bdring/FluidDial" target="_blank" rel="noopener">FluidDial</a> pendant, but gives some pins different jobs. If your display was wired for FluidDial, remove that wiring and connect it as in this guide.</p>
+<table class="table table-bordered"><thead><tr><th>Pin</th><th>FluidDial</th><th>TabUi</th></tr></thead><tbody>
+<tr><td>IO22</td><td>Handwheel A</td><td>PCF8574 SCL (CN1)</td></tr>
+<tr><td>IO21</td><td>Handwheel B</td><td>PCF8574 SDA (CN1)</td></tr>
+<tr><td>IO16</td><td>Green button</td><td>Handwheel A (P6)</td></tr>
+<tr><td>IO4</td><td>Red button</td><td>Handwheel B (P6)</td></tr>
+<tr><td>IO17</td><td>Dial button</td><td>E-stop (P6)</td></tr>
+<tr><td>TX / RX</td><td>Serial to FluidNC, 1 Mbaud</td><td>Unchanged (P1)</td></tr>
+</tbody></table>
 </div>
