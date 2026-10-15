@@ -1,0 +1,135 @@
+<style>
+.dpc-bg figure{margin:0 0 18px}
+.dpc-bg figure img{max-width:100%;height:auto;display:block;border-radius:2px}
+.dpc-bg figcaption{font-size:13px;color:#6b7580;margin-top:6px}
+.dpc-bg .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 18px}
+.dpc-bg .pair figure{margin:0}
+.dpc-bg .note{border-left:4px solid #2b8fe0;background:#f2f7fc;padding:10px 14px;margin:0 0 18px}
+.dpc-bg .warn{border-left:4px solid #d22b2b;background:#fdf1f1;padding:10px 14px;margin:0 0 18px}
+.dpc-bg ol.steps>li{margin-bottom:8px}
+.dpc-bg table td,.dpc-bg table th{vertical-align:top}
+.dpc-bg .sw{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid rgba(0,0,0,.25)}
+@media (max-width:640px){.dpc-bg .pair{grid-template-columns:1fr}}
+</style>
+<div class="dpc-bg">
+<p>This guide takes you from the parts on the bench to a working TabUi pendant. It is written for the DIY pack (firmware licence and case print files) and for anyone who builds the pendant from their own parts. Plan for about two hours, plus the time the silicone needs to dry.</p>
+
+<figure><img src="image/catalog/dpc-site/build/front-panel-front.jpg" alt="Assembled TabUi front panel with the handwheel, display and the STEP and AXIS selectors" loading="lazy"><figcaption>The finished front panel, before it goes onto the case.</figcaption></figure>
+
+<h3>What you need</h3>
+<figure><img src="image/catalog/dpc-site/build/parts-kit.jpg" alt="TabUi parts laid out: display board, PCF8574 module, speaker, two rotary switches with knobs, printed case, handwheel, E-stop, enable button, GX12 connector, cables and screws" loading="lazy"><figcaption>All the parts for one pendant.</figcaption></figure>
+<table class="table table-bordered"><thead><tr><th>Qty</th><th>Part</th><th>Notes</th></tr></thead><tbody>
+<tr><td>1</td><td>JC2432W328C display board</td><td>2.8" capacitive touch, 240×320, ESP32. The <strong>C</strong> (capacitive) version.</td></tr>
+<tr><td>1</td><td>60 mm MPG handwheel</td><td>ZS61-type, 100 pulses per turn, outputs A and B</td></tr>
+<tr><td>1</td><td>E-stop button, 16 mm</td><td>Latching, with a change-over contact (C, NO, NC)</td></tr>
+<tr><td>1</td><td>Momentary push button, 12 mm</td><td>The ENABLE button on the right side</td></tr>
+<tr><td>1</td><td>Rotary switch, 3 positions</td><td>RS16 or RS26 type, for STEP</td></tr>
+<tr><td>1</td><td>Rotary switch, 5 positions</td><td>RS16 or RS26 type, for AXIS</td></tr>
+<tr><td>2</td><td>Knobs for the rotary switches</td><td></td></tr>
+<tr><td>1</td><td>PCF8574 I/O expander module</td><td>Reads the selectors and the ENABLE button</td></tr>
+<tr><td>1</td><td>GX12 connector, 5-pin</td><td>Panel socket for the cable to the controller</td></tr>
+<tr><td>1</td><td>Printed case</td><td>Front panel with faceplate, main case with handle (DPC-TC1 print files)</td></tr>
+<tr><td>4</td><td>M3 × 5 mm self-tapping screws</td><td>Hold the display in the front panel</td></tr>
+<tr><td>—</td><td>Hook-up wire and JST cables</td><td>For P1, P6 and CN1 on the display board</td></tr>
+<tr><td>—</td><td>704 silicone rubber (RTV)</td><td>Glues the display and secures the wires</td></tr>
+</tbody></table>
+<p><strong>Tools:</strong> soldering iron, side cutters, wire stripper, Phillips screwdriver, multimeter, USB-C cable.</p>
+
+<h3>1. Remove the RGB LED from the display board</h3>
+<p>The JC2432W328C has an RGB LED on the front, next to the display. It is wired to IO4, IO16 and IO17: the same pins the pendant uses on connector P6 for the handwheel and the E-stop. Left in place, it loads those lines and the inputs don't read reliably. Desolder it with a soldering iron or hot air.</p>
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/lcd-with-led.jpg" alt="JC2432W328C display board with the RGB LED fitted at the top right" loading="lazy"><figcaption>Before: the RGB LED sits at the top right.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/lcd-led-removed.jpg" alt="JC2432W328C display board with the RGB LED removed, empty pads at the top right" loading="lazy"><figcaption>After: the LED is removed, only its pads remain.</figcaption></figure>
+</div>
+
+<h3>2. Assemble the front panel</h3>
+<figure><img src="image/catalog/dpc-site/build/front-panel-printed.jpg" alt="Back of the printed front panel with openings for the handwheel, display and two selectors" loading="lazy"><figcaption>The back of the printed front panel.</figcaption></figure>
+<ol class="steps">
+<li><strong>Display.</strong> Peel the protective film off the display first. Place the board in the front panel and fix it with the four M3 × 5 mm self-tapping screws.
+<div class="warn">Be careful with the display connector as the board goes into the printed panel: it is a tight fit there.</div>
+Then run a bead of 704 silicone around the perimeter of the board, wherever it can reach the case. Press the display down while the silicone dries and make sure it stays fully seated.</li>
+<li><strong>Handwheel.</strong> Fit the 60 mm MPG through the round opening and tighten it on its three mounting studs.</li>
+<li><strong>STEP selector.</strong> Fit the 3-position rotary switch (RS16 or RS26) in the left opening.</li>
+<li><strong>AXIS selector.</strong> Fit the 5-position rotary switch in the right opening.</li>
+</ol>
+<div class="note">If your rotary switches have an adjustable stop washer, set it to 3 positions for STEP and 5 for AXIS before you tighten the nut, so the knob stops at x1 / x100 and at OFF / A.</div>
+<figure><img src="image/catalog/dpc-site/build/front-panel-back.jpg" alt="Back of the front panel with the display board, handwheel and both rotary switches fitted, no wires yet" loading="lazy"><figcaption>Front panel with the display, handwheel and both selectors fitted, ready for wiring.</figcaption></figure>
+
+<h3>3. Assemble the main case</h3>
+<ol class="steps">
+<li>Screw the <strong>E-stop button</strong> (16 mm) into the left side of the case.</li>
+<li>Screw the <strong>ENABLE button</strong> (12 mm) into the right side.</li>
+<li>Leave the <strong>GX12 connector</strong> out for now. It goes in after the wiring, so the wires are easy to reach.</li>
+</ol>
+<figure><img src="image/catalog/dpc-site/build/case-faceplate.jpg" alt="Main case with the faceplate, handle and the ENABLE button on the right side" loading="lazy"><figcaption>The main case with its handle. The ENABLE button is on the right side.</figcaption></figure>
+
+<h3>4. Wire it</h3>
+<p>The wiring uses three connectors on the back of the display board: <strong>P1</strong> (serial and power), <strong>P6</strong> (handwheel and E-stop) and <strong>CN1</strong> (I²C to the PCF8574).</p>
+<figure><img src="image/catalog/dpc-site/build/pendant-wiring-connectors.png" alt="TabUi wiring diagram: GX12, E-stop, display board connectors P1, P6 and CN1, MPG handwheel, PCF8574 and the selectors" loading="lazy"><figcaption>Every connection in the pendant. Wire colours as in the tables below.</figcaption></figure>
+
+<p><strong>P6 → handwheel and E-stop</strong></p>
+<table class="table table-bordered"><thead><tr><th>P6 pin</th><th>Wire</th><th>Goes to</th></tr></thead><tbody>
+<tr><td>IO17</td><td><span class="sw" style="background:#d22b2b"></span>red</td><td>E-stop button, contact C</td></tr>
+<tr><td>IO4</td><td><span class="sw" style="background:#222"></span>black</td><td>MPG B</td></tr>
+<tr><td>IO16</td><td><span class="sw" style="background:#e3b200"></span>yellow</td><td>MPG A</td></tr>
+<tr><td>GND</td><td><span class="sw" style="background:#2e9b4a"></span>green</td><td>MPG −</td></tr>
+</tbody></table>
+<p>MPG <strong>+</strong> takes the handwheel supply: 5 V from P1 (GX12 pin 1).</p>
+
+<p><strong>CN1 → PCF8574 module</strong></p>
+<table class="table table-bordered"><thead><tr><th>CN1 pin</th><th>PCF8574</th></tr></thead><tbody>
+<tr><td>GND</td><td>GND</td></tr>
+<tr><td>IO22</td><td>SCL</td></tr>
+<tr><td>IO21</td><td>SDA</td></tr>
+<tr><td>3.3V</td><td>VCC</td></tr>
+</tbody></table>
+
+<p><strong>PCF8574 inputs → selectors and ENABLE</strong>. Every input closes to GND: wire the common of each rotary switch and one side of the ENABLE button to GND.</p>
+<table class="table table-bordered"><thead><tr><th>Input</th><th>Function</th></tr></thead><tbody>
+<tr><td>P0 · P1 · P2 · P3</td><td>AXIS selector: X · Y · Z · A (OFF = no contact)</td></tr>
+<tr><td>P4 · P5</td><td>STEP selector: ×10 · ×100 (×1 = no contact)</td></tr>
+<tr><td>P6</td><td>ENABLE button</td></tr>
+<tr><td>P7</td><td>not used</td></tr>
+</tbody></table>
+
+<p><strong>P1 → GX12 connector</strong> (the cable to the controller)</p>
+<table class="table table-bordered"><thead><tr><th>GX12 pin</th><th>Signal</th><th>Wire</th><th>From</th></tr></thead><tbody>
+<tr><td>1</td><td>+5V</td><td><span class="sw" style="background:#d22b2b"></span>red</td><td>P1 5V</td></tr>
+<tr><td>2</td><td>TXD</td><td><span class="sw" style="background:#222"></span>black</td><td>P1 TX</td></tr>
+<tr><td>3</td><td>E-STOP</td><td><span class="sw" style="background:#e8771a"></span>orange</td><td>E-stop button, contact NC</td></tr>
+<tr><td>4</td><td>RXD</td><td><span class="sw" style="background:#e3b200"></span>yellow</td><td>P1 RX</td></tr>
+<tr><td>5</td><td>GND</td><td></td><td>P1 GND</td></tr>
+</tbody></table>
+
+<p><strong>E-stop button contacts</strong></p>
+<table class="table table-bordered"><thead><tr><th>Contact</th><th>Goes to</th></tr></thead><tbody>
+<tr><td>C (common)</td><td>P6 IO17</td></tr>
+<tr><td>NO</td><td>GND</td></tr>
+<tr><td>NC</td><td>GX12 pin 3, to the controller</td></tr>
+</tbody></table>
+
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/front-panel-wired.jpg" alt="Back of the front panel with the handwheel wired to P6 and the PCF8574 module connected to CN1" loading="lazy"><figcaption>Handwheel on P6, PCF8574 on CN1, before the module is fixed in place.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/wiring-overview-photo.jpg" alt="Open pendant: main case with E-stop, ENABLE button and GX12 on the left, wired front panel on the right" loading="lazy"><figcaption>Fully wired, before closing: the PCF8574 is glued to the back of the display board.</figcaption></figure>
+</div>
+<ol class="steps">
+<li>Fix the PCF8574 module to the back of the display board with a blob of 704 silicone, clear of the ESP32 module.</li>
+<li>Put a dab of silicone on the solder joints and connector plugs so they can't work loose.</li>
+<li>Fit the GX12 connector in the bottom of the case and solder its five wires.</li>
+</ol>
+
+<h3>5. Close the case</h3>
+<p>Lay the wires flat so nothing is pinched, place the front panel on the case and screw it down. Fit the knobs on the STEP and AXIS switches so the pointer lines up with x1 and OFF.</p>
+
+<h3>6. Flash and test</h3>
+<ol class="steps">
+<li>Flash the pendant firmware over USB-C from <a href="index.php?route=information/information&amp;information_id=8">Firmware &amp; Downloads</a>. Unplug the controller cable while you flash: the serial pins are shared.</li>
+<li>Hold the ENABLE button during the first second of boot to open the pendant settings, then tap <strong>Inputs</strong>.</li>
+<li>The <strong>Input Monitor</strong> shows every input live. Turn both selectors through every position, press ENABLE and the E-stop, and turn the handwheel: each one must change its line on the screen. Hold the E-stop for 2 seconds to leave.</li>
+</ol>
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/test-settings.jpg" alt="Pendant settings screen with the Inputs, UART and Save &amp; Boot buttons" loading="lazy"><figcaption>Pendant settings: open the Input Monitor with <strong>Inputs</strong>.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/test-input-monitor.jpg" alt="Input Monitor screen listing the PCF8574 inputs, the E-stop and the encoder" loading="lazy"><figcaption>Input Monitor: here STEP is at ×100 (P5 active).</figcaption></figure>
+</div>
+<p>When every input checks out, connect the pendant to the controller: see <a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=19">Connecting the TabUi pendant</a>.</p>
+</div>
