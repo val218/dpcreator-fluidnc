@@ -1,0 +1,137 @@
+<style>
+.dpc-rnd{max-width:860px}
+.dpc-rnd h2{margin-top:34px}
+.dpc-rnd .lead{font-size:17px}
+.dpc-rnd .gets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0 8px}
+.dpc-rnd .gets div{border:1px solid #d6dbe0;border-radius:2px;padding:12px 14px;background:#fff}
+.dpc-rnd .gets b{display:block;font-size:16px;margin-bottom:4px}
+.dpc-rnd .gets .prize{border-color:#2b8fe0;background:#f2f7fc}
+.dpc-rnd .note{border-left:4px solid #2b8fe0;background:#f2f7fc;padding:10px 14px;margin:14px 0}
+.dpc-rnd ol.terms>li{margin-bottom:10px}
+.dpc-rnd .tpl{background:#f6f7f8;border:1px solid #e1e4e7;padding:14px 18px;border-radius:2px}
+.dpc-rnd .tpl ol{margin:0;padding-left:20px}
+.dpc-rnd form{border:1px solid #d6dbe0;border-radius:2px;padding:18px 20px;background:#fff}
+.dpc-rnd .f{margin-bottom:14px}
+.dpc-rnd .f label{display:block;font-weight:600;margin-bottom:5px}
+.dpc-rnd .f small{display:block;color:#6b7580;margin-top:3px}
+.dpc-rnd .f input[type=text],.dpc-rnd .f input[type=email],.dpc-rnd .f select,.dpc-rnd .f textarea{width:100%;max-width:100%;padding:8px 10px;border:1px solid #c5ccd3;border-radius:2px;font:inherit}
+.dpc-rnd .f textarea{min-height:96px}
+.dpc-rnd .two{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.dpc-rnd .err{color:#c22;font-size:13px;margin-top:4px;display:none}
+.dpc-rnd .f.bad .err{display:block}
+.dpc-rnd .f.bad input,.dpc-rnd .f.bad select,.dpc-rnd .f.bad textarea{border-color:#c22}
+.dpc-rnd .chk{display:flex;gap:10px;align-items:flex-start;font-weight:400}
+.dpc-rnd .chk input{margin-top:4px}
+.dpc-rnd .btn-apply{background:#2b8fe0;color:#fff;border:0;border-radius:2px;padding:10px 22px;font:600 17px 'Barlow Condensed',Barlow,sans-serif;cursor:pointer}
+.dpc-rnd .btn-apply[disabled]{opacity:.6;cursor:default}
+.dpc-rnd .done{display:none;border-left:4px solid #2e9b4a;background:#eef8f1;padding:14px 16px}
+@media (max-width:760px){.dpc-rnd .gets{grid-template-columns:1fr 1fr}.dpc-rnd .two{grid-template-columns:1fr}}
+</style>
+<div class="dpc-rnd">
+<p class="lead">Before the official launch we are inviting <strong>10 makers</strong> to build the TabUi pendant and run the dpCREATOR WebUI on their own machines, then tell us honestly what works and what doesn't. Your build, photos and report shape the product before anyone else buys it.</p>
+
+<h2>What you get</h2>
+<div class="gets">
+<div><b>TabUi firmware licence</b>Free, for your pendant.</div>
+<div><b>TabUi case 3D files</b>The PETG print files for the enclosure.</div>
+<div><b>WebUI licence</b>Free, for your controller.</div>
+<div class="prize"><b>Free R3 controller</b>For the 3 best builds out of 10.</div>
+</div>
+<p>You keep the licences after the programme, with the same free updates as any customer.</p>
+
+<h2>What we ask</h2>
+<ul>
+<li>Build the pendant and install the WebUI within <strong>8 weeks</strong> of receiving your licences.</li>
+<li>Send a report using the <a href="#rnd-report">template below</a>, with at least <strong>5 photos</strong> (parts, wiring, finished pendant, machine) and a <strong>short video</strong> of jogging and running a job.</li>
+<li>Share problems and ideas in the private tester group as you go.</li>
+<li>Publishing about it publicly is welcome but optional. If you do, say that you received the licences free as part of the R&amp;D Club.</li>
+</ul>
+
+<h2>Who we are looking for</h2>
+<p>A mix of machines: CNC routers, lasers, plotters and drag knives, plasma, and retrofits of older GRBL machines. A mix of people: first-time FluidNC users as well as experienced ones. Makers who already share their builds on YouTube, Instagram or forums are especially welcome. Places are for the EU and UK.</p>
+
+<h2>What you need</h2>
+<ul>
+<li>A free <a href="index.php?route=account/register">dpcreator.eu account</a>. The licences are delivered to it.</li>
+<li>Your own pendant parts: the JC2432W328C display, 60 mm MPG handwheel, E-stop, rotary switches, PCF8574 module and the rest of the <a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=26">parts list</a>, plus a 3D printer for PETG.</li>
+<li>A controller: a dpCREATOR R2 or R3, or another ESP32-S3 board with 16 MB flash and 8 MB octal PSRAM (N16R8).</li>
+<li>A machine to run it on, and soldering tools. The build is demanding: plan up to four hours.</li>
+</ul>
+
+<h2>How it works</h2>
+<ol>
+<li>Register an account and apply with the form below.</li>
+<li>We pick 10 testers and email everyone, picked or not.</li>
+<li>Testers get a personal code: add the TabUi firmware, case files and WebUI to the cart, enter the code, and check out at €0. The licences and downloads appear in your account.</li>
+<li>Build, test, and send your report within 8 weeks.</li>
+<li>We pick the 3 best builds and send each one a dpCREATOR R3 controller.</li>
+</ol>
+<p><strong>How the 3 best builds are chosen:</strong> how complete and useful the report is (problems found, unclear steps in the guides, ideas), the quality of the photos and video, and the quality of the build itself. dpCREATOR decides, and the decision is final.</p>
+
+<h2 id="rnd-report">Report template</h2>
+<div class="tpl"><ol>
+<li><strong>You and your machine:</strong> machine type and size, drivers, spindle or laser, controller board.</li>
+<li><strong>Build:</strong> how long it took, where you got stuck, anything unclear or wrong in the guide.</li>
+<li><strong>Setup:</strong> flashing, config.yaml, WebUI install, connecting the pendant.</li>
+<li><strong>Use:</strong> jogging, running jobs, E-stop and job recovery, Z adjust. What worked, what didn't.</li>
+<li><strong>Problems:</strong> each bug with what you did, what happened, and what you expected. Logs or screenshots if you have them.</li>
+<li><strong>Ideas:</strong> what would make it better.</li>
+<li><strong>Verdict:</strong> a rating from 1 to 10 and an honest comment in a few sentences.</li>
+<li><strong>Media:</strong> at least 5 photos and a short video (links are fine).</li>
+</ol></div>
+
+<h2 id="rnd-terms">Terms</h2>
+<ol class="terms">
+<li><strong>Licences.</strong> The TabUi firmware licence, the case files and the WebUI licence are free, personal and non-transferable, for your own build and testing. Firmware licences are tied to your device.</li>
+<li><strong>No distribution.</strong> You must not share, upload, publish or resell the firmware, the licences, your code or the 3D files, or files made from them.</li>
+<li><strong>Your part.</strong> You build and test within 8 weeks of receiving the licences and send a report with photos and a video, as described above. We may contact you with questions.</li>
+<li><strong>Honest feedback.</strong> We ask for your honest opinion, good or bad. You decide whether to publish anything. If you do, you say that you received the licences free as part of the dpCREATOR R&amp;D Club.</li>
+<li><strong>Use of your photos and videos.</strong> You keep ownership of everything you send us. By sending it, you allow dpCREATOR to use your report, photos and videos, free of charge, on dpcreator.eu, in the documentation and in marketing, credited with the name or nickname you choose. You can ask us to stop using them in new material at any time.</li>
+<li><strong>Pre-release software, at your own risk.</strong> The firmware and WebUI are pre-release and may contain bugs. You build and operate your machine at your own risk. Follow the build guide, wire the E-stop as described, and always keep an independent mains E-stop for the machine. To the extent the law allows, dpCREATOR is not liable for damage or injury arising from tester builds.</li>
+<li><strong>Ending.</strong> If you break these terms, we may revoke your licences. If you complete the programme, you keep them, with free updates like any customer.</li>
+<li><strong>The R3 controllers.</strong> 3 of the 10 testers receive a dpCREATOR R3 controller free, shipped free within the EU and UK. There is no cash alternative.</li>
+<li><strong>Privacy.</strong> We use your application only to run the R&amp;D Club and to contact you about it. Applications that are not picked are deleted within 3 months. See our <a href="index.php?route=information/information&amp;information_id=3">privacy policy</a>.</li>
+</ol>
+
+<h2 id="rnd-apply">Apply</h2>
+<p>You need a <a href="index.php?route=account/register">dpcreator.eu account</a> first: use the same email address here.</p>
+<form id="rnd-form" novalidate>
+<div class="two">
+<div class="f"><label for="rnd1">Your name or nickname</label><input type="text" id="rnd1" name="item[1]" required><div class="err">Enter your name or nickname.</div></div>
+<div class="f"><label for="rnd2">Email</label><input type="email" id="rnd2" name="item[2]" required><small>The one you registered with.</small><div class="err">Enter a valid email address.</div></div>
+</div>
+<div class="two">
+<div class="f"><label for="rnd3">Country</label><input type="text" id="rnd3" name="item[3]" required><div class="err">Enter your country.</div></div>
+<div class="f"><label for="rnd4">Machine type</label><select id="rnd4" name="item[4]" required><option value="">Choose…</option><option>CNC router / mill</option><option>Laser</option><option>Plotter / drag knife</option><option>Plasma</option><option>Lathe / rotary</option><option>Other</option></select><div class="err">Choose your machine type.</div></div>
+</div>
+<div class="f"><label for="rnd5">Your machine</label><textarea id="rnd5" name="item[5]" required></textarea><small>Size, mechanics, stepper or servo drivers, spindle or laser, and the controller it runs now.</small><div class="err">Tell us about your machine.</div></div>
+<div class="two">
+<div class="f"><label for="rnd6">Experience with FluidNC</label><select id="rnd6" name="item[6]" required><option value="">Choose…</option><option>New to FluidNC</option><option>Some experience</option><option>Experienced</option></select><div class="err">Choose your experience.</div></div>
+<div class="f"><label for="rnd7">Controller you will test on</label><select id="rnd7" name="item[7]" required><option value="">Choose…</option><option>dpCREATOR R2 / R3</option><option>Another ESP32-S3 board with 8 MB PSRAM</option><option>Not sure yet</option></select><div class="err">Choose a controller.</div></div>
+</div>
+<div class="f"><label for="rnd8">About you</label><textarea id="rnd8" name="item[8]" required></textarea><small>What you build, and why you want to join.</small><div class="err">Tell us a little about yourself.</div></div>
+<div class="f"><label for="rnd9">Where you share your builds <span style="font-weight:400">(optional)</span></label><input type="text" id="rnd9" name="item[9]"><small>Links to your YouTube channel, Instagram, or forum profile.</small></div>
+<div class="f"><label for="rnd10">Photos of your machine <span style="font-weight:400">(optional)</span></label><input type="text" id="rnd10" name="item[10]"><small>A link to an album or a post.</small></div>
+<div class="f"><label class="chk"><input type="checkbox" id="rnd11" name="item[11][]" value="I have read and accept the R&amp;D Club terms" required> <span>I have read and accept the <a href="#rnd-terms">R&amp;D Club terms</a>.</span></label><div class="err">Accept the terms to apply.</div></div>
+<button type="submit" class="btn-apply">Send application</button>
+<div class="err" id="rnd-send-err" style="margin-top:10px">Your application couldn't be sent. Check your connection and try again.</div>
+</form>
+<div class="done" id="rnd-done"><strong>Application sent.</strong> Thank you. We'll email you when the 10 testers have been picked.</div>
+</div>
+<script>
+(function(){
+  var f=document.getElementById('rnd-form'); if(!f) return;
+  function ok(el){ var v=el.type==='checkbox'?el.checked:(el.value||'').trim(); if(!el.required) return true;
+    if(!v) return false; if(el.type==='email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); return true; }
+  f.addEventListener('submit',function(e){
+    e.preventDefault(); var first=null;
+    Array.prototype.forEach.call(f.querySelectorAll('[required]'),function(el){ var box=el.closest('.f'); var good=ok(el); box.classList.toggle('bad',!good); if(!good&&!first) first=el; });
+    if(first){ first.focus(); return; }
+    var btn=f.querySelector('.btn-apply'), se=document.getElementById('rnd-send-err'); btn.disabled=true; btn.textContent='Sending…'; se.style.display='none';
+    fetch('index.php?route=journal3/form/send&module_id=272',{method:'POST',body:new FormData(f),credentials:'same-origin'})
+      .then(function(r){return r.json();})
+      .then(function(j){ if(j&&j.status==='success'){ f.style.display='none'; document.getElementById('rnd-done').style.display='block'; } else throw 0; })
+      .catch(function(){ se.style.display='block'; btn.disabled=false; btn.textContent='Send application'; });
+  });
+})();
+</script>
