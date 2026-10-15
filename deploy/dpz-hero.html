@@ -11,7 +11,25 @@
 @keyframes dpzst{0%,40%{opacity:0}42%,62%{opacity:1}64%,100%{opacity:0}}
 @media (max-width:900px){ .dpz .hero .w{grid-template-columns:1fr} .dpz .vis{justify-self:center} .dpz .bento{grid-template-columns:1fr} .dpz .t.w2{grid-column:auto} .dpz .nav nav{display:none}}
 @media (prefers-reduced-motion:reduce){ .dpz *{animation:none!important} .dpz .draw{stroke-dashoffset:0}}
-.dpz .t h3 a{color:#fff}.dpz .t h3 a:hover{color:#6db6f2}</style>
+.dpz .t h3 a{color:#fff}.dpz .t h3 a:hover{color:#6db6f2}
+.dpz .vis2{aspect-ratio:13/10}
+.dpz .vis2 .bed{position:absolute;inset:4% 18% 18% -6%;opacity:.6}
+.dpz .vis2 .bed svg{width:100%;height:100%}
+.dpz .vis2 .r2{position:absolute;left:0;bottom:6%;width:74%;height:auto;filter:drop-shadow(0 18px 24px rgba(0,0,0,.6));animation:dpzfl 7s ease-in-out infinite}
+.dpz .vis2 .pd{position:absolute;right:2%;top:0;height:96%;aspect-ratio:480/852;filter:drop-shadow(0 22px 30px rgba(0,0,0,.65));animation:dpzfl 6s ease-in-out -3s infinite}
+.dpz .vis2 .pd>img{width:100%;height:100%;display:block}
+.dpz .vis2 .scr{position:absolute;left:21.4%;top:44.2%;width:57%;height:22.35%;overflow:hidden;border-radius:2px;background:#000;box-shadow:0 0 22px rgba(79,195,247,.25)}
+.dpz .vis2 .scr img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;animation:dpzsc 12s infinite}
+.dpz .vis2 .scr img:nth-child(2){animation-delay:4s}.dpz .vis2 .scr img:nth-child(3){animation-delay:8s}
+@keyframes dpzsc{0%{opacity:0}4%,33%{opacity:1}37%,100%{opacity:0}}
+.dpz .vis2 .link{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.dpz .vis2 .lk0{fill:none;stroke:#1b2229;stroke-width:9;stroke-linecap:round}
+.dpz .vis2 .lk1{fill:none;stroke:#4fc3f7;stroke-width:3;stroke-dasharray:6 22;stroke-linecap:round;animation:dpzlk 1.2s linear infinite;opacity:.9}
+@keyframes dpzlk{to{stroke-dashoffset:-28}}
+.dpz .vis2 .chip{z-index:3}
+@media (max-width:900px){.dpz .vis2{max-width:520px;width:100%}}
+@media (prefers-reduced-motion:reduce){.dpz .vis2 .scr img:first-child{opacity:1}}
+</style>
 <section class="hero"><div class="w">
  <div>
   <span class="k"><i></i>FluidNC 4.1 · wired Ethernet · TabUi pendant</span>
@@ -19,8 +37,8 @@
   <p class="lead">An ESP32-S3 controller with wired Ethernet and the TabUi pendant for CNC routers, lasers, plotters and plasma tables. Build a new machine, or retrofit one that already has 5&nbsp;V step/direction drivers.</p>
   <div class="cta"><a class="btn p" href="index.php?route=product/product&product_id=380">R3 + TabUi combo, €529</a><a class="btn s" href="index.php?route=journal3/blog">Read the docs</a><a class="btn s" href="#try">Try the live demo</a></div>
  </div>
- <div class="vis">
-  <svg viewBox="20 150 540 380" fill="none" aria-hidden="true">
+ <div class="vis vis2">
+  <div class="bed"><svg viewBox="20 150 540 380" fill="none" aria-hidden="true">
    <defs>
     <radialGradient id="dpzhg"><stop offset="0" stop-color="#4fc3f7" stop-opacity=".95"/><stop offset="1" stop-color="#2b8fe0" stop-opacity="0"/></radialGradient>
     <linearGradient id="dpzpl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b232d"/><stop offset="1" stop-color="#0d1116"/></linearGradient>
@@ -42,14 +60,14 @@
      <g filter="url(#dpzgl)"><circle r="15" fill="url(#dpzhg)"/><circle r="4.5" fill="#fff"/><animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;.45;1" calcMode="linear"><mpath href="#dpztp"/></animateMotion></g>
     </g>
    </g>
-  </svg>
-  <span class="chip" style="top:3%;left:0">Job recovery <em>ready</em></span>
-  <span class="chip" style="top:16%;right:0">Ethernet · <em>192.168.1.50</em></span>
-  <span class="chip" style="bottom:5%;left:6%">X 120.000 · Y 48.500 · Z −3.000</span>
+  </svg></div>
+  <svg class="link" viewBox="0 0 1300 1000" preserveAspectRatio="none" aria-hidden="true"><path class="lk0" d="M601 922C640 1010 960 1015 1003 942"/><path class="lk1" d="M601 922C640 1010 960 1015 1003 942"/></svg>
+  <img class="r2" src="image/catalog/dpc-site/hero2/r2-angle-q.png" alt="dpCREATOR controller board" width="760" height="328">
+  <div class="pd"><img src="image/catalog/dpc-site/hero2/pendant-top-q.png" alt="TabUi pendant" width="480" height="852">
+   <div class="scr"><img src="image/catalog/dpc-site/hero2/pendant-dro-idle.jpg" alt=""><img src="image/catalog/dpc-site/hero2/pendant-running.jpg" alt=""><img src="image/catalog/dpc-site/hero2/pendant-recovery-ready.jpg" alt=""></div></div>
+  <span class="chip" style="top:4%;left:0">Job recovery <em>ready</em></span>
+  <span class="chip" style="top:30%;left:6%">Ethernet · <em>192.168.1.50</em></span>
+  <span class="chip" style="bottom:0;left:38%">Pendant link · <em>1 Mbaud</em></span>
  </div>
 </div></section>
-<div class="mq"><div>
- <span>CNC routers</span><span>Laser engravers</span><span>Pen plotters</span><span>Drag knives</span><span>Plasma tables</span><span>Rotary 4th axis</span><span>GRBL retrofits</span>
- <span>CNC routers</span><span>Laser engravers</span><span>Pen plotters</span><span>Drag knives</span><span>Plasma tables</span><span>Rotary 4th axis</span><span>GRBL retrofits</span>
-</div></div>
 </div>
