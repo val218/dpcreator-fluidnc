@@ -228,7 +228,7 @@ bool teach_command(const char* line, Channel& ch, bool on_protocol_task, bool& d
         const char* v = line[14] == '=' ? line + 15 : "";
         claimName     = v;
         claimUntil    = millis() + CLAIM_MS;
-        ch.print(("[MSG:Teach:claim:" + claimName + "]\n").c_str());
+        all(("[MSG:Teach:claim:" + claimName + "]\n").c_str());  // the pendant too: it then sends double-taps straight on
         return true;
     }
     if (isPoint) {
