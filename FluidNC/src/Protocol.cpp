@@ -22,6 +22,7 @@
 #include "Machine/LimitPin.h"
 #include "Job.h"
 #include "PendantLink.h"   // TabUI pendant presence
+#include "Teach.h"         // teach_poll
 #include "VizGenerator.h"  // queued .viz builds
 #include "Recovery.h"      // job recovery
 #include "ZAdjust.h"
@@ -329,6 +330,8 @@ static void poll_once() {
         heap_monitor_poll();
         wd_mark(WD_POLL, "pendant_poll");
         pendant_poll();
+        wd_mark(WD_POLL, "teach_poll");
+        teach_poll();  // Record & Retrace: pending Add / Measure once Idle
         wd_mark(WD_POLL, "zadj_poll");
         zadj_poll();  // live Z adjust: job start/end, pending -> active
         wd_mark(WD_POLL, "stats_poll");

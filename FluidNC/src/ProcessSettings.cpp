@@ -9,6 +9,7 @@
 #include "Stats.h"
 #include "MacroLib.h"
 #include "PendantLink.h"   // $Pendant/Status
+#include "Teach.h"         // $Teach/..., $Pendant/Point
 #include "Parameters.h"  // global_named_params
 
 #define CRASH_TEST
@@ -1400,13 +1401,6 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
         pendant_report(channel);
         return Error::Ok;
     }
-    // TabUI enable button double-tap: tell every UI. The WebUI adds a point in
-    // its open teach-in tool (Offcuts -> DXF, Record & Retrace, Centre Finder).
-    // Message only - no motion, any state, any task.
-    if (strcasecmp(line, "$Pendant/Point") == 0) {
-        allChannels.print("[MSG:PendantPoint]\n");
-        return Error::Ok;
-    }
     // Last crash, for the WebUI banner / decoding: [MSG:Crash:none] or
     // [MSG:Crash:PC=0x... cause=N Backtrace: 0x...:0x00000000 ...]
     // $Crash/Clear: the crash was seen - every UI drops its notice and $Crash
@@ -1515,6 +1509,18 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
                 if (Job::channel()) {
                     return Error::AnotherInterfaceBusy;
                 }
+                return cmd_queue_defer(line, channel) ? Error::Deferred : Error::AnotherInterfaceBusy;
+            }
+            return Error::Ok;
+        }
+    }
+    // Record & Retrace list on the board, and the pendant's double-tap
+    // ($Pendant/Point): read-only and pending Add/Measure answered here, the
+    // SD-writing rest on the protocol task (Teach.h).
+    {
+        bool defer = false;
+        if (teach_command(line, channel, on_protocol_task, defer)) {
+            if (defer) {
                 return cmd_queue_defer(line, channel) ? Error::Deferred : Error::AnotherInterfaceBusy;
             }
             return Error::Ok;
