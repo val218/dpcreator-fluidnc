@@ -15,9 +15,9 @@ plus dpCREATOR additions:
   board from dpcreator.eu. The commands below work from any sender or console.
 - `$Board/ID`: the board's chip ID and the level of the dpCREATOR commands
   (`[MSG:BoardID:<12 hex>:api=1]`)
-- SD card usable as a **network drive** on your PC, with TabUI pendant `.viz`
+- SD card usable as a **network drive** on your PC, with SmartTabUI pendant `.viz`
   previews built automatically for every G-code file copied onto it
-- TabUI pendant connection status (`$Pendant/Status`, badge in the WebUI)
+- SmartTabUI pendant connection status (`$Pendant/Status`, badge in the WebUI)
 - Job preview on the pendant: **Prepare** a file in the WebUI, it appears on
   the pendant, then **Run** or **Cancel** from either one (see section 8)
 - **Job recovery** kept by the board: an interrupted job (alarm, E-stop,
@@ -28,7 +28,7 @@ plus dpCREATOR additions:
   job (see section 10)
 - **Handwheel rewind** in Hold: go back along the cut path with the pendant
   wheel or the WebUI, change Z, and re-cut to where it stopped (section 11)
-- PathRetrace / VizGenerator commands for the TabUI pendant
+- PathRetrace / VizGenerator commands for the SmartTabUI pendant
 
 Tested on a dpCREATOR R2/R3 (ESP32-S3-WROOM-1-N16R8).
 
@@ -94,7 +94,7 @@ the config has the `ethernet:` section.
 5. [Connect gSender over Ethernet](#5-connect-gsender-over-ethernet)
 6. [SD card as a network drive (Windows)](#6-sd-card-as-a-network-drive-windows)
 7. [Pendant connection status](#7-pendant-connection-status)
-8. [Job preview on the TabUI pendant (Prepare → Run)](#8-job-preview-on-the-tabui-pendant)
+8. [Job preview on the SmartTabUI pendant (Prepare → Run)](#8-job-preview-on-the-smarttabui-pendant)
 9. [Job recovery](#9-job-recovery)
 10. [Live Z adjust](#10-live-z-adjust)
 11. [Handwheel rewind](#11-handwheel-rewind)
@@ -346,7 +346,7 @@ for its MAC) so the drive keeps working after a reboot.
 
 **Pendant previews are built automatically.** Whenever a G-code file
 (`.nc .gcode .gc .ngc .tap .cnc .g`) is written to the SD card, from this
-drive, the web UI or the classic UI, FluidNC queues `<file>.viz` for the TabUI
+drive, the web UI or the classic UI, FluidNC queues `<file>.viz` for the SmartTabUI
 pendant. The build waits until **nothing moves and no job is running** (Idle, or
 Alarm right after power-up; the controller does not take commands while it
 reads the file), starts 1.5 s after the last write,
@@ -382,7 +382,7 @@ every 500 ms, so an unplugged pendant is noticed within about 3 s while the
 machine is idle. During a running job the board streams reports and the
 pendant may stay quiet, so the badge keeps its last state until the job ends.
 
-## 8. Job preview on the TabUI pendant
+## 8. Job preview on the SmartTabUI pendant
 
 The board builds and sends the pendant the toolpath preview of each G-code
 file, so the pendant shows the same part as the WebUI's 3D view.

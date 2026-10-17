@@ -1,7 +1,7 @@
 # dpCREATOR FluidNC
 
 FluidNC 4.1.1 for ESP32-S3 controllers, extended into a complete machine
-system for the **dpCREATOR WebUI** and the **TabUI pendant**: job recovery,
+system for the **dpCREATOR WebUI** and the **SmartTabUI pendant**: job recovery,
 live Z adjust, handwheel rewind, pendant previews, macros, job history and
 crash diagnostics, kept by the board itself. W5500 Ethernet is included too,
 but it is no longer the main point (upstream FluidNC is adding it).
@@ -14,12 +14,12 @@ Full guide: **[W5500_ETHERNET.md](W5500_ETHERNET.md)** · Download:
 > - [Connect gSender over Ethernet](W5500_ETHERNET.md#5-connect-gsender-over-ethernet)
 > - [SD card as a network drive + automatic pendant .viz](W5500_ETHERNET.md#6-sd-card-as-a-network-drive-windows)
 > - [Pendant connection status](W5500_ETHERNET.md#7-pendant-connection-status)
-> - [Job preview on the pendant: Prepare → Run](W5500_ETHERNET.md#8-job-preview-on-the-tabui-pendant) · [Job recovery](W5500_ETHERNET.md#9-job-recovery) · [Live Z adjust](W5500_ETHERNET.md#10-live-z-adjust) · [Handwheel rewind](W5500_ETHERNET.md#11-handwheel-rewind) · [Macros](W5500_ETHERNET.md#12-macros) · [Offsets & tools](W5500_ETHERNET.md#13-work-offsets-and-tools) · [G-code view & history](W5500_ETHERNET.md#14-g-code-view-run-from-line-job-history) · [Troubleshooting](W5500_ETHERNET.md#15-troubleshooting)
+> - [Job preview on the pendant: Prepare → Run](W5500_ETHERNET.md#8-job-preview-on-the-smarttabui-pendant) · [Job recovery](W5500_ETHERNET.md#9-job-recovery) · [Live Z adjust](W5500_ETHERNET.md#10-live-z-adjust) · [Handwheel rewind](W5500_ETHERNET.md#11-handwheel-rewind) · [Macros](W5500_ETHERNET.md#12-macros) · [Offsets & tools](W5500_ETHERNET.md#13-work-offsets-and-tools) · [G-code view & history](W5500_ETHERNET.md#14-g-code-view-run-from-line-job-history) · [Troubleshooting](W5500_ETHERNET.md#15-troubleshooting)
 > - The **dpCREATOR WebUI** (3D view, job recovery, Z adjust, history) is a separate product: install it on the board from [dpcreator.eu](https://dpcreator.eu/). This firmware ships with the stock FluidNC WebUI and works with any FluidNC sender. `$Board/ID` reports the board's chip ID.
 
 ## What this firmware adds to FluidNC 4.1.1
 
-The dpCREATOR WebUI and the TabUI pendant use these board commands; with stock
+The dpCREATOR WebUI and the SmartTabUI pendant use these board commands; with stock
 FluidNC the pendant only jogs and the dpCREATOR WebUI does not work. All of
 them also work from any sender or the console.
 
@@ -28,7 +28,7 @@ them also work from any sender or the console.
 | Job recovery | An interrupted job (alarm, E-stop, Stop, reset, power loss) is kept by the board and offered for restart from a safe line, with a dry run; any file can also be started from a chosen line | `$Job/Recovery`, `$Job/RunFrom=` | [9](W5500_ETHERNET.md#9-job-recovery) |
 | Live Z adjust | Raise or lower the tool while the job cuts, applied within milliseconds; ends with the job, can be added to the work zero | `$Job/ZAdjust` | [10](W5500_ETHERNET.md#10-live-z-adjust) |
 | Handwheel rewind | In Hold, run back along the cut path, change Z, then Continue re-cuts to the hold point | `$Rewind/...` | [11](W5500_ETHERNET.md#11-handwheel-rewind) |
-| Pendant integration | Prepare a file and see it on the pendant, then Run or Cancel from either side; toolpath previews built and sent by the board; link status | `$Job/Prepare=`, `$Viz/...`, `$Pendant/Status` | [7](W5500_ETHERNET.md#7-pendant-connection-status), [8](W5500_ETHERNET.md#8-job-preview-on-the-tabui-pendant) |
+| Pendant integration | Prepare a file and see it on the pendant, then Run or Cancel from either side; toolpath previews built and sent by the board; link status | `$Job/Prepare=`, `$Viz/...`, `$Pendant/Status` | [7](W5500_ETHERNET.md#7-pendant-connection-status), [8](W5500_ETHERNET.md#8-job-preview-on-the-smarttabui-pendant) |
 | Macro library | Macros on the SD card, shared by the WebUI and the pendant | `$MacroLib/...` | [12](W5500_ETHERNET.md#12-macros) |
 | Job history and hour counters | Every job with its result and time; run, spindle and service hours | `$Stats` | [14](W5500_ETHERNET.md#14-g-code-view-run-from-line-job-history) |
 | SD card as a network drive | Map the SD card as a drive on your PC; pendant previews are built for every G-code file copied onto it | WebDAV at `/sd` | [6](W5500_ETHERNET.md#6-sd-card-as-a-network-drive-windows) |
