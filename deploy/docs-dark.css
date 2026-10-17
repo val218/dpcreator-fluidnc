@@ -1,0 +1,68 @@
+/* dpCREATOR docs: dark manual layout (blog posts + docs listing) */
+html.route-journal3-blog-post, html.route-journal3-blog { --d-bg:#0D1014; --d-card:#151B22; --d-line:#26303A; --d-text:#EEF2F5; --d-body:#C3CCD5; --d-muted:#95A2AF; --d-link:#7CCBF7; }
+html.route-journal3-blog-post body, html.route-journal3-blog body { background: var(--d-bg) !important; color: var(--d-body); }
+
+/* page title band */
+html.route-journal3-blog-post h1.page-title, html.route-journal3-blog h1.page-title {
+  background: #0A0D11 !important; color: var(--d-text) !important; text-transform: none !important;
+  font-family: 'Barlow Condensed', 'Barlow', sans-serif !important; font-weight: 700 !important;
+  font-size: 56px !important; line-height: 1.05 !important; letter-spacing: 0 !important;
+  padding: 56px 24px 44px !important; border-bottom: 1px solid var(--d-line); }
+html.route-journal3-blog-post h1.page-title::after, html.route-journal3-blog h1.page-title::after { display: none !important; }
+html.route-journal3-blog-post .breadcrumb, html.route-journal3-blog .breadcrumb { background: transparent !important; }
+html.route-journal3-blog-post .breadcrumb::before, html.route-journal3-blog .breadcrumb::before { background: #0A0D11 !important; }
+html.route-journal3-blog-post .breadcrumb a, html.route-journal3-blog .breadcrumb a, html.route-journal3-blog-post .breadcrumb li { color: var(--d-muted) !important; font-size: 15px !important; }
+
+/* wider page, wider article */
+html.route-journal3-blog-post .container.blog-post, html.route-journal3-blog #content, html.route-journal3-blog .container { max-width: 1440px; }
+
+/* article text */
+html.route-journal3-blog-post .post-content, html.route-journal3-blog-post .post-content .dpc-bg {
+  font-family: 'Barlow', system-ui, sans-serif; font-size: 19px; line-height: 1.65; color: var(--d-body); }
+html.route-journal3-blog-post .post-content p, html.route-journal3-blog-post .post-content li { max-width: 74ch; }
+html.route-journal3-blog-post .post-content h2, html.route-journal3-blog-post .post-content h3, html.route-journal3-blog-post .post-content h4 {
+  color: var(--d-text); font-family: 'Barlow Condensed', 'Barlow', sans-serif; font-weight: 700; line-height: 1.15; }
+html.route-journal3-blog-post .post-content h2 { font-size: 40px; margin: 1.5em 0 .5em; }
+html.route-journal3-blog-post .post-content h3 { font-size: 30px; margin: 1.4em 0 .45em; }
+html.route-journal3-blog-post .post-content h4 { font-size: 23px; margin: 1.2em 0 .4em; }
+html.route-journal3-blog-post .post-content strong { color: var(--d-text); }
+html.route-journal3-blog-post .post-content a { color: var(--d-link); }
+html.route-journal3-blog-post .post-content a:hover { color: #B5E2FB; }
+html.route-journal3-blog-post .post-content code, html.route-journal3-blog-post .post-content pre {
+  font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: .86em; background: #0A0E13 !important;
+  color: #DCE6EE; border: 1px solid var(--d-line); border-radius: 6px; }
+html.route-journal3-blog-post .post-content code { padding: 1px 6px; }
+html.route-journal3-blog-post .post-content pre { padding: 14px 16px !important; }
+html.route-journal3-blog-post .post-content pre code { border: 0; padding: 0; background: none !important; }
+
+/* tables */
+html.route-journal3-blog-post .post-content .table, html.route-journal3-blog-post .post-content table {
+  font-size: 17px; color: var(--d-body); background: transparent; border-color: var(--d-line) !important; }
+html.route-journal3-blog-post .post-content .table > thead > tr > th, html.route-journal3-blog-post .post-content th {
+  background: var(--d-card); color: var(--d-text); border-color: var(--d-line) !important; }
+html.route-journal3-blog-post .post-content .table td, html.route-journal3-blog-post .post-content td { border-color: var(--d-line) !important; }
+
+/* notes, warnings, callouts */
+html.route-journal3-blog-post .post-content .note, html.route-journal3-blog-post .post-content .alert-info, html.route-journal3-blog-post .post-content .dpc-callout {
+  background: #13202B !important; border: 1px solid #234257 !important; border-left: 4px solid #2B8FE0 !important; color: #D6E6F1 !important; border-radius: 8px; }
+html.route-journal3-blog-post .post-content .warn {
+  background: #2A1517 !important; border: 1px solid #5A2A2E !important; border-left: 4px solid #E0484A !important; color: #F3D9DA !important; border-radius: 8px; }
+
+/* figures */
+html.route-journal3-blog-post .post-content figcaption, html.route-journal3-blog-post .dpc-bg figcaption { color: #A9B5C1 !important; font-size: 16px !important; }
+html.route-journal3-blog-post .post-content img { border-radius: 6px; }
+
+/* side column: search + docs sections */
+html.route-journal3-blog-post .side-column, html.route-journal3-blog .side-column { color: var(--d-body); }
+html.route-journal3-blog-post .side-column .title, html.route-journal3-blog .side-column .title, html.route-journal3-blog-post .side-column h3, html.route-journal3-blog .side-column h3 {
+  color: var(--d-muted) !important; font-size: 15px !important; }
+html.route-journal3-blog-post .side-column a, html.route-journal3-blog .side-column a { color: var(--d-body) !important; font-size: 17px !important; }
+html.route-journal3-blog-post .side-column a:hover, html.route-journal3-blog .side-column a:hover { color: var(--d-text) !important; }
+html.route-journal3-blog-post .side-column input, html.route-journal3-blog .side-column input {
+  background: var(--d-card) !important; color: var(--d-text) !important; border: 1px solid #33404C !important; font-size: 16px !important; }
+
+/* docs listing (all posts) */
+html.route-journal3-blog .post-layout, html.route-journal3-blog .post-thumb { background: var(--d-card) !important; border: 1px solid var(--d-line); border-radius: 10px; }
+html.route-journal3-blog .post-layout .name a, html.route-journal3-blog .post-thumb .name a { color: var(--d-text) !important; font-size: 22px !important; }
+html.route-journal3-blog .post-layout .description, html.route-journal3-blog .post-thumb .description { color: var(--d-body) !important; font-size: 17px !important; }
+html.route-journal3-blog-post .post-stats, html.route-journal3-blog .post-stats { color: var(--d-muted) !important; }
