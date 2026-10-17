@@ -36,13 +36,13 @@ ethernet:
   phy_addr: 1
   frequency_hz: 8000000
 
-# ---------------- UART1: TabUI pendant ----------------
+# ---------------- UART1: SmartTabUI pendant ----------------
 uart1:
   txd_pin: gpio.1
   rxd_pin: gpio.2
   rts_pin: NO_PIN
   cts_pin: NO_PIN
-  baud: 1000000        # TabUI / Fluid Dial pendant firmware is built with FNC_BAUD=1000000
+  baud: 1000000        # SmartTabUI pendant link speed (1 Mbaud)
   mode: 8N1
 
 uart_channel1:
