@@ -26,6 +26,9 @@ struct TeachPt {
     double      w      = 0;   // round: diameter; rectangle: width (X)
     double      h      = 0;   // rectangle: height (Y); 0 = square (h = w)
     int         passes = 1;   // depth passes (drill: pecks)
+    double      feed   = 0;   // cutting feed mm/min here; 0 = the job's (TeachCfg)
+    double      plunge = 0;   // Z feed mm/min here; 0 = the job's
+    double      ramp   = 0;   // pockets: enter on a helix down at this angle (degrees); 0 = straight plunge
 };
 
 // Builds the program. Problems (missing depth, pocket smaller than the tool,

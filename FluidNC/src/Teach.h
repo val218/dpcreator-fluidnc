@@ -5,7 +5,9 @@
 //
 //   $Teach  /  $Teach/List         -> cfg line, one pt line per waypoint, count
 //   $Teach/Add[=op]                -> waypoint at the current work position, once Idle
-//   $Teach/Set=n,op=r,ref=c,depth=5,w=30,h=20,passes=2,x=..,y=..,z=..
+//   $Teach/Set=n,op=r,ref=c,depth=5,w=30,h=20,passes=2,feed=800,plunge=200,x=..,y=..,z=..
+//                                  (feed / plunge 0 = the job's from Cfg; ramp = pocket entry angle in
+//                                  degrees on a helix, 0 = straight plunge, max 45)
 //   $Teach/Del=n   $Teach/Clear
 //   $Teach/Cfg=safez=5,feed=500,plunge=150,rpm=12000,tool=3
 //   $Teach/Measure=n               -> size of waypoint n from the current position, once Idle
@@ -18,7 +20,7 @@
 //
 // Broadcast to every channel (numbers 1-based, op m|d|r|p, ref c|bl|br|tl|tr):
 //   [MSG:Teach:cfg:safez:feed:plunge:rpm:tool]
-//   [MSG:Teach:pt:n:x:y:z:op:ref:depth:w:h:passes]
+//   [MSG:Teach:pt:n:x:y:z:op:ref:depth:w:h:passes:feed:plunge:ramp]   (feed, plunge 0 = the job's)
 //   [MSG:Teach:count:n]                       after a full list / delete / clear
 //   [MSG:Teach:added:n:pendant|ui]            followed by its pt line
 //   [MSG:Teach:measured:n:w:h]                followed by its pt line
