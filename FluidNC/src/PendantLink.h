@@ -9,6 +9,11 @@
 //
 //   $Pendant/Status        -> [MSG:Pendant:connected|disconnected|none]
 //   on change (all channels except the pendant itself) -> same message
+//
+//   $Pendant/Hello=<chip ID>:<version>   sent by the SmartTabUI pendant on connect
+//                          -> [MSG:PendantInfo:<chip ID>:<version>] to the other channels,
+//                             and after [MSG:Pendant:...] in $Pendant/Status
+//                             (the WebUI shows it and counts pendants for updates)
 #pragma once
 #include "Channel.h"
 
@@ -20,3 +25,4 @@ void         pendant_report(Channel& out);
 void         pendant_debug(Channel& out);  // $Pendant/Debug: raw counters
 void         pendant_trace(Channel& out, bool on);  // $Pendant/Trace=on|off
 const char*  pendant_state_name();
+void         pendant_hello(const char* info);   // $Pendant/Hello=<chip>:<version>
