@@ -66,3 +66,6 @@ html.route-journal3-blog .post-layout, html.route-journal3-blog .post-thumb { ba
 html.route-journal3-blog .post-layout .name a, html.route-journal3-blog .post-thumb .name a { color: var(--d-text) !important; font-size: 22px !important; }
 html.route-journal3-blog .post-layout .description, html.route-journal3-blog .post-thumb .description { color: var(--d-body) !important; font-size: 17px !important; }
 html.route-journal3-blog-post .post-stats, html.route-journal3-blog .post-stats { color: var(--d-muted) !important; }
+html.route-journal3-blog-post .post-content table tr, html.route-journal3-blog-post .post-content table td,
+html.route-journal3-blog-post .post-content table tbody tr:nth-child(odd), html.route-journal3-blog-post .post-content table tbody tr:nth-child(even) { background: transparent !important; color: var(--d-body); }
+html.route-journal3-blog-post .post-content table tbody tr:nth-child(even) { background: rgba(255,255,255,.025) !important; }
