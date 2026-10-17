@@ -1,0 +1,97 @@
+<p>What changed in each build of the dpCREATOR controller firmware, the SmartTabUI pendant firmware and the dpCREATOR WebUI, newest first. All three update from the <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> page. They are developed together, so update all of them at the same time.</p>
+
+<div class="dpc-callout"><strong>Found a bug?</strong> Write to us with what you did, what happened and the build numbers: the WebUI footer shows the WebUI and controller builds, and the pendant shows its build on the boot screen. If the controller restarted by itself, add the crash report: <code>$Crash</code> in the console, or <em>Copy details</em> in the WebUI.</div>
+
+<h2>dpCREATOR controller firmware</h2>
+<p>FluidNC 4.1.1 with W5500 Ethernet and the dpCREATOR commands. Free for every customer.</p>
+
+<h3>17 October 2026</h3>
+<ul>
+<li><strong>New:</strong> the SmartTabUI pendant reports its chip ID and build to the controller when it connects, so the WebUI can show which pendant is attached.</li>
+<li><strong>Changed:</strong> the default <code>config.yaml</code> and the docs name the SmartTabUI pendant.</li>
+</ul>
+
+<h3>16 October 2026</h3>
+<ul>
+<li><strong>New:</strong> the Record &amp; Retrace waypoint list is kept on the board's SD card. The pendant and the WebUI edit the same list, and the pendant works with it without a PC. Saving writes <code>/retrace.nc</code> with drill holes and round or rectangle pockets.</li>
+<li><strong>New:</strong> when a WebUI tool (Centre Finder, Offcuts) takes the pendant's double-taps, the pendant is told, so the point goes to the right place.</li>
+</ul>
+
+<h3>15 October 2026</h3>
+<ul>
+<li><strong>New:</strong> a double-tap on the pendant's ENABLE button sends a point to the WebUI tools.</li>
+</ul>
+
+<h3>13 October 2026</h3>
+<ul>
+<li><strong>New:</strong> the board's 8 MB PSRAM is used. Boards with a module that has too little PSRAM get a warning in the WebUI and on the Flash Firmware page.</li>
+<li><strong>New:</strong> the board reports its ID, which the WebUI installer uses. The dpCREATOR WebUI is now installed separately from the firmware.</li>
+<li><strong>Fixed:</strong> the controller could crash on SD card access when its internal memory ran low. Pendant previews now wait for memory instead.</li>
+</ul>
+
+<h3>12 October 2026</h3>
+<ul>
+<li><strong>Fixed:</strong> restarts by the task watchdog. Opening the WebUI could lock up the controller while it was sending status reports.</li>
+<li><strong>Fixed:</strong> the WebUI became slow, and pendant previews failed, while the controller was sending to the pendant. Sends to the pendant are buffered and previews are paced.</li>
+<li><strong>Improved:</strong> the WebUI stays connected while jogging. Old status reports are dropped instead of the connection being closed.</li>
+<li><strong>New:</strong> after a watchdog restart the controller keeps a report of what it was doing, shown by <code>$Crash</code>, in the boot log and in the WebUI.</li>
+</ul>
+
+<h2>SmartTabUI pendant firmware</h2>
+<p>The pendant firmware, installed from the Flash Firmware page. Your pendant settings are kept on update.</p>
+
+<h3>17 October 2026</h3>
+<ul>
+<li><strong>New:</strong> registration. A pendant is registered by its chip ID the first time it is installed with a licence. Nothing is locked: an unregistered pendant works fully and shows <em>Not registered</em> on the boot screen and in Settings. See <a href="index.php?route=journal3/blog/post&journal_blog_post_id=32">Installing, updating and registering SmartTabUI</a>.</li>
+<li><strong>New:</strong> Record mode can set the feed, plunge and ramp (helix entry angle) for each waypoint.</li>
+<li><strong>New:</strong> Rewind shows a progress bar of how far back along the path it is, and the panel stays open until Rewind ends.</li>
+<li><strong>Changed:</strong> Measure → Go to centre lifts Z to the top first, like Home → Go to 0.</li>
+</ul>
+
+<h3>16 October 2026</h3>
+<ul>
+<li><strong>New firmware:</strong> SmartTabUI, written from scratch. DRO with the step selector, home and probe menu, macros, spindle, file browser with toolpath preview, Prepare and Run, live Z adjust, Rewind, job recovery and Record &amp; Retrace.</li>
+<li><strong>New:</strong> a double-tap on ENABLE asks whether to measure the part or record waypoints.</li>
+<li><strong>New:</strong> Dark, Neutral and Light themes; Settings with an input monitor and a UART monitor; restart with E-stop + ENABLE held for 3 seconds.</li>
+<li><strong>New:</strong> boot screen with the build number, and beeps when you turn the axis or step selector.</li>
+<li><strong>Fixed:</strong> the Record &amp; Retrace popup closed by itself after each point.</li>
+<li><strong>Fixed:</strong> live Z adjust now stays on screen until the controller confirms it.</li>
+<li><strong>Fixed:</strong> running a file no longer holds up other commands from the pendant.</li>
+</ul>
+
+<h2>dpCREATOR WebUI</h2>
+<p>The browser interface, installed on the board from the Flash Firmware page (WebUI tab).</p>
+
+<h3>17 October 2026</h3>
+<ul>
+<li><strong>New:</strong> update notice. About once a day the WebUI asks dpcreator.eu whether newer builds exist and shows <em>update available</em> in its footer. You can turn this off in the footer.</li>
+<li><strong>New:</strong> the footer shows the build of the connected pendant.</li>
+<li><strong>New:</strong> registration notice. Nothing is locked: an unregistered WebUI shows a small notice that you can hide for a week.</li>
+</ul>
+
+<h3>16 October 2026</h3>
+<ul>
+<li><strong>New:</strong> Record &amp; Retrace has a waypoint map and an editor for the selected waypoint, matching Record mode on the pendant.</li>
+<li><strong>New:</strong> the waypoint list is kept on the board and shared with the pendant; rectangle pockets.</li>
+<li><strong>New:</strong> <em>Measure part</em> on the pendant opens the Centre Finder; clearing the corners clears them on both.</li>
+</ul>
+
+<h3>15 October 2026</h3>
+<ul>
+<li><strong>New:</strong> Centre Finder: measure a part from its corners, see its size, set work zero at its centre or a corner, and make a surfacing job.</li>
+<li><strong>New:</strong> Record &amp; Retrace: jog to marked points, add waypoints and turn them into a drilling or pocketing job.</li>
+<li><strong>New:</strong> Offcuts → DXF: record the outlines of offcuts or the workpiece (with 45° edge snap) and export them as a DXF to place your drawing on.</li>
+<li><strong>New:</strong> tool library with a floating tool picker, tool-change modes with park positions per tool, and an M6 macro generator.</li>
+<li><strong>New:</strong> probe the material height, set Z0 from the tool setter, and set X0/Y0 at measured points.</li>
+<li><strong>New:</strong> jogging (including 45° diagonals) keeps working while Centre Finder, Record &amp; Retrace or Offcuts are open.</li>
+<li><strong>Fixed:</strong> files saved from the WebUI could arrive on the board empty. Saves are now checked and retried.</li>
+<li><strong>Fixed:</strong> the Record &amp; Retrace list was squeezed by the G-code preview and could add the same point twice.</li>
+<li><strong>Fixed:</strong> the Record &amp; Retrace window could stay on screen after closing; safe Z now defaults to 5 mm and jobs with problems are blocked.</li>
+</ul>
+
+<h3>13 October 2026</h3>
+<ul>
+<li><strong>New:</strong> the dpCREATOR WebUI is a separate product, installed on the board from dpcreator.eu.</li>
+<li><strong>Fixed:</strong> two WebUI tabs open at once no longer fight over the connection to the board.</li>
+<li><strong>New:</strong> a warning when the board's module has no 8 MB PSRAM, and a message explaining when pendant previews pause because the board is low on memory.</li>
+</ul>
