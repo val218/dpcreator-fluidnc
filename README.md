@@ -7,7 +7,7 @@ crash diagnostics, kept by the board itself. W5500 Ethernet is included too,
 but it is no longer the main point (upstream FluidNC is adding it).
 
 Full guide: **[W5500_ETHERNET.md](W5500_ETHERNET.md)** · Download:
-[latest release](https://github.com/val218/fluidNC-with-w5500-support/releases/tag/w5500-latest)
+[latest release](https://github.com/val218/dpcreator-fluidnc/releases/tag/w5500-latest)
 
 > - **[Quick start: turn on Ethernet](W5500_ETHERNET.md#quick-start-turn-on-ethernet)**
 > - [Get the firmware](W5500_ETHERNET.md#1-get-the-firmware) · [Wiring](W5500_ETHERNET.md#2-wiring) · [config.yaml](W5500_ETHERNET.md#3-configyaml) · [Ethernet setup](W5500_ETHERNET.md#4-switch-fluidnc-to-ethernet)

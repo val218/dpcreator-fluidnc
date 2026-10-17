@@ -110,7 +110,7 @@ the config has the `ethernet:` section.
 Firmware is built automatically by GitHub Actions on every push to this branch.
 
 **Easiest:** the release
-[**w5500-latest**](https://github.com/val218/fluidNC-with-w5500-support/releases/tag/w5500-latest)
+[**w5500-latest**](https://github.com/val218/dpcreator-fluidnc/releases/tag/w5500-latest)
 always holds the newest build as plain files (no GitHub login, no zip):
 `merged-flash.bin`, `firmware.bin`, … and `version.txt` (which commit).
 
@@ -299,7 +299,7 @@ reconnects at every sign-in. Copy G-code onto it like onto a USB stick.
 board's IP already filled in; double-click it on the PC (steps 2-3 below, no
 IP to type). Or:
 
-1. Download [`tools/windows/dpcreator-sd-drive.cmd`](https://raw.githubusercontent.com/val218/fluidNC-with-w5500-support/fluidnc-4.1.1-w5500/tools/windows/dpcreator-sd-drive.cmd)
+1. Download [`tools/windows/dpcreator-sd-drive.cmd`](https://raw.githubusercontent.com/val218/dpcreator-fluidnc/fluidnc-4.1.1-w5500/tools/windows/dpcreator-sd-drive.cmd)
    (right-click the link → *Save link as…*).
 2. **Double-click it** (do *not* use "Run as administrator"). If Windows says
    *"Windows protected your PC"*, click **More info → Run anyway**.
