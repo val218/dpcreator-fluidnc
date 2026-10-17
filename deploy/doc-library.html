@@ -1,0 +1,57 @@
+<style>
+.dpc-lib{margin:8px 0 28px}
+.dpc-lib .lib-intro{max-width:70ch;margin:0 0 22px;font-size:15px;line-height:1.6}
+.dpc-lib .lib-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.dpc-lib .lib-sec{border:1px solid rgba(127,127,127,.28);border-radius:4px;padding:18px 20px 14px}
+.dpc-lib .lib-sec h2{font-size:17px;margin:0 0 4px}
+.dpc-lib .lib-sec>p{font-size:13px;opacity:.75;margin:0 0 12px;line-height:1.45}
+.dpc-lib ul{list-style:none;margin:0;padding:0}
+.dpc-lib li{padding:7px 0;border-top:1px solid rgba(127,127,127,.18);line-height:1.35}
+.dpc-lib li:first-child{border-top:0}
+.dpc-lib li a{font-weight:600}
+.dpc-lib li span{display:block;font-size:12.5px;opacity:.72;margin-top:2px}
+</style>
+<div class="dpc-lib">
+<p class="lib-intro">Build guides, setup instructions and reference for the dpCREATOR controller, the SmartTabUI pendant and the dpCREATOR WebUI. All guides are free to read; the case print files are in <a href="index.php?route=product/category&path=228_223">3D Files</a>.</p>
+<div class="lib-grid">
+
+<section class="lib-sec"><h2>Build guides</h2><p>Put the hardware together and wire it to your machine.</p><ul>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=26">Build your SmartTabUI pendant</a><span>Parts, front panel, wiring, case and the first test</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=19">Connecting the SmartTabUI pendant</a><span>GX12 cable, E-stop line and the serial link</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=15">Controller board: pinout and features</a><span>Connectors, pins and what to set before cutting</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=17">Spindle and VFD</a><span>PWM, relay and RS485 (Modbus) wiring</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=28">Machine types and retrofits</a><span>Router, laser, plotter, plasma, or a machine you already own</span></li>
+</ul></section>
+
+<section class="lib-sec"><h2>Getting started</h2><p>From the box to the first move.</p><ul>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=13">dpCREATOR system overview</a><span>How the controller, pendant and WebUI fit together</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=14">Quick start: first power-up</a><span>Power, connect, check and jog</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=16">Ethernet (W5500) setup</a><span>Wired network, fixed IP, back to Wi-Fi</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=18">SD card as a network drive</a><span>Copy jobs to the machine from your PC</span></li>
+<li><a href="https://github.com/val218/dpcreator-fluidnc/blob/fluidnc-4.1.1-w5500/example_configs/dpcreator_r2_r3_w5500.yaml" target="_blank" rel="noopener">Example config.yaml for the R2/R3</a><span>Pins already set; adjust steps, speeds and travel for your machine</span></li>
+</ul></section>
+
+<section class="lib-sec"><h2>Using the pendant and the WebUI</h2><p>Running jobs and the tools at the machine.</p><ul>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=30">SmartTabUI pendant: screens, jogging and settings</a><span>Every screen and setting on the pendant</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=31">Measure and Record &amp; Retrace</a><span>Find the part centre and teach drilling and pocketing jobs</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=20">Running a job: Prepare, Run and the E-stop</a><span>Same job on the WebUI and the pendant</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=21">Job recovery after a stop or power loss</a><span>Restart from the last safe retract</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=22">Live Z adjust and handwheel rewind</a><span>Fix depth while cutting, back up along the path</span></li>
+</ul></section>
+
+<section class="lib-sec"><h2>Firmware and updates</h2><p>Install, update and keep your settings.</p><ul>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=33">Release notes and bug fixes</a><span>What is new and fixed in each build</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=23">Flashing firmware from your browser</a><span>Controller and pendant, from the Flash Firmware page</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=24">Updating firmware and keeping your config</a><span>Full image or firmware only, and the WebUI</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=32">Installing, updating and registering SmartTabUI</a><span>Registration by chip ID, updates and support</span></li>
+</ul></section>
+
+<section class="lib-sec"><h2>Help</h2><p>When something doesn't work.</p><ul>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=25">Troubleshooting</a><span>Flashing, network, pendant and job problems</span></li>
+<li><a href="index.php?route=information/information&information_id=7">Frequently asked questions</a><span>Compatibility, senders, spindles and more</span></li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=29">Legacy boards</a><span>Earlier dpCREATOR and 3dp.lv controllers</span></li>
+<li><a href="index.php?route=information/contact">Contact us</a><span>Include your build numbers and, for the pendant, its chip ID</span></li>
+</ul></section>
+
+</div>
+</div>
