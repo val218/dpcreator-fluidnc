@@ -22,6 +22,7 @@ namespace {
     bool     _initialized = false;
     uint32_t _last_noise  = 0;  // noise counter at the previous poll
     uint32_t _noisy_until = 0;  // treat the link as down until then
+    char     _info[48]    = "";  // what the pendant said in $Pendant/Hello
 
     Link evaluate(UartChannel* ch) {
         if (!ch) {
@@ -97,9 +98,27 @@ void pendant_debug(Channel& out) {
 }
 
 void pendant_report(Channel& out) {
-    char buf[48];
+    char buf[80];
     snprintf(buf, sizeof(buf), "[MSG:Pendant:%s]\n", name(_link));
     out.print(buf);
+    if (_info[0] && _link == Link::Connected) {
+        snprintf(buf, sizeof(buf), "[MSG:PendantInfo:%s]\n", _info);
+        out.print(buf);
+    }
+}
+
+void pendant_hello(const char* info) {
+    size_t n = 0;
+    for (const char* p = info; *p && n < sizeof(_info) - 1; p++) {
+        char c = *p;
+        if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == ':' || c == '.' || c == '-' || c == '_') {
+            _info[n++] = c;
+        }
+    }
+    _info[n] = 0;
+    char buf[80];
+    snprintf(buf, sizeof(buf), "[MSG:PendantInfo:%s]\r\n", _info);
+    allChannels.print_except(buf, pendant_channel());
 }
 
 void pendant_poll() {
