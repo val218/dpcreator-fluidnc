@@ -44,6 +44,7 @@
 #include <memory>
 
 #include "Mime.h"  // getContentType
+#include "string_util.h"  // equal_ignore_case
 
 #include <AsyncTCP.h>
 #include "WebDAV.h"
@@ -720,8 +721,14 @@ namespace WebUI {
             return;
         }
 
-        // Download a file.  The true forces a download instead of displaying the file
-        if (myStreamFile(request, path.c_str(), true)) {
+        // Pages on the board (legacy.html = the classic WebUI, studio.html = dpCREATOR
+        // Studio) are shown in the browser; any other file is sent as a download.
+        auto ends_with = [&path](const char* ext) {
+            size_t n = strlen(ext);
+            return path.size() >= n && string_util::equal_ignore_case(std::string_view(path).substr(path.size() - n), ext);
+        };
+        bool page = ends_with(".html") || ends_with(".htm");
+        if (myStreamFile(request, path.c_str(), !page)) {
             return;
         }
 
