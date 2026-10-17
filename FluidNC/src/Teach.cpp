@@ -48,10 +48,11 @@ namespace {
     // ---- text ----
     std::string pt_line(size_t i) {
         const TeachPt& p = pts[i];
-        char b[200];
-        snprintf(b, sizeof(b), "[MSG:Teach:pt:%u:%s:%s:%s:%c:%s:%s:%s:%s:%d]\n", (unsigned)(i + 1), teach_f3(p.x).c_str(),
+        char b[240];
+        snprintf(b, sizeof(b), "[MSG:Teach:pt:%u:%s:%s:%s:%c:%s:%s:%s:%s:%d:%s:%s:%s]\n", (unsigned)(i + 1), teach_f3(p.x).c_str(),
                  teach_f3(p.y).c_str(), teach_f3(p.z).c_str(), p.op, p.ref.c_str(), teach_num(p.depth).c_str(),
-                 teach_num(p.w).c_str(), teach_num(p.h).c_str(), p.passes);
+                 teach_num(p.w).c_str(), teach_num(p.h).c_str(), p.passes, teach_num(p.feed).c_str(), teach_num(p.plunge).c_str(),
+                 teach_num(p.ramp).c_str());
         return b;
     }
     std::string cfg_line() {
@@ -117,18 +118,20 @@ namespace {
             std::string line = text.substr(pos, e == std::string::npos ? std::string::npos : e - pos);
             pos              = e == std::string::npos ? text.size() : e + 1;
             char   ref[8] = "c", op = 'd';
-            double a, b2, c, d, w, h, x;
-            int    passes;
+            double a, b2, c, d, w, h, x, fd = 0, pl = 0, rp = 0;
+            int    passes, nf = 0;
             if (sscanf(line.c_str(), "cfg %lf %lf %lf %lf %lf", &a, &b2, &c, &d, &w) == 5) {
                 cfg.safeZ = a; cfg.feed = b2; cfg.plunge = c; cfg.rpm = d; cfg.tool = w;
             } else if (pts.size() < MAX_PTS &&
-                       sscanf(line.c_str(), "pt %lf %lf %lf %c %7s %lf %lf %lf %d", &x, &a, &b2, &op, ref, &d, &w, &h, &passes) == 9) {
+                       (nf = sscanf(line.c_str(), "pt %lf %lf %lf %c %7s %lf %lf %lf %d %lf %lf %lf", &x, &a, &b2, &op, ref, &d, &w, &h, &passes, &fd, &pl, &rp)) >= 9) {
                 TeachPt p;
                 p.x = x; p.y = a; p.z = b2;
                 p.op     = valid_op(op) ? op : 'd';
                 p.ref    = valid_ref(ref) ? ref : "c";
                 p.depth  = d; p.w = w; p.h = h;
                 p.passes = passes < 1 ? 1 : passes;
+                if (nf >= 11) { p.feed = std::fabs(fd); p.plunge = std::fabs(pl); }  // older lists have no feeds
+                if (nf >= 12) p.ramp = std::fabs(rp);
                 pts.push_back(p);
             }
         }
@@ -138,7 +141,8 @@ namespace {
                         teach_num(cfg.rpm) + " " + teach_num(cfg.tool) + "\n";
         for (auto& p : pts) {
             t += "pt " + teach_f3(p.x) + " " + teach_f3(p.y) + " " + teach_f3(p.z) + " " + p.op + " " + p.ref + " " +
-                 teach_num(p.depth) + " " + teach_num(p.w) + " " + teach_num(p.h) + " " + std::to_string(p.passes) + "\n";
+                 teach_num(p.depth) + " " + teach_num(p.w) + " " + teach_num(p.h) + " " + std::to_string(p.passes) + " " +
+                 teach_num(p.feed) + " " + teach_num(p.plunge) + " " + teach_num(p.ramp) + "\n";
         }
         try {
             std::error_code ec;
@@ -288,13 +292,16 @@ bool teach_command(const char* line, Channel& ch, bool on_protocol_task, bool& d
             else if (k == "w") p.w = std::fabs(d);
             else if (k == "h") p.h = std::fabs(d);
             else if (k == "passes") p.passes = d < 1 ? 1 : (int)d;
+            else if (k == "feed") p.feed = std::fabs(d);       // 0 = the job's feed
+            else if (k == "plunge") p.plunge = std::fabs(d);
+            else if (k == "ramp") p.ramp = std::min(45.0, std::fabs(d));  // degrees, 0 = straight plunge
             else if (k == "x") p.x = d;
             else if (k == "y") p.y = d;
             else if (k == "z") p.z = d;
             else return false;
             return true;
         });
-        if (!ok) return err(ch, "Set=n,op=m|d|r|p,ref=c|bl|br|tl|tr,depth=,w=,h=,passes=,x=,y=,z="), true;
+        if (!ok) return err(ch, "Set=n,op=m|d|r|p,ref=c|bl|br|tl|tr,depth=,w=,h=,passes=,feed=,plunge=,ramp=,x=,y=,z="), true;
         pts[n - 1] = p;
         save_list();
         all(pt_line(n - 1));

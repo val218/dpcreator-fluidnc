@@ -79,13 +79,13 @@ static std::vector<double> rings(double max, double step) {
 std::string teach_gcode(const TeachCfg& cfg, const std::vector<TeachPt>& pts, std::vector<std::string>& problems) {
     const double safeZ = cfg.safeZ, toolD = cfg.tool, toolR = toolD / 2;
     const double step  = std::max(0.05, toolD * 0.4);  // 40% stepover
-    const std::string F = teach_num(cfg.feed), P = teach_num(cfg.plunge);
+    const std::string F0 = teach_num(cfg.feed), P0 = teach_num(cfg.plunge);
     problems.clear();
     if (!(safeZ > 0)) problems.push_back("Safe Z is " + teach_num(safeZ) + ": it must be above the work surface (Z0), e.g. 5");
     if (!(toolD > 0)) problems.push_back("Tool diameter must be above 0");
 
     std::string g = "; dpCREATOR Retrace path (work coordinates, Z0 = top of the part)\n";
-    g += "; Safe Z " + teach_f3(safeZ) + " | Tool \xC3\x98" + teach_num(toolD) + " | Feed " + F + " | Plunge " + P +
+    g += "; Safe Z " + teach_f3(safeZ) + " | Tool \xC3\x98" + teach_num(toolD) + " | Feed " + F0 + " | Plunge " + P0 +
          " | Spindle " + teach_num(cfg.rpm) + "\n\n";
     g += "G21 G90 G17\n";
     g += "G0 Z" + teach_f3(safeZ) + "         ; lift to safe Z first\n";
@@ -100,7 +100,11 @@ std::string teach_gcode(const TeachCfg& cfg, const std::vector<TeachPt>& pts, st
         const double w = wp.w, h = (wp.op == 'p' && wp.h > 0) ? wp.h : wp.w;
         double cx, cy;
         teach_ref_offset(wp, cx, cy);
-        g += std::string("; --- waypoint ") + n + " (" + op_label(wp.op) + ") ---\n";
+        const std::string F = teach_num(wp.feed > 0 ? wp.feed : cfg.feed), P = teach_num(wp.plunge > 0 ? wp.plunge : cfg.plunge);
+        const double ramp = pocket && wp.ramp > 0 && wp.ramp < 90 ? wp.ramp : 0;
+        g += std::string("; --- waypoint ") + n + " (" + op_label(wp.op) + ") ---" +
+             (wp.feed > 0 || wp.plunge > 0 ? "  feed " + F + ", plunge " + P : std::string()) +
+             (ramp > 0 ? "  ramp " + teach_num(ramp) + "\xC2\xB0" : std::string()) + "\n";
         if ((wp.op == 'd' || pocket) && !(depth > 0)) {
             problems.push_back("Waypoint " + n + ": set a depth");
             g += "; SKIPPED: no depth set\n\n";
@@ -132,7 +136,21 @@ std::string teach_gcode(const TeachCfg& cfg, const std::vector<TeachPt>& pts, st
             const double dStep = depth / passes;
             for (int p = 1; p <= passes; p++) {
                 g += "G0 X" + teach_f3(cx) + " Y" + teach_f3(cy) + "\n";
-                g += "G1 Z" + teach_f3(-dStep * p) + " F" + P + "     ; pass " + std::to_string(p) + "/" + std::to_string(passes) + "\n";
+                const double rr = std::min(m, toolR);  // helix radius: inside the walls
+                if (ramp > 0 && rr > 0.05) {
+                    // down on a helix at the ramp angle from the top of this pass
+                    const double top = -dStep * (p - 1), bot = -dStep * p;
+                    const double PI = 3.14159265358979323846, perRev = 2 * PI * rr * std::tan(ramp * PI / 180);
+                    const int    revs   = std::max(1, (int)std::ceil((top - bot) / perRev - 1e-9));
+                    g += "G1 Z" + teach_f3(top) + " F" + P + "     ; pass " + std::to_string(p) + "/" + std::to_string(passes) +
+                         ", ramp " + teach_num(ramp) + "\xC2\xB0\n";
+                    g += "G1 X" + teach_f3(cx + rr) + " Y" + teach_f3(cy) + " F" + F + "\n";
+                    for (int k = 1; k <= revs; k++)
+                        g += "G3 X" + teach_f3(cx + rr) + " Y" + teach_f3(cy) + " I" + teach_f3(-rr) + " J0 Z" + teach_f3(top + (bot - top) * k / revs) + "\n";
+                    g += "G3 X" + teach_f3(cx + rr) + " Y" + teach_f3(cy) + " I" + teach_f3(-rr) + " J0\n";  // flat floor
+                } else {
+                    g += "G1 Z" + teach_f3(-dStep * p) + " F" + P + "     ; pass " + std::to_string(p) + "/" + std::to_string(passes) + "\n";
+                }
                 for (double r : rings(m, step)) {
                     if (wp.op == 'r') {
                         g += "G1 X" + teach_f3(cx + r) + " Y" + teach_f3(cy) + " F" + F + "\n";
