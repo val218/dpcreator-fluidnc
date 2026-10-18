@@ -33,7 +33,8 @@
 .dpch-pop img{display:block;width:100%;border-radius:6px}
 .dpch-pop figcaption,.dpch figcaption{font-size:15px;color:#A9B5C1;padding:6px 4px 0}
 .dpch figure{margin:0}
-@media (max-width:1100px){.dpch-in{grid-template-columns:minmax(0,1fr)}}
+.dpch-in-pd{grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr)}
+@media (max-width:1100px){.dpch-in,.dpch-in-pd{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:700px){.dpch-grid3,.dpch-grid4{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.dpch{border-radius:0}}
 .dpch-stack{position:relative}
 .dpch-stack .pop{position:absolute;right:-12px;bottom:-24px;width:30%}
@@ -56,7 +57,8 @@
 .dpch-right{display:flex;flex-direction:column;gap:22px}
 @media (prefers-reduced-motion:reduce){.dpch-pdimg img+img,.dpch-row.r{animation:none}.dpch-pdimg .s2,.dpch-pdimg .s3{opacity:0}}
 @media (max-width:1100px){.dpch-stack .pop{position:static;width:auto;margin-top:14px}}
-@media (max-width:700px){.dpch-pd{grid-template-columns:minmax(0,1fr)}.dpch-board{padding:24px}.dpch-board svg{display:none}.dpch-row{grid-template-columns:110px minmax(0,1fr)}}
+@media (max-width:700px){.dpch-pd{grid-template-columns:minmax(0,1fr)}.dpch-board{padding:24px}.dpch-board svg{display:none}.dpch-board .cap{position:static;display:block;margin-top:10px}.dpch-row{grid-template-columns:110px minmax(0,1fr)}}
+.dpch-bar span.dots{flex:none;background:none;padding:0;display:flex;gap:6px}.dpch-bar span.dots i{margin:0}
 </style>
 <section class="dpch"><div class="dpch-in"><div class="dpch-l">
 <div class="dpch-eye"><span class="dpch-free">Free</span>dpCREATOR Studio, made for FluidNC</div>
@@ -65,7 +67,7 @@
 <div class="dpch-cta"><a class="dpch-b" href="/studio/">Try Studio now</a><a class="dpch-b dpch-b2" href="index.php?route=information/information&amp;information_id=8">Install it on your controller</a></div>
 <div class="dpch-win"><b>Made for FluidNC, and free</b><ul><li>Runs from the controller itself: no PC software, no cloud, no account</li><li>Sends jobs straight to the board, ready in the WebUI and on the pendant</li><li>3D machine view: play the whole job on your machine, line by line, before you cut</li><li>Offcut tracing: cut the scrap instead of a new sheet</li><li>SVG, DXF, PDF and pictures; profiles, pockets, V-carve and laser</li></ul></div>
 </div><div class="dpch-right">
-<div class="dpch-stack"><div class="dpch-shot"><div class="dpch-bar"><span style="flex:0;background:none;padding:0"><i></i><i></i><i></i></span><span>fluidnc.local/studio.html</span></div><img src="/image/catalog/dpc-site/hero3/studio-ui-3d.jpg" alt="dpCREATOR Studio running from the controller: G-code list, 3D machine view cutting a pocket and the play bar" loading="lazy"></div>
+<div class="dpch-stack"><div class="dpch-shot"><div class="dpch-bar"><span class="dots"><i></i><i></i><i></i></span><span>fluidnc.local/studio.html</span></div><img src="/image/catalog/dpc-site/hero3/studio-ui-3d.jpg" alt="dpCREATOR Studio running from the controller: G-code list, 3D machine view cutting a pocket and the play bar" loading="lazy"></div>
 <figure class="dpch-pop pop"><img src="/image/catalog/dpc-site/shots/studio-preview.jpg" alt="Studio 3D cut view of the finished part" loading="lazy"><figcaption>3D cut view of the finished part.</figcaption></figure></div>
 <ol class="dpch-steps dpch-grid3" style="margin-top:28px">
 <li class="dpch-card dpch-c1"><svg viewBox="0 0 200 110" style="width:100%;height:86px" aria-hidden="true"><path d="M18 92 L30 22 L118 14 L170 34 L182 88 L96 98 Z" fill="#2A2116" stroke="#C8A06B" stroke-width="2"></path><g fill="#4FB4EE"><circle cx="18" cy="92" r="4"/><circle cx="30" cy="22" r="4"/><circle cx="118" cy="14" r="4"/><circle cx="170" cy="34" r="4"/><circle cx="182" cy="88" r="4"/><circle cx="96" cy="98" r="4"/></g></svg><div class="t">1. Trace the offcut</div><div class="d">Jog round it and double-tap ENABLE at each corner.</div></li>
