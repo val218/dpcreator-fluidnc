@@ -1,0 +1,39 @@
+name: Test build - stock FluidNC 4.1.1 for ESP32-S3 N16R8 (octal PSRAM)
+
+# Upstream FluidNC v4.1.1, unchanged except board_build.arduino.memory_type =
+# qio_opi, so it runs on ESP32-S3-WROOM-1-N16R8 modules (dpCREATOR R2/R3).
+# For testing stock-FluidNC behaviour only: builds and keeps the files as an
+# Actions artifact. Publishes nothing.
+on:
+  push:
+    branches: [ test/stock-4.1.1-opi ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install --upgrade platformio
+      - name: Build firmware (wifi_s3)
+        run: pio run -e wifi_s3
+      - name: Build merged flash image
+        run: pio run -e wifi_s3 -t build_merged
+      - name: Collect binaries
+        run: |
+          mkdir -p out
+          B=.pio/build/wifi_s3
+          cp $B/firmware.bin $B/bootloader.bin $B/partitions.bin out/
+          cp $B/littlefs.bin out/ 2>/dev/null || true
+          cp $B/merged-flash.bin out/ 2>/dev/null || true
+          ls -l out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stock-fluidnc-4.1.1-s3-opi
+          path: out/
+          retention-days: 30
