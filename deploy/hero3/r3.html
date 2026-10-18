@@ -1,0 +1,70 @@
+<style>@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+.dpch{--bg:#0D1014;--card:#151B22;--line:#26303A;--text:#EEF2F5;--body:#D0D8DF;--muted:#95A2AF;background:var(--bg);color:var(--text);font-family:Barlow,system-ui,sans-serif;font-size:19px;line-height:1.6;border-radius:16px;overflow:hidden;margin:0 0 32px;}
+.dpch *{box-sizing:border-box}
+.dpch-in{max-width:1680px;margin:0 auto;padding:clamp(28px,5vw,80px) clamp(16px,3vw,40px);display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(28px,4vw,72px);align-items:start}
+.dpch-l{display:flex;flex-direction:column;gap:24px}
+.dpch-eye{font-size:16px;color:#9FD8F8;font-weight:500;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.dpch-free{background:#1F5E3A;color:#CFF5DD;font-size:15px;font-weight:600;padding:4px 12px;border-radius:999px}
+.dpch h2.dpch-h{margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(44px,5vw,92px);line-height:.98;color:var(--text);text-transform:none;letter-spacing:0}
+.dpch p.dpch-p{margin:0;font-size:clamp(19px,1.3vw,23px);line-height:1.55;color:var(--body);max-width:36ch}
+.dpch-win{background:#11221A;border:1px solid #24523A;border-radius:12px;padding:16px 20px;max-width:600px}
+.dpch-win b{display:block;font-size:18px;color:#fff;margin-bottom:6px}
+.dpch-win ul,.dpch-feat,.dpch-steps{margin:0;padding:0;list-style:none}
+.dpch-win li{display:flex;gap:10px;font-size:17.5px;color:#D7EEDF;margin:4px 0}
+.dpch-win li:before{content:"\2713";color:#5FD38A;font-weight:700}
+.dpch-cta{display:flex;gap:16px;flex-wrap:wrap}
+.dpch a.dpch-b{background:#1F7BC7;color:#fff!important;text-decoration:none;font-size:19px;font-weight:600;padding:15px 26px;border-radius:8px;border:1px solid #1F7BC7}
+.dpch a.dpch-b2{background:#1A2129;border-color:#33404C}
+.dpch a.dpch-b:hover{filter:brightness(1.12)}
+.dpch a.dpch-b:focus-visible{outline:3px solid #7CCBF7;outline-offset:3px}
+.dpch-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.dpch-card .t{font-size:19px;font-weight:600;color:#fff}
+.dpch-card .d{font-size:16px;color:#B9C4CE;line-height:1.45}
+.dpch-c1{border-top:3px solid #4FB4EE}.dpch-c2{border-top:3px solid #5FD38A}.dpch-c3{border-top:3px solid #E7B566}.dpch-c4{border-top:3px solid #B48CF0}.dpch-c5{border-top:3px solid #E0484A}
+.dpch-grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.dpch-grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0}
+.dpch-grid4 dt{font-size:14px;color:var(--muted);font-weight:400}.dpch-grid4 dd{margin:2px 0 0;font-size:17px;font-weight:600}
+.dpch-shot{border:1px solid #33404C;border-radius:12px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55);background:#1A2129}
+.dpch-shot img{display:block;width:100%;height:auto}
+.dpch-bar{display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid var(--line)}
+.dpch-bar i{width:10px;height:10px;border-radius:50%;background:#3A4754;display:inline-block;margin-right:6px}
+.dpch-bar span{flex:1;background:var(--bg);border-radius:6px;padding:2px 12px;font-family:'JetBrains Mono',monospace;font-size:14px;color:#C3CCD5}
+.dpch-pop{background:var(--card);border:1px solid #33404C;border-radius:12px;padding:10px;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.dpch-pop img{display:block;width:100%;border-radius:6px}
+.dpch-pop figcaption,.dpch figcaption{font-size:15px;color:#A9B5C1;padding:6px 4px 0}
+.dpch figure{margin:0}
+@media (max-width:1100px){.dpch-in{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){.dpch-grid3,.dpch-grid4{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.dpch{border-radius:0}}
+.dpch-stack{position:relative}
+.dpch-stack .pop{position:absolute;right:-12px;bottom:-24px;width:30%}
+.dpch-stack2 .pop{width:50%;right:0;bottom:-40px}
+.dpch-pd{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:28px;align-items:start}
+.dpch-pdimg{position:relative;max-width:380px;margin:0 auto;aspect-ratio:728/840}
+.dpch-pdimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 40px 60px rgba(0,0,0,.6))}
+@keyframes dpchScr{0%,30%{opacity:1}36%,94%{opacity:0}100%{opacity:1}}
+@keyframes dpchRow{0%,30%{border-color:#4FB4EE;background:rgba(31,123,199,.16)}36%,94%{border-color:#26303A;background:#151B22}100%{border-color:#4FB4EE;background:rgba(31,123,199,.16)}}
+.dpch-pdimg img+img{animation:dpchScr 9s infinite}.dpch-pdimg .s2{animation-delay:-6s}.dpch-pdimg .s3{animation-delay:-3s}
+.dpch-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 12px}
+.dpch-row img{width:100%;border-radius:6px;border:1px solid #33404C;display:block;aspect-ratio:4/3;object-fit:cover}
+.dpch-row.r{animation:dpchRow 9s infinite}.dpch-row.r2{animation-delay:-6s}.dpch-row.r1{animation-delay:-3s}
+.dpch-row.k1{box-shadow:inset 0 3px 0 #5FD38A}.dpch-row.k2{box-shadow:inset 0 3px 0 #E7B566}.dpch-row.k3{box-shadow:inset 0 3px 0 #4FB4EE}.dpch-row.k4{box-shadow:inset 0 3px 0 #B48CF0}
+.dpch-board{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:90px 48px 110px;position:relative}
+.dpch-board .wrap{position:relative}
+.dpch-board .wrap img{display:block;width:100%;height:auto}
+.dpch-board svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.dpch-board .cap{position:absolute;left:18px;top:14px;font-size:14px;color:var(--muted)}
+.dpch-right{display:flex;flex-direction:column;gap:22px}
+@media (prefers-reduced-motion:reduce){.dpch-pdimg img+img,.dpch-row.r{animation:none}.dpch-pdimg .s2,.dpch-pdimg .s3{opacity:0}}
+@media (max-width:1100px){.dpch-stack .pop{position:static;width:auto;margin-top:14px}}
+@media (max-width:700px){.dpch-pd{grid-template-columns:minmax(0,1fr)}.dpch-board{padding:24px}.dpch-board svg{display:none}.dpch-row{grid-template-columns:110px minmax(0,1fr)}}
+</style>
+<section class="dpch"><div class="dpch-in"><div class="dpch-l">
+<div class="dpch-eye">dpCREATOR R3 FluidNC controller</div>
+<h2 class="dpch-h">A FluidNC controller with a cable you can trust</h2>
+<p class="dpch-p">Wired Ethernet instead of shaky Wi-Fi, an RS485 port for your spindle drive and a plug for the SmartTabUI pendant. Flash and update it from your browser, and keep your config.</p>
+<div class="dpch-win"><b>Comes with the board, free</b><ul><li>dpCREATOR WebUI licence, with job resume after a stop</li><li>dpCREATOR Studio CAD/CAM</li><li>Firmware updates that keep your config</li><li>Assembled and tested before it ships</li></ul></div>
+<div class="dpch-cta"><a class="dpch-b" href="index.php?route=product/product&amp;product_id=381">See the R3</a><a class="dpch-b dpch-b2" href="index.php?route=product/product&amp;product_id=380">R3 + pendant combo</a></div>
+</div><div class="dpch-right">
+<figure class="dpch-board"><div class="wrap"><img src="/image/catalog/dpc-site/hero2/r2-angle-q.png" alt="dpCREATOR controller board with its connectors labelled" loading="lazy"><svg viewBox="0 0 760 328" aria-hidden="true" font-family="Barlow, sans-serif" font-size="16" font-weight="600"><g stroke="#4FB4EE" stroke-width="1.5" fill="none"><path d="M40 -6 V-22 H560 V-6"/><path d="M300 -22 V-34"/><path d="M622 40 V-34"/><path d="M75 250 V364"/><path d="M320 262 V404"/><path d="M395 268 V364"/><path d="M470 268 V404"/><path d="M560 262 V364"/><path d="M625 285 V404"/><path d="M705 280 V364"/></g><g fill="#4FB4EE"><circle cx="622" cy="40" r="4"/><circle cx="75" cy="250" r="4"/><circle cx="320" cy="262" r="4"/><circle cx="395" cy="268" r="4"/><circle cx="470" cy="268" r="4"/><circle cx="560" cy="262" r="4"/><circle cx="625" cy="285" r="4"/><circle cx="705" cy="280" r="4"/></g><g fill="#EEF2F5"><text x="300" y="-42" text-anchor="middle">4 stepper axes: X, Y, Z and A</text><text x="622" y="-42" text-anchor="middle">Probe &#183; 0-10 V &#183; PWM</text><text x="75" y="382" text-anchor="middle">24 V in</text><text x="320" y="422" text-anchor="middle">RS485 for VFD</text><text x="395" y="382" text-anchor="middle">E-stop</text><text x="470" y="422" text-anchor="middle">SmartTabUI pendant</text><text x="560" y="382" text-anchor="middle">SD card</text><text x="625" y="422" text-anchor="middle">Wired Ethernet</text><text x="705" y="382" text-anchor="middle">USB</text></g></svg></div><figcaption class="cap">R2 shown; R3 photo to follow</figcaption></figure>
+<dl class="dpch-grid4"><div class="dpch-card dpch-c1"><dt>Network</dt><dd>Wired Ethernet</dd></div><div class="dpch-card dpch-c3"><dt>Spindle</dt><dd>RS485 for VFDs</dd></div><div class="dpch-card dpch-c2"><dt>Pendant</dt><dd>SmartTabUI port</dd></div><div class="dpch-card dpch-c4"><dt>Motion</dt><dd>4 axes</dd></div></dl>
+</div></div></section>
