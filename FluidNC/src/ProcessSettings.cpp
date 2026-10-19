@@ -20,6 +20,7 @@
 #include "Configuration/Validator.h"
 #include "Driver/watchdog.h"  // feed_watchdog()
 #include "Machine/Axes.h"
+#include "Machine/Homing.h"     // $Homed
 #include "Regexpr.h"
 #include "WebUI/Authentication.h"
 #include "Report.h"
@@ -593,6 +594,30 @@ static Error go_to_sleep(const char* value, AuthenticationLevel auth_level, Chan
 // api is the level of the dpCREATOR commands this firmware has, so a WebUI can
 // tell when it is older than the firmware.
 static constexpr int DPC_API_LEVEL = 1;
+// $Homed -> [MSG:HomedAxes:<axes homed since power-up / reset>:of=<axes that home>]
+// The WebUI asks after connecting: machine positions only mean "where on the
+// bed" once the axes have homed. (The live [MSG:Homed:..] only comes at the end
+// of a homing cycle, so a page opened later could not know.)
+static Error showHomed(const char* value, AuthenticationLevel auth_level, Channel& out) {
+    if (value && *value) {
+        return Error::InvalidStatement;
+    }
+    auto        axes = config->_axes;
+    std::string homed, homing;
+    for (axis_t axis = X_AXIS; axis < axes->_numberAxis; axis++) {
+        if (!axes->_axis[axis]->_homing) {
+            continue;
+        }
+        homing += Machine::Axes::axisName(axis);
+        if (Machine::Homing::axis_is_homed(axis)) {
+            homed += Machine::Axes::axisName(axis);
+        }
+    }
+    std::string msg = "[MSG:HomedAxes:" + homed + ":of=" + homing + "]\n";
+    out.print(msg.c_str());
+    return Error::Ok;
+}
+
 static Error showBoardId(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (value && *value) {
         return Error::InvalidStatement;
@@ -1159,6 +1184,7 @@ void make_user_commands() {
     new UserCommand("SLP", "System/Sleep", go_to_sleep, notIdleOrAlarm);
     new ReportCommand("I", "Build/Info", get_report_build_info, anyState);
     new ReportCommand("BID", "Board/ID", showBoardId, anyState);
+    new ReportCommand("HMD", "Homed", showHomed, anyState);
     new UserCommand("RST", "Settings/Restore", restore_settings, notIdleOrAlarm, WA);
 
     new ReportCommand("SA", "Alarm/Send", sendAlarm, anyState);
