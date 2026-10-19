@@ -40,6 +40,7 @@
 #include <esp_timer.h>  // esp_timer_get_time
 
 #define VIZ_MAX_POINTS    8000
+#define VIZ_MAX_POINTS_LASER 16000  // a grey-scale raster changes power on nearly every move
 #define VIZ_ARC_SEGMENTS  16
 
 
@@ -127,12 +128,40 @@ struct VizBuild {
     int                        forced = 0;  // rapids / rapid<->cut switches (pass 1)
     float                      res = 0;     // detail size in mm (pass 2)
     int                        retries = 0; // pass 2 restarted with a coarser res
+    // Laser power. Pass 1 finds the highest S while the spindle/laser is on,
+    // whether M4 is used and how flat the cuts are; a laser job (M4, or flat
+    // with several power levels) then gets a 6th field on every point in
+    // pass 2: the power in % of that highest S (0 = off). Other jobs keep the
+    // 5-field points.
+    bool                       spin_on = false;
+    float                      s_cur = 0, s_max = 0;
+    bool                       used_m4 = false;
+    float                      s_vals[3];
+    int                        s_nvals = 0;
+    float                      cut_zmin = 1e9f, cut_zmax = -1e9f;
+    bool                       laser = false;
+    int                        last_pw = -1, pend_pw = 0;
+    int                        pw_steps = 0;  // power level changes (pass 1), part of the point budget
+    int                        pw_step = 10;  // power kept in steps of this many % (coarser when it does not fit)
 };
 static VizBuild         _b;
 static std::atomic<bool> _cancel { false };
 static std::string      _current;  // path being built (guarded by _q_mutex)
 
-static void emit(float x, float y, float z, int t, int line) {
+// Power levels for keeping points: off, then 10 % steps. A grey-scale raster
+// changes S on nearly every move; keeping every small change would use the
+// whole point budget on a few lines.
+static int pw_level(int pw, int step) { return pw <= 0 ? -1 : pw / step; }
+
+static int max_points() { return _b.laser ? VIZ_MAX_POINTS_LASER : VIZ_MAX_POINTS; }
+
+static int cur_pw() {
+    if (!_b.laser || !_b.spin_on || _b.s_max <= 0) return 0;
+    int pw = (int)lroundf(_b.s_cur * 100.0f / _b.s_max);
+    return pw < 0 ? 0 : pw > 100 ? 100 : pw;
+}
+
+static void emit(float x, float y, float z, int t, int line, int pw = -1) {
     if (_b.pass == 1) {  // measuring
         if (_b.last_px < 1e8f) {
             float dx = x - _b.last_px, dy = y - _b.last_py, dz = z - _b.last_pz;
@@ -140,19 +169,26 @@ static void emit(float x, float y, float z, int t, int line) {
         }
         if (x < _b.xmin) _b.xmin = x; if (x > _b.xmax) _b.xmax = x;
         if (y < _b.ymin) _b.ymin = y; if (y > _b.ymax) _b.ymax = y;
+        if (t == 1) { _b.cut_zmin = std::min(_b.cut_zmin, z); _b.cut_zmax = std::max(_b.cut_zmax, z); }
         _b.last_px = x; _b.last_py = y; _b.last_pz = z; _b.last_t = t;
         _b.n_points++;
         return;
     }
-    if (_b.n_points >= VIZ_MAX_POINTS) return;
-    fprintf(_b.vf, "%.3f,%.3f,%.3f,%d,%d\n", x, y, z, t, line);
+    if (_b.n_points >= max_points()) return;
+    if (_b.laser) {
+        if (pw < 0) pw = cur_pw();
+        fprintf(_b.vf, "%.3f,%.3f,%.3f,%d,%d,%d\n", x, y, z, t, line, t == 0 ? 0 : pw);
+        _b.last_pw = t == 0 ? 0 : pw;
+    } else {
+        fprintf(_b.vf, "%.3f,%.3f,%.3f,%d,%d\n", x, y, z, t, line);
+    }
     if (x < _b.xmin) _b.xmin = x; if (x > _b.xmax) _b.xmax = x;
     if (y < _b.ymin) _b.ymin = y; if (y > _b.ymax) _b.ymax = y;
     _b.last_px = x; _b.last_py = y; _b.last_pz = z; _b.last_t = t;
     _b.n_points++;
 }
 static void flush_pending() {
-    if (_b.pend_ok) { emit(_b.pend_x, _b.pend_y, _b.pend_z, 1, _b.pend_line); _b.pend_ok = false; }
+    if (_b.pend_ok) { emit(_b.pend_x, _b.pend_y, _b.pend_z, 1, _b.pend_line, _b.pend_pw); _b.pend_ok = false; }
 }
 
 static void write_arc(float x0, float y0, float x1, float y1, float i, float j, bool cw, float z0, float z1, int line) {
@@ -169,7 +205,7 @@ static void write_arc(float x0, float y0, float x1, float y1, float i, float j, 
         float len = r * fabsf(a1 - a0);
         segs = std::max(2, std::min(VIZ_ARC_SEGMENTS, (int)ceilf(len / _b.res)));
     }
-    for (int s = 1; s <= segs && (_b.pass == 1 || _b.n_points < VIZ_MAX_POINTS); s++) {
+    for (int s = 1; s <= segs && (_b.pass == 1 || _b.n_points < max_points()); s++) {
         float t = (float)s / segs;
         float ang = a0 + t * (a1 - a0);
         emit(cx + r * cosf(ang), cy + r * sinf(ang), z0 + t * (z1 - z0), 1, line);  // helical Z
@@ -235,6 +271,7 @@ static bool build_begin(const std::string& nc, VizMode mode, bool push) {
     _b.n_points = 0; _b.line_num = 0; _b.sample_ct = 0;
     _b.last_px = 1e9f; _b.last_py = 1e9f; _b.last_pz = 0; _b.last_t = -1;
     _b.pend_ok = false; _b.pend_line = 0;
+    _b.spin_on = false; _b.s_cur = 0; _b.last_pw = -1; _b.pend_pw = 0;
     _b.last_busy_ms = millis();
     _b.active = true;
     return true;
@@ -279,6 +316,8 @@ static void process_line(char* linebuf) {
     float arc_i = 0, arc_j = 0;
     int motion = -1;
     bool has_x = false, has_y = false, has_z = false;
+    int   spin   = -1;     // M3/M4 -> 1, M5 -> 0
+    float s_word = -1;
 
     const char* scan = p;
     while (*scan) {
@@ -301,8 +340,28 @@ static void process_line(char* linebuf) {
             case 'X': new_x = _modal_abs ? to_mm(val) : _modal_x + to_mm(val); has_x=true; break;
             case 'Y': new_y = _modal_abs ? to_mm(val) : _modal_y + to_mm(val); has_y=true; break;
             case 'Z': new_z = _modal_abs ? to_mm(val) : _modal_z + to_mm(val); has_z=true; break;
+            case 'M': {
+                int m = (int)lroundf(val);
+                if (m == 3 || m == 4) { spin = 1; if (m == 4) _b.used_m4 = true; }
+                else if (m == 5 || m == 2 || m == 30) spin = 0;
+                break;
+            }
+            case 'S': s_word = val; break;
             case 'I': arc_i = to_mm(val); break;
             case 'J': arc_j = to_mm(val); break;
+        }
+    }
+
+    if (s_word >= 0 || spin >= 0) {
+        if (_b.laser) flush_pending();  // the run so far was cut at the old power
+        if (_b.pass == 1 && s_word >= 0 && fabsf(s_word - _b.s_cur) > 1e-3f) ++_b.pw_steps;
+        if (s_word >= 0) _b.s_cur = s_word;
+        if (spin >= 0) _b.spin_on = spin == 1;
+        if (_b.pass == 1 && _b.spin_on && _b.s_cur > 0) {
+            _b.s_max = std::max(_b.s_max, _b.s_cur);
+            bool seen = false;
+            for (int i = 0; i < _b.s_nvals; i++) seen |= fabsf(_b.s_vals[i] - _b.s_cur) < 1e-3f;
+            if (!seen && _b.s_nvals < 3) _b.s_vals[_b.s_nvals++] = _b.s_cur;
         }
     }
 
@@ -334,7 +393,9 @@ static void process_line(char* linebuf) {
         float res    = _b.pass == 1 ? 0.0f : _b.res;
         bool  zchg   = fabsf(new_z - _b.last_pz) > std::max(res, 0.001f);
         bool  far    = (dx * dx + dy * dy) >= res * res;
-        bool  keep   = first || zchg || tchg || t == 0 || far;
+        int   pw     = cur_pw();
+        bool  pchg   = _b.laser && t == 1 && pw_level(pw, _b.pw_step) != pw_level(_b.last_pw, _b.pw_step);
+        bool  keep   = first || zchg || tchg || t == 0 || far || pchg;
         if (keep) {
             if (zchg || tchg || t == 0) flush_pending();
             emit(new_x, new_y, new_z, t, line_num);
@@ -342,6 +403,7 @@ static void process_line(char* linebuf) {
             _b.pend_ok   = false;
         } else {
             _b.pend_x = new_x; _b.pend_y = new_y; _b.pend_z = new_z; _b.pend_line = line_num; _b.pend_ok = true;
+            _b.pend_pw = pw;
         }
     }
     _modal_x = new_x; _modal_y = new_y; _modal_z = new_z;
@@ -352,9 +414,10 @@ static void push_begin(const std::string& vpath);
 static void build_finish() {
     flush_pending();
     fclose(_b.in); _b.in = nullptr;
-    // " v5": generator version (v3 points, whole-file coverage, G90.1/G91.1 fix); older files are rebuilt.
+    // " v6": generator version (v3 points, whole-file coverage, G90.1/G91.1 fix, v6 laser power); older files are rebuilt.
+    // A laser job adds " pw" (its points carry the 6th field).
     char head[HEADER_W + 1];
-    int  n = snprintf(head, sizeof(head), "VIZ %d %.3f %.3f %.3f %.3f v5", _b.n_points, _b.xmin, _b.xmax, _b.ymin, _b.ymax);
+    int  n = snprintf(head, sizeof(head), "VIZ %d %.3f %.3f %.3f %.3f v6%s", _b.n_points, _b.xmin, _b.xmax, _b.ymin, _b.ymax, _b.laser ? " pw" : "");
     if (n >= HEADER_W) n = HEADER_W - 1;
     errno = 0;
     bool ok = fseek(_b.vf, 0, SEEK_SET) == 0 && fprintf(_b.vf, "%-*.*s\n", HEADER_W - 1, n, head) == HEADER_W;
@@ -392,6 +455,7 @@ static bool pass2_start(float res) {
     _b.n_points = 0; _b.line_num = 0; _b.sample_ct = 0;
     _b.last_px = 1e9f; _b.last_py = 1e9f; _b.last_pz = 0; _b.last_t = -1;
     _b.pend_ok = false; _b.pend_line = 0;
+    _b.spin_on = false; _b.s_cur = 0; _b.last_pw = -1; _b.pend_pw = 0;
     return true;
 }
 
@@ -399,8 +463,14 @@ static bool pass2_start(float res) {
 // path (rapids and rapid/cut switches are always kept), never finer than
 // 1/4000 of the part.
 static bool pass1_done() {
-    const double budget = VIZ_MAX_POINTS * 0.9;
-    double avail = std::max(budget - _b.forced, budget / 4);
+    _b.laser     = _b.s_max > 0 && (_b.used_m4 || (_b.cut_zmax - _b.cut_zmin < 0.05f && _b.s_nvals > 2));
+    const double budget = max_points() * 0.9;
+    double used  = _b.forced;
+    if (_b.laser) {  // power changes are kept like rapids: less budget for the rest
+        if (_b.pw_steps > budget) _b.pw_step = 20;  // a grey-scale raster: coarser steps from the start
+        used += std::min<double>(_b.pw_steps, budget * 0.6);
+    }
+    double avail = std::max(budget - used, budget / 4);
     float  span  = std::max(_b.xmax - _b.xmin, _b.ymax - _b.ymin);
     float  res   = (float)(_b.plen / avail);
     res          = std::max(res, span > 0 ? span / 4000.0f : 0.0f);
@@ -415,11 +485,15 @@ static void build_step(int64_t budget_us) {
     char linebuf[256];
     int  n = 0;
     for (;;) {
-        if (_b.pass == 2 && _b.n_points >= VIZ_MAX_POINTS) {
+        if (_b.pass == 2 && _b.n_points >= max_points()) {
             // More points than measured: coarser detail, write again.
-            if (_b.retries < 3 && !feof(_b.in)) {
+            if (_b.retries < (_b.laser ? 5 : 3) && !feof(_b.in)) {
                 ++_b.retries;
-                if (!pass2_start(_b.res * 1.6f)) return;
+                // A laser job first keeps fewer power levels, then less detail.
+                if (_b.laser && _b.pw_step < 50) {
+                    _b.pw_step = std::min(50, _b.pw_step * 2);
+                    if (!pass2_start(_b.res * 1.15f)) return;
+                } else if (!pass2_start(_b.res * 1.6f)) return;
                 continue;
             }
             break;
@@ -457,7 +531,7 @@ bool viz_exists(const std::string& nc_path) {
     FILE* f = fopen(viz_path(nc_path).c_str(), "r");
     if (!f) return false;
     char head[HEADER_W + 8] = {};
-    bool ok = fgets(head, sizeof(head), f) && strstr(head, " v5");
+    bool ok = fgets(head, sizeof(head), f) && strstr(head, " v6");
     fclose(f);
     return ok;
 }
@@ -469,6 +543,8 @@ bool viz_exists(const std::string& nc_path) {
 // matching. Messages go to the pendant UART only:
 //   [MSG:VZB:<n>:<xmin>:<xmax>:<ymin>:<ymax>:<zmin>:<zmax>:<viz path>]   begin
 //   [MSG:VZ:<seq>:<sum>:<x,y,z,t,ln>;<x,y,z,t,ln>;...]     up to 4 points;
+//        laser jobs add a 6th field: <x,y,z,t,ln,pw>, power in % of the
+//        file's highest S (older pendants skip it);
 //        <sum> = 4 hex digits, byte sum of the points text (line noise check)
 //   [MSG:VZE:<count>:<viz path>]                           end
 //   [MSG:VZX:<viz path>:<reason>]                          cannot send it
@@ -490,7 +566,25 @@ struct ThinState {
     int         lt = -1;
     bool        pend = false;
     std::string pline;
+    // Laser jobs: merged moves get the length-weighted average power, so a
+    // grey-scale raster shrinks like a picture being scaled down.
+    float       px = 0, py = 0;            // previous input point
+    double      acc_l = 0, acc_p = 0;      // since the last kept point
+    double      pend_l = 0, pend_p = 0;    // ... up to the pending point
 };
+
+static std::string with_pw(const std::string& l, int pw) {
+    size_t c = 0;
+    for (int k = 0; k < 5; k++) {
+        c = l.find(',', c);
+        if (c == std::string::npos) return l;
+        c++;
+    }
+    return l.substr(0, c) + std::to_string(pw);
+}
+static int avg_pw(double len, double sum, int fallback) {
+    return len > 1e-6 ? (int)lround(sum / len) : fallback;
+}
 
 // Feed one .viz point line; calls out() for each point to keep.
 template <class F>
@@ -498,27 +592,49 @@ static void thin_point(ThinState& s, const char* line, float res, F&& out) {
     float    x, y, z;
     int      t;
     unsigned ln;
-    if (sscanf(line, "%f,%f,%f,%d,%u", &x, &y, &z, &t, &ln) < 4) return;
+    int      pw = -1;  // laser jobs: power % of the move ending here
+    if (sscanf(line, "%f,%f,%f,%d,%u,%d", &x, &y, &z, &t, &ln, &pw) < 4) return;
+    const bool laser = pw >= 0;
+    if (laser && s.have && t == 1) {
+        double d = hypot(x - s.px, y - s.py);
+        s.acc_l += d;
+        s.acc_p += d * pw;
+    }
+    s.px = x; s.py = y;
     bool keep = true;
     if (s.have && res > 0) {
         float dx = x - s.lx, dy = y - s.ly;
         bool  tchg = t != s.lt;
         bool  zchg = fabsf(z - s.lz) >= res;
         keep       = tchg || zchg || (dx * dx + dy * dy >= res * res);
-        if (keep && (tchg || zchg) && s.pend) out(s.pline.c_str());  // exact corner before a plunge / rapid
+        if (keep && (tchg || zchg) && s.pend) {  // exact corner before a plunge / rapid
+            if (laser) {
+                out(with_pw(s.pline, avg_pw(s.pend_l, s.pend_p, 0)).c_str());
+                s.acc_l -= s.pend_l; s.acc_p -= s.pend_p;
+            } else {
+                out(s.pline.c_str());
+            }
+        }
     }
     if (keep) {
-        out(line);
+        if (laser && t == 1) out(with_pw(line, avg_pw(s.acc_l, s.acc_p, pw)).c_str());
+        else out(line);
         s.have = true; s.lx = x; s.ly = y; s.lz = z; s.lt = t;
-        s.pend = false;
+        s.pend  = false;
+        s.acc_l = s.acc_p = 0;
     } else {
-        s.pend  = true;
-        s.pline = line;
+        s.pend   = true;
+        s.pline  = line;
+        while (!s.pline.empty() && (s.pline.back() == '\n' || s.pline.back() == '\r')) s.pline.pop_back();
+        s.pend_l = s.acc_l; s.pend_p = s.acc_p;
     }
 }
 template <class F>
 static void thin_end(ThinState& s, F&& out) {
-    if (s.pend) out(s.pline.c_str());  // the last point
+    if (s.pend) {  // the last point
+        if (s.pline.find(',') != std::string::npos && s.pend_l > 0) out(with_pw(s.pline, avg_pw(s.pend_l, s.pend_p, 0)).c_str());
+        else out(s.pline.c_str());
+    }
     s.pend = false;
 }
 
@@ -540,6 +656,14 @@ struct VizPush {
     int                        seq = 0;
     int                        sent = 0;
     ThinState                  thin;
+    // Laser jobs (" pw" in the header) that still do not fit drop whole
+    // rapid-to-rapid runs (raster lines) instead of every n-th point, which
+    // would mix up the power of neighbouring moves. The last runs (usually
+    // the cut-out) are always kept.
+    bool                       laser = false;
+    std::vector<uint16_t>      gsz;              // points per run (counting pass)
+    int                        gstride = 1;
+    int                        gidx = -1;
     std::vector<std::string>   outq;
     uint32_t                   last_ms = 0;
     int32_t                    credit  = 0;      // bytes it may send now (see push_step)
@@ -567,6 +691,13 @@ static void push_rewind() {
     _p.zmin  = 1e9f;
     _p.zmax  = -1e9f;
     _p.idx   = 0;
+    _p.gidx  = -1;
+    if (!_p.sending) _p.gsz.clear();  // run sizes are counted, then used while sending
+}
+
+static bool push_keep_group(int g) {
+    int n = (int)_p.gsz.size();
+    return _p.gstride <= 1 || g % _p.gstride == 0 || g >= n - 4;
 }
 
 static void push_begin(const std::string& vpath) {
@@ -577,13 +708,15 @@ static void push_begin(const std::string& vpath) {
     if (!ec) _p.f = fopen(vpath.c_str(), "r");
     char head[HEADER_W + 8] = {};
     int  n = 0;
-    if (!_p.f || !fgets(head, sizeof(head), _p.f) || !strstr(head, " v5") ||
+    if (!_p.f || !fgets(head, sizeof(head), _p.f) || !strstr(head, " v6") ||
         sscanf(head, "VIZ %d %f %f %f %f", &n, &_p.b[0], &_p.b[1], &_p.b[2], &_p.b[3]) != 5) {
         to_pendant("[MSG:VZX:" + vpath + ":" + (_p.f ? "old format" : "missing") + "]");
         push_end();
         return;
     }
     _p.path     = vpath;
+    _p.laser    = strstr(head, " pw") != nullptr;
+    _p.gstride  = 1;
     _p.data_pos = ftell(_p.f);
     _p.n_file   = n;
     float span  = std::max(_p.b[1] - _p.b[0], _p.b[3] - _p.b[2]);
@@ -613,6 +746,18 @@ static void push_counted() {
     }
     _p.stride = (_p.count > _push_max && _push_max > 0) ? (_p.count + _push_max - 1) / _push_max : 1;
     int n     = (_p.count + _p.stride - 1) / _p.stride;
+    if (_p.laser && _p.stride > 1 && _p.gsz.size() > 8) {
+        // Drop whole runs: the smallest run stride that fits.
+        for (_p.gstride = 2; _p.gstride <= 64 && _p.gstride < (int)_p.gsz.size(); ++_p.gstride) {
+            int k = 0;
+            for (int g = 0; g < (int)_p.gsz.size(); ++g)
+                if (push_keep_group(g)) k += _p.gsz[g];
+            n = k;
+            if (k <= _push_max) break;
+        }
+        if (n <= _push_max) _p.stride = 1;
+        else { _p.gstride = 1; n = (_p.count + _p.stride - 1) / _p.stride; }  // runs too long: every n-th point
+    }
     char buf[256];
     if (_p.zmin > _p.zmax) { _p.zmin = _p.zmax = 0; }
     snprintf(buf, sizeof(buf), "[MSG:VZB:%d:%.3f:%.3f:%.3f:%.3f:%.3f:%.3f:%s]", n, _p.b[0], _p.b[1], _p.b[2], _p.b[3], _p.zmin, _p.zmax,
@@ -641,9 +786,14 @@ static void push_step() {
         auto cnt   = [&](const char* l) {
             ++_p.count;
             float z;
-            if (sscanf(l, "%*f,%*f,%f", &z) == 1) {
+            int   t = 1;
+            if (sscanf(l, "%*f,%*f,%f,%d", &z, &t) >= 1) {
                 _p.zmin = std::min(_p.zmin, z);
                 _p.zmax = std::max(_p.zmax, z);
+            }
+            if (_p.laser) {
+                if (t == 0 || _p.gsz.empty()) _p.gsz.push_back(0);
+                if (_p.gsz.back() < 0xFFFF) ++_p.gsz.back();
             }
         };
         while (lines-- > 0) {
@@ -667,6 +817,12 @@ static void push_step() {
     if (_p.credit < 140) return;
     if (uxQueueMessagesWaiting(message_queue) > 8) return;  // let the output drain first
     auto keep = [&](const char* l) {
+        if (_p.gstride > 1) {
+            int t = 1;
+            sscanf(l, "%*f,%*f,%*f,%d", &t);
+            if (t == 0 || _p.gidx < 0) ++_p.gidx;
+            if (!push_keep_group(_p.gidx)) return;
+        }
         if ((_p.idx++ % _p.stride) != 0) return;
         std::string s(l);
         while (!s.empty() && (s.back() == '\n' || s.back() == '\r' || s.back() == ' ')) s.pop_back();
