@@ -991,8 +991,12 @@ static void start_next() {
                     FILE* f = fopen(req.path.c_str(), "r");  // deleted or renamed meanwhile?
                     if (f) {
                         fclose(f);
+                        // Being sent to the pendant right now: stop, and send the
+                        // new one when it is built (the pendant starts over on VZB).
+                        bool resend = _p.active && _p.path == viz_path(req.path);
+                        if (resend) push_end();
                         remove(viz_path(req.path).c_str());  // never serve a stale preview for a rewritten file
-                        started = build_begin(req.path, req.mode, req.push);
+                        started = build_begin(req.path, req.mode, req.push || resend);
                     }
                 } else {
                     started = build_begin(req.path, req.mode, req.push);
