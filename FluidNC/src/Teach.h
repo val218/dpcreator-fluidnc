@@ -14,6 +14,7 @@
 //                                     (round: diameter = 2 x distance; rectangle from the
 //                                     centre: 2|dX| x 2|dY|, from a corner mark: |dX| x |dY|)
 //   $Teach/Save                    -> /sd/retrace.nc (refused while the list has problems)
+//   $Measure/Save=x0,y0,x1,y1[,top[,zero[,by]]] -> /sd/.dpc/measure.json (Centre Finder / pendant Measure, for Studio)
 //   $Pendant/Point                 -> enable double-tap on the pendant: to the WebUI tool that
 //                                     claimed it ($Pendant/Claim=<name>, renewed every minute,
 //                                     $Pendant/Claim= to release), otherwise $Teach/Add
