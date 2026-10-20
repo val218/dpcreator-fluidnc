@@ -62,6 +62,9 @@ gc_modal_t modal_defaults = {
 };
 // clang-format on
 
+// dpCREATOR: the part of the tool offset that is the selected spindle's offset_mm
+static float spindle_off_applied[3] = { 0.0f, 0.0f, 0.0f };
+
 void gc_init() {
     // Reset parser state:
 
@@ -257,7 +260,6 @@ void gc_ngc_changed(CoordIndex coord) {
 // the tool offset while that spindle is selected: TLO = -offset, so work
 // coordinates mean that spindle's tool point. Only the part we added is
 // changed, so a measured tool length (G43.1 Z) stays.
-static float spindle_off_applied[3] = { 0.0f, 0.0f, 0.0f };
 
 std::string gc_spindle_info() {
     if (!spindle) {

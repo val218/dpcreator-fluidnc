@@ -147,6 +147,7 @@ namespace Spindles {
 
             // @config offset_mm
             // @default 0 0 0
+            // @ignore_drift a float list: { 0.0f, 0.0f, 0.0f } is written 0 0 0 in config.yaml
             // @tuning typical
             // dpCREATOR: where this spindle's tool point is relative to the main
             // spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind
