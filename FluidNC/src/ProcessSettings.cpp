@@ -594,7 +594,7 @@ static Error go_to_sleep(const char* value, AuthenticationLevel auth_level, Chan
 // The chip ID identifies the board (WebUI licence installs from dpcreator.eu);
 // api is the level of the dpCREATOR commands this firmware has, so a WebUI can
 // tell when it is older than the firmware.
-static constexpr int DPC_API_LEVEL = 2;  // 2: $Spindle, spindle tools:/offset_mm
+static constexpr int DPC_API_LEVEL = 3;  // 2: $Spindle, spindle tools:/offset_mm; 3: compact pendant previews (VZ2)
 // $Homed -> [MSG:HomedAxes:<axes homed since power-up / reset>:of=<axes that home>]
 // The WebUI asks after connecting: machine positions only mean "where on the
 // bed" once the axes have homed. (The live [MSG:Homed:..] only comes at the end
