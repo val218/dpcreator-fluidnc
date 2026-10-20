@@ -14,7 +14,7 @@ plus dpCREATOR additions:
   view, job recovery, Z adjust, history) is a separate product installed on the
   board from dpcreator.eu. The commands below work from any sender or console.
 - `$Board/ID`: the board's chip ID and the level of the dpCREATOR commands
-  (`[MSG:BoardID:<12 hex>:api=1]`)
+  (`[MSG:BoardID:<12 hex>:api=2]`)
 - SD card usable as a **network drive** on your PC, with TabUI pendant `.viz`
   previews built automatically for every G-code file copied onto it
 - TabUI pendant connection status (`$Pendant/Status`, badge in the WebUI)
@@ -29,6 +29,12 @@ plus dpCREATOR additions:
 - **Handwheel rewind** in Hold: go back along the cut path with the pendant
   wheel or the WebUI, change Z, and re-cut to where it stopped (section 11)
 - PathRetrace / VizGenerator commands for the TabUI pendant
+- **Laser jobs in the previews**: the laser power travels with the toolpath,
+  so the pendant and the WebUI show the burn (section 8)
+- **Homing state** for the WebUI and the pendant (`$Homed`, section 15)
+- **Router and laser on one machine**: a laser (or knife) selected by its own
+  tool number, with its offset from the router applied automatically
+  (section 16)
 
 Tested on a dpCREATOR R2/R3 (ESP32-S3-WROOM-1-N16R8).
 
@@ -423,6 +429,33 @@ without progress or if the pendant disconnects, and Reset cancels it.
   rebuilds it by hand (only needed for older files).
 - `.nc .gcode .gc .ngc .tap .cnc .g` files are supported, including Vectric /
   Mach `.tap` headers (`G90.1` / `G91.1`).
+- If the file is uploaded again while its preview is being sent to the
+  pendant, the new preview is built and sent when it is ready (the pendant
+  used to wait for the rest of the old one).
+
+### Laser jobs
+
+A file is taken as a **laser job** when, with the spindle/laser on, it uses
+**M4**, or all its cuts are at one Z height and it uses more than two
+different S values (a grey-scale engraving). For a laser job every preview
+point also carries the **power** of the move, in % of the file's highest S:
+
+- the pendant's PART view shows the burn (plywood darkening) instead of a
+  carved block, and its override pill reads **LASER**;
+- the WebUI shows the burn in the Part view and the laser power in the run
+  bar (section 15), also when the job is loaded from its `.viz`;
+- grey-scale rasters change power on almost every move: their preview may
+  hold 16000 points (8000 for other jobs), and the pendant gets moves merged
+  with their average power, like a picture scaled down.
+
+A laser file with only one power level (a plain vector cut) is not detected
+and shows as a normal toolpath. Previews from older firmware are rebuilt once
+by themselves (format `v6`).
+
+M4 (dynamic laser power) needs a `Laser:` spindle in config.yaml (or a
+spindle with a direction pin). On a machine with only a router spindle M4
+stops the job with *error 20 (Unsupported GCode command)*: use M3, or set up
+the laser as in section 16.
 
 ### Commands
 
@@ -712,7 +745,152 @@ and approach both marks from the same direction (backlash).
   `/sd/.dpc/stats.txt`). The board has no clock: the WebUI tells it the time
   when it connects, so jobs run with no page open have no date.
 
-## 15. Troubleshooting
+## 15. WebUI: position, 3D view, laser
+
+**Position panel**
+
+- Two columns: **Work** (the job's coordinates) and **Machine** (from the
+  homing position). The chip above them shows **Not homed · Home** while an
+  axis that has homing has not homed since power-up or a reset (click it to
+  home). Machine positions only mean "where on the bed" after homing; work
+  positions are always right. Unlock (`$X`) does not count as homing.
+  `$Homed` answers `[MSG:HomedAxes:<homed>:of=<axes with homing>]`.
+- **Zero an axis by holding** its row (or X0 / Y0 / Z0) for about 0.7 s; a tap
+  does nothing, so a stray click cannot move the work zero. **Zero all** works
+  the same way.
+- **Probe Z0** (under the position): touch plate or 3D probe. Put the probe a
+  few mm above the part and test it (push the stylus or touch the plate to the
+  bit: the light turns green), enter the plate thickness, then **Probe**: the
+  tool touches, Z0 is set at the plate's top surface (+ your Z offset) and Z lifts 5 mm.
+
+**3D view while a job runs**
+
+- The spindle (or the laser module) moves over the bed; the finished cuts are
+  coloured by depth; a progress card shows the file, time left, % and line.
+  **Follow** keeps the tool in view; **Auto-fit** keeps the job in view when
+  it loads or the work zero moves; **Spindle view** shows the spindle body or
+  only the bit; **Stock** shows the stock block (its size: **Stock** above).
+- The machine bed and travel box, and the warning that a job leaves the
+  travel, are only drawn when X and Y have homing and `soft_limits: true` in
+  config.yaml and the machine is homed: then the numbers are real. Otherwise
+  the view shows the plain grid at the bottom of the work.
+- **Part** (next to the view buttons) shows the part the job makes: the
+  toolpath carved out of the block with the bit in the tool column (flat,
+  ball, V…), carved live while the job runs. The **Path** switch then draws
+  the toolpath faintly over the part. Laser jobs show the burn instead, with
+  the beam on while it fires.
+- **Run bar** under the view: Cycle start / Pause / Stop, mist and flood, and
+  feed and spindle overrides as sliders. For a laser job it reads **Laser**
+  and shows the power as % of the top S in config.yaml, with the S value
+  (e.g. *3% S600* when the spindle's top is 18000): the laser is detected from
+  the selected spindle (section 16), or from the loaded job when config.yaml
+  has no laser.
+- **Tool column** (left of the view): the tool table; click a tool to change
+  to it (M6). A laser on its own tool number (section 16) shows as
+  *T2 laser*.
+
+**Studio and the WebUI in the browser**
+
+The **Studio** button opens dpCREATOR Studio in its own tab; from Studio,
+sending a job to the machine switches back to the WebUI tab instead of
+opening another one, and a second click on Studio goes to the tab that is
+already open.
+
+## 16. Router and laser on one machine
+
+A laser module (or a drag knife, a pen…) next to the router can be its own
+**spindle**, selected with its own tool number, with no tool changer. The
+board switches the output, stops the other one and applies the laser's
+offset from the router, so **one work zero serves both**.
+
+### config.yaml
+
+Router on an RS485 inverter, laser on a PWM output (the cleanest set-up):
+
+```yaml
+uart1:
+  txd_pin: gpio.xx
+  rxd_pin: gpio.yy
+  rts_pin: gpio.zz          # RS485 driver enable
+  baud: 9600
+  mode: 8N1
+
+Huanyang:                   # or H2A, YL620, ModbusVFD ...
+  uart_num: 1
+  modbus_id: 1
+  tool_num: 0               # every tool not listed by another spindle
+  speed_map: 0=0% 24000=100%
+
+Laser:
+  pwm_hz: 5000
+  output_pin: gpio.ww       # laser PWM / TTL input
+  enable_pin: NO_PIN
+  tools: 2                  # M6 T2 selects the laser
+  offset_mm: 42.5 18 0      # laser spot from the router bit: X Y Z
+  speed_map: 0=0% 1000=100%
+```
+
+Router on a 0-10V inverter (the R3's 0-10V output, the relay switching the
+inverter's FWD/run input):
+
+```yaml
+10V:
+  output_pin: gpio.xx       # into the 0-10V converter
+  forward_pin: gpio.yy      # relay -> inverter FWD / run
+  tool_num: 0
+  spinup_ms: 3000
+  spindown_ms: 3000
+  speed_map: 0=0% 24000=100%
+```
+
+plus a `Laser:` section as above **on its own GPIO**. Two spindles cannot use
+the same output pin (FluidNC stops with *pin already used*), so on a board
+whose PWM and 0-10V share one GPIO the laser needs another free output.
+Routing one signal to either the inverter or the laser through a relay is not
+supported: on the R3 the single relay is needed for the inverter's run input.
+
+- `tools:` - the exact tool numbers that select this spindle (`2`, or `2 9`).
+  A spindle with a `tools:` list is left out of the `tool_num` ranges, so T1,
+  T3, T4... stay on the router. `tool_num` ranges work as in stock FluidNC.
+- `offset_mm:` - where this spindle's tool point is relative to the router's
+  bit, X Y Z in mm: `42.5 18 0` = 42.5 mm to the right (+X) and 18 mm behind
+  (+Y). Z: how far the laser's focus point is above the bit's tip (negative
+  when it is below).
+
+### Measuring the offset
+
+1. With the router: set a work zero, then cut or draw a small cross at a
+   known spot, e.g. a 0.5 mm deep cross at X50 Y50.
+2. Note the machine position (Machine column) with the bit exactly over the
+   cross centre.
+3. Switch to the laser, jog until the laser's spot (low power or the
+   pointer) is exactly on the cross centre, and note the machine position.
+4. `offset_mm` X = bit X − laser X, Y = bit Y − laser Y (the bit's position
+   minus the laser's). Z the same way: offset Z = (machine Z with the bit
+   touching the work surface) − (machine Z with the laser focused on it).
+5. Put it in config.yaml, restart, switch to T2 and check: X50 Y50 now puts
+   the laser spot on the cross.
+
+### Using it
+
+- **Switch**: `M6 T2` in a file or the console, the *T2 laser* button in the
+  WebUI's tool column, or the WebUI tool table. The router stops, the laser is
+  selected and the work position jumps by the offset (it now shows where the
+  laser spot is); nothing is measured. `M6 T1` (or any router tool) switches
+  back; with a tool setter (`atc_manual`) the router tool is measured as usual.
+- **Jobs**: put `M6 T2` at the start of a laser file (most laser programs let
+  you add a header), `M6 T1` at the start of a router file.
+- The offset is kept in the tool offset (`G43.1`): a measured tool length
+  stays, `G49` clears the tool length but keeps the laser's offset, and after
+  a reset the selected spindle's offset is put back. An explicit `G43.1` value
+  is kept as given.
+- `$Spindle` answers `[MSG:Spindle:<name>:laser|spindle:<x>:<y>:<z>:<tools>]`
+  and the same line is sent to everyone on every switch; the WebUI and the
+  pendant use it (LASER on the pendant's override pill).
+- `Laser:` spindles are in laser mode: M4 power follows the speed, as in stock
+  FluidNC.
+
+## 17. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|
@@ -726,6 +904,9 @@ and approach both marks from the same direction (backlash).
 | Browser / Windows calls the firmware zip *dangerous* | False alarm on an unknown download; the firmware zip now holds only the `.bin` files. If it is still blocked: keep / "Download anyway", or check the file in Windows Security → Protection history and allow it. |
 | Z adjust (or any `$` command) from the WebUI does nothing while a job runs that was started from the WebUI | Fixed: `$SD/Run` started from a WebUI / pendant / terminal now answers `ok` at once. Before, the reply waited for the end of the job and the board took no further command lines from that page until then (only Hold / Resume / overrides). |
 | Pendant keeps the *E-stop released* menu after the job was unlocked / resumed from the WebUI | Fixed (pendant firmware): the menu closes by itself when the alarm is cleared anywhere. |
+| Job stops at once with *error 20 (Unsupported GCode command)* at the `M4` line | M4 needs a laser spindle: use M3, or add a `Laser:` spindle (section 16). |
+| Job stops with *error 14 (Line too long)* | A line (often a long comment) is longer than the controller accepts: shorten it. |
+| Pendant keeps showing *loading* for a file just uploaded | Fixed in builds from 4acd654b on: a preview rebuilt while it was being sent is sent again. |
 | Board stops answering (WebUI, pendant, serial) after the pendant was plugged in / rebooted | Fixed: XON/XOFF is off on the pendant UART — a noise byte that looked like XOFF paused the board's transmitter and blocked it. |
 | Hold / door / reset when the pendant is plugged in or rebooted | Fixed: line noise on the pendant UART is dropped. `$Pendant/Debug` shows how many bytes were dropped. |
 | WebUI goes offline / online or jerks while jogging | Fixed in builds from 5e5b8f2 on (with the pendant from 43f1a20 on): the pendant streams the handwheel as smooth jogs, state-change reports are spaced to at most one per 50 ms, and a busy WebSocket waits instead of being closed. If it still happens, the network link itself is slow: try a lower Ethernet SPI frequency in `config.yaml`. |
@@ -743,6 +924,8 @@ or use PuTTY (connection type **Raw**), type `?` + Enter → `<Idle|MPos:...>`.
 ### Useful commands
 
 ```
+$Homed                  axes homed since power-up: [MSG:HomedAxes:...]
+$Spindle                selected spindle (router / laser) and its offset
 $Ethernet/Status        link, IP, mask, gateway, MAC
 $Ethernet/Setup         show static IP settings
 $Ethernet/Init          bring up the W5500 manually (test)
