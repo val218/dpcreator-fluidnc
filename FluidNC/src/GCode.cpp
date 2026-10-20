@@ -9,6 +9,7 @@
 #include "Settings.h"
 #include "Config.h"
 #include "Report.h"
+#include "Serial.h"  // allChannels
 #include "Jog.h"
 #include "Protocol.h"             // protocol_buffer_synchronize
 #include "MotionControl.h"        // mc_override_ctrl_update
@@ -72,6 +73,9 @@ void gc_init() {
     gc_state.current_tool   = -1;
     coords[gc_state.modal.coord_select]->get(gc_state.coord_system);
     flowcontrol_init();
+    // The tool offset was cleared: put the selected spindle's offset back.
+    spindle_off_applied[0] = spindle_off_applied[1] = spindle_off_applied[2] = 0.0f;
+    gc_spindle_offset_sync(false);
 }
 
 // Sets g-code parser position in mm. Input in steps. Called by the system abort and hard
@@ -247,6 +251,51 @@ void collapseGCode(char* line) {
 
 void gc_ngc_changed(CoordIndex coord) {
     allChannels.notifyNgc(coord);
+}
+
+// dpCREATOR: a spindle's offset_mm (laser next to the router...) is carried in
+// the tool offset while that spindle is selected: TLO = -offset, so work
+// coordinates mean that spindle's tool point. Only the part we added is
+// changed, so a measured tool length (G43.1 Z) stays.
+static float spindle_off_applied[3] = { 0.0f, 0.0f, 0.0f };
+
+std::string gc_spindle_info() {
+    if (!spindle) {
+        return "[MSG:Spindle:none]\n";
+    }
+    char b[200];
+    snprintf(b,
+             sizeof(b),
+             "[MSG:Spindle:%s:%s:%.3f:%.3f:%.3f:%s]\n",
+             spindle->name(),
+             spindle->isRateAdjusted() ? "laser" : "spindle",
+             spindle->offsetAxis(0),
+             spindle->offsetAxis(1),
+             spindle->offsetAxis(2),
+             spindle->_tools_str.c_str());
+    return b;
+}
+
+void gc_spindle_offset_sync(bool announce) {
+    auto n_axis  = Axes::_numberAxis;
+    bool changed = false;
+    for (axis_t axis = X_AXIS; axis < n_axis && axis <= Z_AXIS; axis++) {
+        float want = spindle ? -spindle->offsetAxis(axis) : 0.0f;
+        float d    = want - spindle_off_applied[axis];
+        if (d != 0.0f) {
+            gc_state.tool_length_offset[axis] += d;
+            changed = true;
+        }
+        spindle_off_applied[axis] = want;
+    }
+    if (changed && coords[CoordIndex::TLO]) {
+        coords[CoordIndex::TLO]->set(gc_state.tool_length_offset);
+        gc_ngc_changed(CoordIndex::TLO);
+        report_wco_counter = 0;  // show the new work position right away
+    }
+    if (announce) {
+        allChannels.print(gc_spindle_info().c_str());
+    }
 }
 
 void gc_ovr_changed() {
@@ -1742,6 +1791,7 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
             }
             if (new_spindle) {
                 gc_state.spindle_speed = 0.0;
+                gc_spindle_offset_sync(true);
             }
             log_info("Current T:" << gc_state.current_tool << " Selected T:" << gc_state.selected_tool);
             if (spindle->tool_change(gc_state.selected_tool, false, false, &channel)) {
@@ -1768,6 +1818,7 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
         }
         if (new_spindle) {
             gc_state.spindle_speed = 0.0;
+            gc_spindle_offset_sync(true);
         }
         if (spindle->tool_change(gc_state.selected_tool, false, true, &channel)) {
             deferred_ack = true;
@@ -1901,14 +1952,23 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
         for (size_t idx = 0; idx < n_axis; idx++) {  // Axes indices are consistent, so loop may be used to save flash space.
             if (gc_state.modal.tool_length == ToolLengthOffset::Cancel) {
                 gc_state.tool_length_offset[idx] = 0.0;
+                if (idx <= Z_AXIS) {
+                    spindle_off_applied[idx] = 0.0f;
+                }
             } else {
                 if (bitnum_is_true(axis_words, idx)) {
                     gc_state.tool_length_offset[idx] = gc_block.values.xyz[idx];
+                    if (idx <= Z_AXIS) {
+                        spindle_off_applied[idx] = 0.0f;  // an explicit G43.1 value is kept as given
+                    }
                 }
             }
         }
 
         coords[CoordIndex::TLO]->set(gc_state.tool_length_offset);
+        if (gc_state.modal.tool_length == ToolLengthOffset::Cancel) {
+            gc_spindle_offset_sync(false);  // G49 clears tool lengths; a laser's offset stays
+        }
     }
     // [15. Coordinate system selection ]:
     if (gc_state.modal.coord_select != gc_block.modal.coord_select) {

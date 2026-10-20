@@ -20,7 +20,8 @@
 #include "Configuration/Validator.h"
 #include "Driver/watchdog.h"  // feed_watchdog()
 #include "Machine/Axes.h"
-#include "Machine/Homing.h"     // $Homed
+#include "Machine/Homing.h"  // $Homed
+#include "GCode.h"           // gc_spindle_info ($Spindle)
 #include "Regexpr.h"
 #include "WebUI/Authentication.h"
 #include "Report.h"
@@ -618,6 +619,15 @@ static Error showHomed(const char* value, AuthenticationLevel auth_level, Channe
     return Error::Ok;
 }
 
+// dpCREATOR: the selected spindle: [MSG:Spindle:<name>:laser|spindle:<offset x>:<y>:<z>:<tools>]
+static Error showSpindle(const char* value, AuthenticationLevel auth_level, Channel& out) {
+    if (value && *value) {
+        return Error::InvalidStatement;
+    }
+    out.print(gc_spindle_info().c_str());
+    return Error::Ok;
+}
+
 static Error showBoardId(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (value && *value) {
         return Error::InvalidStatement;
@@ -1185,6 +1195,7 @@ void make_user_commands() {
     new ReportCommand("I", "Build/Info", get_report_build_info, anyState);
     new ReportCommand("BID", "Board/ID", showBoardId, anyState);
     new ReportCommand("HMD", "Homed", showHomed, anyState);
+    new ReportCommand("SPN", "Spindle", showSpindle, anyState);
     new UserCommand("RST", "Settings/Restore", restore_settings, notIdleOrAlarm, WA);
 
     new ReportCommand("SA", "Alarm/Send", sendAlarm, anyState);

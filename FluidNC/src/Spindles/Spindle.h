@@ -105,6 +105,14 @@ namespace Spindles {
         Macro       _m6_macro;
         std::string _atc_name = "";
 
+        // dpCREATOR: exact tool numbers for this spindle ("2" or "2 9") and the
+        // position of its tool point relative to the main spindle (X Y Z mm).
+        std::string        _tools_str;
+        std::vector<float> _offset = { 0.0f, 0.0f, 0.0f };
+        bool               ownsTool(uint32_t tool);  // tool is in _tools_str
+        bool               hasToolList();
+        float              offsetAxis(int axis) { return axis < (int)_offset.size() ? _offset[axis] : 0.0f; }
+
         // Name is required for the configuration factory to work.
         const char* name() { return _name; }
 
@@ -125,6 +133,27 @@ namespace Spindles {
             // relative order, e.g. a relay spindle at tool_num: 0 and a laser at
             // tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
             handler.item("tool_num", _tool, 0, MaxToolNumber);
+
+            // @config tools
+            // @default ""
+            // @default_note empty
+            // @tuning typical
+            // dpCREATOR: exact tool numbers that select this spindle, separated by
+            // spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the
+            // tool_num spindle. A spindle with a tools: list is left out of the
+            // tool_num ranges. Use it for a laser or a drag knife mounted next to the
+            // router, with no tool changer needed.
+            handler.item("tools", _tools_str, 0, 64);
+
+            // @config offset_mm
+            // @default 0 0 0
+            // @tuning typical
+            // dpCREATOR: where this spindle's tool point is relative to the main
+            // spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind
+            // the router: 42.5 18 0). While it is selected the offset is applied like
+            // a tool offset (G43.1), so work coordinates mean the laser spot: the same
+            // job zero works for both. Z: focus height above the router's tool tip.
+            handler.item("offset_mm", _offset);
 
             // @config speed_map
             // @default ""
