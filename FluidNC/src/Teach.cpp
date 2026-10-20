@@ -21,6 +21,8 @@
 #include <cstring>
 #include <cmath>
 #include <strings.h>
+#include <cctype>
+#include <utility>
 
 namespace {
     const char* LIST_FILE = "/.dpc/teach.txt";
@@ -219,12 +221,66 @@ namespace {
     }
 }
 
+// $Measure/Save=x0,y0,x1,y1[,top[,zero[,by]]]: the part measured by the WebUI's
+// Centre Finder or the pendant's Measure (work coordinates), kept in
+// /sd/.dpc/measure.json for dpCREATOR Studio, with the work offset (WCO, machine
+// coordinates of work zero) so Studio can tell when work zero moved since.
+// top: work Z of the part's top, or "-" (not measured); zero: where XY zero was
+// set (centre, bl, br, tl, tr, none); by: webui or pendant.
+static void measure_save(const char* v, Channel& ch) {
+    double x0, y0, x1, y1;
+    char   top[24] = "-", zero[12] = "none", by[12] = "";
+    int    n = sscanf(v, "%lf,%lf,%lf,%lf,%23[^,],%11[^,],%11s", &x0, &y0, &x1, &y1, top, zero, by);
+    if (n < 4) {
+        ch.print("[MSG:Measure:err:give x0,y0,x1,y1]\n");
+        return;
+    }
+    if (x0 > x1) std::swap(x0, x1);
+    if (y0 > y1) std::swap(y0, y1);
+    float m[MAX_N_AXIS], w[MAX_N_AXIS];
+    memcpy(m, get_mpos(), sizeof(m));
+    memcpy(w, m, sizeof(w));
+    mpos_to_wpos(w);
+    char* end   = nullptr;
+    double tz   = strtod(top, &end);
+    bool  has_t = end && end != top;
+    for (char* c = zero; *c; ++c) *c = isalnum((unsigned char)*c) ? tolower(*c) : '_';
+    for (char* c = by; *c; ++c) *c = isalnum((unsigned char)*c) ? tolower(*c) : '_';
+    char j[420];
+    snprintf(j, sizeof(j),
+             "{\"x0\":%.3f,\"y0\":%.3f,\"x1\":%.3f,\"y1\":%.3f,\"w\":%.3f,\"h\":%.3f,\"cx\":%.3f,\"cy\":%.3f,"
+             "\"top\":%s,\"zero\":\"%s\",\"wco\":[%.3f,%.3f,%.3f],\"by\":\"%s\",\"up_ms\":%lu}\n",
+             x0, y0, x1, y1, x1 - x0, y1 - y0, (x0 + x1) / 2, (y0 + y1) / 2, has_t ? teach_f3(tz).c_str() : "null", zero,
+             m[0] - w[0], m[1] - w[1], m[2] - w[2], by, (unsigned long)millis());
+    try {
+        std::error_code ec;
+        FluidPath       dir { "/.dpc", SD, ec };
+        if (!ec) stdfs::create_directory(dir, ec);
+        FileStream f("/.dpc/measure.json", "w", SD);
+        f.write((const uint8_t*)j, strlen(j));
+    } catch (...) {
+        ch.print("[MSG:Measure:err:cannot write the SD card]\n");
+        return;
+    }
+    char msg[120];
+    snprintf(msg, sizeof(msg), "[MSG:Measure:saved:%.3f:%.3f]\n", x1 - x0, y1 - y0);
+    allChannels.print(msg);
+}
+
 bool teach_command(const char* line, Channel& ch, bool on_protocol_task, bool& deferred) {
     deferred = false;
     const bool isTeach = strncasecmp(line, "$Teach", 6) == 0 && (line[6] == '\0' || line[6] == '/');
     const bool isPoint = strcasecmp(line, "$Pendant/Point") == 0;
     const bool isClaim = strncasecmp(line, "$Pendant/Claim", 14) == 0 && (line[14] == '\0' || line[14] == '=');
-    if (!isTeach && !isPoint && !isClaim) return false;
+    const bool isMeas  = strncasecmp(line, "$Measure/Save=", 14) == 0;
+    if (!isTeach && !isPoint && !isClaim && !isMeas) return false;
+    if (isMeas) {  // writes the SD card: on the protocol task
+        if (!on_protocol_task) {
+            deferred = true;
+            return true;
+        }
+        return measure_save(line + 14, ch), true;
+    }
 
     std::lock_guard<std::recursive_mutex> lock(mtx);
 
