@@ -1,0 +1,50 @@
+<section class="rndc" id="rnd-members">
+<div class="rndc-eye">dpCREATOR R&amp;D Club</div>
+<h2 class="rndc-h">Meet the makers building dpCREATOR before launch</h2>
+<p class="rndc-lead">Ten makers are building the SmartTabUI pendant and running the dpCREATOR WebUI on their own machines. Follow their builds here: the machines, the problems they hit, what worked, and our feedback on each step.</p>
+<div class="rndc-cta"><a class="rndc-b" href="index.php?route=information/information&amp;information_id=9">Apply to join</a><a class="rndc-b rndc-b2" href="rnd-profile">Edit my profile</a></div>
+<div class="rndc-stages" id="rnd-legend"></div>
+<div id="rnd-list"><p class="rndc-sub">Loading the members…</p></div>
+<noscript><p>Turn on JavaScript to see the members.</p></noscript>
+</section>
+<script>
+(function(){
+var STAGE={licences:'Got the licences',parts:'Parts ready',building:'Building',running:'First job run',report:'Report sent'};
+var ORDER=['licences','parts','building','running','report'];
+var COLORS=['#4FB4EE','#B48CF0','#E7B566','#5FD38A','#EEF2F5'];
+var LINK={youtube:'YouTube',instagram:'Instagram',facebook:'Facebook',tiktok:'TikTok',website:'Website',github:'GitHub',other:'Link'};
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+function safe(u){return /^https?:\/\//i.test(u||'')?u:'';}
+function bar(stage){var w=el('div'),b=el('div','rndc-bar'),n=ORDER.indexOf(stage);ORDER.forEach(function(s,i){var x=el('i');if(i<=n)x.style.background=COLORS[i];b.appendChild(x);});w.appendChild(b);w.appendChild(el('div','rndc-barlab',(n+1)+' of 5: '+(STAGE[stage]||'')));return w;}
+function update(u){
+  var d=el('div','rndc-up');d.appendChild(el('div','d',u.date));d.appendChild(el('div','t',u.title));d.appendChild(el('div','b',u.body));
+  if(u.photos&&u.photos.length){var g=el('div','rndc-ph');u.photos.forEach(function(p){var a=el('a');a.href=p;a.target='_blank';a.rel='noopener';var i=el('img');i.src=p;i.loading='lazy';i.alt='Build photo: '+u.title;a.appendChild(i);g.appendChild(a);});d.appendChild(g);}
+  if(u.youtube){var y=el('a','rndc-yt');y.href='https://www.youtube.com/watch?v='+u.youtube;y.target='_blank';y.rel='noopener nofollow';var yi=el('img');yi.src='https://i.ytimg.com/vi/'+u.youtube+'/hqdefault.jpg';yi.alt='Video: '+u.title;yi.loading='lazy';y.appendChild(yi);y.appendChild(el('span',null,'▶ Watch on YouTube'));d.appendChild(y);}
+  else if(safe(u.video)){var v=el('a',null,'Watch the video');v.href=u.video;v.target='_blank';v.rel='noopener nofollow';d.appendChild(v);}
+  if(u.feedback){var f=el('div','rndc-fb');f.appendChild(el('b',null,'dpCREATOR: '));f.appendChild(document.createTextNode(u.feedback));d.appendChild(f);}
+  return d;
+}
+function card(m){
+  var p=m.profile,c=el('article','rndc-card'+(m.top_build?' top':''));c.id='m-'+m.pid;
+  var who=el('div','rndc-who'),ava;
+  if(p.avatar_url){ava=el('img','rndc-ava');ava.src=p.avatar_url;ava.alt=p.name;ava.loading='lazy';}else{ava=el('div','rndc-ava',(p.name||'?').charAt(0).toUpperCase());}
+  who.appendChild(ava);var t=el('div'),nm=el('div','rndc-name',p.name);if(m.top_build)nm.appendChild(el('span','rndc-badge','Top build'));t.appendChild(nm);
+  var sub=[p.work,p.location].filter(Boolean).join(' · ');if(sub)t.appendChild(el('div','rndc-sub',sub));who.appendChild(t);c.appendChild(who);
+  var dl=el('dl','rndc-facts');[['Machine',p.machine],['Controller',p.controller]].forEach(function(r){if(r[1]){dl.appendChild(el('dt',null,r[0]));dl.appendChild(el('dd',null,r[1]));}});c.appendChild(dl);
+  c.appendChild(bar(m.stage));
+  if(p.bio)c.appendChild(el('div','rndc-bio',p.bio));
+  var ls=el('div','rndc-links');Object.keys(p.links||{}).forEach(function(k){var u=safe(p.links[k]);if(!u)return;var a=el('a',null,LINK[k]||'Link');a.href=u;a.target='_blank';a.rel='noopener nofollow ugc';ls.appendChild(a);});if(ls.childNodes.length)c.appendChild(ls);
+  if(m.feedback){var f=el('div','rndc-fb');f.appendChild(el('b',null,'dpCREATOR on this build: '));f.appendChild(document.createTextNode(m.feedback));c.appendChild(f);}
+  if(m.updates.length){var dt=el('details'),sm=el('summary',null,'Follow the build ('+m.updates.length+(m.updates.length===1?' update)':' updates)'));dt.appendChild(sm);var tl=el('div','rndc-tl');m.updates.forEach(function(u){tl.appendChild(update(u));});dt.appendChild(tl);if(location.hash==='#m-'+m.pid)dt.open=true;c.appendChild(dt);}
+  else c.appendChild(el('div','rndc-sub','No build updates yet.'));
+  return c;
+}
+var lg=document.getElementById('rnd-legend');ORDER.forEach(function(s,i){var sp=el('span'),x=el('i');x.style.background=COLORS[i];sp.appendChild(x);sp.appendChild(document.createTextNode(STAGE[s]));lg.appendChild(sp);});
+fetch('/rnd.php?f=list',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){
+  var box=document.getElementById('rnd-list');box.textContent='';
+  if(!j.members||!j.members.length){var e=el('div','rndc-empty');e.appendChild(el('h3',null,'The first testers are being picked now'));e.appendChild(el('p',null,'Their profiles and build updates will appear here as soon as they start. Want to be one of them?'));var a=el('a','rndc-b','Apply to the R&D Club');a.href='index.php?route=information/information&information_id=9';e.appendChild(a);box.appendChild(e);return;}
+  var g=el('div','rndc-grid');j.members.forEach(function(m){g.appendChild(card(m));});box.appendChild(g);
+  if(location.hash){var t=document.querySelector(location.hash);if(t)t.scrollIntoView();}
+}).catch(function(){document.getElementById('rnd-list').textContent='The members could not be loaded. Try again in a minute.';});
+})();
+</script>
