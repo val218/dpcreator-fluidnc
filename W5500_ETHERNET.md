@@ -432,6 +432,14 @@ without progress or if the pendant disconnects, and Reset cancels it.
 - If the file is uploaded again while its preview is being sent to the
   pendant, the new preview is built and sent when it is ready (the pendant
   used to wait for the rest of the old one).
+- While a preview the pendant asked for is being built, the pendant shows the
+  build progress (it no longer gives up with *preview stream broken*).
+- The pendant's copy is kept on the SD card (`/sd/.dpc/pv/`): the next
+  Prepare of the same file starts sending at once. It is rebuilt with the
+  `.viz`.
+- Pendant firmware from cd36a8e on asks for compact points (API level 3):
+  about a third of the bytes of the text points, so previews arrive about 3×
+  faster.
 
 ### Laser jobs
 
