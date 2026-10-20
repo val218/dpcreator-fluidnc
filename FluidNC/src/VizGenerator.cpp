@@ -38,6 +38,7 @@
 #include <cerrno>
 #include <memory>
 #include <esp_timer.h>  // esp_timer_get_time
+#include <sys/stat.h>   // mkdir (pendant preview cache)
 
 #define VIZ_MAX_POINTS    8000
 #define VIZ_MAX_POINTS_LASER 16000  // a grey-scale raster changes power on nearly every move
@@ -87,6 +88,8 @@ static void viz_say(const char* msg, bool auto_mode) {
 }
 // Messages about the build in progress (labelled by who asked for it).
 static void viz_msg(const char* msg) { viz_say(msg, _auto_mode); }
+static void viz_progress_to_pendant(const char* msg);  // the pendant waits for this build
+static void cache_drop(const std::string& vpath);      // pendant preview cache (push section)
 
 std::string viz_path(const std::string& nc_path) { return nc_path + ".viz"; }
 
@@ -141,17 +144,18 @@ struct VizBuild {
     float                      cut_zmin = 1e9f, cut_zmax = -1e9f;
     bool                       laser = false;
     int                        last_pw = -1, pend_pw = 0;
-    int                        pw_steps = 0;  // power level changes (pass 1), part of the point budget
-    int                        pw_step = 10;  // power kept in steps of this many % (coarser when it does not fit)
+    // Laser: moves merged into one preview point get their length-weighted
+    // average power, so the point count follows the path length like any job
+    // (one pass, no re-reads) and a grey-scale picture shrinks like an image.
+    double                     acc_l = 0, acc_p = 0;    // since the last written point
+    double                     pend_l = 0, pend_p = 0;  // ... up to the pending point
+    // Direction of the last cut move: a turn of more than 90 degrees keeps its
+    // corner (raster line ends, pocket corners), counted in pass 1.
+    float                      mdx = 0, mdy = 0;
 };
 static VizBuild         _b;
 static std::atomic<bool> _cancel { false };
 static std::string      _current;  // path being built (guarded by _q_mutex)
-
-// Power levels for keeping points: off, then 10 % steps. A grey-scale raster
-// changes S on nearly every move; keeping every small change would use the
-// whole point budget on a few lines.
-static int pw_level(int pw, int step) { return pw <= 0 ? -1 : pw / step; }
 
 static int max_points() { return _b.laser ? VIZ_MAX_POINTS_LASER : VIZ_MAX_POINTS; }
 
@@ -187,8 +191,18 @@ static void emit(float x, float y, float z, int t, int line, int pw = -1) {
     _b.last_px = x; _b.last_py = y; _b.last_pz = z; _b.last_t = t;
     _b.n_points++;
 }
+static int avg_power(double l, double p, int fallback) {
+    if (l <= 1e-6) return fallback;
+    int v = (int)lround(p / l);
+    return v < 0 ? 0 : v > 100 ? 100 : v;
+}
 static void flush_pending() {
-    if (_b.pend_ok) { emit(_b.pend_x, _b.pend_y, _b.pend_z, 1, _b.pend_line, _b.pend_pw); _b.pend_ok = false; }
+    if (_b.pend_ok) {
+        emit(_b.pend_x, _b.pend_y, _b.pend_z, 1, _b.pend_line, avg_power(_b.pend_l, _b.pend_p, _b.pend_pw));
+        _b.acc_l -= _b.pend_l;
+        _b.acc_p -= _b.pend_p;
+        _b.pend_ok = false;
+    }
 }
 
 static void write_arc(float x0, float y0, float x1, float y1, float i, float j, bool cw, float z0, float z1, int line) {
@@ -210,6 +224,8 @@ static void write_arc(float x0, float y0, float x1, float y1, float i, float j, 
         float ang = a0 + t * (a1 - a0);
         emit(cx + r * cosf(ang), cy + r * sinf(ang), z0 + t * (z1 - z0), 1, line);  // helical Z
     }
+    _b.acc_l = _b.acc_p = 0;
+    _b.mdx = _b.mdy = 0;
 }
 
 static void build_close(bool keep) {
@@ -272,6 +288,7 @@ static bool build_begin(const std::string& nc, VizMode mode, bool push) {
     _b.last_px = 1e9f; _b.last_py = 1e9f; _b.last_pz = 0; _b.last_t = -1;
     _b.pend_ok = false; _b.pend_line = 0;
     _b.spin_on = false; _b.s_cur = 0; _b.last_pw = -1; _b.pend_pw = 0;
+    _b.acc_l = _b.acc_p = _b.pend_l = _b.pend_p = 0; _b.mdx = _b.mdy = 0;
     _b.last_busy_ms = millis();
     _b.active = true;
     return true;
@@ -353,8 +370,6 @@ static void process_line(char* linebuf) {
     }
 
     if (s_word >= 0 || spin >= 0) {
-        if (_b.laser) flush_pending();  // the run so far was cut at the old power
-        if (_b.pass == 1 && s_word >= 0 && fabsf(s_word - _b.s_cur) > 1e-3f) ++_b.pw_steps;
         if (s_word >= 0) _b.s_cur = s_word;
         if (spin >= 0) _b.spin_on = spin == 1;
         if (_b.pass == 1 && _b.spin_on && _b.s_cur > 0) {
@@ -389,21 +404,30 @@ static void process_line(char* linebuf) {
         float dx     = new_x - _b.last_px, dy = new_y - _b.last_py;
         bool  first  = _b.last_px > 1e8f;
         bool  tchg   = t != _b.last_t;
-        if (_b.pass == 1 && (t == 0 || tchg)) ++_b.forced;
+        // this move (from the previous input point) and a sharp turn from the last one
+        float mx = new_x - _modal_x, my = new_y - _modal_y;
+        float ml = sqrtf(mx * mx + my * my);
+        bool  sharp = t == 1 && ml > 1e-4f && (_b.mdx * mx + _b.mdy * my) < 0;
+        if (t == 1 && ml > 1e-4f) { _b.mdx = mx; _b.mdy = my; }
+        if (t == 0) { _b.mdx = _b.mdy = 0; }
+        if (_b.pass == 1 && (t == 0 || tchg || sharp)) ++_b.forced;
         float res    = _b.pass == 1 ? 0.0f : _b.res;
         bool  zchg   = fabsf(new_z - _b.last_pz) > std::max(res, 0.001f);
         bool  far    = (dx * dx + dy * dy) >= res * res;
         int   pw     = cur_pw();
-        bool  pchg   = _b.laser && t == 1 && pw_level(pw, _b.pw_step) != pw_level(_b.last_pw, _b.pw_step);
-        bool  keep   = first || zchg || tchg || t == 0 || far || pchg;
+        if (_b.laser && t == 1) { _b.acc_l += ml; _b.acc_p += (double)ml * pw; }
+        if (sharp && _b.pass == 2) flush_pending();  // the corner: end of the previous move
+        bool  keep   = first || zchg || tchg || t == 0 || far;
         if (keep) {
             if (zchg || tchg || t == 0) flush_pending();
-            emit(new_x, new_y, new_z, t, line_num);
+            emit(new_x, new_y, new_z, t, line_num, t == 1 ? avg_power(_b.acc_l, _b.acc_p, pw) : 0);
+            _b.acc_l = _b.acc_p = 0;
             _b.sample_ct = 0;
             _b.pend_ok   = false;
         } else {
             _b.pend_x = new_x; _b.pend_y = new_y; _b.pend_z = new_z; _b.pend_line = line_num; _b.pend_ok = true;
             _b.pend_pw = pw;
+            _b.pend_l  = _b.acc_l; _b.pend_p = _b.acc_p;
         }
     }
     _modal_x = new_x; _modal_y = new_y; _modal_z = new_z;
@@ -427,6 +451,7 @@ static void build_finish() {
     remove(_b.out.c_str());
     errno = 0;
     if (rename(_b.tmp.c_str(), _b.out.c_str()) != 0) { build_fail("cannot rename", _b.out); return; }
+    cache_drop(_b.out);  // the pendant's copy is for the old preview
 
     char done_msg[200];
     snprintf(done_msg, sizeof(done_msg), "VizReady:%s:%d:%.3f:%.3f:%.3f:%.3f",
@@ -456,6 +481,7 @@ static bool pass2_start(float res) {
     _b.last_px = 1e9f; _b.last_py = 1e9f; _b.last_pz = 0; _b.last_t = -1;
     _b.pend_ok = false; _b.pend_line = 0;
     _b.spin_on = false; _b.s_cur = 0; _b.last_pw = -1; _b.pend_pw = 0;
+    _b.acc_l = _b.acc_p = _b.pend_l = _b.pend_p = 0; _b.mdx = _b.mdy = 0;
     return true;
 }
 
@@ -464,13 +490,10 @@ static bool pass2_start(float res) {
 // 1/4000 of the part.
 static bool pass1_done() {
     _b.laser     = _b.s_max > 0 && (_b.used_m4 || (_b.cut_zmax - _b.cut_zmin < 0.05f && _b.s_nvals > 2));
+    // Points written = forced ones (rapids, rapid/cut switches, sharp turns)
+    // + one per res of path: res from the budget that is left.
     const double budget = max_points() * 0.9;
-    double used  = _b.forced;
-    if (_b.laser) {  // power changes are kept like rapids: less budget for the rest
-        if (_b.pw_steps > budget) _b.pw_step = 20;  // a grey-scale raster: coarser steps from the start
-        used += std::min<double>(_b.pw_steps, budget * 0.6);
-    }
-    double avail = std::max(budget - used, budget / 4);
+    double avail = std::max(budget - _b.forced, budget / 4);
     float  span  = std::max(_b.xmax - _b.xmin, _b.ymax - _b.ymin);
     float  res   = (float)(_b.plen / avail);
     res          = std::max(res, span > 0 ? span / 4000.0f : 0.0f);
@@ -487,13 +510,9 @@ static void build_step(int64_t budget_us) {
     for (;;) {
         if (_b.pass == 2 && _b.n_points >= max_points()) {
             // More points than measured: coarser detail, write again.
-            if (_b.retries < (_b.laser ? 5 : 3) && !feof(_b.in)) {
+            if (_b.retries < 3 && !feof(_b.in)) {
                 ++_b.retries;
-                // A laser job first keeps fewer power levels, then less detail.
-                if (_b.laser && _b.pw_step < 50) {
-                    _b.pw_step = std::min(50, _b.pw_step * 2);
-                    if (!pass2_start(_b.res * 1.15f)) return;
-                } else if (!pass2_start(_b.res * 1.6f)) return;
+                if (!pass2_start(_b.res * 1.6f)) return;
                 continue;
             }
             break;
@@ -517,6 +536,7 @@ static void build_step(int64_t budget_us) {
                     int  pct = _b.file_size > 0 ? (int)(pos * 50 / _b.file_size) : 0;  // two passes
                     snprintf(msg, sizeof(msg), "VizBusy:%s:%d", _b.nc.c_str(), _b.pass == 1 ? pct : 50 + pct);
                     viz_msg(msg);
+                    if (_auto_mode) viz_progress_to_pendant(msg);  // auto builds are not sent to it otherwise
                 }
                 return;
             }
@@ -545,6 +565,13 @@ bool viz_exists(const std::string& nc_path) {
 //   [MSG:VZ:<seq>:<sum>:<x,y,z,t,ln>;<x,y,z,t,ln>;...]     up to 4 points;
 //        laser jobs add a 6th field: <x,y,z,t,ln,pw>, power in % of the
 //        file's highest S (older pendants skip it);
+//   [MSG:VZ2:<seq>:<sum>:<base64>]                         up to 10 points, compact
+//        (when the pendant asks with "$Viz/Push=<px>:<max>:c:<file>", API 3):
+//        per point x,y,z as 16-bit steps of (max-min)/65000 in the VZB bounds,
+//        LE; a flag byte (bit 7 rapid, bits 0-6 power %, 127 = none); the line
+//        as an unsigned varint delta from the previous point
+//   [MSG:VizBusy:<file>:<pct>]                             still being built
+//        (also for automatic builds the pendant is waiting for)
 //        <sum> = 4 hex digits, byte sum of the points text (line noise check)
 //   [MSG:VZE:<count>:<viz path>]                           end
 //   [MSG:VZX:<viz path>:<reason>]                          cannot send it
@@ -667,8 +694,35 @@ struct VizPush {
     std::vector<std::string>   outq;
     uint32_t                   last_ms = 0;
     int32_t                    credit  = 0;      // bytes it may send now (see push_step)
+    // The pendant-sized preview is kept in /sd/.dpc/pv/<hash>.vzp: the next
+    // push of the same file (another Prepare, a restart) streams it straight
+    // away, without the counting passes.
+    bool                       cached = false;   // sending from the cache file
+    FILE*                      cf = nullptr;     // cache being written while sending
+    std::string                ctmp;
+    long                       vsize = 0;        // .viz size: the cache key, with px and max
+    int                        n_send = 0;
+    // compact points (VZ2): 16-bit coordinates in the VZB bounds
+    float                      qx = 1, qy = 1, qz = 1, ox = 0, oy = 0, oz = 0;
+    unsigned                   prev_line = 0;
 };
 static VizPush _p;
+static int         _push_fmt = 1;  // 1: text points (VZ), 2: compact (VZ2, the pendant asked with "c:")
+static std::string _pend_want;     // .nc the pendant is waiting for while its preview is built
+
+static std::string cache_path(const std::string& vpath) {
+    uint32_t h = 2166136261u;  // FNV-1a of the .viz path
+    for (unsigned char c : vpath) {
+        h ^= c;
+        h *= 16777619u;
+    }
+    char b[48];
+    snprintf(b, sizeof(b), "/sd/.dpc/pv/%08x.vzp", (unsigned)h);
+    return b;
+}
+static void cache_drop(const std::string& vpath) {
+    remove(cache_path(vpath).c_str());
+}
 
 static void to_pendant(const std::string& line) {
     UartChannel* ch = pendant_channel();
@@ -679,9 +733,36 @@ static void to_pendant(const std::string& line) {
 
 static void push_end() {
     if (_p.f) { fclose(_p.f); _p.f = nullptr; }
+    if (_p.cf) {  // stopped part-way: the cache would be incomplete
+        fclose(_p.cf);
+        _p.cf = nullptr;
+        remove(_p.ctmp.c_str());
+    }
     _p.mount.reset();
     _p.active = false;
+    _p.cached = false;
     _p.outq.clear();
+}
+
+static void viz_progress_to_pendant(const char* msg) {
+    if (!_pend_want.empty() && _pend_want == _b.nc) to_pendant(std::string("[MSG:") + msg + "]");
+}
+
+// VZB: point count, bounds; also sets up the compact coordinate scale (the
+// pendant computes the same from the printed bounds).
+static void send_vzb(int n) {
+    char buf[256];
+    if (_p.zmin > _p.zmax) { _p.zmin = _p.zmax = 0; }
+    snprintf(buf, sizeof(buf), "[MSG:VZB:%d:%.3f:%.3f:%.3f:%.3f:%.3f:%.3f:%s]", n, _p.b[0], _p.b[1], _p.b[2], _p.b[3], _p.zmin, _p.zmax,
+             _p.path.c_str());
+    to_pendant(buf);
+    float v[6];
+    sscanf(buf + 9, "%*d:%f:%f:%f:%f:%f:%f", &v[0], &v[1], &v[2], &v[3], &v[4], &v[5]);
+    auto q = [](float a, float b) { return b - a > 0 ? (b - a) / 65000.0f : 0.001f; };
+    _p.qx = q(v[0], v[1]); _p.qy = q(v[2], v[3]); _p.qz = q(v[4], v[5]);
+    _p.ox = v[0]; _p.oy = v[2]; _p.oz = v[4];
+    _p.prev_line = 0;
+    _p.n_send    = n;
 }
 
 static void push_rewind() {
@@ -718,6 +799,37 @@ static void push_begin(const std::string& vpath) {
     _p.laser    = strstr(head, " pw") != nullptr;
     _p.gstride  = 1;
     _p.data_pos = ftell(_p.f);
+    fseek(_p.f, 0, SEEK_END);
+    _p.vsize = ftell(_p.f);
+    fseek(_p.f, _p.data_pos, SEEK_SET);
+    _pend_want.clear();
+    // Sent before with the same screen and memory: stream the cached copy.
+    {
+        FILE* c = fopen(cache_path(vpath).c_str(), "r");
+        char  ch[200];
+        int   px = -1, mx = -1, cn = 0;
+        long  vs = -1;
+        float cb[4], cz0, cz1, cres;
+        if (c && fgets(ch, sizeof(ch), c) &&
+            sscanf(ch, "VZP1 %d %d %ld %d %f %f %f %f %f %f %f", &px, &mx, &vs, &cn, &cb[0], &cb[1], &cb[2], &cb[3], &cz0, &cz1, &cres) == 11 &&
+            px == _push_px && mx == _push_max && vs == _p.vsize) {
+            fclose(_p.f);
+            _p.f        = c;
+            _p.data_pos = ftell(c);
+            for (int i = 0; i < 4; ++i) _p.b[i] = cb[i];
+            _p.zmin = cz0; _p.zmax = cz1; _p.res = cres;
+            _p.n_file = n;
+            _p.cached = true; _p.sending = true; _p.active = true;
+            _p.seq = 0; _p.sent = 0; _p.last_ms = 0; _p.credit = 0; _p.idx = 0; _p.stride = 1;
+            _p.outq.clear();
+            send_vzb(cn);
+            char buf[200];
+            snprintf(buf, sizeof(buf), "[MSG:VizPush:%s:%d of %d points (cached)]\r\n", _p.path.c_str(), cn, n);
+            allChannels.print_except(buf, static_cast<Channel*>(pendant_channel()));
+            return;
+        }
+        if (c) fclose(c);
+    }
     _p.n_file   = n;
     float span  = std::max(_p.b[1] - _p.b[0], _p.b[3] - _p.b[2]);
     _p.res      = (_push_px > 0 && span > 0) ? span / _push_px : 0;
@@ -733,40 +845,102 @@ static void push_begin(const std::string& vpath) {
 }
 
 // Counting pass finished: fits? Otherwise coarser pixel and count again.
-static void push_counted() {
-    if (_p.count > _push_max && _p.iter < 10) {
-        // Coarser until it fits. Every-n-th thinning (below) is only a last
-        // resort: it would drop corners.
-        float f = std::max(1.3f, sqrtf((float)_p.count / _push_max) * 1.15f);
-        float span = std::max(_p.b[1] - _p.b[0], _p.b[3] - _p.b[2]);
-        _p.res = _p.res > 0 ? _p.res * f : std::max(span / 2000.0f, 0.01f);
-        ++_p.iter;
-        push_rewind();
-        return;
-    }
-    _p.stride = (_p.count > _push_max && _push_max > 0) ? (_p.count + _push_max - 1) / _push_max : 1;
-    int n     = (_p.count + _p.stride - 1) / _p.stride;
-    if (_p.laser && _p.stride > 1 && _p.gsz.size() > 8) {
-        // Drop whole runs: the smallest run stride that fits.
-        for (_p.gstride = 2; _p.gstride <= 64 && _p.gstride < (int)_p.gsz.size(); ++_p.gstride) {
-            int k = 0;
-            for (int g = 0; g < (int)_p.gsz.size(); ++g)
-                if (push_keep_group(g)) k += _p.gsz[g];
-            n = k;
-            if (k <= _push_max) break;
+// Laser rasters: keep every k-th line at full detail (the smallest k that fits)
+// instead of making every line coarse.
+static bool push_try_rows() {
+    if (!_p.laser || _p.gsz.size() <= 16) return false;
+    for (_p.gstride = 2; _p.gstride <= 64 && _p.gstride < (int)_p.gsz.size(); ++_p.gstride) {
+        int k = 0;
+        for (int g = 0; g < (int)_p.gsz.size(); ++g)
+            if (push_keep_group(g)) k += _p.gsz[g];
+        if (k <= _push_max) {
+            _p.n_send = k;
+            return true;
         }
-        if (n <= _push_max) _p.stride = 1;
-        else { _p.gstride = 1; n = (_p.count + _p.stride - 1) / _p.stride; }  // runs too long: every n-th point
     }
+    _p.gstride = 1;
+    return false;
+}
+
+static void push_cache_open(int n) {
+    mkdir("/sd/.dpc", 0777);
+    mkdir("/sd/.dpc/pv", 0777);
+    _p.ctmp = cache_path(_p.path) + ".tmp";
+    _p.cf   = fopen(_p.ctmp.c_str(), "w");
+    if (_p.cf)
+        fprintf(_p.cf, "VZP1 %d %d %ld %d %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n", _push_px, _push_max, _p.vsize, n, _p.b[0], _p.b[1], _p.b[2],
+                _p.b[3], _p.zmin, _p.zmax, _p.res);
+}
+
+// Counting pass finished: fits? Otherwise coarser pixel and count again.
+static void push_counted() {
+    int n = _p.count;
+    _p.stride = 1;
+    if (_p.count > _push_max && _push_max > 0) {
+        if (_p.iter == 0 && push_try_rows()) {
+            n = _p.n_send;
+        } else if (_p.iter < 10) {
+            // Coarser until it fits. Every-n-th thinning (below) is only a last
+            // resort: it would drop corners.
+            float f = std::max(1.3f, sqrtf((float)_p.count / _push_max) * 1.15f);
+            float span = std::max(_p.b[1] - _p.b[0], _p.b[3] - _p.b[2]);
+            _p.res = _p.res > 0 ? _p.res * f : std::max(span / 2000.0f, 0.01f);
+            ++_p.iter;
+            push_rewind();
+            return;
+        } else {
+            _p.stride = (_p.count + _push_max - 1) / _push_max;
+            n         = (_p.count + _p.stride - 1) / _p.stride;
+        }
+    }
+    send_vzb(n);
     char buf[256];
-    if (_p.zmin > _p.zmax) { _p.zmin = _p.zmax = 0; }
-    snprintf(buf, sizeof(buf), "[MSG:VZB:%d:%.3f:%.3f:%.3f:%.3f:%.3f:%.3f:%s]", n, _p.b[0], _p.b[1], _p.b[2], _p.b[3], _p.zmin, _p.zmax,
-             _p.path.c_str());
-    to_pendant(buf);
     snprintf(buf, sizeof(buf), "[MSG:VizPush:%s:%d of %d points, %.2f mm detail]\r\n", _p.path.c_str(), n, _p.n_file, _p.res);
     allChannels.print_except(buf, static_cast<Channel*>(pendant_channel()));
+    push_cache_open(n);
     _p.sending = true;
     push_rewind();
+}
+
+// VZ2: per point x, y, z as 16-bit steps in the VZB bounds (little endian),
+// a flag byte (bit 7 rapid, bits 0-6 laser power %, 127 = none) and the
+// line as an unsigned varint delta from the previous point; base64.
+static std::string pack_points(size_t take) {
+    static const char* B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    uint8_t buf[16 * 12];
+    size_t  n = 0;
+    auto    q16 = [](float v, float o, float q) {
+        float u = (v - o) / q + 0.5f;
+        return (uint16_t)(u < 0 ? 0 : u > 65535 ? 65535 : u);
+    };
+    for (size_t i = 0; i < take && n + 12 <= sizeof(buf); ++i) {
+        float    x = 0, y = 0, z = 0;
+        int      t = 1, pw = -1;
+        unsigned ln = 0;
+        sscanf(_p.outq[i].c_str(), "%f,%f,%f,%d,%u,%d", &x, &y, &z, &t, &ln, &pw);
+        uint16_t c[3] = { q16(x, _p.ox, _p.qx), q16(y, _p.oy, _p.qy), q16(z, _p.oz, _p.qz) };
+        for (int k = 0; k < 3; ++k) {
+            buf[n++] = c[k] & 0xFF;
+            buf[n++] = c[k] >> 8;
+        }
+        buf[n++]   = (t == 0 ? 0x80 : 0) | (pw < 0 ? 127 : (pw > 100 ? 100 : pw));
+        unsigned d = ln >= _p.prev_line ? ln - _p.prev_line : 0;
+        _p.prev_line = ln;
+        do {
+            uint8_t b = d & 0x7F;
+            d >>= 7;
+            buf[n++] = b | (d ? 0x80 : 0);
+        } while (d);
+    }
+    std::string out;
+    for (size_t i = 0; i < n; i += 3) {
+        uint32_t v = buf[i] << 16 | (i + 1 < n ? buf[i + 1] << 8 : 0) | (i + 2 < n ? buf[i + 2] : 0);
+        out += B64[(v >> 18) & 63];
+        out += B64[(v >> 12) & 63];
+        out += i + 1 < n ? B64[(v >> 6) & 63] : '=';
+        out += i + 2 < n ? B64[v & 63] : '=';
+    }
+    return out;
 }
 
 static void push_step() {
@@ -826,29 +1000,39 @@ static void push_step() {
         if ((_p.idx++ % _p.stride) != 0) return;
         std::string s(l);
         while (!s.empty() && (s.back() == '\n' || s.back() == '\r' || s.back() == ' ')) s.pop_back();
+        if (_p.cf) fprintf(_p.cf, "%s\n", s.c_str());
         _p.outq.push_back(s);
     };
+    const size_t per_msg = _push_fmt == 2 ? 10 : 4;
     for (int m = 0; m < 12 && _p.credit >= 140; ++m) {
         bool eof = false;
-        while (_p.outq.size() < 4) {
+        while (_p.outq.size() < per_msg) {
             if (!fgets(line, sizeof(line), _p.f)) {
-                thin_end(_p.thin, keep);
+                if (!_p.cached) thin_end(_p.thin, keep);
                 eof = true;
                 break;
             }
-            thin_point(_p.thin, line, _p.res, keep);
+            if (_p.cached) {  // already thinned
+                std::string l(line);
+                while (!l.empty() && (l.back() == '\n' || l.back() == '\r')) l.pop_back();
+                if (!l.empty()) _p.outq.push_back(l);
+            } else {
+                thin_point(_p.thin, line, _p.res, keep);
+            }
         }
-        size_t take = std::min<size_t>(4, _p.outq.size());
+        size_t take = std::min<size_t>(per_msg, _p.outq.size());
         if (take) {
-            std::string pts;
-            for (size_t i = 0; i < take; ++i) {
-                if (i) pts += ';';
-                pts += _p.outq[i];
+            std::string pts = _push_fmt == 2 ? pack_points(take) : std::string();
+            if (_push_fmt != 2) {
+                for (size_t i = 0; i < take; ++i) {
+                    if (i) pts += ';';
+                    pts += _p.outq[i];
+                }
             }
             unsigned sum = 0;
             for (unsigned char c : pts) sum += c;
             char head[32];
-            snprintf(head, sizeof(head), "[MSG:VZ:%d:%04X:", _p.seq, sum & 0xFFFF);
+            snprintf(head, sizeof(head), _push_fmt == 2 ? "[MSG:VZ2:%d:%04X:" : "[MSG:VZ:%d:%04X:", _p.seq, sum & 0xFFFF);
             std::string out = head + pts + "]";
             _p.outq.erase(_p.outq.begin(), _p.outq.begin() + take);
             to_pendant(out);
@@ -858,6 +1042,13 @@ static void push_step() {
         }
         if (eof && _p.outq.empty()) {
             to_pendant("[MSG:VZE:" + std::to_string(_p.sent) + ":" + _p.path + "]");
+            if (_p.cf) {  // complete: keep it for the next push of this file
+                bool ok = fclose(_p.cf) == 0;
+                _p.cf   = nullptr;
+                std::string cp = cache_path(_p.path);
+                remove(cp.c_str());
+                if (!ok || _p.sent != _p.n_send || rename(_p.ctmp.c_str(), cp.c_str()) != 0) remove(_p.ctmp.c_str());
+            }
             push_end();
             return;
         }
@@ -943,7 +1134,10 @@ void viz_file_removed(const std::string& path) {
     }
     std::error_code ec;
     FluidPath       mount { path, SD, ec };
-    if (!ec) remove(viz_path(path).c_str());
+    if (!ec) {
+        remove(viz_path(path).c_str());
+        cache_drop(viz_path(path));
+    }
 }
 
 static bool idle_no_job() {
@@ -1286,6 +1480,12 @@ static void viz_push_request(const char* arg) {
         _push_px  = 0;
         _push_max = 8000;
     }
+    // "c:" before the file: the pendant reads compact points (VZ2, API level 3)
+    _push_fmt = 1;
+    if (arg[0] == 'c' && arg[1] == ':') {
+        _push_fmt = 2;
+        arg += 2;
+    }
     std::string p = sd_norm(arg);
     // Asked again while it is being sent: the pendant started over (it cleared
     // what it had), so start over too instead of finishing a half it dropped.
@@ -1295,6 +1495,10 @@ static void viz_push_request(const char* arg) {
         return;
     }
     enqueue(p, 0, VizMode::Requested, true);
+    // Built first (or waiting for another build): tell the pendant it is
+    // coming, and pass it the build progress, so it does not give up.
+    _pend_want = p;
+    to_pendant("[MSG:VizBusy:" + p + ":0]");
 }
 
 bool viz_generate(const std::string& nc_path) {
