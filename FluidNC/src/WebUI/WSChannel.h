@@ -9,6 +9,8 @@
 #include <list>
 #include <map>
 #include <ESPAsyncWebServer.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 #include "Channel.h"
 
@@ -68,6 +70,17 @@ namespace WebUI {
         // _output_line without bound.  ~8 frames.
         static constexpr size_t WS_OUT_MAX_BACKLOG = 8 * WS_OUT_FLUSH_LEN;
         std::string               _output_line;
+        // _output_line is written from any task (AllChannels::write runs on
+        // the polling task, the protocol task, the viz builder...) and flushed
+        // from pollLine(). Unguarded, two appends at once corrupted the heap
+        // (panic in multi_heap_free from WSChannel::write). Recursive: write()
+        // can reach flush_output() and drop_old_reports() with it held.
+        SemaphoreHandle_t         _out_mutex = xSemaphoreCreateRecursiveMutex();
+        struct OutLock {
+            SemaphoreHandle_t m;
+            explicit OutLock(SemaphoreHandle_t m) : m(m) { if (m) xSemaphoreTakeRecursive(m, portMAX_DELAY); }
+            ~OutLock() { if (m) xSemaphoreGiveRecursive(m); }
+        };
         void                      drop_old_reports();
         uint32_t                  _output_pending_since = 0;
         unsigned long             _last_queue_full      = 0;
