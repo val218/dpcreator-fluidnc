@@ -849,18 +849,55 @@ whose PWM and 0-10V share one GPIO the laser needs another free output.
 Routing one signal to either the inverter or the laser through a relay is not
 supported: on the R3 the single relay is needed for the inverter's run input.
 
-**On the dpCREATOR R3** (no spare GPIO):
+**On the dpCREATOR R3** there is no spare GPIO. Two set-ups work:
 
-| Router | Laser | |
-|---|---|---|
-| RS485 inverter | PWM output | Best: the PWM output is free for the laser; the relay is free too (air assist). |
-| 0-10V inverter, relay = FWD | A-axis STEP output | Only without an A axis. The STEP output is 5 V logic, which suits the TTL/PWM input of most diode lasers. Remove the `a:` axis (or set its `step_pin: NO_PIN`) and use that GPIO as the laser's `output_pin`. |
-| 0-10V inverter | – | With an A axis (e.g. a rotary) there is no output left for the laser: use RS485 for the router. |
+1. **Recommended: router on an RS485 inverter, laser on the PWM output.**
+   The PWM output (`gpio.21`) and the relay (`gpio.39`) are free for the
+   laser: PWM = power, relay = laser enable (or air assist). Any A axis stays.
 
-The A-axis STEP output goes through the board's 3.3 V → 5 V level shifter.
-If that stage inverts the signal, add `:low` to the laser's `output_pin`
-(`gpio.NN:low`) so S0 means laser off; check with a meter or a scope before
-connecting the laser.
+   ```yaml
+   Huanyang:                 # uart1 / RS485 wiring: see the Spindle and VFD page
+     uart_num: 1
+     modbus_id: 1
+     tool_num: 0
+     speed_map: 0=0% 24000=100%
+   Laser:
+     pwm_hz: 5000
+     output_pin: gpio.21
+     enable_pin: gpio.39
+     tools: 2
+     offset_mm: 42.5 18 0
+     speed_map: 0=0% 1000=100%
+   ```
+
+2. **Possible: router on a 0-10V inverter, laser on the A-axis STEP output.**
+   Only without an A axis. The 0-10V output uses `gpio.21`, the relay
+   (`gpio.39`) switches the inverter's FWD/run input, and the laser takes the
+   A-axis STEP output (`gpio.17`, 5 V logic, which suits the TTL/PWM input of
+   most diode lasers). Remove the `a:` axis from config.yaml.
+
+   ```yaml
+   10V:
+     output_pin: gpio.21
+     forward_pin: gpio.39
+     tool_num: 0
+     spinup_ms: 3000
+     spindown_ms: 3000
+     speed_map: 0=0% 24000=100%
+   Laser:
+     pwm_hz: 5000
+     output_pin: gpio.17     # A-axis STEP output (no A axis)
+     tools: 2
+     offset_mm: 42.5 18 0
+     speed_map: 0=0% 1000=100%
+   ```
+
+   The STEP output goes through the board's 3.3 V → 5 V level shifter. If that
+   stage inverts the signal, use `gpio.17:low` so S0 means laser off, and
+   check with a meter or a scope before connecting the laser.
+
+With an A axis (e.g. a rotary) and a 0-10V inverter there is no output left
+for the laser: use set-up 1.
 
 - `tools:` - the exact tool numbers that select this spindle (`2`, or `2 9`).
   A spindle with a `tools:` list is left out of the `tool_num` ranges, so T1,
