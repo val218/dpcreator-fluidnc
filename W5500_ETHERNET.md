@@ -849,6 +849,19 @@ whose PWM and 0-10V share one GPIO the laser needs another free output.
 Routing one signal to either the inverter or the laser through a relay is not
 supported: on the R3 the single relay is needed for the inverter's run input.
 
+**On the dpCREATOR R3** (no spare GPIO):
+
+| Router | Laser | |
+|---|---|---|
+| RS485 inverter | PWM output | Best: the PWM output is free for the laser; the relay is free too (air assist). |
+| 0-10V inverter, relay = FWD | A-axis STEP output | Only without an A axis. The STEP output is 5 V logic, which suits the TTL/PWM input of most diode lasers. Remove the `a:` axis (or set its `step_pin: NO_PIN`) and use that GPIO as the laser's `output_pin`. |
+| 0-10V inverter | – | With an A axis (e.g. a rotary) there is no output left for the laser: use RS485 for the router. |
+
+The A-axis STEP output goes through the board's 3.3 V → 5 V level shifter.
+If that stage inverts the signal, add `:low` to the laser's `output_pin`
+(`gpio.NN:low`) so S0 means laser off; check with a meter or a scope before
+connecting the laser.
+
 - `tools:` - the exact tool numbers that select this spindle (`2`, or `2 9`).
   A spindle with a `tools:` list is left out of the `tool_num` ranges, so T1,
   T3, T4... stay on the router. `tool_num` ranges work as in stock FluidNC.
