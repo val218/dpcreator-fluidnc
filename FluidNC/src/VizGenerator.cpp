@@ -1115,7 +1115,12 @@ static void enqueue(const std::string& path, uint32_t delay, VizMode mode, bool 
 }
 
 void viz_file_written(const std::string& path) {
-    if (on_sd(path) && is_gcode(path)) enqueue(path, settle_ms, VizMode::Auto);
+    if (!on_sd(path) || !is_gcode(path)) return;
+    enqueue(path, settle_ms, VizMode::Auto);
+    // A file the pendant may be showing was rewritten under the same name
+    // (Studio's Send always writes studio-job.nc): its preview is old. The
+    // pendant asks again; that request joins the rebuild queued above.
+    to_pendant("[MSG:VizStale:" + path + "]");
 }
 
 void viz_job_started(const std::string& path) {
