@@ -145,6 +145,7 @@ namespace WebUI {
     // queue full, client still connected) leaves the data pending for the next
     // flush from pollLine().
     void WSChannel::flush_output(bool may_block) {
+        OutLock lock(_out_mutex);
         if (_output_line.empty()) {
             return;
         }
@@ -182,6 +183,7 @@ namespace WebUI {
     }
 
     size_t WSChannel::write(const uint8_t* buffer, size_t size) {
+        OutLock lock(_out_mutex);
         if (buffer == NULL || !_active || !size) {
             return 0;
         }
@@ -229,8 +231,11 @@ namespace WebUI {
     Error WSChannel::pollLine(char* line) {
         // Runs under AllChannels' poll mutex, so never spin here - a full queue
         // just defers the flush to the next poll.
-        if (!_output_line.empty() && (int32_t)(millis() - _output_pending_since) >= (int32_t)WS_OUT_IDLE_MS) {
-            flush_output(false);
+        {
+            OutLock lock(_out_mutex);
+            if (!_output_line.empty() && (int32_t)(millis() - _output_pending_since) >= (int32_t)WS_OUT_IDLE_MS) {
+                flush_output(false);
+            }
         }
         return Channel::pollLine(line);
     }
@@ -275,7 +280,11 @@ namespace WebUI {
         Channel::autoReport();
     }
 
-    WSChannel::~WSChannel() {}
+    WSChannel::~WSChannel() {
+        if (_out_mutex) {
+            vSemaphoreDelete(_out_mutex);
+        }
+    }
 
     std::vector<WSChannel*> WSChannels::_wsChannels;
     AsyncWebSocket*         WSChannels::_server = nullptr;
