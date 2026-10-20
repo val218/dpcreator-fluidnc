@@ -2292,6 +2292,23 @@ PWM:
     description: |
       Sets the tool-number range this spindle responds to for M6 Tn tool changes. With a single spindle, the value doesn't matter (conventionally 0). With multiple spindles, give each a distinct number -- ranges are implied by relative order, e.g. a relay spindle at tool_num: 0 and a laser at tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
 
+  tools:
+    type: string
+    min: 0
+    max: 64
+    default: '""'
+    default_note: 'empty'
+    tuning: typical
+    description: |
+      dpCREATOR: exact tool numbers that select this spindle, separated by spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the tool_num spindle. A spindle with a tools: list is left out of the tool_num ranges. Use it for a laser or a drag knife mounted next to the router, with no tool changer needed.
+
+  offset_mm:
+    type: std::vector<float>
+    default: '0 0 0'
+    tuning: typical
+    description: |
+      dpCREATOR: where this spindle's tool point is relative to the main spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind the router: 42.5 18 0). While it is selected the offset is applied like a tool offset (G43.1), so work coordinates mean the laser spot: the same job zero works for both. Z: focus height above the router's tool tip.
+
   speed_map:
     type: std::vector<Configuration::speedEntry>
     default: '0=0% 10000=100%'
@@ -2396,6 +2413,23 @@ Laser:
     description: |
       Sets the tool-number range this spindle responds to for M6 Tn tool changes. With a single spindle, the value doesn't matter (conventionally 0). With multiple spindles, give each a distinct number -- ranges are implied by relative order, e.g. a relay spindle at tool_num: 0 and a laser at tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
 
+  tools:
+    type: string
+    min: 0
+    max: 64
+    default: '""'
+    default_note: 'empty'
+    tuning: typical
+    description: |
+      dpCREATOR: exact tool numbers that select this spindle, separated by spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the tool_num spindle. A spindle with a tools: list is left out of the tool_num ranges. Use it for a laser or a drag knife mounted next to the router, with no tool changer needed.
+
+  offset_mm:
+    type: std::vector<float>
+    default: '0 0 0'
+    tuning: typical
+    description: |
+      dpCREATOR: where this spindle's tool point is relative to the main spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind the router: 42.5 18 0). While it is selected the offset is applied like a tool offset (G43.1), so work coordinates mean the laser spot: the same job zero works for both. Z: focus height above the router's tool tip.
+
   speed_map:
     type: std::vector<Configuration::speedEntry>
     default: '0=0% 255=100%'
@@ -2473,6 +2507,23 @@ Laser:
     tuning: typical
     description: |
       Sets the tool-number range this spindle responds to for M6 Tn tool changes. With a single spindle, the value doesn't matter (conventionally 0). With multiple spindles, give each a distinct number -- ranges are implied by relative order, e.g. a relay spindle at tool_num: 0 and a laser at tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
+
+  tools:
+    type: string
+    min: 0
+    max: 64
+    default: '""'
+    default_note: 'empty'
+    tuning: typical
+    description: |
+      dpCREATOR: exact tool numbers that select this spindle, separated by spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the tool_num spindle. A spindle with a tools: list is left out of the tool_num ranges. Use it for a laser or a drag knife mounted next to the router, with no tool changer needed.
+
+  offset_mm:
+    type: std::vector<float>
+    default: '0 0 0'
+    tuning: typical
+    description: |
+      dpCREATOR: where this spindle's tool point is relative to the main spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind the router: 42.5 18 0). While it is selected the offset is applied like a tool offset (G43.1), so work coordinates mean the laser spot: the same job zero works for both. Z: focus height above the router's tool tip.
 
   speed_map:
     type: std::vector<Configuration::speedEntry>
@@ -2590,6 +2641,23 @@ BESC:
     tuning: typical
     description: |
       Sets the tool-number range this spindle responds to for M6 Tn tool changes. With a single spindle, the value doesn't matter (conventionally 0). With multiple spindles, give each a distinct number -- ranges are implied by relative order, e.g. a relay spindle at tool_num: 0 and a laser at tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
+
+  tools:
+    type: string
+    min: 0
+    max: 64
+    default: '""'
+    default_note: 'empty'
+    tuning: typical
+    description: |
+      dpCREATOR: exact tool numbers that select this spindle, separated by spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the tool_num spindle. A spindle with a tools: list is left out of the tool_num ranges. Use it for a laser or a drag knife mounted next to the router, with no tool changer needed.
+
+  offset_mm:
+    type: std::vector<float>
+    default: '0 0 0'
+    tuning: typical
+    description: |
+      dpCREATOR: where this spindle's tool point is relative to the main spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind the router: 42.5 18 0). While it is selected the offset is applied like a tool offset (G43.1), so work coordinates mean the laser spot: the same job zero works for both. Z: focus height above the router's tool tip.
 
   speed_map:
     type: std::vector<Configuration::speedEntry>
@@ -2712,6 +2780,23 @@ HBridge:
     description: |
       Sets the tool-number range this spindle responds to for M6 Tn tool changes. With a single spindle, the value doesn't matter (conventionally 0). With multiple spindles, give each a distinct number -- ranges are implied by relative order, e.g. a relay spindle at tool_num: 0 and a laser at tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
 
+  tools:
+    type: string
+    min: 0
+    max: 64
+    default: '""'
+    default_note: 'empty'
+    tuning: typical
+    description: |
+      dpCREATOR: exact tool numbers that select this spindle, separated by spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the tool_num spindle. A spindle with a tools: list is left out of the tool_num ranges. Use it for a laser or a drag knife mounted next to the router, with no tool changer needed.
+
+  offset_mm:
+    type: std::vector<float>
+    default: '0 0 0'
+    tuning: typical
+    description: |
+      dpCREATOR: where this spindle's tool point is relative to the main spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind the router: 42.5 18 0). While it is selected the offset is applied like a tool offset (G43.1), so work coordinates mean the laser spot: the same job zero works for both. Z: focus height above the router's tool tip.
+
   speed_map:
     type: std::vector<Configuration::speedEntry>
     default: '0=0% 10000=100%'
@@ -2816,6 +2901,23 @@ OnOff:
     description: |
       Sets the tool-number range this spindle responds to for M6 Tn tool changes. With a single spindle, the value doesn't matter (conventionally 0). With multiple spindles, give each a distinct number -- ranges are implied by relative order, e.g. a relay spindle at tool_num: 0 and a laser at tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
 
+  tools:
+    type: string
+    min: 0
+    max: 64
+    default: '""'
+    default_note: 'empty'
+    tuning: typical
+    description: |
+      dpCREATOR: exact tool numbers that select this spindle, separated by spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the tool_num spindle. A spindle with a tools: list is left out of the tool_num ranges. Use it for a laser or a drag knife mounted next to the router, with no tool changer needed.
+
+  offset_mm:
+    type: std::vector<float>
+    default: '0 0 0'
+    tuning: typical
+    description: |
+      dpCREATOR: where this spindle's tool point is relative to the main spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind the router: 42.5 18 0). While it is selected the offset is applied like a tool offset (G43.1), so work coordinates mean the laser spot: the same job zero works for both. Z: focus height above the router's tool tip.
+
   speed_map:
     type: std::vector<Configuration::speedEntry>
     default: '0=0% 1=100%'
@@ -2910,6 +3012,23 @@ Relay:
     tuning: typical
     description: |
       Sets the tool-number range this spindle responds to for M6 Tn tool changes. With a single spindle, the value doesn't matter (conventionally 0). With multiple spindles, give each a distinct number -- ranges are implied by relative order, e.g. a relay spindle at tool_num: 0 and a laser at tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
+
+  tools:
+    type: string
+    min: 0
+    max: 64
+    default: '""'
+    default_note: 'empty'
+    tuning: typical
+    description: |
+      dpCREATOR: exact tool numbers that select this spindle, separated by spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the tool_num spindle. A spindle with a tools: list is left out of the tool_num ranges. Use it for a laser or a drag knife mounted next to the router, with no tool changer needed.
+
+  offset_mm:
+    type: std::vector<float>
+    default: '0 0 0'
+    tuning: typical
+    description: |
+      dpCREATOR: where this spindle's tool point is relative to the main spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind the router: 42.5 18 0). While it is selected the offset is applied like a tool offset (G43.1), so work coordinates mean the laser spot: the same job zero works for both. Z: focus height above the router's tool tip.
 
   speed_map:
     type: std::vector<Configuration::speedEntry>
@@ -3006,6 +3125,23 @@ DAC:
     description: |
       Sets the tool-number range this spindle responds to for M6 Tn tool changes. With a single spindle, the value doesn't matter (conventionally 0). With multiple spindles, give each a distinct number -- ranges are implied by relative order, e.g. a relay spindle at tool_num: 0 and a laser at tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
 
+  tools:
+    type: string
+    min: 0
+    max: 64
+    default: '""'
+    default_note: 'empty'
+    tuning: typical
+    description: |
+      dpCREATOR: exact tool numbers that select this spindle, separated by spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the tool_num spindle. A spindle with a tools: list is left out of the tool_num ranges. Use it for a laser or a drag knife mounted next to the router, with no tool changer needed.
+
+  offset_mm:
+    type: std::vector<float>
+    default: '0 0 0'
+    tuning: typical
+    description: |
+      dpCREATOR: where this spindle's tool point is relative to the main spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind the router: 42.5 18 0). While it is selected the offset is applied like a tool offset (G43.1), so work coordinates mean the laser spot: the same job zero works for both. Z: focus height above the router's tool tip.
+
   speed_map:
     type: std::vector<Configuration::speedEntry>
     default: '0=0% 10000=100%'
@@ -3101,6 +3237,23 @@ PlasmaSpindle:
     description: |
       Sets the tool-number range this spindle responds to for M6 Tn tool changes. With a single spindle, the value doesn't matter (conventionally 0). With multiple spindles, give each a distinct number -- ranges are implied by relative order, e.g. a relay spindle at tool_num: 0 and a laser at tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
 
+  tools:
+    type: string
+    min: 0
+    max: 64
+    default: '""'
+    default_note: 'empty'
+    tuning: typical
+    description: |
+      dpCREATOR: exact tool numbers that select this spindle, separated by spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the tool_num spindle. A spindle with a tools: list is left out of the tool_num ranges. Use it for a laser or a drag knife mounted next to the router, with no tool changer needed.
+
+  offset_mm:
+    type: std::vector<float>
+    default: '0 0 0'
+    tuning: typical
+    description: |
+      dpCREATOR: where this spindle's tool point is relative to the main spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind the router: 42.5 18 0). While it is selected the offset is applied like a tool offset (G43.1), so work coordinates mean the laser spot: the same job zero works for both. Z: focus height above the router's tool tip.
+
   speed_map:
     type: std::vector<Configuration::speedEntry>
     default: '0=0% 1=100%'
@@ -3181,6 +3334,23 @@ ModbusVFD:
     tuning: typical
     description: |
       Sets the tool-number range this spindle responds to for M6 Tn tool changes. With a single spindle, the value doesn't matter (conventionally 0). With multiple spindles, give each a distinct number -- ranges are implied by relative order, e.g. a relay spindle at tool_num: 0 and a laser at tool_num: 100 makes M6 T0-T99 select the relay and M6 T100+ select the laser.
+
+  tools:
+    type: string
+    min: 0
+    max: 64
+    default: '""'
+    default_note: 'empty'
+    tuning: typical
+    description: |
+      dpCREATOR: exact tool numbers that select this spindle, separated by spaces, e.g. tools: 2 makes M6 T2 select it while T1, T3... stay on the tool_num spindle. A spindle with a tools: list is left out of the tool_num ranges. Use it for a laser or a drag knife mounted next to the router, with no tool changer needed.
+
+  offset_mm:
+    type: std::vector<float>
+    default: '0 0 0'
+    tuning: typical
+    description: |
+      dpCREATOR: where this spindle's tool point is relative to the main spindle's (X Y Z in mm, e.g. a laser 42.5 mm right of and 18 mm behind the router: 42.5 18 0). While it is selected the offset is applied like a tool offset (G43.1), so work coordinates mean the laser spot: the same job zero works for both. Z: focus height above the router's tool tip.
 
   speed_map:
     type: std::vector<Configuration::speedEntry>

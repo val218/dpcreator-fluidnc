@@ -8,6 +8,9 @@
 
 #include "System.h"  //sys.spindle_speed_ovr
 
+#include <cctype>
+#include <cstdlib>
+
 Spindles::Spindle* spindle = nullptr;
 
 Spindles::Spindle::IsrSpeedFn spindle_isr_speed_fn = nullptr;
@@ -33,9 +36,23 @@ namespace Spindles {
     }
 
     void Spindle::switchSpindle(uint32_t new_tool, SpindleList spindles, Spindle*& spindle, bool& stop_spindle, bool& new_spindle) {
-        // Find the spindle whose tool number is closest to and below the new tool number
+        // A spindle that lists the tool exactly (tools:) wins; otherwise the
+        // spindle whose tool number is closest to and below the new tool number,
+        // among the spindles without a tools: list.
         Spindle* candidate = nullptr;
         for (auto s : spindles) {
+            if (s->ownsTool(new_tool)) {
+                candidate = s;
+                break;
+            }
+        }
+        for (auto s : spindles) {
+            if (candidate && candidate->ownsTool(new_tool)) {
+                break;
+            }
+            if (s->hasToolList()) {
+                continue;
+            }
             if (s->_tool <= new_tool && (!candidate || candidate->_tool < s->_tool)) {
                 candidate = s;
             }
@@ -65,6 +82,32 @@ namespace Spindles {
                 spindle_isr_speed_fn = spindle->isr_speed_fn();
             }
         }
+    }
+
+    bool Spindle::hasToolList() {
+        for (char c : _tools_str) {
+            if (isdigit((unsigned char)c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool Spindle::ownsTool(uint32_t tool) {
+        const char* p = _tools_str.c_str();
+        while (*p) {
+            if (!isdigit((unsigned char)*p)) {
+                ++p;
+                continue;
+            }
+            char*         e;
+            unsigned long v = strtoul(p, &e, 10);
+            if (v == tool) {
+                return true;
+            }
+            p = e;
+        }
+        return false;
     }
 
     bool Spindle::isRateAdjusted() {

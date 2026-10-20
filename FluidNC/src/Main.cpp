@@ -158,6 +158,7 @@ void setup() {
             }
             bool stopped_spindle, new_spindle;
             Spindles::Spindle::switchSpindle(0, spindles, spindle, stopped_spindle, new_spindle);
+            gc_spindle_offset_sync(false);  // dpCREATOR: the default spindle's offset_mm
 
             config->_coolant->init();
             config->_probe->init();

@@ -8,6 +8,7 @@
 #include "Config.h"
 #include "Error.h"
 #include "SpindleDatatypes.h"
+#include <string>
 
 #include <cstdint>
 #include <optional>
@@ -332,6 +333,9 @@ enum class AxisCommand : uint8_t {
 
 // Initialize the parser
 void gc_init();
+// dpCREATOR: apply the selected spindle's offset_mm to the tool offset; report it.
+void        gc_spindle_offset_sync(bool announce);
+std::string gc_spindle_info();
 
 class Channel;  // Channel.h includes this header, so it cannot be included here.
 

@@ -20,7 +20,8 @@
 #include "Configuration/Validator.h"
 #include "Driver/watchdog.h"  // feed_watchdog()
 #include "Machine/Axes.h"
-#include "Machine/Homing.h"     // $Homed
+#include "Machine/Homing.h"  // $Homed
+#include "GCode.h"           // gc_spindle_info ($Spindle)
 #include "Regexpr.h"
 #include "WebUI/Authentication.h"
 #include "Report.h"
@@ -593,7 +594,7 @@ static Error go_to_sleep(const char* value, AuthenticationLevel auth_level, Chan
 // The chip ID identifies the board (WebUI licence installs from dpcreator.eu);
 // api is the level of the dpCREATOR commands this firmware has, so a WebUI can
 // tell when it is older than the firmware.
-static constexpr int DPC_API_LEVEL = 1;
+static constexpr int DPC_API_LEVEL = 2;  // 2: $Spindle, spindle tools:/offset_mm
 // $Homed -> [MSG:HomedAxes:<axes homed since power-up / reset>:of=<axes that home>]
 // The WebUI asks after connecting: machine positions only mean "where on the
 // bed" once the axes have homed. (The live [MSG:Homed:..] only comes at the end
@@ -615,6 +616,15 @@ static Error showHomed(const char* value, AuthenticationLevel auth_level, Channe
     }
     std::string msg = "[MSG:HomedAxes:" + homed + ":of=" + homing + "]\n";
     out.print(msg.c_str());
+    return Error::Ok;
+}
+
+// dpCREATOR: the selected spindle: [MSG:Spindle:<name>:laser|spindle:<offset x>:<y>:<z>:<tools>]
+static Error showSpindle(const char* value, AuthenticationLevel auth_level, Channel& out) {
+    if (value && *value) {
+        return Error::InvalidStatement;
+    }
+    out.print(gc_spindle_info().c_str());
     return Error::Ok;
 }
 
@@ -1185,6 +1195,7 @@ void make_user_commands() {
     new ReportCommand("I", "Build/Info", get_report_build_info, anyState);
     new ReportCommand("BID", "Board/ID", showBoardId, anyState);
     new ReportCommand("HMD", "Homed", showHomed, anyState);
+    new ReportCommand("SPN", "Spindle", showSpindle, anyState);
     new UserCommand("RST", "Settings/Restore", restore_settings, notIdleOrAlarm, WA);
 
     new ReportCommand("SA", "Alarm/Send", sendAlarm, anyState);
