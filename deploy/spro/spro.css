@@ -15,3 +15,8 @@
 .spro-row{display:flex;gap:8px;flex-wrap:wrap}
 .spro-btn{font:600 15px Barlow,sans-serif;background:#1A2129;color:#EEF2F5!important;border:1px solid #33404C;border-radius:6px;padding:7px 14px;cursor:pointer;text-decoration:none}
 @media (max-width:900px){.spro-plans,.spro-cmp{grid-template-columns:minmax(0,1fr)}.dpch-spro .dpch-in{grid-template-columns:minmax(0,1fr)!important}}
+.spro-ways{display:grid;grid-template-columns:180px minmax(0,1fr) minmax(0,1fr);gap:1px;background:#26303A;border:1px solid #26303A;border-radius:12px;overflow:hidden;margin-top:14px}
+.spro-ways>div{background:#151B22;padding:14px 16px;font-size:16.5px;color:#C3CCD5}
+.spro-ways .spro-way-h{background:#1A2129;color:#EEF2F5;font-weight:600}.spro-ways .spro-way-l{color:#EEF2F5;font-weight:600}
+.spro-ways code{font-size:.9em;background:#0A0E13;border:1px solid #26303A;border-radius:4px;padding:0 5px;color:#DCE6EE}
+@media (max-width:760px){.spro-ways{grid-template-columns:minmax(0,1fr)}.spro-ways .spro-way-h:first-child{display:none}}

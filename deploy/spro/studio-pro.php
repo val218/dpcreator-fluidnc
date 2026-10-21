@@ -13,6 +13,7 @@
  *   POST /studio-pro.php?f=install {"board":"84F703A1B2C4"}
  *                                            Pro one-file copy, licensed to that board, gzipped
  *                                            (same protocol as studio.php?f=install)
+ *   POST /studio-pro.php?f=trial             start the free trial (once per account)
  *   GET  /studio-pro.php?f=version           build of the Pro release (public)
  *   GET  /studio-pro-app/...                 hosted Pro app (via studio-pro-app/.htaccess -> f=app)
  *   GET  /studio-pro.php?f=sample            shop admins: sample licences for testing
@@ -54,6 +55,10 @@ const MAX_FILE    = 33554432;     // 32 MB
 const MAX_INSTALLS_PER_HOUR = 20;
 const BUY_URL     = '/studio-pro';
 const APP_PATH    = '/studio-pro-app/';
+// Free trial: once per account, on dpcreator.eu only (no licence text, no controller install) until Studio
+// enforces the expires= line; then TRIAL_LICENCES can be switched on.
+const TRIAL_DAYS     = 14;
+const TRIAL_LICENCES = false;
 
 if (is_file(__DIR__ . '/fw-config.php')) {
     require_once __DIR__ . '/fw-config.php';
@@ -180,6 +185,13 @@ function ensure_tables()
         `created` DATETIME NOT NULL,
         PRIMARY KEY (`customer_id`, `scope`)
     ) DEFAULT CHARSET=utf8mb4");
+    $db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dpc_studio_pro_trial` (
+        `customer_id` INT NOT NULL PRIMARY KEY,
+        `email` VARCHAR(96) NOT NULL,
+        `started` DATE NOT NULL,
+        `ends` DATE NOT NULL,
+        KEY `email` (`email`)
+    ) DEFAULT CHARSET=utf8mb4");
     $db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "dpc_studio_pro_event` (
         `customer_id` INT NOT NULL,
         `event` VARCHAR(16) NOT NULL,
@@ -273,6 +285,38 @@ function entitlement($cid)
         $updEnd = '';                                 // subscriptions get every update while active
     }
     return ['pro' => true, 'expires' => $proEnd, 'updates' => $updEnd, 'plan' => $plan, 'order_id' => $orderId];
+}
+
+/** The trial row of a customer (or of their e-mail address), or null. */
+function trial_row($cid)
+{
+    $c = customer($cid);
+    $email = $c ? strtolower($c['email']) : '';
+    $st = oc_db()->prepare("SELECT `started`, `ends` FROM `" . DB_PREFIX . "dpc_studio_pro_trial` WHERE `customer_id` = ? OR (`email` <> '' AND `email` = ?) ORDER BY `ends` DESC LIMIT 1");
+    $st->bind_param('is', $cid, $email);
+    $st->execute();
+    $st->bind_result($a, $b);
+    $row = $st->fetch() ? ['started' => $a, 'ends' => $b] : null;
+    $st->close();
+    return $row;
+}
+
+/** Paid Pro first; otherwise an active trial counts as Pro (plan "trial"). */
+function entitlement_with_trial($cid)
+{
+    $ent = entitlement($cid);
+    $ent['trial'] = false;
+    if ($ent['pro'] || !$cid) {
+        return $ent;
+    }
+    $t = trial_row($cid);
+    if ($t && $t['ends'] >= gmdate('Y-m-d')) {
+        return ['pro' => true, 'expires' => $t['ends'], 'updates' => '', 'plan' => 'trial', 'order_id' => 0, 'trial' => true];
+    }
+    if ($t) {
+        $ent['trial_ended'] = $t['ends'];
+    }
+    return $ent;
 }
 
 // ---------------------------------------------------------------------------
@@ -517,15 +561,18 @@ function no_pro_page($loggedIn, $ent)
     http_response_code($loggedIn ? 402 : 401);
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: private, no-store');
+    if (empty($ent['expired']) && !empty($ent['trial_ended'])) {
+        $ent['expired'] = $ent['trial_ended'];
+    }
     $expired = !empty($ent['expired']);
-    $title = !$loggedIn ? 'Log in to open Studio Pro' : ($expired ? 'Your Studio Pro has ended' : 'Studio Pro is not on this account');
+    $title = !$loggedIn ? 'Log in to open Studio Pro' : ($expired ? (!empty($ent['trial_ended']) ? 'Your Studio Pro trial has ended' : 'Your Studio Pro has ended') : 'Studio Pro is not on this account');
     $text = !$loggedIn ? 'Studio Pro runs here for the account that bought it.'
         : ($expired ? 'It ended on ' . htmlspecialchars($ent['expired']) . '. Renew it to carry on; your designs stay in this browser.'
-                    : 'Studio Pro opens here once your order is complete. The free Studio Basic is always available.');
+                    : 'Studio Pro opens here once your order is complete, or start the ' . TRIAL_DAYS . '-day free trial on the Studio Pro page. The free Studio Basic is always available.');
     echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>dpCREATOR Studio Pro</title>'
         . '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0D1014;color:#C3CCD5;font:18px/1.55 system-ui,Segoe UI,Roboto,sans-serif}main{max-width:560px;padding:28px}h1{color:#EEF2F5;font-size:34px;line-height:1.1;margin:0 0 12px}a.b{display:inline-block;margin:16px 12px 0 0;background:#1F7BC7;color:#fff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:8px}a.s{background:#1A2129;border:1px solid #33404C}</style></head><body><main>'
         . '<h1>' . $title . '</h1><p>' . $text . '</p>'
-        . (!$loggedIn ? '<a class="b" href="/index.php?route=account/login">Log in</a>' : '<a class="b" href="' . BUY_URL . '">' . ($expired ? 'Renew Studio Pro' : 'Get Studio Pro') . '</a>')
+        . (!$loggedIn ? '<a class="b" href="/index.php?route=account/login">Log in</a>' : '<a class="b" href="' . BUY_URL . '">' . ($expired ? 'Get Studio Pro' : 'Try or get Studio Pro') . '</a>')
         . '<a class="b s" href="/studio/">Open Studio Basic (free)</a></main></body></html>';
     exit;
 }
@@ -582,7 +629,7 @@ if ($f === 'sample' || $f === 'diag') {
 }
 
 $cid = customer_id();
-$ent = $cid ? entitlement($cid) : ['pro' => false, 'expires' => '', 'updates' => '', 'plan' => '', 'order_id' => 0];
+$ent = $cid ? entitlement_with_trial($cid) : ['pro' => false, 'expires' => '', 'updates' => '', 'plan' => '', 'order_id' => 0, 'trial' => false];
 
 if ($f === 'app') {
     $p = isset($_GET['p']) ? (string)$_GET['p'] : '';
@@ -618,7 +665,7 @@ if ($f === 'app') {
         header('Service-Worker-Allowed: ' . APP_PATH);
     }
     if ($isPage) {
-        $lic = licence_for($cid, $ent, 'account');
+        $lic = licence_for($cid, $ent, $ent['trial'] ? 'trial' : 'account');
         $html = file_get_contents($file);
         echo $lic !== null ? inject_licence($html, $lic) : $html;
         exit;
@@ -630,9 +677,11 @@ if ($f === 'app') {
 if ($f === 'access') {
     $out = ['logged_in' => $cid > 0, 'pro' => $ent['pro'], 'plan' => $ent['plan'], 'expires' => $ent['expires'],
             'updates' => $ent['updates'], 'expired' => isset($ent['expired']) ? $ent['expired'] : '',
-            'app' => APP_PATH, 'buy' => BUY_URL];
-    if ($ent['pro']) {
-        $out['licence'] = licence_for($cid, $ent, 'account');
+            'app' => APP_PATH, 'buy' => BUY_URL, 'trial' => !empty($ent['trial']), 'trial_days' => TRIAL_DAYS,
+            'trial_available' => $cid > 0 && !$ent['pro'] && !trial_row($cid) && empty($ent['expired']),
+            'trial_ended' => isset($ent['trial_ended']) ? $ent['trial_ended'] : ''];
+    if ($ent['pro'] && (!$ent['trial'] || TRIAL_LICENCES)) {
+        $out['licence'] = licence_for($cid, $ent, $ent['trial'] ? 'trial' : 'account');
     }
     json_out(200, $out);
 }
@@ -640,8 +689,36 @@ if ($f === 'access') {
 if (!$cid) {
     json_out(401, ['error' => 'login_required']);
 }
+if ($f === 'trial') {
+    if ($method !== 'POST') {
+        json_out(405, ['error' => 'post_only']);
+    }
+    $src = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '');
+    $host = isset($_SERVER['HTTP_HOST']) ? strtolower(preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'])) : '';
+    if ($host === '' || strtolower((string)parse_url($src, PHP_URL_HOST)) !== $host) {
+        json_out(403, ['error' => 'wrong_origin']);
+    }
+    if ($ent['pro']) {
+        json_out(200, ['ok' => true, 'already' => true, 'expires' => $ent['expires']]);
+    }
+    if (trial_row($cid)) {
+        json_out(409, ['error' => 'trial_used']);
+    }
+    $c = customer($cid);
+    $email = $c ? strtolower($c['email']) : '';
+    $ends = date('Y-m-d', strtotime(gmdate('Y-m-d') . ' +' . TRIAL_DAYS . ' days'));
+    $st = oc_db()->prepare("INSERT INTO `" . DB_PREFIX . "dpc_studio_pro_trial` (`customer_id`, `email`, `started`, `ends`) VALUES (?, ?, UTC_DATE(), ?)");
+    $st->bind_param('iss', $cid, $email, $ends);
+    $st->execute();
+    log_event($cid, 'trial');
+    json_out(200, ['ok' => true, 'expires' => $ends, 'app' => APP_PATH]);
+}
 if (!$ent['pro']) {
     json_out(403, ['error' => 'no_pro']);
+}
+
+if (!empty($ent['trial']) && !TRIAL_LICENCES && in_array($f, ['licence', 'email', 'install'], true)) {
+    json_out(403, ['error' => 'trial_web_only']);
 }
 
 if ($f === 'licence') {

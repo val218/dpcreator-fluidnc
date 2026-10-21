@@ -2,7 +2,7 @@
 <div class="dpch-eye"><span class="dpch-free">Basic stays free</span>dpCREATOR Studio Pro</div>
 <h2 class="dpch-h">Everything Studio can do, for the jobs that need more</h2>
 <p class="dpch-p">Studio Basic is the easy design-to-cut experience for routers, free for everyone. Pro adds laser, 3D relief, V-carve and the tools for real production work, in the same simple Studio.</p>
-<div class="dpch-cta"><a class="dpch-b" href="#spro-plans">Choose a plan</a><a class="dpch-b dpch-b2" href="/studio/">Try Studio Basic, free</a></div>
+<div class="dpch-cta" id="spro-cta"><a class="dpch-b" href="#spro-plans">Choose a plan</a><a class="dpch-b dpch-b2" href="/studio/">Open Studio Basic, free</a></div>
 <div id="spro-me"></div>
 </div><div class="dpch-right">
 <div class="dpch-shot"><div class="dpch-bar"><span class="dots"><i></i><i></i><i></i></span><span>dpcreator.eu/studio-pro-app/</span></div><img src="/image/catalog/dpc-site/hero3/studio-ui-3d.jpg" alt="dpCREATOR Studio with the 3D machine view, G-code list and play bar" loading="lazy"></div>
@@ -11,7 +11,7 @@
 
 <section class="dpch" id="spro-plans"><div style="max-width:1680px;margin:0 auto;padding:clamp(24px,4vw,56px) clamp(16px,3vw,40px)">
 <div class="dpch-eye">Plans</div><h2 class="dpch-h" style="font-size:clamp(34px,3.4vw,56px)">Pick how you want to pay</h2>
-<p class="dpch-p" style="max-width:62ch;margin:14px 0 24px">All plans unlock the same Pro, on dpcreator.eu and on your own controller. Plans add up: buy another month or year before the end and it is added on top.</p>
+<p class="dpch-p" style="max-width:62ch;margin:14px 0 24px">Not sure yet? Try Pro free for 14 days on dpcreator.eu first, no payment needed. All plans unlock the same Pro, on dpcreator.eu and on your own controller. Plans add up: buy another month or year before the end and it is added on top.</p>
 <div class="spro-plans">
 <div class="dpch-card dpch-c1"><div class="t">Monthly</div><div class="spro-price">€7<small> / month</small></div><div class="d">Pay for the months you need. No subscription: you buy a month when you want one.</div><a class="dpch-b dpch-b2" href="studio-pro-monthly">Get a month</a></div>
 <div class="dpch-card dpch-c2 spro-best"><div class="t">Yearly <span class="spro-tag">Best value</span></div><div class="spro-price">€59<small> / year</small></div><div class="d">A year of Pro with every update, for less than 9 months of the monthly plan.</div><a class="dpch-b" href="#product">Buy a year</a></div>
@@ -26,26 +26,38 @@
 <div class="dpch-card dpch-c1"><div class="t">Studio Basic, free</div><div class="d">The Easel-like core for routers.</div><ul class="spro-list"><li>Draw or import SVG, DXF, PDF and pictures</li><li>Cut out, holes, engrave, pocket and drill, with depth and holding tabs</li><li>Bits, materials and speeds worked out for you</li><li>Live preview and toolpath lines</li><li>Download the G-code or send it to your FluidNC machine</li></ul></div>
 <div class="dpch-card dpch-c2"><div class="t">Studio Pro</div><div class="d">Everything in Basic, plus:</div><ul class="spro-list"><li>Laser and router + laser machines, laser test grid and framing</li><li>3D relief carving from pictures and STL models, V-carve, surfacing and thread milling</li><li>Cut order, job time line and cutting from a pocket floor</li><li>Probe Z, resume a job from a line, tool-change files and printable job sheets</li><li>QR codes and barcodes, box maker with finger joints, offcuts as material</li><li>Templates, My designs with backups, saved cut settings</li><li>All advanced shape options: two-sided work, inlays, texture fills, copies and arrays</li><li>3D machine view of the job running</li></ul></div>
 </div>
-<h3 class="spro-h3">How you get it</h3>
-<ul class="spro-list" style="max-width:74ch"><li><b>On dpcreator.eu:</b> open <a href="/studio-pro-app/">Studio Pro</a> while logged in. It is unlocked for your account straight away.</li><li><b>On your controller:</b> install it from the <a href="index.php?route=information/information&amp;information_id=8">Flash Firmware</a> page, Studio tab. The installer puts Pro on when your account has it.</li><li><b>Your licence:</b> shown on this page when you are logged in, with copy, download and e-mail buttons. Paste all its lines, unchanged, into the unlock page of a Pro copy.</li></ul>
+<h3 class="spro-h3">Use it your way: in the browser, as an app, or on your controller</h3>
+<div class="spro-ways">
+<div class="spro-way-h"></div><div class="spro-way-h">Studio Basic, free</div><div class="spro-way-h">Studio Pro</div>
+<div class="spro-way-l">In the browser</div><div><a href="/studio/">Open Studio Basic</a>. No account needed.</div><div><a href="/studio-pro-app/">Open Studio Pro</a> while logged in. It is unlocked for your account.</div>
+<div class="spro-way-l">As an app</div><div>Open it in Chrome or Edge and click <b>Install</b> in the address bar. It gets its own window and works offline.</div><div>The same: open Studio Pro and click <b>Install</b>. Basic and Pro can sit side by side.</div>
+<div class="spro-way-l">On your controller</div><div>Flash Firmware page, Studio tab. Open it at <code>http://&lt;your board&gt;/studio.html</code>.</div><div>The same installer puts Pro on when your account has it, licensed to that board.</div>
+</div>
+<p class="dpch-p" style="font-size:16px;margin-top:14px;color:#95A2AF">Your licence is shown at the top of this page when you are logged in, with copy, download and e-mail buttons. Paste all its lines, unchanged, into the unlock page of a Pro copy.</p>
 </div></section>
 <script>
 (function(){
 var box=document.getElementById('spro-me'); if(!box||!window.fetch) return;
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+function link(text,href,cls){var a=el('a',cls||'dpch-b',text);a.href=href;return a;}
 fetch('/studio-pro.php?f=access',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json();}).then(function(a){
-  var card=el('div','dpch-win spro-me');
-  if(!a.logged_in){card.appendChild(el('b',null,'Already have Studio Pro?'));var p=el('p',null,'');var l=el('a',null,'Log in');l.href='index.php?route=account/login';p.appendChild(l);p.appendChild(document.createTextNode(' to open it and see your licence.'));card.appendChild(p);box.appendChild(card);return;}
-  if(!a.pro){ if(a.expired){card.appendChild(el('b',null,'Your Studio Pro ended on '+a.expired));card.appendChild(el('p',null,'Pick a plan below to carry on. Your designs stay where they are.'));box.appendChild(card);} return;}
+  var card=el('div','dpch-win spro-me'),cta;
+  if(!a.logged_in){card.appendChild(el('b',null,'Try Studio Pro free for '+a.trial_days+' days'));var p=el('p',null,'');p.appendChild(link('Log in','index.php?route=account/login',''));p.appendChild(document.createTextNode(' or '));p.appendChild(link('create a free account','index.php?route=account/register',''));p.appendChild(document.createTextNode(' to start the trial. Already bought Pro? Log in to open it and see your licence.'));card.appendChild(p);box.appendChild(card);return;}
+  if(!a.pro){
+    if(a.trial_available){card.appendChild(el('b',null,'Try Studio Pro free for '+a.trial_days+' days'));card.appendChild(el('p',null,'Everything in Pro, on dpcreator.eu, once per account. No payment, nothing to cancel.'));var t=el('button','dpch-b','Start the free trial');t.type='button';t.style.border='0';t.style.cursor='pointer';t.onclick=function(){t.disabled=true;t.textContent='Starting…';fetch('/studio-pro.php?f=trial',{method:'POST',credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){if(j.ok){location.href=j.app||a.app;}else{t.textContent=j.error==='trial_used'?'You have used your trial':'Could not start, try later';}});};card.appendChild(t);box.appendChild(card);return;}
+    if(a.expired||a.trial_ended){card.appendChild(el('b',null,a.trial_ended&&!a.expired?'Your free trial ended on '+a.trial_ended:'Your Studio Pro ended on '+a.expired));card.appendChild(el('p',null,'Pick a plan below to carry on. Your designs stay where they are.'));box.appendChild(card);}
+    return;}
+  if(a.trial){card.appendChild(el('b',null,'Your free Studio Pro trial runs until '+a.expires));card.appendChild(el('p',null,'Use it on dpcreator.eu, in the browser or installed as an app. Pro on your controller comes with a plan.'));cta=el('div','dpch-cta');cta.appendChild(link('Open Studio Pro',a.app));cta.appendChild(link('Choose a plan','#spro-plans','dpch-b dpch-b2'));card.appendChild(cta);box.appendChild(card);return;}
   card.appendChild(el('b',null,'Your Studio Pro is active'));
   card.appendChild(el('p',null,(a.expires?'Until '+a.expires+'.':'No end date.')+(a.updates?' Updates included until '+a.updates+'.':'')));
-  var cta=el('div','dpch-cta');var o=el('a','dpch-b','Open Studio Pro');o.href=a.app;cta.appendChild(o);var i=el('a','dpch-b dpch-b2','Install on my controller');i.href='index.php?route=information/information&information_id=8';cta.appendChild(i);card.appendChild(cta);
-  var t=el('textarea','spro-lic');t.readOnly=true;t.rows=8;t.value=a.licence||'';t.setAttribute('aria-label','Your Studio Pro licence');card.appendChild(t);
+  cta=el('div','dpch-cta');cta.appendChild(link('Open Studio Pro',a.app));cta.appendChild(link('Install on my controller','index.php?route=information/information&information_id=8','dpch-b dpch-b2'));card.appendChild(cta);
+  if(a.licence){var tx=el('textarea','spro-lic');tx.readOnly=true;tx.rows=8;tx.value=a.licence;tx.setAttribute('aria-label','Your Studio Pro licence');card.appendChild(tx);
   var row=el('div','spro-row');
-  var c=el('button','spro-btn','Copy licence');c.type='button';c.onclick=function(){t.select();(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.resolve(document.execCommand('copy'))).then(function(){c.textContent='Copied';});};row.appendChild(c);
-  var d=el('a','spro-btn','Download .txt');d.href='/studio-pro.php?f=licence';row.appendChild(d);
+  var c=el('button','spro-btn','Copy licence');c.type='button';c.onclick=function(){tx.select();(navigator.clipboard?navigator.clipboard.writeText(tx.value):Promise.resolve(document.execCommand('copy'))).then(function(){c.textContent='Copied';});};row.appendChild(c);
+  row.appendChild(link('Download .txt','/studio-pro.php?f=licence','spro-btn'));
   var m=el('button','spro-btn','E-mail it to me');m.type='button';m.onclick=function(){m.disabled=true;fetch('/studio-pro.php?f=email',{method:'POST',credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){m.textContent=j.ok?'Sent to your account e-mail':'Could not send, try later';});};row.appendChild(m);
-  card.appendChild(row);box.appendChild(card);
+  card.appendChild(row);}
+  box.appendChild(card);
 }).catch(function(){});
 })();
 </script>
