@@ -1,0 +1,6 @@
+# dpCREATOR Studio Pro hosted app: every request goes through studio-pro.php,
+# which serves the Pro files only to logged-in customers who have Pro.
+Options -Indexes
+DirectoryIndex disabled
+RewriteEngine On
+RewriteRule ^(.*)$ /studio-pro.php?f=app&p=$1 [L,QSA]

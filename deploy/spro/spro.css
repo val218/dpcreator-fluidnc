@@ -1,0 +1,17 @@
+/* ===== dpCREATOR Studio Pro page (added by Claude) ===== */
+.spro-plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.spro-plans .dpch-card{display:flex;flex-direction:column;gap:10px;padding:20px 22px}
+.spro-plans .dpch-b{margin-top:auto;text-align:center}
+.spro-price{font:700 44px/1 'Barlow Condensed',sans-serif;color:#EEF2F5}.spro-price small{font-size:18px;font-weight:600;color:#95A2AF}
+.spro-best{border-color:#2E7D4F!important;background:#11221A!important}
+.spro-tag{display:inline-block;font-size:13px;font-weight:600;background:#1F5E3A;color:#CFF5DD;border-radius:999px;padding:1px 10px;margin-left:6px;vertical-align:middle}
+.spro-cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:20px}
+.spro-cmp .dpch-card{padding:20px 22px}
+.dpch .spro-list{margin:10px 0 0;padding:0}.dpch .spro-list li{position:relative;padding-left:24px;margin:7px 0;color:#C3CCD5;font-size:17px;list-style:none}
+.dpch .spro-list li:before{content:"\2713";position:absolute;left:0;color:#5FD38A;font-weight:700}
+.spro-h3{color:#EEF2F5;font:700 28px/1.1 'Barlow Condensed',sans-serif;margin:30px 0 4px;text-transform:none}
+.spro-me{margin-top:6px}.spro-me p{margin:4px 0 10px;color:#D7EEDF}
+.spro-lic{width:100%;font:13px/1.45 'JetBrains Mono',monospace;background:#0A0E13;color:#DCE6EE;border:1px solid #33404C;border-radius:8px;padding:10px;margin:10px 0 8px;resize:vertical}
+.spro-row{display:flex;gap:8px;flex-wrap:wrap}
+.spro-btn{font:600 15px Barlow,sans-serif;background:#1A2129;color:#EEF2F5!important;border:1px solid #33404C;border-radius:6px;padding:7px 14px;cursor:pointer;text-decoration:none}
+@media (max-width:900px){.spro-plans,.spro-cmp{grid-template-columns:minmax(0,1fr)}.dpch-spro .dpch-in{grid-template-columns:minmax(0,1fr)!important}}
