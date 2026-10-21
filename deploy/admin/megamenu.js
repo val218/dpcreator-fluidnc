@@ -25,8 +25,8 @@ window.DPMM = (function () {
 			{t: 'Enclosure 3D print files', d: 'STL files for the case', u: '/smarttabui-pendant-enclosure-3d-print-files', i: 'tabui-render-angle-250x250w.jpg'}
 		], links: [['SmartTabUI pendant guide', '/docs/smarttabui-pendant-guide'], ['Build the pendant', '/docs/build-tabui-pendant'], ['Measure and record', '/docs/pendant-measure-record'], ['Install, update, register', '/docs/install-update-register-smarttabui']], all: ['All pendants', '/pendants']},
 		Firmware: {width: 1000, sideTitle: 'Firmware and software', cards: [
-			{t: 'Flash in your browser', d: 'Chrome or Edge and a USB cable. Nothing to install', u: '/firmware', i: 'shots/product-fluidnc-403-250x250.jpg'},
-			{t: 'FluidNC for R2/R3', tag: 'Free', d: 'dpCREATOR firmware with Ethernet support', u: '/fluidnc-firmware-r2-r3', i: 'photo-r2-controller-top-250x250w.jpg'},
+			{t: 'Flash in your browser', d: 'Chrome or Edge and a USB cable. Nothing to install', u: '/firmware', i: 'shots/product-fluidnc-411-250x250.jpg'},
+			{t: 'FluidNC 4.1.1 for R2/R3', tag: 'Free', d: 'Ethernet, WebUI and job recovery', u: '/fluidnc-firmware-r2-r3', i: 'photo-r2-controller-top-250x250w.jpg'},
 			{t: 'dpCREATOR WebUI', d: 'Control panel in any browser on your network', u: '/dpcreator-webui', i: 'shots/product-webui-250x250.jpg'},
 			{t: 'Studio Pro', d: 'Laser, 3D relief, V-carve and surfacing', u: '/studio-pro', i: 'shots/studio-preview-250x250w.jpg'}
 		], links: [['Studio Basic (free CAD/CAM)', '/dpcreator-studio-cad-cam'], ['Live WebUI demo', '/demo/'], ['Flashable firmware', '/firmware-products/flashable-firmware'], ['Firmware ZIP', '/firmware-products/firmware-zip'], ['Release notes', '/docs/release-notes']], all: ['All firmware', '/firmware-products']},
