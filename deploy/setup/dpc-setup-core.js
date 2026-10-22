@@ -228,6 +228,12 @@
     const problems = parsed.problems.slice();
     const add = (level, line, msg) => problems.push({ level, line, msg });
     const pins = [];        // {gpio, where, line, dir, node}
+    // pins of a known board (board: key) are by design: no strapping-pin notes for them
+    if (!opts.boardPins) {
+      const bk = (parsed.root.children.find((c) => c.key === "board") || {}).value;
+      const known = Object.values(BOARDS).filter((b) => b && b.boardKey && b.boardKey === bk);
+      if (known.length) opts = Object.assign({}, opts, { boardPins: new Set([].concat(...known.map((b) => [...JSON.stringify(b).matchAll(/gpio\.(\d+)/g)].map((m) => +m[1])))) });
+    }
     const leafs = {};       // "a.b.c" -> node
 
     function walk(node) {

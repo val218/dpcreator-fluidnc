@@ -606,7 +606,7 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
       const a = b.dataset.jog.toUpperCase();
       await send("$X", 3000);
       const r = await send("$J=G91 G21 " + a + "10 F300", 6000);
-      out("dpcs-k3", r.ok ? "Jogged " + a + " +10 mm. Did " + (dirWord[b.dataset.jog] || "it move the + way") + "? If not, click Wrong way." : "The board refused the jog: " + esc(r.error || "") + " " + esc((r.lines || []).join(" ")), r.ok ? "" : "err");
+      out("dpcs-k3", r.ok ? "Jogged " + a + " +10 mm. Expected: " + (dirWord[b.dataset.jog] || "the + way") + ". If it went the other way, click Wrong way." : "The board refused the jog: " + esc(r.error || "") + " " + esc((r.lines || []).join(" ")), r.ok ? "" : "err");
     }));
     $$("[data-flip]", box).forEach((b) => (b.onclick = async () => {
       const a = b.dataset.flip;
@@ -672,7 +672,8 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
     const o = $("#" + li + " .k-out");
     o.innerHTML = '<div class="dpcs-note">Writing the change and restarting…</div>';
     await writeBack();
-    o.innerHTML = '<div class="dpcs-note ok">' + esc(okText) + "</div>";
+    const o2 = $("#" + li + " .k-out");
+    if (o2) o2.innerHTML = '<div class="dpcs-note ok">' + esc(okText) + "</div>";
   }
 
   // ------------------------------------------------------------ builder
