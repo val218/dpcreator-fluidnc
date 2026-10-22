@@ -1,0 +1,166 @@
+board: 3dplv_v4_XYZ50_S3
+name: 3dplv_v4_S3_3018_TB6600
+meta: by 3dp.lv LTD UK 2024 - v4.0.2 with ESP32-S3-WROOM-1-N16R8 module swap + external W5500
+
+# Pin remap: WROOM-32 PCB pad -> ESP32-S3 GPIO on the same pad.
+# PCB pads 26/27/28 cut (N16R8 octal PSRAM sits on IO35-37).
+# Bodge wires:
+#   reset  (old IO4,  pad 26 net) -> S3 IO10 (PCB pad 17, was SD2)
+#   probe  (old IO16, pad 27 net) -> S3 IO11 (PCB pad 18, was SD3)
+# W5500 (shares the SD card SPI bus):
+#   W5500 GND/MISO/SCK/MOSI/3V3 -> J4 pins 1/2/3/4/6 (micro-SD header)
+#   MISO: IO40 is dead -> wire J4 pin 2 to S3 castellation PCB pad 22 (IO21)
+#   SD module MISO goes through a 2k series resistor (card otherwise holds MISO)
+#   CS  -> S3 IO12 (PCB pad 19, was CMD)
+#   INT -> not connected (int_pin: NO_PIN, polling)
+# Spindle relay K1: driven by ULN U3 pin 7 (in7 -> out12 -> K1 coil), was module pad 28 (old IO17, cut).
+#   Bodge: U3 pin 7 -> S3 castellation PCB pad 20 (IO13). Relay contacts on the 2-pin terminal J2 (COM / NO).
+# Laser on the board's PWM output: S3 IO48 (pad 24, old IO2) -> ULN U3 in5/in6 ->
+#   J5PWR1 pin 1 + PWM header pins 1-2 (non-inverted, open collector) and PWM header pin 3 (inverted).
+#   :low as in the original XYZ77 config - check polarity with a meter before connecting the laser.
+# 3018 with TB6600 drivers, common-anode wiring: PUL+/DIR+/ENA+ -> terminal +5V (pins 1/3/5),
+#   PUL- -> pin 4, DIR- -> pin 6, ENA- -> pin 2 (or leave ENA unconnected = always enabled).
+# Tools: M6 T2 = laser, any other tool (M6 T1) = spindle on the relay.
+# 3018 wiring: X driver + limit on the X block; Y driver + limit on the Y block;
+#   Z driver + limit on the A block (the Z block outputs sit on the S3 USB pins IO19/IO20 and don't work).
+#   Each block: pin 4 = STEP, pin 6 = DIR, pin 2 = enable (shared), pins 8/7 = limit switch (NC, isolated).
+
+stepping:
+  engine: TIMED
+  idle_ms: 250
+  pulse_us: 5                    # TB6600 needs >2.5 us pulses
+  dir_delay_us: 5                # TB6600 needs ~5 us DIR setup
+  disable_delay_us: 0
+
+probe:
+  pin: gpio.11:pu:low            # was gpio.16 (bodge)
+  check_mode_start: true
+
+control:
+  safety_door_pin: NO_PIN        # door disabled - to use a door switch: gpio.42:pu (closed door = input to GND)
+  reset_pin: gpio.10:pu:low      # was gpio.4 (bodge)
+  feed_hold_pin: NO_PIN
+
+axes:
+  shared_stepper_disable_pin: gpio.47:pu   # was gpio.15
+
+  x:
+    steps_per_mm: 1600             # measured on this 3018 (2 mm lead at 1/16). TB6600 at 1/4 -> 400
+    soft_limits: true             # refuse moves outside the travel (needs homing)
+    max_rate_mm_per_min: 750      # TB6600 ~20 kHz limit at 1600 steps/mm
+    acceleration_mm_per_sec2: 100
+    max_travel_mm: 300
+    homing:
+      cycle: 2
+      mpos_mm: 0                 # switch position = machine 0, travel runs negative from it
+      feed_mm_per_min: 100
+      seek_mm_per_min: 600
+      settle_ms: 250
+      positive_direction: false  # switch at the left
+
+    motor0:
+      limit_all_pin: gpio.4      # was gpio.36
+      hard_limits: true            # stop at once if a switch trips during motion
+      pulloff_mm: 2
+      standard_stepper:
+        direction_pin: gpio.17   # was gpio.25
+        step_pin: gpio.16        # was gpio.33
+
+  y:
+    steps_per_mm: 1600             # measured on this 3018 (2 mm lead at 1/16). TB6600 at 1/4 -> 400
+    soft_limits: true             # refuse moves outside the travel (needs homing)
+    max_rate_mm_per_min: 750      # TB6600 ~20 kHz limit at 1600 steps/mm
+    acceleration_mm_per_sec2: 100
+    max_travel_mm: 180
+    homing:
+      cycle: 2
+      mpos_mm: 0                 # switch position = machine 0, travel runs negative from it
+      feed_mm_per_min: 100
+      seek_mm_per_min: 600
+      settle_ms: 250
+      positive_direction: false  # bed switch: triggers with the bed at the back = tool at the front (Y min)
+
+    motor0:
+      limit_all_pin: gpio.5      # Y block limit (pins 8/7). A block limit input = gpio.7
+      hard_limits: true            # stop at once if a switch trips during motion
+      pulloff_mm: 2
+      standard_stepper:
+        direction_pin: gpio.8:low    # Y block DIR - inverted: on the 3018 the BED moves, Y+ = bed toward you
+        step_pin: gpio.18            # Y block STEP (terminal pin 4)
+
+  z:
+    steps_per_mm: 1600             # measured on this 3018 (2 mm lead at 1/16). TB6600 at 1/4 -> 400
+    soft_limits: true             # refuse moves outside the travel (needs homing)
+    max_rate_mm_per_min: 500      # TB6600 ~20 kHz limit at 1600 steps/mm
+    acceleration_mm_per_sec2: 100
+    max_travel_mm: 45
+    homing:
+      cycle: 1
+      mpos_mm: 0                 # switch position = machine 0, travel runs negative from it
+      feed_mm_per_min: 100
+      seek_mm_per_min: 400
+      settle_ms: 250
+      positive_direction: true   # switch at the top
+
+    motor0:
+      limit_all_pin: gpio.7      # Z limit on the A block (pins 8/7). Z block limit input = gpio.6
+      hard_limits: true            # stop at once if a switch trips during motion
+      pulloff_mm: 2
+      standard_stepper:
+        direction_pin: gpio.15       # Z driver on the A block: A DIR (terminal pin 6)
+        step_pin: gpio.9             # Z driver on the A block: A STEP (terminal pin 4)
+
+spi:
+  miso_pin: gpio.21              # was gpio.19 - moved off IO40: wire J4 pin 2 -> S3 castellation PCB pad 22 (IO21)
+  mosi_pin: gpio.1               # was gpio.23
+  sck_pin: gpio.39               # was gpio.18
+
+sdcard:
+  cs_pin: gpio.38                # was gpio.5
+  card_detect_pin: NO_PIN
+  frequency_hz: 4000000
+
+ethernet:
+  cs_pin: gpio.12                # PCB pad 19
+  int_pin: NO_PIN                # gpio.41 once INT is wired to PCB pad 32
+  rst_pin: NO_PIN
+  phy_type: w5500
+  phy_addr: 1
+  frequency_hz: 8000000          # shared bus with the SD card
+
+macros:
+  startup_line0:
+  startup_line1:
+  macro0:
+  macro1:
+  macro2:
+  macro3:
+
+start:
+  must_home: true
+
+coolant:
+  mist_pin: NO_PIN
+  flood_pin: NO_PIN
+
+Relay:
+  output_pin: gpio.13            # relay K1 via ULN U3 (bodge U3 pin 7 -> pad 20)
+  direction_pin: NO_PIN
+  enable_pin: NO_PIN
+  disable_with_s0: false
+  s0_with_disable: true
+  spinup_ms: 3000                # wait after M3 for the spindle to reach speed
+  spindown_ms: 3000              # wait after M5 for it to stop
+  tool_num: 0                    # every tool except the laser's
+  speed_map: 0=0.000% 24000=100.000%
+
+Laser:
+  pwm_hz: 5000
+  output_pin: gpio.48:low        # board PWM output (old gpio.2:low)
+  enable_pin: NO_PIN
+  disable_with_s0: false
+  s0_with_disable: true
+  tools: 2                       # M6 T2 selects the laser (dpCREATOR firmware)
+  offset_mm: 0 0 0               # laser spot relative to the spindle bit, X Y Z - measure and set
+  speed_map: 0=0.000% 255=100.000%
+  off_on_alarm: true
