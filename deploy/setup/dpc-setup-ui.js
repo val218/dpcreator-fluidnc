@@ -406,7 +406,8 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
     box.innerHTML = "";
     startFlash();
   }
-  function startFlash() {
+  async function startFlash() {
+    await closeSession();   // the flasher needs the USB port
     const b = document.createElement("button");
     b.setAttribute("data-manifest", mount.dataset.manifest);
     b.setAttribute("data-name", mount.dataset.name || "dpCREATOR controller firmware");
@@ -423,18 +424,21 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
       if (d && d !== dlg) { dlg = d; finished = false; noted = false; }
       if (dlg) {
         if (dlg.port) st.dialogPort = dlg.port;
-        // "Erase device" question: add our note under the checkbox
-        if (dlg._state === "ASK_ERASE" && dlg.shadowRoot && !noted) {
-          const lbl = dlg.shadowRoot.querySelector("label.formfield");
-          if (lbl && !dlg.shadowRoot.querySelector(".dpcs-erase")) {
+        // "Erase device" question, or the erase confirmation (boards without Improv are always erased):
+        // say what it means for config.yaml
+        const sr = dlg.shadowRoot;
+        const asking = dlg._state === "ASK_ERASE" || (dlg._state === "INSTALL" && !dlg._installConfirmed && dlg._installErase);
+        if (asking && sr && !sr.querySelector(".dpcs-erase")) {
+          const host = (sr.querySelector("label.formfield") || {}).parentNode || sr.querySelector('[slot="content"]');
+          if (host) {
             const n = document.createElement("div");
             n.className = "dpcs-erase";
             n.style.cssText = "margin:10px 0 0;padding:8px 10px;border-left:3px solid #d9a21b;background:rgba(217,162,27,.12);font-size:14px;line-height:1.4";
-            n.textContent = st.config ? "Erasing also wipes config.yaml on the board. That's fine: the page writes your configuration back right after flashing." : "Erasing also wipes config.yaml and every other file on the board. Choose a configuration in step 1 first, so the page can write it back.";
-            lbl.parentNode.appendChild(n);
-            noted = true;
+            n.textContent = st.config ? "Erasing also wipes config.yaml on the board. That's fine: this page writes your configuration back right after flashing." : "Erasing also wipes config.yaml and every other file on the board. Choose a configuration in step 1 first, so this page can write it back.";
+            host.appendChild(n);
           }
         }
+        void noted;
         if (dlg._installErase) st.erase = true;
         const s = dlg._installState;
         if (s && s.state === "finished" && !finished) {
