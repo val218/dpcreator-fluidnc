@@ -184,7 +184,7 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
   <li class="dpcs-step" id="dpcs-s2">
     <h4>Flash the firmware</h4>
     <p>Connect the controller by USB and flash. In the flasher, <b>Erase device</b> also wipes the board's files, including <code>config.yaml</code>: that's fine, your configuration is written back in the next step.</p>
-    <div class="dpcs-row"><button type="button" class="dpcs-btn" id="dpcs-flash">⚡ Flash via browser</button><a class="dpcs-btn ghost" href="${esc(mount.dataset.bin || "")}" id="dpcs-bin">⇓ Download .bin</a></div>
+    <div class="dpcs-row"><button type="button" class="dpcs-btn" id="dpcs-flash">⚡ Flash via browser</button><a class="dpcs-btn ghost" href="${esc(mount.dataset.fwBin || mount.dataset.bin || "")}" id="dpcs-bin">⇓ Download .bin</a></div>
     <div id="dpcs-c2"></div>
   </li>
   <li class="dpcs-step" id="dpcs-s3">
@@ -204,7 +204,41 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
     $("#dpcs-flash").onclick = onFlash;
     $("#dpcs-write").onclick = () => writeBack();
     $("#dpcs-checks-open").onclick = () => renderChecks();
-    if (!mount.dataset.bin) $("#dpcs-bin").remove();
+    if (!(mount.dataset.fwBin || mount.dataset.bin)) $("#dpcs-bin").remove();
+    access();
+  }
+
+  // Flashing needs an account (free): the same check the page's other firmware cards use.
+  const LOGIN = "index.php?route=account/login&return=index.php%3Froute%3Dinformation%2Finformation%26information_id%3D8";
+  function access() {
+    const fw = mount.dataset.fw || "controller";
+    fetch("/fw.php?fw=" + fw + "&f=access", { credentials: "same-origin" }).then((r) => r.json()).then((a) => {
+      st.access = a;
+      if (a.entitled) return;
+      const b = $("#dpcs-flash"), dl = $("#dpcs-bin");
+      if (dl) dl.remove();
+      b.innerHTML = a.logged_in ? "🔒 Buy to unlock" : "🔒 Log in to flash";
+      b.onclick = () => { save(); location.href = LOGIN; };
+      $("#dpcs-c2").innerHTML = a.logged_in ? "" : '<div class="dpcs-note">The firmware is free for registered customers. Building and checking a configuration works without an account; your answers are kept while you log in.</div>';
+    }).catch(() => {});
+  }
+
+  // keep the chosen config and the builder answers across a login (this browser only)
+  const SKEY = "dpcs-state";
+  function save() {
+    try { localStorage.setItem(SKEY, JSON.stringify({ t: Date.now(), ans, config: st.config, choice: st.choice })); } catch (e) {}
+  }
+  function restore() {
+    try {
+      const s = JSON.parse(localStorage.getItem(SKEY) || "null");
+      if (!s || Date.now() - s.t > 7 * 864e5) return;
+      if (s.ans) ans = s.ans;
+      if (s.config && s.config.text) {
+        st.choice = s.choice;
+        $$(".dpcs-choice", mount).forEach((b) => b.setAttribute("aria-pressed", b.dataset.choice === s.choice ? "true" : "false"));
+        useConfig(s.config.text, s.config.name, s.config.source);
+      }
+    } catch (e) {}
   }
 
   function stepState() {
@@ -243,6 +277,7 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
     st.result = r;
     showResult();
     stepState();
+    save();
   }
 
   function probList(r) {
@@ -410,7 +445,7 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
   async function startFlash() {
     await closeSession();   // the flasher needs the USB port
     const b = document.createElement("button");
-    b.setAttribute("data-manifest", mount.dataset.manifest);
+    b.setAttribute("data-manifest", mount.dataset.fwManifest || mount.dataset.manifest);
     b.setAttribute("data-name", mount.dataset.name || "dpCREATOR controller firmware");
     if (typeof window.dpcFlash === "function") window.dpcFlash(b);
     watchDialog();
@@ -706,7 +741,7 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
       pendant: !!b.pendant, network: b.eth && b.eth.cs ? "ethernet" : "wifi", sd: true, sdHz: 4000000, custom: {},
     };
   }
-  let ans = null, screen = 0, lastYaml = "";
+  let screen = 0, lastYaml = "";
   function SCREENS() {
     const list = ["board"];
     if (ans.board === "generic") list.push("pins");
@@ -762,6 +797,7 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
     $("[data-next]", m).focus();
   }
   function closeBuilder() {
+    save();
     const m = $("#dpcs-modal");
     if (m) m.hidden = true;
     document.documentElement.style.overflow = "";
@@ -1016,8 +1052,10 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
   }
 
   // ------------------------------------------------------------ go
+  let ans = null;
   render();
   stepState();
+  restore();
   schema().catch(() => {});
   window.DPCSetupUI = { openBuilder, useConfig, state: st };
 })();
