@@ -66,9 +66,10 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
 .dpcs-choice b{font-size:14.5px}.dpcs-choice span{font-size:12.5px;color:var(--c-mute);line-height:1.4}
 .dpcs-choice:hover{border-color:var(--c-acc)}.dpcs-choice[aria-pressed=true]{border-color:var(--c-acc);background:var(--c-card2);box-shadow:inset 3px 0 0 var(--c-acc)}
 .dpcs-choice:focus-visible,.dpcs-btn:focus-visible,#dpcs-modal button:focus-visible,#dpcs-modal .tgt:focus-visible{outline:2px solid var(--c-acc);outline-offset:2px}
+#dpcs-flow a.dpcs-btn:not(.ghost){color:#fff!important}
 .dpcs-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:6px;border:1px solid var(--c-acc);background:var(--c-acc);color:#fff;font:600 14px Barlow,system-ui,sans-serif;cursor:pointer;text-decoration:none!important}
 .dpcs-btn:hover{filter:brightness(1.1)}.dpcs-btn[disabled]{opacity:.45;cursor:default;filter:none}
-.dpcs-btn.ghost{background:transparent;color:var(--c-text);border-color:var(--c-line)}.dpcs-btn.ghost:hover{border-color:var(--c-acc)}
+.dpcs-btn.ghost{background:transparent!important;color:var(--c-text)!important;border:1px solid var(--c-line)!important}.dpcs-btn.ghost:hover{border-color:var(--c-acc)}
 .dpcs-btn.small{padding:5px 10px;font-size:13px}
 .dpcs-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
 .dpcs-panel{border:1px solid var(--c-line);border-radius:8px;background:var(--c-card);padding:12px 14px;margin:6px 0 10px}
@@ -176,7 +177,7 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
       <button type="button" class="dpcs-choice" data-choice="build" aria-pressed="false"><b>Build my machine</b><span>Answer a few questions with pictures and get a commented config.yaml.</span></button>
       <button type="button" class="dpcs-choice" data-choice="board" aria-pressed="false"${hasSerial ? "" : " disabled"}><b>Keep the config on the board</b><span>Firmware update: read the board's current config.yaml over USB and check it first.</span></button>
     </div>
-    <input type="file" id="dpcs-file" accept=".yaml,.yml,.txt" hidden>
+    <input type="file" id="dpcs-file" class="dpcs-hidden" accept=".yaml,.yml,.txt" tabindex="-1" aria-hidden="true">
     <div id="dpcs-c1"></div>
     <div id="dpcs-ready"></div>
   </li>
@@ -452,7 +453,11 @@ html.dpc-light #dpcs-flow,html.dpc-light #dpcs-modal{--c-bg:#f6f7f9;--c-card:#ff
           dlg = null;
           clearInterval(t);
           watching = false;
-          if (wasFinished && st.config) setTimeout(() => writeBack(true), 700);
+          if (wasFinished) {
+            if (typeof window.dpcCloseModal === "function" && document.getElementById("dpc-flash-modal")) window.dpcCloseModal("dpc-flash-modal");
+            $("#dpcs-s3").scrollIntoView({ behavior: "smooth", block: "start" });
+            if (st.config) setTimeout(() => writeBack(true), 700);
+          }
         }
       }
     }, 400);
