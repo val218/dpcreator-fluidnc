@@ -44,6 +44,7 @@ void viz_init();
 class Channel;
 bool viz_hold_job(Channel* in, const std::string& path, Channel* out, Channel* ack);
 void viz_cancel_pending_job();  // reset
+bool viz_job_pending();         // a $SD/Run waits for the pendant to show its preview
 // $Viz/... and $Job/Prepare=<file>, $Job/Unprepare, $Job/Prepared: run now on
 // the protocol task, queued for viz_poll() from any other task. false = not ours.
 bool viz_command(const char* line, Channel& out, bool on_protocol_task);

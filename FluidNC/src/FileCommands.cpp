@@ -363,6 +363,13 @@ static Error runFile(const Volume& fs, const char* parameter, AuthenticationLeve
     // A user macro (MacroLib.h) runs like a file, but is not a job to preview
     // on the pendant or to recover.
     const bool isMacro = macrolib_is_macro_path(theFile->path());
+    // A file already waits for the pendant to show its preview: a second Run
+    // ran at once, and the first then started on its own after it.
+    if (!isMacro && viz_job_pending()) {
+        delete theFile;
+        log_error_to(out, "A job is starting - wait for it, or cancel it first");
+        return Error::AnotherInterfaceBusy;
+    }
     if (!isMacro) {
         viz_job_started(theFile->path());  // preview for the pendant / WebUI if it has none yet
         // A connected pendant first gets the preview on screen; the job starts after.
