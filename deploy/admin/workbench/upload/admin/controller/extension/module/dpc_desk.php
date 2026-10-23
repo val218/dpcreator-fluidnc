@@ -96,19 +96,79 @@ class ControllerExtensionModuleDpcDesk extends Controller {
 		$in = $S ? implode(',', $S) : '0';
 		$now = time();
 
-		// Money
-		$sum = function ($from) use ($in) {
-			$r = $this->db->query("SELECT COUNT(*) AS n, COALESCE(SUM(total), 0) AS t FROM `" . DB_PREFIX . "order` WHERE order_status_id IN (" . $in . ") AND store_id = 0 AND date_added >= '" . $this->db->escape($from) . "'")->row;
+		// Money: four tiles, each with the change against the period before and a small trend line
+		$range = function ($from, $to) use ($in) {
+			$r = $this->db->query("SELECT COUNT(*) AS n, COALESCE(SUM(total), 0) AS t FROM `" . DB_PREFIX . "order` WHERE order_status_id IN (" . $in . ") AND store_id = 0 AND date_added >= '" . $this->db->escape($from) . "' AND date_added < '" . $this->db->escape($to) . "'")->row;
 			return array('n' => (int)$r['n'], 't' => (float)$r['t']);
 		};
-		$today = $sum(date('Y-m-d 00:00:00', $now));
-		$month = $sum(date('Y-m-01 00:00:00', $now));
-		$year = $sum(date('Y-01-01 00:00:00', $now));
+		$series = function ($fromTs, $count, $step) use ($range) {
+			$out = array();
+			for ($i = 0; $i < $count; $i++) {
+				$a = strtotime('+' . $i . ' ' . $step, $fromTs);
+				$b = strtotime('+' . ($i + 1) . ' ' . $step, $fromTs);
+				$out[] = $range(date('Y-m-d H:i:s', $a), date('Y-m-d H:i:s', $b));
+			}
+			return $out;
+		};
+		$day0 = strtotime(date('Y-m-d 00:00:00', $now));
+		$mon0 = strtotime(date('Y-m-01 00:00:00', $now));
+		$yr0 = strtotime(date('Y-01-01 00:00:00', $now));
+		$end = date('Y-m-d H:i:s', $now + 1);
+		$today = $range(date('Y-m-d H:i:s', $day0), $end);
+		$yday = $range(date('Y-m-d H:i:s', strtotime('-1 day', $day0)), date('Y-m-d H:i:s', strtotime('-1 day', $now + 1)));
+		$month = $range(date('Y-m-d H:i:s', $mon0), $end);
+		$pmonth0 = strtotime('-1 month', $mon0);
+		$pmonth = $range(date('Y-m-d H:i:s', $pmonth0), date('Y-m-d H:i:s', min(strtotime('-1 month', $now + 1), $mon0)));
+		$year = $range(date('Y-m-d H:i:s', $yr0), $end);
+		$pyear = $range(date('Y-m-d H:i:s', strtotime('-1 year', $yr0)), date('Y-m-d H:i:s', strtotime('-1 year', $now + 1)));
+		$avg = function ($x) { return $x['n'] ? $x['t'] / $x['n'] : 0.0; };
+		$plural = function ($n) { return $n . ' order' . ($n == 1 ? '' : 's'); };
+		$delta = function ($cur, $prev, $what) {
+			if ($cur == 0 && $prev == 0) {
+				return array('cls' => 'flat', 'text' => 'no change ' . $what);
+			}
+			if ($prev == 0) {
+				return array('cls' => 'up', 'text' => 'new ' . $what);
+			}
+			$p = ($cur - $prev) / $prev * 100;
+			return array('cls' => abs($p) < 0.5 ? 'flat' : ($p > 0 ? 'up' : 'down'), 'text' => ($p > 0 ? '+' : '') . round($p) . '% ' . $what);
+		};
+		$cmp = function ($a, $b, $what) use ($delta) {
+			$m = $a['t'] > 0 || $b['t'] > 0;
+			return $delta($m ? $a['t'] : $a['n'], $m ? $b['t'] : $b['n'], ($m ? '' : 'orders ') . $what);
+		};
+		// trend line: revenue, or orders while everything is free
+		$spark = function ($pts) {
+			$money = 0;
+			foreach ($pts as $p) {
+				$money += $p['t'];
+			}
+			$vals = array();
+			foreach ($pts as $p) {
+				$vals[] = $money > 0 ? $p['t'] : $p['n'];
+			}
+			$max = max(1e-9, max($vals));
+			$n = count($vals);
+			$line = array();
+			foreach ($vals as $i => $v) {
+				$line[] = round($n > 1 ? $i / ($n - 1) * 100 : 50, 2) . ',' . round(30 - $v / $max * 26, 2);
+			}
+			return array('line' => implode(' ', $line), 'area' => '0,32 ' . implode(' ', $line) . ' 100,32', 'what' => $money > 0 ? 'revenue' : 'orders', 'empty' => max($vals) <= 0);
+		};
+		$daysInMonth = (int)date('j', $now);
+		$monthsInYear = (int)date('n', $now);
+		$spDays = $series(strtotime('-13 days', $day0), 14, 'day');
+		$spMonth = $series($mon0, $daysInMonth, 'day');
+		$spYear = $series($yr0, $monthsInYear, 'month');
+		$spAvg = array();
+		foreach ($series(strtotime('-5 months', $mon0), 6, 'month') as $p) {
+			$spAvg[] = array('t' => $avg($p), 'n' => $p['n']);
+		}
 		$data['stats'] = array(
-			array('label' => 'Today', 'value' => $this->money($today['t']), 'sub' => $today['n'] . ' order' . ($today['n'] == 1 ? '' : 's')),
-			array('label' => 'This month', 'value' => $this->money($month['t']), 'sub' => $month['n'] . ' order' . ($month['n'] == 1 ? '' : 's')),
-			array('label' => 'This year', 'value' => $this->money($year['t']), 'sub' => $year['n'] . ' order' . ($year['n'] == 1 ? '' : 's')),
-			array('label' => 'Average order (month)', 'value' => $this->money($month['n'] ? $month['t'] / $month['n'] : 0), 'sub' => 'Only paid statuses count')
+			array('label' => 'Today', 'icon' => 'fa-sun-o', 'tone' => 'blue', 'value' => $this->money($today['t']), 'orders' => $plural($today['n']), 'delta' => $cmp($today, $yday, 'vs yesterday'), 'spark' => $spark($spDays), 'span' => 'last 14 days'),
+			array('label' => 'This month', 'icon' => 'fa-calendar', 'tone' => 'green', 'value' => $this->money($month['t']), 'orders' => $plural($month['n']), 'delta' => $cmp($month, $pmonth, 'vs last month'), 'spark' => $spark($spMonth), 'span' => date('F', $now) . ' by day'),
+			array('label' => 'This year', 'icon' => 'fa-line-chart', 'tone' => 'violet', 'value' => $this->money($year['t']), 'orders' => $plural($year['n']), 'delta' => $cmp($year, $pyear, 'vs ' . (date('Y', $now) - 1)), 'spark' => $spark($spYear), 'span' => date('Y', $now) . ' by month'),
+			array('label' => 'Average order', 'icon' => 'fa-shopping-basket', 'tone' => 'amber', 'value' => $this->money($avg($month)), 'orders' => 'this month', 'delta' => $delta($avg($month), $avg($pmonth), 'vs last month'), 'spark' => $spark($spAvg), 'span' => 'last 6 months')
 		);
 		$names = array();
 		if ($S) {
