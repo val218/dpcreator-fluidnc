@@ -129,7 +129,7 @@ class ControllerExtensionModuleDpcDesk extends Controller {
 				return array('cls' => 'flat', 'text' => 'Same as ' . $what);
 			}
 			if ($prev == 0) {
-				return array('cls' => 'up', 'text' => ($kind ? 'Up from no ' . $kind : 'Up from 0') . ' ' . ($what === 'yesterday' ? 'yesterday' : 'in ' . $what));
+				return array('cls' => 'up', 'text' => ($kind ? 'Up from no ' . $kind : 'Up from 0') . ' ' . (preg_match('/^\d{4}$/', $what) ? 'in ' . $what : $what));
 			}
 			$p = ($cur - $prev) / $prev * 100;
 			return array('cls' => abs($p) < 0.5 ? 'flat' : ($p > 0 ? 'up' : 'down'), 'text' => ($p > 0 ? '+' : '') . round($p) . '%' . ($kind ? ' ' . $kind : '') . ' vs ' . $what);
