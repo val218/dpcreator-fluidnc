@@ -59,32 +59,9 @@
     </div>
   </div>
 
-  <div class="dpd-row dpd-row-a">
-    <div class="dpd-card">
-      <div class="dpd-ch"><h2>Last 30 days</h2><span class="dpd-mut">{{ chart_total }}</span></div>
-      <div class="dpd-chart" role="img" aria-label="Paid orders per day for the last 30 days: {{ chart_total }}">
-        <span class="dpd-max">{{ chart_max }}</span>
-        <div class="dpd-bars">
-          {% for c in chart %}<div class="dpd-bar" title="{{ c.title }}"><i style="height:{{ c.h }}%"></i>{% if c.tick %}<em>{{ c.label }}</em>{% endif %}</div>{% endfor %}
-        </div>
-      </div>
-      <p class="dpd-note">Counts orders in: {{ counted }}. Change it in Extensions › Dashboard › dpCREATOR Sales.</p>
-    </div>
-    <div class="dpd-card dpd-vis">
-      <div class="dpd-ch"><h2>Visitors</h2>{% if visitors %}<a href="{{ visitors.link }}">Who is on the shop</a>{% endif %}</div>
-      {% if visitors %}
-      <div class="dpd-vgrid">
-        <div><b>{{ visitors.now }}</b><span>on the shop now</span></div>
-        <div><b>{{ visitors.today }}</b><span>people today</span></div>
-        <div><b>{{ visitors.customers }}</b><span>logged-in customers</span></div>
-        <div><b>{{ visitors.carts }}</b><span>with a cart</span></div>
-      </div>
-      <p class="dpd-note">{{ visitors.bots }} bot visits today are left out.</p>
-      {% else %}
-      <p class="dpd-empty">Install dpCREATOR Visitors to see who is on the shop.</p>
-      {% endif %}
-    </div>
-  </div>
+  {% for w in widgets %}
+  <div class="dpd-widget dpd-w-{{ w.code }}">{{ w.html }}</div>
+  {% endfor %}
 
   <div class="dpd-row dpd-row-b">
     <div class="dpd-card">
@@ -104,6 +81,20 @@
       {% if lowstock %}
       <table class="dpd-t">{% for p in lowstock %}<tr><td><a href="{{ p.link }}">{{ p.name }}</a></td><td class="r"><b class="{{ p.cls }}">{{ p.q }}</b></td></tr>{% endfor %}</table>
       {% else %}<p class="dpd-empty">Every shipped product has more than 3 in stock.</p>{% endif %}
+    </div>
+    <div class="dpd-card dpd-vis">
+      <div class="dpd-ch"><h2>Visitors</h2>{% if visitors %}<a href="{{ visitors.link }}">Who is on the shop</a>{% endif %}</div>
+      {% if visitors %}
+      <div class="dpd-vgrid">
+        <div><b>{{ visitors.now }}</b><span>on the shop now</span></div>
+        <div><b>{{ visitors.today }}</b><span>people today</span></div>
+        <div><b>{{ visitors.customers }}</b><span>logged-in customers</span></div>
+        <div><b>{{ visitors.carts }}</b><span>with a cart</span></div>
+      </div>
+      <p class="dpd-note">{{ visitors.bots }} bot visits today are left out.</p>
+      {% else %}
+      <p class="dpd-empty">Install dpCREATOR Visitors to see who is on the shop.</p>
+      {% endif %}
     </div>
   </div>
   <p class="dpd-foot"><a href="{{ settings }}">Workbench settings</a></p>
@@ -127,7 +118,8 @@
 .dpd-stat small{color:var(--mut)}
 .dpd-row{display:grid;gap:12px;margin-bottom:12px}
 .dpd-row-a{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}
-.dpd-row-b{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dpd-row-b{grid-template-columns:repeat(4,minmax(0,1fr))}
+.dpd-widget{margin-bottom:12px}.dpd-widget>.panel{margin-bottom:0;border-color:var(--line);border-radius:6px}
 .dpd-ch{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
 .dpd-ch h2{margin:0;font-size:16px;font-weight:700;color:var(--ink)}
 .dpd-ch a,.dpd-mut{font-size:12.5px;color:var(--mut)}
@@ -167,6 +159,7 @@
 .dpd-t td small{display:block;color:var(--mut);font-size:11.5px}
 .dpd-t .r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .dpd-foot{margin-top:6px;font-size:12px}.dpd-foot a{color:var(--mut)}
+@media (max-width:1300px){.dpd-row-b{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:1100px){.dpd-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.dpd-row-a,.dpd-row-b{grid-template-columns:1fr}}
 @media (max-width:520px){.dpd{padding:12px}.dpd-stats{grid-template-columns:1fr}.dpd-it{grid-template-columns:1fr}}
 </style>

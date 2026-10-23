@@ -272,6 +272,21 @@ class ControllerExtensionModuleDpcDesk extends Controller {
 			}
 		}
 
+		// Dashboard widgets shown as they are on the classic dashboard
+		$data['widgets'] = array();
+		foreach (array('dpc_sales', 'dpc_devices') as $code) {
+			if ($this->config->get('dashboard_' . $code . '_status') && is_file(DIR_APPLICATION . 'controller/extension/dashboard/' . $code . '.php') && $this->user->hasPermission('access', 'extension/dashboard/' . $code)) {
+				try {
+					$html = $this->load->controller('extension/dashboard/' . $code . '/dashboard');
+				} catch (\Throwable $e) {
+					$html = '';
+				}
+				if ($html) {
+					$data['widgets'][] = array('code' => $code, 'html' => $html);
+				}
+			}
+		}
+
 		$data['classic'] = $this->link('common/dashboard', 'classic=1');
 		$data['settings'] = $this->link('extension/module/dpc_desk');
 		$data['store'] = HTTPS_CATALOG;
