@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+  <name>dpCREATOR Workbench</name>
+  <code>dpc_desk</code>
+  <version>1.0</version>
+  <author>dpCREATOR</author>
+  <link>https://dpcreator.eu</link>
+  <!-- The Workbench is the admin home; ?classic=1 opens the OpenCart dashboard -->
+  <file path="admin/controller/common/dashboard.php">
+    <operation error="skip">
+      <search><![CDATA[public function index() {]]></search>
+      <add position="after"><![CDATA[		if (empty($this->request->get['classic']) && $this->config->get('module_dpc_desk_status') && $this->config->get('module_dpc_desk_landing') && $this->user->hasPermission('access', 'extension/module/dpc_desk') && is_file(DIR_APPLICATION . 'controller/extension/module/dpc_desk.php')) {
+			$this->response->redirect($this->url->link('extension/module/dpc_desk/desk', 'user_token=' . $this->session->data['user_token'], true));
+		}]]></add>
+    </operation>
+  </file>
+  <!-- Ctrl+K search on every admin page -->
+  <file path="admin/view/template/common/header.twig">
+    <operation error="skip">
+      <search><![CDATA[</head>]]></search>
+      <add position="before"><![CDATA[<script src="view/javascript/dpc-desk.js?v=1" defer></script>]]></add>
+    </operation>
+  </file>
+</modification>

@@ -1,0 +1,34 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header"><div class="container-fluid">
+    <div class="pull-right">
+      <button type="submit" form="form-dpc-desk" class="btn btn-primary" title="Save"><i class="fa fa-save"></i></button>
+      <a href="{{ cancel }}" class="btn btn-default" title="Cancel"><i class="fa fa-reply"></i></a>
+    </div>
+    <h1>dpCREATOR Workbench</h1>
+    <ul class="breadcrumb">{% for b in breadcrumbs %}<li><a href="{{ b.href }}">{{ b.text }}</a></li>{% endfor %}</ul>
+  </div></div>
+  <div class="container-fluid">
+    {% if error_warning %}<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>{% endif %}
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" id="form-dpc-desk" class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-3 control-label">Status</label>
+            <div class="col-sm-9"><div class="checkbox"><label><input type="checkbox" name="module_dpc_desk_status" value="1"{% if status %} checked{% endif %}> Workbench and Ctrl+K search on</label></div></div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label">Admin home</label>
+            <div class="col-sm-9"><div class="checkbox"><label><input type="checkbox" name="module_dpc_desk_landing" value="1"{% if landing %} checked{% endif %}> Open the Workbench instead of the dashboard after login and from the Dashboard menu</label></div>
+            <p class="help-block">The classic dashboard stays one click away: the <em>Classic dashboard</em> button on the Workbench.</p></div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label">Open</label>
+            <div class="col-sm-9"><a href="{{ desk }}" class="btn btn-default">Open the Workbench</a></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

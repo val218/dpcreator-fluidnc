@@ -1,0 +1,182 @@
+{{ header }}{{ column_left }}
+<div id="content" class="dpd">
+  <div class="dpd-head">
+    <div>
+      <h1>Workbench</h1>
+      <p>{{ hello }}, {{ username }} · {{ date }}</p>
+    </div>
+    <div class="dpd-acts">
+      {% if inbox_on %}<a class="dpd-btn" href="{{ inbox_link }}"><i class="fa fa-envelope"></i> Inbox{% if inbox.reply %} <b class="dpd-badge">{{ inbox.reply }}</b>{% endif %}</a>{% endif %}
+      <button type="button" class="dpd-btn" onclick="window.dpcSearch && dpcSearch.open()"><i class="fa fa-search"></i> Search <kbd>Ctrl K</kbd></button>
+      <a class="dpd-btn" href="{{ store }}" target="_blank" rel="noopener"><i class="fa fa-external-link"></i> Shop</a>
+      <a class="dpd-btn dpd-quiet" href="{{ classic }}">Classic dashboard</a>
+    </div>
+  </div>
+
+  <div class="dpd-stats">
+    {% for s in stats %}
+    <div class="dpd-card dpd-stat"><span>{{ s.label }}</span><b>{{ s.value }}</b><small>{{ s.sub }}</small></div>
+    {% endfor %}
+  </div>
+
+  <div class="dpd-row dpd-row-a">
+    <div class="dpd-card dpd-wait{% if waiting_count %} dpd-hot{% endif %}">
+      <div class="dpd-ch"><h2>Waiting for you · {{ waiting_count }}</h2><a href="{{ followup_link }}">Open the full list</a></div>
+      {% if waiting %}
+      <ul class="dpd-items">
+        {% for it in waiting %}
+        <li class="dpd-it {{ it.state }}">
+          <span class="dpd-kind k-{{ it.kind }}">{{ it.kind_label }}</span>
+          <div class="dpd-it-b">
+            <a href="{{ it.link }}">{{ it.title }}</a>
+            <small>{{ it.who }}{% if it.email and it.email != it.who %} · {{ it.email }}{% endif %}{% if it.amount %} · {{ it.amount }}{% endif %} · waiting {{ it.since }}</small>
+            <small class="dpd-hint">{{ it.hint }}</small>
+          </div>
+          <span class="dpd-due">{{ it.due }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="dpd-empty"><i class="fa fa-check-circle"></i> Nothing is waiting for you.{% if snoozed_count %} {{ snoozed_count }} snoozed.{% endif %}</p>
+      {% endif %}
+    </div>
+
+    <div class="dpd-card dpd-q">
+      <div class="dpd-ch"><h2>Queues</h2></div>
+      <ul>
+        {% for q in queues %}
+        <li><a href="{{ q.link }}"{% if q.open %} data-dpd-open="{{ q.open }}"{% endif %}><span>{{ q.label }}</span><b class="{{ q.cls }}">{{ q.n }}</b></a></li>
+        {% endfor %}
+      </ul>
+      <div id="dpd-noweight" class="dpd-fix" hidden>
+        <p>Give these a weight, or shipping can't be worked out:</p>
+        <ul>{% for p in noweight %}<li><a href="{{ p.link }}">{{ p.name }}</a> <small>{{ p.model }}</small></li>{% endfor %}</ul>
+      </div>
+      <div id="dpd-noimage" class="dpd-fix" hidden>
+        <p>Add a picture to these:</p>
+        <ul>{% for p in noimage %}<li><a href="{{ p.link }}">{{ p.name }}</a> <small>{{ p.model }}</small></li>{% endfor %}</ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="dpd-row dpd-row-a">
+    <div class="dpd-card">
+      <div class="dpd-ch"><h2>Last 30 days</h2><span class="dpd-mut">{{ chart_total }}</span></div>
+      <div class="dpd-chart" role="img" aria-label="Paid orders per day for the last 30 days: {{ chart_total }}">
+        <span class="dpd-max">{{ chart_max }}</span>
+        <div class="dpd-bars">
+          {% for c in chart %}<div class="dpd-bar" title="{{ c.title }}"><i style="height:{{ c.h }}%"></i>{% if c.tick %}<em>{{ c.label }}</em>{% endif %}</div>{% endfor %}
+        </div>
+      </div>
+      <p class="dpd-note">Counts orders in: {{ counted }}. Change it in Extensions › Dashboard › dpCREATOR Sales.</p>
+    </div>
+    <div class="dpd-card dpd-vis">
+      <div class="dpd-ch"><h2>Visitors</h2>{% if visitors %}<a href="{{ visitors.link }}">Who is on the shop</a>{% endif %}</div>
+      {% if visitors %}
+      <div class="dpd-vgrid">
+        <div><b>{{ visitors.now }}</b><span>on the shop now</span></div>
+        <div><b>{{ visitors.today }}</b><span>people today</span></div>
+        <div><b>{{ visitors.customers }}</b><span>logged-in customers</span></div>
+        <div><b>{{ visitors.carts }}</b><span>with a cart</span></div>
+      </div>
+      <p class="dpd-note">{{ visitors.bots }} bot visits today are left out.</p>
+      {% else %}
+      <p class="dpd-empty">Install dpCREATOR Visitors to see who is on the shop.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="dpd-row dpd-row-b">
+    <div class="dpd-card">
+      <div class="dpd-ch"><h2>Latest orders</h2><a href="{{ orders_link }}">All orders</a></div>
+      {% if orders %}
+      <table class="dpd-t">{% for o in orders %}<tr><td><a href="{{ o.link }}">#{{ o.id }}</a></td><td>{{ o.who }}<small>{{ o.date }}</small></td><td>{{ o.status }}</td><td class="r">{{ o.total }}</td></tr>{% endfor %}</table>
+      {% else %}<p class="dpd-empty">No orders yet.</p>{% endif %}
+    </div>
+    <div class="dpd-card">
+      <div class="dpd-ch"><h2>Best sellers, 30 days</h2></div>
+      {% if popular %}
+      <table class="dpd-t">{% for p in popular %}<tr><td><a href="{{ p.link }}">{{ p.name }}</a></td><td class="r">{{ p.q }} ×</td><td class="r">{{ p.t }}</td></tr>{% endfor %}</table>
+      {% else %}<p class="dpd-empty">No paid orders in the last 30 days.</p>{% endif %}
+    </div>
+    <div class="dpd-card">
+      <div class="dpd-ch"><h2>Low stock</h2></div>
+      {% if lowstock %}
+      <table class="dpd-t">{% for p in lowstock %}<tr><td><a href="{{ p.link }}">{{ p.name }}</a></td><td class="r"><b class="{{ p.cls }}">{{ p.q }}</b></td></tr>{% endfor %}</table>
+      {% else %}<p class="dpd-empty">Every shipped product has more than 3 in stock.</p>{% endif %}
+    </div>
+  </div>
+  <p class="dpd-foot"><a href="{{ settings }}">Workbench settings</a></p>
+</div>
+<style>
+.dpd{--ink:#1E2A35;--mut:#6B7885;--line:#E3E8ED;--acc:#1F6FB8;--red:#C42B1C;--amb:#B26A00;--ok:#2E7D4F;padding:18px 22px 30px;color:var(--ink);background:#F3F5F7;min-height:100vh}
+.dpd a{color:var(--acc)}
+.dpd-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.dpd-head h1{margin:0;font-size:28px;font-weight:700;color:var(--ink)}
+.dpd-head p{margin:2px 0 0;color:var(--mut)}
+.dpd-acts{display:flex;gap:8px;flex-wrap:wrap}
+.dpd-btn{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:4px;padding:7px 12px;font-size:13px;font-weight:600;color:var(--ink)!important;cursor:pointer;text-decoration:none!important}
+.dpd-btn:hover{border-color:var(--acc)}
+.dpd-quiet{color:var(--mut)!important}
+.dpd-btn kbd{background:#EEF1F4;color:var(--mut);border:1px solid var(--line);box-shadow:none;font-size:11px;padding:0 5px}
+.dpd-badge{background:var(--red);color:#fff;border-radius:9px;padding:0 7px;font-size:11.5px}
+.dpd-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:14px 16px;min-width:0}
+.dpd-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.dpd-stat span{display:block;color:var(--mut);font-size:13px}
+.dpd-stat b{display:block;font-size:26px;line-height:1.25;font-variant-numeric:tabular-nums;margin:4px 0 2px}
+.dpd-stat small{color:var(--mut)}
+.dpd-row{display:grid;gap:12px;margin-bottom:12px}
+.dpd-row-a{grid-template-columns:minmax(0,2fr) minmax(280px,1fr)}
+.dpd-row-b{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dpd-ch{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
+.dpd-ch h2{margin:0;font-size:16px;font-weight:700;color:var(--ink)}
+.dpd-ch a,.dpd-mut{font-size:12.5px;color:var(--mut)}
+.dpd-hot{border-top:3px solid var(--red)}
+.dpd-items{list-style:none;margin:0;padding:0}
+.dpd-it{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 10px;border:1px solid var(--line);border-left:3px solid var(--amb);border-radius:4px;margin-bottom:8px}
+.dpd-it.overdue{border-left-color:var(--red)}
+.dpd-kind{font-size:11px;font-weight:700;text-align:center;border-radius:10px;padding:2px 6px;background:#FFF1D6;color:#7A4A00}
+.dpd-kind.k-mail{background:#FFE8C2}.dpd-kind.k-order{background:#E1EEFA;color:#0C447C}.dpd-kind.k-rnd{background:#EDE9FB;color:#3C3489}.dpd-kind.k-ticket{background:#FDE4E1;color:#8A1F14}
+.dpd-it-b a{font-weight:700}
+.dpd-it-b small{display:block;color:var(--mut);font-size:12px;line-height:1.45}
+.dpd-hint{font-style:italic}
+.dpd-due{font-size:12px;font-weight:700;color:var(--amb);white-space:nowrap}
+.dpd-it.overdue .dpd-due{color:var(--red)}
+.dpd-empty{color:var(--mut);margin:6px 0}
+.dpd-empty .fa{color:var(--ok)}
+.dpd-q ul{list-style:none;margin:0;padding:0}
+.dpd-q li a{display:flex;justify-content:space-between;gap:10px;padding:6px 2px;border-bottom:1px solid #F0F2F4;color:var(--ink);text-decoration:none}
+.dpd-q li a:hover span{color:var(--acc)}
+.dpd-q b{color:var(--mut);font-variant-numeric:tabular-nums}
+.dpd-q b.on{color:var(--ink)}.dpd-q b.red,.dpd-t b.red{color:var(--red)}.dpd-t b.amb{color:var(--amb)}
+.dpd-fix{margin-top:10px;background:#FBFCFD;border:1px solid var(--line);border-radius:4px;padding:8px 10px;font-size:12.5px}
+.dpd-fix p{margin:0 0 4px;color:var(--mut)}.dpd-fix ul{list-style:disc;padding-left:18px}.dpd-fix small{color:var(--mut)}
+.dpd-chart{position:relative;padding:18px 0 22px}
+.dpd-max{position:absolute;right:0;top:0;font-size:11.5px;color:var(--mut)}
+.dpd-bars{display:flex;align-items:flex-end;gap:3px;height:180px;border-bottom:1px solid var(--line);border-top:1px dashed var(--line)}
+.dpd-bar{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;position:relative;min-width:0}
+.dpd-bar i{display:block;background:var(--acc);border-radius:2px 2px 0 0;min-height:1px;opacity:.85}
+.dpd-bar:hover i{opacity:1}
+.dpd-bar em{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-style:normal;font-size:11px;color:var(--mut);white-space:nowrap}
+.dpd-note{margin:6px 0 0;font-size:12px;color:var(--mut)}
+.dpd-vgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dpd-vgrid div{background:#F7F9FA;border-radius:4px;padding:10px}
+.dpd-vgrid b{display:block;font-size:24px;font-variant-numeric:tabular-nums}.dpd-vgrid span{font-size:12px;color:var(--mut)}
+.dpd-t{width:100%;font-size:13px}
+.dpd-t td{padding:6px 4px;border-bottom:1px solid #F0F2F4;vertical-align:top}
+.dpd-t td small{display:block;color:var(--mut);font-size:11.5px}
+.dpd-t .r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dpd-foot{margin-top:6px;font-size:12px}.dpd-foot a{color:var(--mut)}
+@media (max-width:1100px){.dpd-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.dpd-row-a,.dpd-row-b{grid-template-columns:1fr}}
+@media (max-width:520px){.dpd{padding:12px}.dpd-stats{grid-template-columns:1fr}.dpd-it{grid-template-columns:1fr}}
+</style>
+<script>
+document.querySelectorAll('[data-dpd-open]').forEach(function (a) {
+  a.addEventListener('click', function (e) {
+    e.preventDefault();
+    var box = document.getElementById(a.getAttribute('data-dpd-open'));
+    if (box) box.hidden = !box.hidden;
+  });
+});
+</script>
+{{ footer }}
