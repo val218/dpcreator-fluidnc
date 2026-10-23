@@ -75,7 +75,7 @@
       if (parent !== rootNode && parent.children.length && parent.children[0].indent !== indent) {
         problems.push({ level: "error", line: n, msg: '"' + key + '" is indented ' + indent + " spaces but its siblings under \"" + parent.key + '" use ' + parent.children[0].indent + ". Siblings must line up." });
       }
-      if (parent.children.some((c) => c.key === key)) problems.push({ level: "error", line: n, msg: '"' + key + '" appears twice under "' + (parent.key || "the top level") + '".' });
+      if (parent.children.some((c) => c.key.toLowerCase() === key.toLowerCase())) problems.push({ level: "error", line: n, msg: '"' + key + '" appears twice under "' + (parent.key || "the top level") + '".' });
       node.parent = parent;
       parent.children.push(node);
       stack.push(node);
@@ -89,7 +89,8 @@
     for (let x = node; x && x.key; x = x.parent) p.unshift(x.key);
     return p;
   }
-  function child(node, key) { return node && node.children.find((c) => c.key === key); }
+  // FluidNC matches config keys without regard to case (Parser::is uses strncasecmp)
+  function child(node, key) { const k = String(key).toLowerCase(); return node && node.children.find((c) => c.key.toLowerCase() === k); }
   function get(node, path) {
     let x = node;
     for (const k of path.split(".")) { x = child(x, k); if (!x) return undefined; }
@@ -121,14 +122,14 @@
     for (const [tpl, m] of Object.entries(meta)) {
       const segs = tpl.split(".");
       const last = segs[segs.length - 1];
-      if (m.key_pattern) ph[last] = new RegExp("^(?:" + m.key_pattern + ")$");
-      if (m.child_types) ph[last] = new RegExp("^(?:" + m.child_types.join("|") + ")$");
+      if (m.key_pattern) ph[last] = new RegExp("^(?:" + m.key_pattern + ")$", "i");
+      if (m.child_types) ph[last] = new RegExp("^(?:" + m.child_types.join("|") + ")$", "i");
     }
     const templates = Object.keys(sections).filter((t) => t !== "").map((t) => t.split("."));
 
     function segMatches(seg, key) {
       if (ph[seg]) return ph[seg].test(key);
-      return seg === key;
+      return seg.toLowerCase() === String(key).toLowerCase();
     }
     // The template for a section path (array of keys), or null.
     function sectionFor(path) {
@@ -139,10 +140,16 @@
     function isContainer(path) {
       return path.length === 0 || templates.some((tp) => tp.length > path.length && path.every((k, i) => segMatches(tp[i], k)));
     }
-    function fields(tpl) { return sections[tpl] || {}; }
+    const lowered = {};
+    function fields(tpl) {
+      const f = sections[tpl] || {};
+      if (!lowered[tpl]) { lowered[tpl] = {}; for (const k of Object.keys(f)) lowered[tpl][k.toLowerCase()] = f[k]; }
+      return new Proxy(f, { get: (o, k) => (typeof k === "string" && !(k in o) ? lowered[tpl][k.toLowerCase()] : o[k]) });
+    }
+    const spl = new Set([...spindles, ...vfdNamed, "ModbusVFD"].map((s) => s.toLowerCase()));
     return {
       sectionFor, isContainer, fields, spindles, vfdNamed,
-      isSpindle: (k) => spindles.has(k) || vfdNamed.has(k) || k === "ModbusVFD",
+      isSpindle: (k) => spl.has(String(k).toLowerCase()),
       pinNamespaces: Object.values(doc.pin_namespaces || {}).map((p) => new RegExp("^" + p.pattern + "$")),
       raw: doc,
     };
@@ -230,7 +237,7 @@
     const pins = [];        // {gpio, where, line, dir, node}
     // pins of a known board (board: key) are by design: no strapping-pin notes for them
     if (!opts.boardPins) {
-      const bk = (parsed.root.children.find((c) => c.key === "board") || {}).value;
+      const bk = (child(parsed.root, "board") || {}).value;
       const known = Object.values(BOARDS).filter((b) => b && b.boardKey && b.boardKey === bk);
       if (known.length) opts = Object.assign({}, opts, { boardPins: new Set([].concat(...known.map((b) => [...JSON.stringify(b).matchAll(/gpio\.(\d+)/g)].map((m) => +m[1])))) });
     }
@@ -335,8 +342,8 @@
         const cycle = homing ? num(child(homing, "cycle"), 0) : 0;
         const soft = child(ax, "soft_limits");
         const hasSwitch = ax.children.some((m) => /^motor[01]$/.test(m.key) && ["limit_all_pin", "limit_neg_pin", "limit_pos_pin"].some((k) => { const n = child(m, k); return n && !parsePin(n.value).none; }));
-        if (soft && /^true$/i.test(soft.value || "") && !(homing && cycle > 0)) add("error", soft.line, "axes/" + ax.key + ": soft_limits needs homing (a homing: section with cycle 1 or more).");
-        if (homing && cycle > 0 && !hasSwitch) add("error", child(homing, "cycle").line, "axes/" + ax.key + ": homing is on but the axis has no limit switch pin.");
+        if (soft && /^true$/i.test(soft.value || "") && !(homing && cycle > 0)) add("warn", soft.line, "axes/" + ax.key + ": soft_limits needs homing (a homing: section with cycle 1 or more).");
+        if (homing && cycle > 0 && !hasSwitch) add("warn", child(homing, "cycle").line, "axes/" + ax.key + ": homing is on but the axis has no limit switch pin.");
         if (homing && cycle > 0) homed.push(ax.key);
         for (const m of ax.children) {
           if (!/^motor[01]$/.test(m.key)) continue;
@@ -350,7 +357,7 @@
       add("warn", 0, "No axes: section. The machine will not move.");
     }
     const mh = get(root2, "start.must_home");
-    if (mh && /^true$/i.test(mh.value || "") && !homed.length) add("error", mh.line, "start/must_home is true but no axis has homing configured: the machine would stay locked.");
+    if (mh && /^true$/i.test(mh.value || "") && !homed.length) add("warn", mh.line, "start/must_home is true but no axis has homing configured: the machine would stay locked.");
 
     // spindles
     const sp = root2.children.filter((c) => schema.isSpindle(c.key));

@@ -1,0 +1,58 @@
+<div class="dpmb">
+<div class="app">
+  <header class="top">
+    <h1>Machine builder</h1>
+    <span class="sub">For the dpCREATOR R3, or any ESP32 / ESP32-S3 board with your own pins. Choose the axes, spindles and lasers, and what goes on each input and output: the builder writes a <code>config.yaml</code> for dpCREATOR or mainstream FluidNC and draws the machine to scale. Or paste your own config to see it.</span>
+  </header>
+
+  <section class="left" aria-label="Builder and config.yaml">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="mb-tab-build" aria-selected="true" aria-controls="mb-pane-build">Build</button>
+      <button type="button" role="tab" id="mb-tab-yaml" aria-selected="false" aria-controls="mb-pane-yaml">config.yaml</button>
+      <span class="grow"></span>
+      <span class="status" id="mb-status" aria-live="polite"></span>
+    </div>
+    <div class="pane" id="mb-pane-build" role="tabpanel" aria-labelledby="mb-tab-build">
+      <div class="banner" id="mb-handnote" hidden><span>config.yaml was edited by hand. Changing anything here rebuilds it from these settings.</span><button type="button" class="small" id="mb-import">Load it here</button></div>
+      <div class="scroll" id="mb-build"></div>
+    </div>
+    <div class="pane" id="mb-pane-yaml" role="tabpanel" aria-labelledby="mb-tab-yaml" hidden>
+      <div class="card" style="flex:1;display:flex;flex-direction:column;gap:8px;min-height:0">
+        <div class="row" style="justify-content:space-between">
+          <span class="note">Edit or paste a config. The drawing and wiring follow it.</span>
+          <span class="row"><button type="button" class="small" id="mb-import2">Load into the builder</button><button type="button" class="small" id="mb-copy">Copy</button></span>
+        </div>
+        <textarea id="mb-yaml" spellcheck="false" aria-label="config.yaml text"></textarea>
+        <ul class="probs" id="mb-probs"></ul>
+      </div>
+      <div class="card"><div class="kv" id="mb-facts"></div></div>
+    </div>
+  </section>
+
+  <section class="stage" aria-label="Machine drawing">
+    <div class="sheet">
+      <div class="views" role="group" aria-label="Drawing">
+        <button type="button" id="mb-v-plan" aria-pressed="true">Plan view</button><button type="button" id="mb-v-wire" aria-pressed="false">Wiring</button>
+      </div>
+      <svg id="mb-plan" role="img" aria-label="Plan view of the machine"></svg>
+      <div id="mb-wiring" hidden></div>
+      <div class="msg" id="mb-msg" role="status"></div>
+    </div>
+    <div class="side">
+      <div class="dro" id="mb-dro"></div>
+      <div class="zpanel"><svg id="mb-elev" role="img" aria-label="Z axis elevation"></svg></div>
+      <div class="pad" role="group" aria-label="Jog and homing">
+        <div class="steps" role="group" aria-label="Jog step">
+          <button type="button" data-step="1" aria-pressed="false">1</button><button type="button" data-step="10" aria-pressed="false">10</button><button type="button" data-step="100" aria-pressed="true">100</button>
+        </div>
+        <span></span><button type="button" data-j="y,1" title="Jog Y+">Y+</button><button type="button" data-j="z,1" title="Jog Z+">Z+</button>
+        <button type="button" data-j="x,-1" title="Jog X-">X−</button><button type="button" data-j="y,-1" title="Jog Y-">Y−</button><button type="button" data-j="x,1" title="Jog X+">X+</button>
+        <button type="button" data-j="a,-1" title="Rotate A-" class="ajog">A−</button><button type="button" data-j="a,1" title="Rotate A+" class="ajog">A+</button><button type="button" data-j="z,-1" title="Jog Z-">Z−</button>
+        <button type="button" id="mb-home" class="two">$H home</button><button type="button" id="mb-unlock">$X</button>
+        <button type="button" id="mb-zero" class="two">Zero XY here</button><button type="button" id="mb-zeroz">Z0</button>
+        <button type="button" id="mb-gozero" class="two">Go to work 0</button><button type="button" id="mb-tool" title="M6 tool change">M6</button>
+      </div>
+    </div>
+  </section>
+</div>
+</div>

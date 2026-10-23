@@ -1,0 +1,1578 @@
+<title>dpCREATOR Machine Builder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: builder (or config.yaml) on the left; on the right a dimensioned plan view of the machine with its accessories, or the board wiring; Z elevation, DRO and jog pad beside it. Drawing style: a machine-shop layout sheet. */
+:root{
+  --bg:#e9edf0; --panel:#fbfcfd; --panel2:#f0f3f6; --line:#cfd7de; --fg:#18212a; --mute:#5b6874;
+  --acc:#1f6fb8; --acc2:#2b7fd0; --ok:#15803d; --warn:#946200; --err:#bf3a2b;
+  --sheet:#f7f9fa; --grid:#e2e8ec; --ink:#2a3540; --ink2:#7a8794; --steel:#c5ced6; --steel2:#a9b5c0; --bed:#e6dccb; --slot:#c8b99f;
+  --switch:#d49b0c; --tool:#2b7fd0; --laser:#c2341f; --plasma:#d26a10; --dim:#1f6fb8; --env:rgba(43,127,208,.07); --cool:#0f8a9c; --estop:#d0281a; --box:#dfe5ea;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif; --f-body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif; --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1115; --panel:#141a20; --panel2:#1a2229; --line:#28323c; --fg:#dde4ea; --mute:#8c99a5;
+  --acc:#56b4ef; --acc2:#2b8fe0; --ok:#40c47c; --warn:#e3b33c; --err:#f06b5f;
+  --sheet:#10161c; --grid:#18212a; --ink:#c6d0d9; --ink2:#6f7d8a; --steel:#3a4651; --steel2:#56636f; --bed:#2b2a26; --slot:#4a4438;
+  --switch:#eab42a; --tool:#4fb4ee; --laser:#f05a45; --plasma:#f08a35; --dim:#56b4ef; --env:rgba(79,180,238,.08); --cool:#3cc3d6; --estop:#f0473a; --box:#1f2830; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1115; --panel:#141a20; --panel2:#1a2229; --line:#28323c; --fg:#dde4ea; --mute:#8c99a5;
+  --acc:#56b4ef; --acc2:#2b8fe0; --ok:#40c47c; --warn:#e3b33c; --err:#f06b5f;
+  --sheet:#10161c; --grid:#18212a; --ink:#c6d0d9; --ink2:#6f7d8a; --steel:#3a4651; --steel2:#56636f; --bed:#2b2a26; --slot:#4a4438;
+  --switch:#eab42a; --tool:#4fb4ee; --laser:#f05a45; --plasma:#f08a35; --dim:#56b4ef; --env:rgba(79,180,238,.08); --cool:#3cc3d6; --estop:#f0473a; --box:#1f2830; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 var(--f-body);margin:0}
+.app{display:grid;grid-template-columns:minmax(320px,440px) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:12px;height:100%;box-sizing:border-box;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h1{font:700 26px/1 var(--f-display);margin:0;letter-spacing:.2px}
+.sub{color:var(--mute);font-size:13.5px;max-width:86ch}
+.left{display:flex;flex-direction:column;gap:8px;min-height:0;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+button{font:600 13px var(--f-body);border:1px solid var(--line);background:var(--panel2);color:var(--fg);border-radius:7px;padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--acc2)}
+button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.sw:focus-visible,.acc:focus-visible{outline:2px solid var(--acc2);outline-offset:2px}
+button[aria-pressed="true"],button[aria-selected="true"]{background:var(--acc2);border-color:var(--acc2);color:#fff}
+button[disabled]{opacity:.45;cursor:default}
+.tabs{display:flex;gap:4px;align-items:center}
+.tabs .grow{flex:1}
+.tabs button{border-radius:7px 7px 0 0;border-bottom-color:transparent}
+.pane{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.pane[hidden]{display:none}
+.scroll{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:2px}
+textarea#yaml{flex:1;min-height:180px;width:100%;box-sizing:border-box;resize:none;font:12px/1.5 var(--f-mono);background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:10px;white-space:pre;tab-size:2}
+.status{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.pill{display:inline-block;font:700 11.5px var(--f-body);padding:2px 8px;border-radius:20px;border:1px solid currentColor}
+.pill.ok{color:var(--ok)}.pill.err{color:var(--err)}.pill.warn{color:var(--warn)}
+.probs{list-style:none;margin:0;padding:0;max-height:140px;overflow:auto;font-size:12.5px}
+.probs li{display:grid;grid-template-columns:54px 1fr;gap:8px;padding:5px 0;border-top:1px solid var(--line)}
+.probs .lv{font-weight:700;font-size:11px}.probs .error .lv{color:var(--err)}.probs .warn .lv{color:var(--warn)}
+.probs a{color:var(--acc);cursor:pointer;text-decoration:underline}
+.kv{font-size:12.5px;color:var(--mute);display:grid;gap:3px}.kv b{color:var(--fg);font-weight:600}
+.kv .bad{color:var(--err)}
+label.tg{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+/* builder */
+details.sec{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+details.sec>summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;gap:8px;align-items:baseline}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(-45deg);margin-right:2px;transition:transform .15s;align-self:center}
+details.sec[open]>summary::before{transform:rotate(45deg)}
+details.sec>summary h3{font:600 16px var(--f-display);margin:0;letter-spacing:.3px;white-space:nowrap}
+details.sec>summary .sum{color:var(--mute);font-size:12.5px;margin-left:auto;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.secb{padding:0 12px 12px;display:grid;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 8px}
+.fld{display:grid;gap:2px;font-size:12px;color:var(--mute);min-width:0}
+.fld>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fld.wide{grid-column:1/-1}
+input[type=number],input[type=text],select{font:13px var(--f-body);color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 7px;min-width:0;width:100%;box-sizing:border-box}
+input[type=number]{font-family:var(--f-mono);font-size:12.5px}
+select option:disabled{color:var(--ink2)}
+.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;border-radius:0;flex:1;padding:5px 6px;font-size:12.5px;background:var(--panel2)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--acc2);color:#fff}
+.axcard,.spcard{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:grid;gap:7px;background:var(--panel)}
+.axcard h4,.spcard h4{margin:0;font:600 15px var(--f-display);display:flex;gap:8px;align-items:center}
+.axcard h4 .sp,.spcard h4 .sp{flex:1}
+.motor-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px 8px;align-items:center;font-size:12.5px}
+.motor-row b{font:600 12px var(--f-mono);color:var(--mute)}
+.note{font-size:12px;color:var(--mute)}
+.note.warn{color:var(--warn)}.note.err{color:var(--err)}
+.calc{font-size:12px}
+.calc>summary{cursor:pointer;color:var(--acc);list-style:none}
+.calc>summary::-webkit-details-marker{display:none}
+.calc .grid3{margin-top:6px}
+.pins{display:grid;grid-template-columns:22px repeat(3,minmax(0,1fr));gap:5px 6px;align-items:center;font-size:12px}
+.pins b{font:600 12px var(--f-mono);color:var(--mute)}
+.terms{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.8fr) minmax(0,1.2fr) auto;gap:5px 6px;align-items:center}
+.blkmap{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:5px 8px;align-items:center;font-size:12.5px}
+@media (max-width:480px){.blkmap{grid-template-columns:auto 1fr}}
+.grp{font:600 13px var(--f-display);letter-spacing:.3px;color:var(--mute);margin-top:4px;border-top:1px solid var(--line);padding-top:6px}
+.iomap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:5px 10px;align-items:center;font-size:13px}
+.banner{border:1px solid var(--warn);color:var(--warn);border-radius:8px;padding:7px 10px;font-size:12.5px;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.banner[hidden]{display:none}
+.small{padding:3px 8px;font-size:12px}
+.link{border:0;background:none;color:var(--acc);padding:0;text-decoration:underline;font-weight:600}
+/* stage */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:10px;min-height:0;min-width:0}
+.sheet{position:relative;background:var(--sheet);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-height:0;min-width:0}
+.sheet svg{position:absolute;inset:0;width:100%;height:100%}
+.views{position:absolute;left:10px;top:10px;z-index:3;display:flex;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.views button{border:0;border-radius:0;padding:5px 12px;font-size:12.5px}
+.views button+button{border-left:1px solid var(--line)}
+#wiring{position:absolute;inset:0;overflow:auto;padding:52px 16px 16px;box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;align-content:start}
+#wiring[hidden]{display:none}
+.wg{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.wg h3{margin:0 0 4px;font:600 15px var(--f-display);letter-spacing:.3px}
+.wg .wn{font-size:12px;color:var(--mute);margin:0 0 6px}
+.wr{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1.2fr);gap:8px;padding:4px 0;border-top:1px solid var(--line);font-size:12.5px;align-items:baseline}
+.wr .t{font-weight:600}
+.wr .g{font:12px var(--f-mono);color:var(--mute)}
+.wr .f{color:var(--acc)}
+.wr.free .t,.wr.free .f{color:var(--ink2);font-weight:400}
+.wr.dead .f{color:var(--warn)}
+.wr.clash .f{color:var(--err);font-weight:600}
+.side{display:flex;flex-direction:column;gap:10px;min-height:0}
+.zpanel{flex:1;position:relative;background:var(--sheet);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-height:200px}
+.zpanel svg{position:absolute;inset:0;width:100%;height:100%}
+.dro{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:12.5px var(--f-mono);display:grid;grid-template-columns:auto 1fr 1fr;gap:2px 8px;font-variant-numeric:tabular-nums}
+.dro b{font:600 10.5px var(--f-body);color:var(--mute);text-transform:uppercase;letter-spacing:.6px}
+.dro .ax{font-weight:700}.dro .st{grid-column:1/-1;margin-top:4px;font:700 12px var(--f-body)}
+.dro .st.alarm{color:var(--err)}.dro .st.idle{color:var(--ok)}.dro .st.run{color:var(--acc)}
+.pad{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.pad button{padding:7px 0;font:700 13px var(--f-mono)}
+.pad .full{grid-column:1/-1}.pad .two{grid-column:span 2}
+.pad [hidden]{display:none}
+.steps{display:flex;gap:4px;grid-column:1/-1}.steps button{flex:1;padding:4px 0;font-size:12px}
+.msg{position:absolute;left:50%;top:52px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--err);color:var(--err);border-radius:8px;padding:6px 12px;font-weight:600;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80%;text-align:center;z-index:4}
+.msg.on{opacity:1}.msg.info{border-color:var(--acc);color:var(--acc)}
+/* drawing */
+svg text{font-family:var(--f-body)}
+#plan *,#elev *{vector-effect:non-scaling-stroke}
+.g-grid{stroke:var(--grid)}
+.frame{fill:none;stroke:var(--ink);stroke-width:2.2}
+.frame-fill{fill:var(--steel)}
+.bed{fill:var(--bed);stroke:var(--ink2);stroke-width:1}
+.slot{stroke:var(--slot);stroke-width:1.2}
+.hc{stroke:var(--slot);stroke-width:.7}
+.rail{fill:var(--steel2);stroke:var(--ink2);stroke-width:1}
+.rack{stroke:var(--ink2);stroke-width:1;stroke-dasharray:2 3}
+.beam{fill:var(--steel);stroke:var(--ink);stroke-width:1.6}
+.plate{fill:var(--steel2);stroke:var(--ink);stroke-width:1.2}
+.motor{fill:var(--ink2);stroke:var(--ink);stroke-width:1.2}
+.motor-t{fill:var(--mute);font-weight:600}
+.env{fill:var(--env);stroke:var(--dim);stroke-width:1.2;stroke-dasharray:6 4}
+.dim{stroke:var(--dim);stroke-width:1}
+.dim-t{fill:var(--dim);font-weight:600;font-variant-numeric:tabular-nums}
+.spindle{fill:var(--panel);stroke:var(--tool);stroke-width:2.2}
+.spindle-c{fill:var(--tool)}
+.laser{fill:var(--panel);stroke:var(--laser);stroke-width:2}
+.laser-c{fill:var(--laser)}
+.torch{fill:var(--panel);stroke:var(--plasma);stroke-width:2.2}
+.torch-c{fill:var(--plasma)}
+.sw rect{fill:var(--switch);stroke:var(--ink);stroke-width:1}
+.sw.ghost rect{fill:none;stroke:var(--switch);stroke-dasharray:3 2;pointer-events:all}
+.sw{cursor:pointer}.sw:hover rect{stroke:var(--acc2);stroke-width:2.5}
+.sw-t{fill:var(--warn);font-weight:700}
+.arw{stroke:var(--ok);stroke-width:2.4;fill:none}
+.arw-h{fill:var(--ok)}
+.arw-t{fill:var(--ok);font-weight:700}
+.origin{stroke:var(--ink);stroke-width:1.4;fill:none}
+.origin-t{fill:var(--ink);font-weight:600}
+.wz{stroke:var(--laser);stroke-width:1.6;fill:none}
+.wz-t{fill:var(--laser);font-weight:700}
+.trail{stroke:var(--tool);stroke-width:1.2;fill:none;opacity:.5}
+.stock{fill:none;stroke:var(--ink2);stroke-width:1.2}
+.lbl{fill:var(--mute)}
+.front{fill:var(--mute);font-weight:600;letter-spacing:.5px}
+.acc{cursor:pointer}
+.acc:hover .box,.acc:hover .bx{stroke:var(--acc2);stroke-width:2.2}
+.box{fill:var(--box);stroke:var(--ink);stroke-width:1.3}
+.bx{fill:var(--panel);stroke:var(--ink2);stroke-width:1}
+.box-t{fill:var(--fg);font-weight:600}
+.cable{stroke:var(--ink2);stroke-width:1.2;fill:none;stroke-dasharray:5 3}
+.estop{fill:var(--estop);stroke:var(--ink);stroke-width:1.2}
+.estop-r{fill:#f2c200;stroke:var(--ink);stroke-width:1}
+.enc{fill:none;stroke:var(--ink2);stroke-width:1.4;stroke-dasharray:10 5}
+.door{stroke:var(--warn);stroke-width:3}
+.cool{stroke:var(--cool);stroke-width:2;fill:none}
+.cool-t{fill:var(--cool);font-weight:700}
+.ts{fill:var(--switch);stroke:var(--ink);stroke-width:1.2}
+.rot{fill:var(--steel2);stroke:var(--ink);stroke-width:1.3}
+.rot-s{stroke:var(--tool);stroke-width:2}
+@media (max-width:900px){
+  html,body{height:auto}
+  .app{grid-template-columns:1fr;height:auto}
+  .stage{grid-template-columns:1fr;order:-1}
+  .sheet{height:64vh;min-height:400px}
+  .side{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .zpanel{min-height:260px;grid-row:span 2}
+  header.top{order:-2}
+  .scroll{overflow:visible}
+  textarea#yaml{min-height:320px}
+}
+@media (prefers-reduced-motion:reduce){.msg{transition:none}details.sec>summary::before{transition:none}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <h1>Machine Builder</h1>
+    <span class="sub">For the dpCREATOR R3, or any ESP32 / ESP32-S3 board with your own pins. Choose the axes, spindles and lasers, and what goes on each input and output: the builder writes a <code>config.yaml</code> for dpCREATOR or mainstream FluidNC and draws the machine to scale. Or paste your own config to see it.</span>
+  </header>
+
+  <section class="left" aria-label="Builder and config.yaml">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-build" aria-selected="true" aria-controls="pane-build">Build</button>
+      <button type="button" role="tab" id="tab-yaml" aria-selected="false" aria-controls="pane-yaml">config.yaml</button>
+      <span class="grow"></span>
+      <span class="status" id="status" aria-live="polite"></span>
+    </div>
+    <div class="pane" id="pane-build" role="tabpanel" aria-labelledby="tab-build">
+      <div class="banner" id="handnote" hidden><span>config.yaml was edited by hand. Changing anything here rebuilds it from these settings.</span><button type="button" class="small" id="import">Load it here</button></div>
+      <div class="scroll" id="build"></div>
+    </div>
+    <div class="pane" id="pane-yaml" role="tabpanel" aria-labelledby="tab-yaml" hidden>
+      <div class="card" style="flex:1;display:flex;flex-direction:column;gap:8px;min-height:0">
+        <div class="row" style="justify-content:space-between">
+          <span class="note">Edit or paste a config. The drawing and wiring follow it.</span>
+          <span class="row"><button type="button" class="small" id="import2">Load into the builder</button><button type="button" class="small" id="copy">Copy</button></span>
+        </div>
+        <textarea id="yaml" spellcheck="false" aria-label="config.yaml text"></textarea>
+        <ul class="probs" id="probs"></ul>
+      </div>
+      <div class="card"><div class="kv" id="facts"></div></div>
+    </div>
+  </section>
+
+  <section class="stage" aria-label="Machine drawing">
+    <div class="sheet">
+      <div class="views" role="group" aria-label="Drawing">
+        <button type="button" id="v-plan" aria-pressed="true">Plan view</button><button type="button" id="v-wire" aria-pressed="false">Wiring</button>
+      </div>
+      <svg id="plan" role="img" aria-label="Plan view of the machine"></svg>
+      <div id="wiring" hidden></div>
+      <div class="msg" id="msg" role="status"></div>
+    </div>
+    <div class="side">
+      <div class="dro" id="dro"></div>
+      <div class="zpanel"><svg id="elev" role="img" aria-label="Z axis elevation"></svg></div>
+      <div class="pad" role="group" aria-label="Jog and homing">
+        <div class="steps" role="group" aria-label="Jog step">
+          <button type="button" data-step="1" aria-pressed="false">1</button><button type="button" data-step="10" aria-pressed="false">10</button><button type="button" data-step="100" aria-pressed="true">100</button>
+        </div>
+        <span></span><button type="button" data-j="y,1" title="Jog Y+">Y+</button><button type="button" data-j="z,1" title="Jog Z+">Z+</button>
+        <button type="button" data-j="x,-1" title="Jog X-">X−</button><button type="button" data-j="y,-1" title="Jog Y-">Y−</button><button type="button" data-j="x,1" title="Jog X+">X+</button>
+        <button type="button" data-j="a,-1" title="Rotate A-" class="ajog">A−</button><button type="button" data-j="a,1" title="Rotate A+" class="ajog">A+</button><button type="button" data-j="z,-1" title="Jog Z-">Z−</button>
+        <button type="button" id="home" class="two">$H home</button><button type="button" id="unlock">$X</button>
+        <button type="button" id="zero" class="two">Zero XY here</button><button type="button" id="zeroz">Z0</button>
+        <button type="button" id="gozero" class="two">Go to work 0</button><button type="button" id="tool" title="M6 tool change">M6</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script type="application/json" id="items">__ITEMS__</script>
+<script>__CORE__</script>
+<script>
+(function () {
+  "use strict";
+  const S = window.DPCSetup;
+  const schema = S.Schema(JSON.parse(document.getElementById("items").textContent));
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const fmt = (n) => (Math.round(n * 100) / 100).toString();
+  const NS = "http://www.w3.org/2000/svg";
+
+__BUILDER__
+
+  // ------------------------------------------------------------ builder state
+  function prep(m) {
+    m.fw = m.fw || "dp"; m.custom = m.custom || clone(CUSTOM_DEFAULTS.esp32s3);
+    for (const k of Object.keys(EXTRA_DEFAULTS)) m[k] = Object.assign(clone(EXTRA_DEFAULTS[k]), m[k] || {});
+    return m;
+  }
+  let M = prep(clone(PRESETS.router.m)), preset = "router";
+  // mainstream FluidNC has the same keys except tools/offset_mm on spindles
+  const ITEMS = JSON.parse(document.getElementById("items").textContent);
+  const itemsMain = clone(ITEMS);
+  for (const sec of Object.values(itemsMain)) if (sec && typeof sec === "object" && !Array.isArray(sec)) { delete sec.tools; delete sec.offset_mm; }
+  const schemaMain = S.Schema(itemsMain);
+  let text = "", cfg = null, src = "build", boardNow = "r3";
+  const openSecs = new Set(["machine"]);
+
+  function usage(m) {
+    const u = {};
+    const put = (id, k, name) => { if (id) (u[id] = u[id] || []).push({ k, name }); };
+    for (const L of ["x", "y", "z", "a"]) {
+      const a = m.axes[L]; if (!a.on) continue;
+      a.motors.forEach((mo, i) => {
+        const nm = L.toUpperCase() + (a.motors.length > 1 ? " motor" + i : " motor");
+        put(mo.blk + ".STEP", "mot:" + L + i, nm); put(mo.blk + ".DIR", "mot:" + L + i, nm);
+        if (a.sw !== "none" && mo.lim) put(mo.blk + ".LIM", "lim:" + L + i, L.toUpperCase() + " switch" + (a.motors.length > 1 ? " " + i : ""));
+      });
+    }
+    (m.spindles || []).forEach((s, i) => {
+      const nm = spName(s);
+      if (s.type === "PlasmaSpindle") { put(s.en, "sp" + i + ":en", nm + " fire"); put(s.arcOk, "sp" + i + ":arcOk", nm + " arc OK"); }
+      else if (s.type !== "VFD") { put(s.out, "sp" + i + ":out", nm); put(s.en, "sp" + i + ":en", nm + " enable"); put(s.dir, "sp" + i + ":dir", nm + " direction"); }
+    });
+    for (const [f, id] of Object.entries(m.inputs || {})) put(id, "in:" + f, (INPUTS.find((x) => x[0] === f) || [f, f])[1]);
+    if (m.oled && m.oled.on) { put(m.oled.sda, "oled:sda", "OLED SDA"); put(m.oled.scl, "oled:scl", "OLED SCL"); }
+    for (const [f, id] of Object.entries(m.outputs || {})) put(id, "out:" + f, (OUTPUTS.find((x) => x[0] === f) || [f, f])[1].replace(/ \(.*\)$/, ""));
+    return u;
+  }
+  function spName(s) { return s.type === "VFD" ? (s.vfd || "VFD") + " VFD" : s.type === "PlasmaSpindle" ? "Plasma torch" : s.type === "10V" ? "0-10 V spindle" : s.type === "PWM" ? "PWM spindle" : s.type === "Relay" ? "Relay spindle" : "Laser"; }
+
+  // keep the machine consistent after a change: drop terminals the board does not have, move motors off dead blocks
+  function normalize(m) {
+    const b = boardOf(m), ids = new Set(terminals(b).map((t) => t.id)), notes = [];
+    const dead = (blk) => (b.unusable && b.unusable[blk]) || !(b.blocks[blk] && b.blocks[blk][0] && b.blocks[blk][1]);
+    const ALIAS = { PROBE: "IN1", PWM: "OUT1", RELAY: "OUT2", IN1: "PROBE", OUT1: "PWM", OUT2: "RELAY" };
+    const remap = (id) => (!id || ids.has(id) ? id || "" : ALIAS[id] && ids.has(ALIAS[id]) ? ALIAS[id] : "");
+    const taken = () => { const s = new Set(); for (const L of ["x", "y", "z", "a"]) if (m.axes[L].on) m.axes[L].motors.forEach((mo) => s.add(mo.blk)); return s; };
+    for (const L of ["x", "y", "z", "a"]) {
+      const a = m.axes[L]; if (!a.on) continue;
+      a.motors.forEach((mo) => {
+        if (dead(mo.blk)) {
+          const t = taken(), free = ["X", "Y", "Z", "A"].find((k) => !dead(k) && !t.has(k));
+          if (free) { notes.push(L.toUpperCase() + " moved from the " + mo.blk + " block to the " + free + " block"); mo.blk = free; }
+          else notes.push(L.toUpperCase() + " has no free " + (b.custom ? "motor pins" : "block") + " left: remove a second motor or the A axis" + (b.custom ? ", or set more pins" : ""));
+        }
+      });
+    }
+    for (const f of Object.keys(m.inputs)) { m.inputs[f] = remap(m.inputs[f]); if (!m.inputs[f]) delete m.inputs[f]; }
+    for (const f of Object.keys(m.outputs)) { m.outputs[f] = remap(m.outputs[f]); if (!m.outputs[f]) delete m.outputs[f]; }
+    for (const s of m.spindles) {
+      if (s.type === "VFD" && !b.rs485) { s.type = "PWM"; { const U0 = usage(m); s.out = (terminals(b).find((t) => (t.kind === "out" || t.kind === "io") && !U0[t.id]) || {}).id || ""; } s.en = ""; s.hz = 5000; notes.push(b.custom ? "no RS485 pins are set: the VFD became a PWM spindle" : "this board has no RS485 port: the VFD became a PWM spindle"); }
+      ["out", "en", "arcOk", "dir"].forEach((k) => { s[k] = remap(s[k]); });
+    }
+    if (!b.pendant) m.pendant = false;
+    if (m.oled) { m.oled.sda = remap(m.oled.sda); m.oled.scl = remap(m.oled.scl); }
+    // an input or output on a terminal that an axis now needs moves to a free one of the same kind
+    const U = usage(m);
+    const moveOff = (map, f, kinds, name) => {
+      const id = map[f], who = U[id] || [];
+      if (who.length < 2 || !who.some((x) => /^(mot|lim):/.test(x.k))) return;
+      const alt = terminals(b).find((t) => kinds.includes(t.kind) && !U[t.id]);
+      if (alt) { map[f] = alt.id; (U[alt.id] = []).push({ k: "x", name }); notes.push(name + " moved to the " + alt.label); }
+      else { delete map[f]; notes.push(name + " removed: its terminal is needed by an axis"); }
+    };
+    for (const [f, label] of INPUTS) if (m.inputs[f]) moveOff(m.inputs, f, ["lim", "in", "io"], label);
+    for (const [f, label] of OUTPUTS) if (m.outputs[f]) moveOff(m.outputs, f, ["out", "io"], label.replace(/ \(.*\)$/, ""));
+    return notes;
+  }
+
+  function rebuild(reRender, note) {
+    const notes = normalize(M);
+    text = gen(M); ta.value = text; src = "build"; boardNow = M.board;
+    $("handnote").hidden = true;
+    $bed().checked = !!M.bed;
+    reload(true);
+    if (reRender) renderBuild();
+    else updateSums();
+    if (notes.length || note) toast([note].concat(notes).filter(Boolean).map((s) => s[0].toUpperCase() + s.slice(1) + ".").join(" "), true);
+  }
+
+  // ------------------------------------------------------------ builder panel
+  const field = (label, inner, cls) => '<label class="fld' + (cls ? " " + cls : "") + '"><span>' + label + "</span>" + inner + "</label>";
+  const num = (k, v, extra) => '<input type="number" data-k="' + k + '" data-n="1" value="' + esc(v) + '"' + (extra || "") + ">";
+  const txt = (k, v) => '<input type="text" data-k="' + k + '" value="' + esc(v) + '">';
+  const sel = (k, opts, cur, re) => '<select data-k="' + k + '"' + (re ? ' data-re="1"' : "") + ">" + opts.map((o) => '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(cur) ? " selected" : "") + (o[2] ? " disabled" : "") + ">" + esc(o[1]) + "</option>").join("") + "</select>";
+  const chk = (k, on, label, re, dis) => '<label class="tg"><input type="checkbox" data-k="' + k + '"' + (on ? " checked" : "") + (re ? ' data-re="1"' : "") + (dis ? " disabled" : "") + "> " + label + "</label>";
+  const seg = (k, opts, cur) => '<div class="seg" role="group">' + opts.map((o) => '<button type="button" data-seg="' + k + '" data-v="' + o[0] + '" aria-pressed="' + (String(o[0]) === String(cur)) + '">' + o[1] + "</button>").join("") + "</div>";
+
+  function termOpts(kind, cur, who, U, b) {
+    const okKinds = kind === "in" ? ["lim", "in", "io"] : kind === "io" ? ["io"] : ["out", "io"];
+    const list = [["", "not used"]];
+    for (const t of terminals(b)) {
+      if (!okKinds.includes(t.kind)) continue;
+      const others = (U[t.id] || []).filter((x) => x.k !== who);
+      list.push([t.id, t.label + " · " + t.pin.replace("gpio.", "IO") + (others.length ? " — " + others.map((x) => x.name).join(", ") : ""), others.length > 0 && t.id !== cur]);
+    }
+    return list;
+  }
+
+  function sumOf(id) {
+    const b = boardOf(M), A = M.axes;
+    if (id === "pins") return S.CHIPS[M.custom.chip].label + " · " + customUse(M.custom).length + " pins";
+    if (id === "machine") return (M.fw === "main" ? "Mainstream · " : "") + b.label + " · " + (M.bed ? "moving bed" : "moving gantry") + " · " + S.DRIVERS[M.driver].label;
+    if (id === "axes") return ["x", "y", "z", "a"].filter((L) => A[L].on).map((L) => L.toUpperCase() + (A[L].motors.length > 1 ? "×2" : "") + " " + fmt(A[L].travel)).join(" · ");
+    if (id === "tools") return M.spindles.map((s, i) => (i ? "T" + (s.tools || i) + " " : "") + spName(s)).join(" + ") || "none";
+    if (id === "inputs") { const n = Object.keys(M.inputs).length; return n ? Object.keys(M.inputs).map((f) => (INPUTS.find((x) => x[0] === f) || [f, f])[1].replace(/ button| \/ touch plate| \(.*\)/g, "")).join(", ") : "none"; }
+    if (id === "outputs") { const n = Object.keys(M.outputs).length; return n ? Object.keys(M.outputs).map((f) => { const o = OUTPUTS.find((x) => x[0] === f) || [f, f, ""]; return (o[2] === "Status lights" && f !== "rgb" ? o[1] + " light" : o[1]).replace(/ \(.*\)$/, "").replace(/ coolant.*| \/.*$/, ""); }).join(", ") : "none"; }
+    if (id === "extras") return [M.oled.on ? "OLED " + M.oled.w + "×" + M.oled.h : "", ["m0", "m1", "m2", "m3"].filter((k) => M.macros[k]).length ? ["m0", "m1", "m2", "m3"].filter((k) => M.macros[k]).length + " macros" : "", M.macros.startup0 ? "startup line" : ""].filter(Boolean).join(" · ") || "none";
+    if (id === "ports") return [M.net === "eth" ? "W5500 Ethernet" : "Wi-Fi", M.sd ? "SD card" : "", M.pendant ? "pendant" : ""].filter(Boolean).join(" · ");
+    return "";
+  }
+  function updateSums() { document.querySelectorAll("details.sec").forEach((d) => { const s = d.querySelector(".sum"); if (s) s.textContent = sumOf(d.dataset.id); }); }
+  function sec(id, title, body) {
+    return '<details class="sec" data-id="' + id + '" id="sec-' + id + '"' + (openSecs.has(id) ? " open" : "") + '><summary><h3>' + title + '</h3><span class="sum">' + esc(sumOf(id)) + '</span></summary><div class="secb">' + body + "</div></details>";
+  }
+
+  function renderBuild() {
+    const b = boardOf(M), U = usage(M), A = M.axes;
+    const focusK = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.k || document.activeElement.dataset.focus : null;
+    const scrollTop = $("build").scrollTop;
+    let h = "";
+    // presets
+    h += '<div class="card"><div class="note" style="margin-bottom:6px">Start from a machine</div><div class="row">' + Object.entries(PRESETS).map(([k, p]) => '<button type="button" class="small" data-preset="' + k + '" aria-pressed="' + (preset === k) + '">' + esc(p.label) + "</button>").join("") + "</div></div>";
+    // machine
+    let mh = '<div class="grid2">';
+    mh += field("Board", sel("board", Object.keys(BOARD).map((k) => [k, BOARD[k].label]), M.board, true), "wide");
+    mh += '<div class="fld wide"><span>Firmware</span>' + seg("fw", [["dp", "dpCREATOR FluidNC 4.1.1"], ["main", "Mainstream FluidNC"]], M.fw) + "</div>";
+    if (M.fw === "main") mh += '<div class="note" style="grid-column:1/-1">Mainstream FluidNC: extra tools switch with M6 by tool number, but it has no tool offsets (offset_mm); the builder leaves them out.</div>';
+    mh += field("Name", txt("name", M.name));
+    mh += field("Stepper drivers", sel("driver", Object.entries(S.DRIVERS).map(([k, d]) => [k, d.label + " · " + Math.round(d.hz / 1000) + " kHz"]), M.driver, true));
+    mh += "</div>";
+    mh += '<div class="grid2">' + field("What moves on Y", seg("bed", [["0", "The gantry"], ["1", "The bed"]], M.bed ? "1" : "0")) + field("Limit switches", seg("switchType", [["nc", "NC (safer)"], ["no", "NO"]], M.switchType)) + "</div>";
+    mh += chk("holdIdle", M.holdIdle, "Motors stay powered when idle (hold position)");
+    if (b.unusable) mh += '<div class="note warn">' + Object.entries(b.unusable).map(([k, v]) => k + " block: " + esc(v)).join(" ") + "</div>";
+    h += sec("machine", "Board and frame", mh);
+    if (M.board === "custom") h += sec("pins", "Your board's pins", pinsHtml());
+    // axes
+    const freeBlocks = (except) => { const t = new Set(); for (const L of ["x", "y", "z", "a"]) if (A[L].on) A[L].motors.forEach((mo) => mo !== except && t.add(mo.blk)); return ["X", "Y", "Z", "A"].filter((k) => !(b.unusable && b.unusable[k]) && b.blocks[k] && b.blocks[k][0] && b.blocks[k][1] && !t.has(k)); };
+    let ah = '<div class="note">Which motor each ' + (b.custom ? "set of motor pins" : "axis block") + " drives. Any block can be any axis: put a second Y motor (Y2) on the A block to square a gantry, for example.</div><div class=\"blkmap\">";
+    for (const K of ["X", "Y", "Z", "A"]) {
+      const usable = !(b.unusable && b.unusable[K]) && b.blocks[K] && b.blocks[K][0] && b.blocks[K][1];
+      ah += "<span>" + K + (b.custom ? " pins" : " block") + "</span>";
+      ah += usable ? '<select data-blk="' + K + '">' + SLOTS.map(([v, l]) => '<option value="' + v + '"' + (blockUser(K) === v ? " selected" : "") + ">" + l + "</option>").join("") + "</select>" : '<span class="note">' + (b.custom ? "pins not set" : "not usable") + "</span>";
+    }
+    ah += "</div>";
+    for (const L of ["x", "y", "z", "a"]) {
+      const a = A[L], up = L.toUpperCase();
+      if (L === "a" && !a.on) {
+        const can = freeBlocks().length > 0;
+        ah += '<div class="axcard"><h4><span class="sp">A axis (rotary)</span>' + chk("axes.a.on", false, "Add", true, !can) + "</h4>" + (can ? '<div class="note">A 4th axis on a free block, e.g. a rotary chuck for turning.</div>' : '<div class="note">No free axis block: all four are in use' + (["x", "y", "z"].some((k) => A[k].motors.length > 1) ? " (a second motor takes one)" : "") + ".</div>") + "</div>";
+        continue;
+      }
+      const words = { x: ["left", "right"], y: ["front", "back"], z: ["bottom", "top"], a: ["- end", "+ end"] }[L];
+      const unit = L === "a" ? "°" : "mm";
+      let c = '<div class="axcard" data-axis="' + L + '"><h4><span class="sp">' + up + (L === "a" ? " axis (rotary)" : " axis") + "</span>" + (L === "a" ? chk("axes.a.on", true, "Use", true) : "") + "</h4>";
+      c += '<div class="grid2">' + field("Travel, " + unit, num("axes." + L + ".travel", a.travel, ' min="1"')) + field("Steps per " + (L === "a" ? "degree" : "mm"), num("axes." + L + ".spm", a.spm, ' min="0.001" step="any"'));
+      const drv = S.DRIVERS[M.driver], cap = S.maxRateFor(+a.spm || 1, drv.hz, drv.pulse, drv.dirDelay);
+      c += field("Max speed, " + unit + "/min", num("axes." + L + ".rate", a.rate, ' min="1"')) + field("Acceleration, " + unit + "/s²", num("axes." + L + ".accel", a.accel, ' min="1"')) + "</div>";
+      if (+a.rate > cap) c += '<div class="note warn">The ' + esc(drv.label) + " limit at " + fmt(+a.spm) + " steps caps this at " + cap + " " + unit + "/min; the config uses " + cap + ".</div>";
+      c += '<details class="calc" data-calc="' + L + '"' + (a.calcOpen ? " open" : "") + "><summary>Work out steps per " + (L === "a" ? "degree" : "mm") + "</summary>" + calcHtml(L) + "</details>";
+      c += field("Homing switch", seg("axes." + L + ".sw", [["min", "At the " + words[0]], ["max", "At the " + words[1]], ["none", "None"]], a.sw));
+      a.motors.forEach((mo, i) => {
+        const opts = ["X", "Y", "Z", "A"].map((k) => { const dead = (b.unusable && b.unusable[k]) || !(b.blocks[k] && b.blocks[k][0] && b.blocks[k][1]); const own = (U[k + ".STEP"] || []).filter((x) => x.k !== "mot:" + L + i); return [k, k + (b.custom ? " pins" : " block") + (dead ? (b.custom ? " (not set)" : " (not usable)") : own.length ? " — " + own.map((x) => x.name).join(", ") : ""), dead || own.length > 0]; });
+        c += '<div class="motor-row"><b>motor' + i + "</b>" + sel("axes." + L + ".motors." + i + ".blk", opts, mo.blk, true);
+        c += a.sw !== "none" ? chk("axes." + L + ".motors." + i + ".lim", mo.lim !== false, "switch", true) : "<span></span>";
+        c += i ? chk("axes." + L + ".motors." + i + ".inv", !!mo.inv, "mirrored") : "<span></span>";
+        c += "</div>";
+      });
+      if (L !== "a") {
+        if (a.motors.length < 2) {
+          const fb = freeBlocks();
+          c += '<div class="row"><button type="button" class="small" data-addmotor="' + L + '"' + (fb.length ? "" : " disabled") + ">Add a second " + up + " motor</button><span class=\"note\">" + (fb.length ? (L === "y" ? "Gantry with a motor on each side, squared by homing." : "") : "No free axis block." + (A.a.on ? " Remove the A axis to free one." : "")) + "</span></div>";
+        } else c += '<div class="row"><button type="button" class="small" data-delmotor="' + L + '">Remove motor1</button><span class="note">' + (a.sw !== "none" && a.motors.every((m) => m.lim !== false) ? "Each motor homes to its own switch, so homing squares the " + (L === "y" ? "gantry" : "axis") + "." : "Both motors move together.") + "</span></div>";
+      }
+      c += "</div>";
+      ah += c;
+    }
+    h += sec("axes", "Axes and motors", ah);
+    // spindles and tools
+    let th = "";
+    M.spindles.forEach((s, i) => {
+      const k = "spindles." + i + ".";
+      const types = SPINDLE_TYPES.map(([v, l]) => [v, l + (v === "VFD" && !b.rs485 ? " (needs RS485)" : ""), v === "VFD" && !b.rs485]);
+      let c = '<div class="spcard"><h4><span class="sp">' + (i === 0 ? "Main tool" : "Tool " + (s.tools || i + 1)) + "</span>" + (M.spindles.length > 1 ? '<button type="button" class="small" data-delsp="' + i + '">Remove</button>' : "") + "</h4>";
+      c += '<div class="grid2">' + field("Type", sel(k + "type", types, s.type, true), s.type === "VFD" ? "" : "wide");
+      if (s.type === "VFD") {
+        c += field("VFD model", sel(k + "vfd", VFDS.map((v) => [v, v]), s.vfd)) + field("Modbus ID", num(k + "modbus", s.modbus ?? 1, ' min="1" max="247"')) + field("Baud", sel(k + "baud", [[9600, "9600"], [19200, "19200"], [38400, "38400"]], s.baud || 9600));
+        c += field("Max RPM", num(k + "rpm", s.rpm || 24000)) + field("Spin-up, ms", num(k + "up", s.up ?? 5000)) + field("Spin-down, ms", num(k + "down", s.down ?? 6000));
+      } else if (s.type === "PlasmaSpindle") {
+        c += field("Torch fire output", sel(k + "en", termOpts("out", s.en, "sp" + i + ":en", U, b), s.en || "", true)) + field("Arc OK input", sel(k + "arcOk", termOpts("in", s.arcOk, "sp" + i + ":arcOk", U, b), s.arcOk || "", true));
+        c += field("Arc wait, ms", num(k + "arcWait", s.arcWait || 1000));
+      } else {
+        c += field(s.type === "Relay" ? "Relay output" : "Signal output", sel(k + "out", termOpts("out", s.out, "sp" + i + ":out", U, b), s.out || "", true));
+        if (s.type !== "Relay") c += field("Enable output", sel(k + "en", termOpts("out", s.en, "sp" + i + ":en", U, b), s.en || "", true)) + field("PWM frequency, Hz", num(k + "hz", s.hz || 5000));
+        if (s.type !== "Laser") c += field("Direction output (M4)", sel(k + "dir", termOpts("out", s.dir, "sp" + i + ":dir", U, b), s.dir || "", true));
+        c += s.type === "Laser" ? field("Max S value", num(k + "maxS", s.maxS || 1000)) : field("Max RPM", num(k + "rpm", s.rpm || 24000));
+        if (s.type !== "Laser") c += field("Spin-up, ms", num(k + "up", s.up ?? 3000)) + field("Spin-down, ms", num(k + "down", s.down ?? 3000));
+      }
+      c += "</div>";
+      if ((s.type !== "VFD" && s.type !== "PlasmaSpindle" && !s.out) || (s.type === "PlasmaSpindle" && !s.en)) c += '<div class="note err">Choose an output. If none is free, take one from coolant or a user output, or remove an axis to free its block.</div>';
+      if (s.type !== "Relay" && s.type !== "VFD" && s.type !== "PlasmaSpindle") c += chk(k + "low", !!s.low, "Invert the signal (active low)");
+      if (i > 0) {
+        c += '<div class="grid3">' + field("M6 tool no.", num(k + "tools", s.tools || i + 1, ' min="1"')) + "<span></span><span></span>" + [0, 1, 2].map((j) => field(["X", "Y", "Z"][j] + " offset, mm", num(k + "off." + j, (s.off || [0, 0, 0])[j], ' step="any"'))).join("") + "</div>";
+        c += M.fw === "main" ? '<div class="note">M6 T' + esc(s.tools || i + 1) + " switches to it. Mainstream FluidNC has no offset_mm: the offset goes in a comment, set it in your sender (G10/G43).</div>" : '<div class="note">Where this tool\'s point is, relative to the main spindle. M6 T' + esc(s.tools || i + 1) + " selects it and the offset is applied.</div>";
+      }
+      if (s.type === "VFD") c += '<div class="note">On the ' + esc(b.rs485.label) + ": A/B to the VFD's RS485 terminals; set the VFD's own Modbus address and baud to match.</div>";
+      if (s.type === "Laser") c += '<div class="note warn">Check the laser\'s PWM polarity before connecting it: some lasers fire at full power on an inverted signal.</div>';
+      if (s.type === "10V") c += '<div class="note">The ' + esc((terminals(b).find((t) => t.id === s.out) || {}).label || "output") + " drives the spindle's 0-10 V input" + (b.custom ? " (through a PWM to 0-10 V converter if the board has none)" : "") + ".</div>";
+      c += "</div>";
+      th += c;
+    });
+    th += '<div class="grp">Tool change</div>';
+    if (!M.inputs.toolsetter) th += '<div class="note">Manual tool change with automatic tool-length measuring needs a tool setter: set one under Inputs.</div>';
+    else {
+      th += chk("atc.on", M.atc.on, "Manual tool change (atc_manual): M6 goes to the change position, then measures the new tool on the tool setter", true);
+      if (M.atc.on) {
+        th += '<div class="note">Machine coordinates, as the DRO shows them after homing.</div><div class="grid3">';
+        th += [0, 1, 2].map((j) => field("Change " + "XYZ"[j], num("atc.change." + j, M.atc.change[j], ' step="any"'))).join("");
+        th += [0, 1, 2].map((j) => field("Tool setter " + "XYZ"[j], num("atc.ets." + j, M.atc.ets[j], ' step="any"'))).join("");
+        th += field("Safe Z", num("atc.safeZ", M.atc.safeZ, ' step="any"')) + field("Rapid Z over setter", num("atc.etsZ", M.atc.etsZ, ' step="any"')) + field("Probe feed, mm/min", num("atc.feed", M.atc.feed)) + "</div>";
+      }
+    }
+    th += '<div class="row"><button type="button" class="small" data-addsp="1"' + (M.spindles.length >= 3 ? " disabled" : "") + '>Add another tool</button><span class="note">A laser or second spindle next to the main one, chosen with M6.</span></div>';
+    h += sec("tools", "Spindles, lasers and torches", th);
+    // inputs
+    const grouped = (list, kind, map, pre) => {
+      let out = "", g = null;
+      for (const [f, label, grp] of list) {
+        if (grp !== g) { if (g !== null) out += "</div>"; out += '<div class="grp">' + esc(grp) + '</div><div class="iomap">'; g = grp; }
+        out += "<span>" + label + "</span>" + sel(pre + "." + f, termOpts(kind, map[f], pre.slice(0, pre === "inputs" ? 2 : 3) + ":" + f, U, b), map[f] || "", true);
+      }
+      return out + "</div>";
+    };
+    let ih = '<div class="note">' + (b.custom ? "Inputs you set under Your board's pins, plus free limit inputs." : "Free axis-block limit inputs (pins 8/7) take switches and buttons too.") + "</div>";
+    ih += grouped(INPUTS, "in", M.inputs, "inputs");
+    if (M.inputs.door) {
+      ih += '<div class="note">Safety door: an NC switch that opens with the door. Opening it pauses the job.</div>';
+      ih += chk("parking.on", M.parking.on, "Park the spindle when the door opens (lift Z)", true);
+      if (M.parking.on) ih += '<div class="grid2">' + field("Park at Z (machine), mm", num("parking.target", M.parking.target, ' step="any"')) + field("Lift speed, mm/min", num("parking.rate", M.parking.rate)) + field("Pull-out first, mm", num("parking.pullout", M.parking.pullout, ' step="any"')) + field("Pull-out speed, mm/min", num("parking.pulloutRate", M.parking.pulloutRate)) + "</div>";
+    }
+    if (M.inputs.estop) ih += '<div class="note warn">This e-stop input stops the controller. It does not replace a hardwired e-stop that cuts the drivers\' power.</div>';
+    h += sec("inputs", "Inputs: probe, door, buttons", ih);
+    // outputs
+    let oh = '<div class="note">' + (b.custom ? "Outputs you set under Your board's pins." : "STEP/DIR of an axis block you don't use (usually A) are 5 V logic outputs: they drive a relay module, an SSR input or a status light.") + "</div>";
+    oh += grouped(OUTPUTS, "out", M.outputs, "outputs");
+    if (M.outputs.rgb) oh += '<div class="note">WS2812 data needs a clean, fast signal: a direct GPIO or a fast 5 V buffer.</div>';
+    h += sec("outputs", "Outputs: coolant, user outputs, status lights", oh);
+    // display and macros
+    let xh = chk("oled.on", M.oled.on, "OLED status display (SSD1306, I2C)", true);
+    if (M.oled.on) {
+      const ioOpts = (cur, who) => termOpts("io", cur, who, U, b);
+      xh += '<div class="grid2">' + field("SDA", sel("oled.sda", ioOpts(M.oled.sda, "oled:sda"), M.oled.sda || "", true)) + field("SCL", sel("oled.scl", ioOpts(M.oled.scl, "oled:scl"), M.oled.scl || "", true));
+      xh += field("Size", sel("oled.size", [["128x64", "128 × 64"], ["128x32", "128 × 32"], ["64x48", "64 × 48"]], M.oled.w + "x" + M.oled.h, true)) + field("I2C address", sel("oled.addr", [["0x3c", "0x3C"], ["0x3d", "0x3D"]], M.oled.addr)) + "</div>";
+      xh += chk("oled.flip", M.oled.flip, "Rotate 180°");
+      if (!(M.oled.sda && M.oled.scl)) xh += '<div class="note err">Choose both SDA and SCL, or the display is left out of the config.</div>';
+      if (!terminals(b).some((t) => t.kind === "io")) xh += '<div class="note err">I2C needs two plain GPIO pins' + (b.custom ? ': add them as "I/O" under Your board\'s pins.' : ".") + "</div>";
+      else if (!b.custom) xh += '<div class="note warn">On the R3 the display goes on J7 (GPIO43/44, the UART0 connector). The UART0 serial console on J7 is lost; USB and the network still work.</div>';
+    }
+    xh += '<div class="grp">Macros</div><div class="note">One line each. Join commands with &amp;, e.g. <code>G0 Z-5&amp;G0 X0 Y0</code>. Macro buttons are under Inputs.</div><div class="grid2">';
+    xh += field("Startup line (after reset)", txt("macros.startup0", M.macros.startup0), "wide");
+    ["m0", "m1", "m2", "m3"].forEach((k, i) => (xh += field("Macro " + i + (M.inputs["macro" + i] ? " · button" : "") + " ($Macros/Run=" + i + ")", txt("macros." + k, M.macros[k]))));
+    xh += field("After homing", txt("macros.afterHoming", M.macros.afterHoming)) + field("After unlock ($X)", txt("macros.afterUnlock", M.macros.afterUnlock)) + "</div>";
+    h += sec("extras", "Display and macros", xh);
+    // ports
+    let ph = "";
+    ph += b.pendant ? chk("pendant", M.pendant, "SmartTabUI pendant on the " + esc(b.pendant.label), true) : '<div class="note">Set the pendant TX/RX pins under Your board\'s pins to add a pendant.</div>';
+    ph += field("Network", seg("net", [["eth", "W5500 Ethernet"], ["wifi", "Wi-Fi only"]], M.net));
+    if (M.net === "eth") {
+      ph += '<div class="grid2">' + field("SPI clock for the W5500", sel("ethHz", [[4000000, "4 MHz"], [8000000, "8 MHz"], [12000000, "12 MHz"], [20000000, "20 MHz"]], M.ethHz || 8000000)) + "<span></span></div>";
+      const io = (pp) => (pp ? "IO" + pp.split(".")[1] : "not set");
+      ph += b.eth.intOnBoard ? chk("ethInt", M.ethInt, "INT line wired (on the board: " + io(b.eth.int) + ")", true) : b.eth.int ? chk("ethInt", M.ethInt, "Use the INT line on " + io(b.eth.int) + " (without it the W5500 is polled)", true) : '<div class="note">No W5500 INT pin set: the W5500 is polled.</div>';
+      ph += '<div class="note' + (b.eth.cs ? "" : " err") + '">W5500: CS ' + io(b.eth.cs) + ", SPI " + b.spi.map(io).join("/") + (M.sd ? ", shared with the SD card" : "") + ". Set the IP with $Eth/... or in the WebUI.</div>";
+    }
+    ph += chk("sd", M.sd, "SD card (CS " + (b.sd ? "on IO" + b.sd.split(".")[1] : "not set") + ")", true);
+    if (M.sd) ph += '<div class="grid2">' + field("SD clock", sel("sdHz", [[1000000, "1 MHz (long wires)"], [4000000, "4 MHz"], [8000000, "8 MHz"], [20000000, "20 MHz"]], M.sdHz || 4000000)) + "<span></span></div>";
+    h += sec("ports", "Pendant, Ethernet, SD card", ph);
+    $("build").innerHTML = h;
+    $("build").scrollTop = scrollTop;
+    if (focusK) { const e = $("build").querySelector('[data-k="' + focusK + '"],[data-focus="' + focusK + '"]'); if (e) e.focus(); }
+  }
+
+  // ------------------------------------------------------------ custom board: every pin chosen by hand
+  function customUse(c) {
+    const list = [];
+    const add = (k, name, pin) => { if (pin) list.push({ k, name, n: +String(pin).split(".")[1] }); };
+    for (const [L, ps] of Object.entries(c.blocks)) { add("custom.blocks." + L + ".0", L + " STEP", ps[0]); add("custom.blocks." + L + ".1", L + " DIR", ps[1]); add("custom.blocks." + L + ".2", L + " limit", ps[2]); }
+    add("custom.enable", "Enable", c.enable);
+    c.extra.forEach((t, i) => add("custom.extra." + i + ".pin", t.label || "terminal", t.pin));
+    if (c.pendant) { add("custom.pendant.tx", "Pendant TX", c.pendant.tx); add("custom.pendant.rx", "Pendant RX", c.pendant.rx); }
+    if (c.rs485) { add("custom.rs485.tx", "RS485 TX", c.rs485.tx); add("custom.rs485.rx", "RS485 RX", c.rs485.rx); add("custom.rs485.rts", "RS485 DE", c.rs485.rts); }
+    add("custom.spi.0", "SPI MISO", c.spi[0]); add("custom.spi.1", "SPI MOSI", c.spi[1]); add("custom.spi.2", "SPI SCK", c.spi[2]);
+    add("custom.sd", "SD CS", c.sd); add("custom.eth.cs", "W5500 CS", c.eth.cs); add("custom.eth.int", "W5500 INT", c.eth.int);
+    return list;
+  }
+  function gpioSel(k, cur, dir, uses) {
+    const c = M.custom, chip = S.CHIPS[c.chip], opts = [["", "not set"]];
+    for (let n = 0; n <= 48; n++) {
+      if (!chip.valid(n)) continue;
+      const r = chip.rules(n, c.octal, dir === "out" ? "output" : "");
+      const why = r ? (/flash/.test(r.msg) ? "flash" : /USB/.test(r.msg) ? "USB" : /PSRAM/.test(r.msg) ? "PSRAM" : /input only/.test(r.msg) ? "input only" : "strapping") : "";
+      const other = uses.filter((u) => u.n === n && u.k !== k);
+      opts.push(["gpio." + n, "GPIO " + n + (why ? " · " + why : "") + (other.length ? " — " + other.map((u) => u.name).join(", ") : ""), (r && r.level === "error") || other.length > 0]);
+    }
+    if (cur && !opts.some((o) => o[0] === cur)) opts.push([cur, cur + " (not on this chip)"]);
+    return sel(k, opts, cur || "", true);
+  }
+  function pinsHtml() {
+    const c = M.custom, U = customUse(c), s3 = c.chip === "esp32s3";
+    let h = '<div class="note">Any ESP32 or ESP32-S3 controller: pick the GPIO behind each terminal. Pins the chip can\'t use here (flash, USB, PSRAM, input only) are greyed out, and each pin can be used once.</div>';
+    h += '<div class="grid2">' + field("Chip", seg("custom.chip", [["esp32s3", "ESP32-S3"], ["esp32", "ESP32"]], c.chip)) + field("Board name (board:)", txt("custom.name", c.name)) + "</div>";
+    if (s3) h += chk("custom.octal", c.octal, "Module with octal PSRAM (N8R8, N16R8): GPIO 35-37 are taken", true);
+    h += chk("custom.pullups", c.pullups, "Switches to GND with the chip's pull-ups (no pull-up resistors on the board)", true);
+    h += '<div class="pins"><span></span><b>STEP</b><b>DIR</b><b>Limit</b>';
+    for (const L of ["X", "Y", "Z", "A"]) h += "<b>" + L + "</b>" + gpioSel("custom.blocks." + L + ".0", c.blocks[L][0], "out", U) + gpioSel("custom.blocks." + L + ".1", c.blocks[L][1], "out", U) + gpioSel("custom.blocks." + L + ".2", c.blocks[L][2], "in", U);
+    h += "</div>";
+    h += '<div class="grid2">' + field("Driver enable (all axes)", gpioSel("custom.enable", c.enable, "out", U)) + '<label class="tg" style="align-self:end;padding-bottom:6px"><input type="checkbox" data-k="custom.enableLow"' + (c.enableLow ? " checked" : "") + "> Active low</label></div>";
+    h += '<div class="note" style="margin-top:2px">Inputs and outputs on your board. They show up in the probe, button, spindle and coolant lists.</div><div class="terms">';
+    c.extra.forEach((t, i) => {
+      h += txt("custom.extra." + i + ".label", t.label) + sel("custom.extra." + i + ".kind", [["in", "input"], ["out", "output"], ["io", "I/O (I2C, LED)"]], t.kind, true) + gpioSel("custom.extra." + i + ".pin", t.pin, t.kind === "in" ? "in" : "out", U) + '<button type="button" class="small" data-delterm="' + i + '" aria-label="Remove ' + esc(t.label) + '">×</button>';
+    });
+    h += '</div><div class="row"><button type="button" class="small" data-addterm="in">Add an input</button><button type="button" class="small" data-addterm="out">Add an output</button></div>';
+    const pt = c.pendant || {}, rs = c.rs485 || {};
+    h += '<div class="grid3">' + field("Pendant TX", gpioSel("custom.pendant.tx", pt.tx, "out", U)) + field("Pendant RX", gpioSel("custom.pendant.rx", pt.rx, "in", U)) + "<span></span>";
+    h += field("RS485 TX", gpioSel("custom.rs485.tx", rs.tx, "out", U)) + field("RS485 RX", gpioSel("custom.rs485.rx", rs.rx, "in", U)) + field("RS485 DE", gpioSel("custom.rs485.rts", rs.rts, "out", U));
+    h += field("SPI MISO", gpioSel("custom.spi.0", c.spi[0], "in", U)) + field("SPI MOSI", gpioSel("custom.spi.1", c.spi[1], "out", U)) + field("SPI SCK", gpioSel("custom.spi.2", c.spi[2], "out", U));
+    h += field("SD card CS", gpioSel("custom.sd", c.sd, "out", U)) + field("W5500 CS", gpioSel("custom.eth.cs", c.eth.cs, "out", U)) + field("W5500 INT", gpioSel("custom.eth.int", c.eth.int, "in", U)) + "</div>";
+    return h;
+  }
+
+  const SLOTS = [["x0", "X"], ["x1", "X2 (second X motor)"], ["y0", "Y"], ["y1", "Y2 (second Y motor)"], ["z0", "Z"], ["z1", "Z2 (second Z motor)"], ["a0", "A (rotary or 4th axis)"], ["", "not used"]];
+  function blockUser(blk) {
+    for (const L of ["x", "y", "z", "a"]) { const a = M.axes[L]; if (!a.on) continue; const i = a.motors.findIndex((mo) => mo.blk === blk); if (i >= 0) return L + i; }
+    return "";
+  }
+  function assignBlock(B2, slot) {
+    const cur = blockUser(B2);
+    if (cur === slot) return;
+    const motorAt = (s) => { const a = M.axes[s[0]]; return a.on && a.motors[+s[1]] ? a.motors[+s[1]] : null; };
+    const take = (s) => {
+      const L = s[0], i = +s[1], a = M.axes[L];
+      if (i === 1) { a.motors.splice(1, 1); return true; }
+      if (L === "a") { a.on = false; return true; }
+      if (a.motors.length > 1) { a.motors.splice(0, 1); a.motors[0].inv = false; return true; }
+      return false;
+    };
+    const up = (s) => s[0].toUpperCase() + (s[1] === "1" ? "2" : "");
+    let note;
+    if (!slot) {
+      if (!take(cur)) { renderBuild(); return toast(up(cur) + " needs a block: give " + up(cur) + " another block first."); }
+      note = "The " + B2 + " block is free: its STEP/DIR can now be used as outputs";
+    } else {
+      const tgt = motorAt(slot);
+      if (tgt) {
+        const other = tgt.blk; tgt.blk = B2;
+        if (cur) motorAt(cur).blk = other;
+        note = up(slot) + " now on the " + B2 + " block" + (cur ? ", " + up(cur) + " on the " + other + " block" : "");
+      } else {
+        if (cur && !take(cur)) { renderBuild(); return toast(up(cur) + " needs a block: give " + up(cur) + " another block first."); }
+        const L = slot[0], a = M.axes[L];
+        if (L === "a") { a.on = true; a.motors = [{ blk: B2, lim: false }]; }
+        else a.motors[1] = { blk: B2, lim: true, inv: L === "y" };
+        note = up(slot) + " now on the " + B2 + " block";
+      }
+    }
+    preset = null; rebuild(true, note);
+  }
+
+  function calcHtml(L) {
+    const c = M.axes[L].calc || (M.axes[L].calc = L === "a" ? { drive: "rotary", micro: 8, ratio: 1 } : { drive: "screw", micro: 8, lead: 5, ratio: 1 });
+    const k = "axes." + L + ".calc.";
+    let h = '<div class="grid3">' + field("Drive", sel(k + "drive", [["screw", "Ballscrew"], ["belt", "Belt"], ["rack", "Rack and pinion"], ["rotary", "Rotary"]], c.drive, true)) + field("Microsteps", sel(k + "micro", [1, 2, 4, 8, 16, 32].map((v) => [v, "1/" + v]), c.micro || 8));
+    if (c.drive === "screw") h += field("Lead, mm/turn", num(k + "lead", c.lead || 5, ' step="any"'));
+    if (c.drive === "belt") h += field("Pulley teeth", num(k + "teeth", c.teeth || 20)) + field("Belt pitch, mm", num(k + "pitch", c.pitch || 3, ' step="any"'));
+    if (c.drive === "rack") h += field("Pinion pitch dia, mm", num(k + "pinionDia", c.pinionDia || 25, ' step="any"'));
+    h += field("Gearbox ratio", num(k + "ratio", c.ratio || 1, ' step="any" min="0.01"'));
+    h += '</div><div class="row" style="margin-top:6px"><span class="note" data-calcout="' + L + '">= ' + fmt(calcSpm(c)) + " steps per " + (L === "a" ? "degree" : "mm") + '</span><button type="button" class="small" data-usecalc="' + L + '">Use it</button></div>';
+    return h;
+  }
+  function calcSpm(c) {
+    const base = S.stepsPerMm({ drive: c.drive === "screw" ? "screw" : c.drive, motorSteps: 200, micro: c.micro, lead: c.lead, teeth: c.teeth, pitch: c.pitch, pinionDia: c.pinionDia, ratio: c.ratio });
+    return c.drive === "rotary" ? base : base * (+c.ratio || 1);
+  }
+
+  function setPath(o, path, v) {
+    const p = path.split("."); let x = o;
+    for (let i = 0; i < p.length - 1; i++) { if (x[p[i]] == null) x[p[i]] = /^\d+$/.test(p[i + 1]) ? [] : {}; x = x[p[i]]; }
+    const last = p[p.length - 1];
+    if ((p[0] === "inputs" || p[0] === "outputs") && v === "") delete x[last]; else x[last] = v;
+  }
+  const B = $("build");
+  function onField(e) {
+    const t = e.target, k = t.dataset && t.dataset.k;
+    if (!k) return;
+    let v = t.type === "checkbox" ? t.checked : t.value;
+    if (t.dataset.n) { v = parseFloat(v); if (isNaN(v)) return; }
+    if (t.tagName === "SELECT" && /^\d+$/.test(v) && !/\.blk$|\.out$|\.en$|\.arcOk$|^inputs|^outputs|^custom|^oled|^macros/.test(k)) v = +v;
+    const before = k === "board" ? M.board : null;
+    if (k === "board" && v === "custom") openSecs.add("pins");
+    if (k === "oled.size") { const [w2, h2] = String(v).split("x"); M.oled.w = +w2; M.oled.h = +h2; preset = null; return rebuild(true); }
+    setPath(M, k, v);
+    if (k === "axes.a.on" && v) { const t2 = new Set(); for (const L of ["x", "y", "z"]) M.axes[L].motors.forEach((mo) => t2.add(mo.blk)); M.axes.a.motors[0].blk = ["A", "Z", "Y", "X"].find((b) => !t2.has(b) && !(boardOf(M).unusable || {})[b]) || "A"; }
+    if (/^spindles\.\d+\.type$/.test(k)) { const i = +k.split(".")[1]; M.spindles[i] = spDefaults(v, i); }
+    if (/\.calc\./.test(k)) { const L = k.split(".")[1]; const o = $("build").querySelector('[data-calcout="' + L + '"]'); if (o) o.textContent = "= " + fmt(calcSpm(M.axes[L].calc)) + " steps per " + (L === "a" ? "degree" : "mm"); if (!t.dataset.re) return; }
+    preset = null;
+    rebuild(!!t.dataset.re || e.type === "change" && t.tagName === "SELECT", before && before !== v ? "Board changed to " + BOARD[v].label + (v === "custom" ? ": set your pins under Your board's pins" : "") : "");
+  }
+  B.addEventListener("input", (e) => { if (e.target.tagName === "INPUT" && e.target.type !== "checkbox") { clearTimeout(onField.t); const ev = { target: e.target, type: "input" }; onField.t = setTimeout(() => onField(ev), 200); } });
+  B.addEventListener("change", (e) => { if (e.target.dataset && e.target.dataset.blk) return assignBlock(e.target.dataset.blk, e.target.value); if (e.target.tagName === "SELECT" || e.target.type === "checkbox") onField(e); else { clearTimeout(onField.t); onField({ target: e.target, type: "input" }); renderBuild(); } });
+  B.addEventListener("toggle", (e) => {
+    const d = e.target;
+    if (d.classList && d.classList.contains("sec")) { if (d.open) openSecs.add(d.dataset.id); else openSecs.delete(d.dataset.id); }
+    if (d.dataset && d.dataset.calc) M.axes[d.dataset.calc].calcOpen = d.open;
+  }, true);
+  function spDefaults(type, i) {
+    const b = boardOf(M), U = usage(Object.assign({}, M, { spindles: M.spindles.filter((_, j) => j !== i) }));
+    const freeOut = (pref) => { const ids = terminals(b).filter((t) => t.kind === "out" || t.kind === "io").map((t) => t.id); return [pref, ...ids].find((id) => id && ids.includes(id) && !U[id]) || ""; };
+    const freeIn = () => (terminals(b).find((t) => ["in", "lim", "io"].includes(t.kind) && !U[t.id] && t.id !== "PROBE") || {}).id || "";
+    const keep = i > 0 ? { tools: (M.spindles[i] && M.spindles[i].tools) || String(i + 1), off: (M.spindles[i] && M.spindles[i].off) || [0, 0, 0] } : {};
+    const d = {
+      VFD: { vfd: "Huanyang", modbus: 1, baud: 9600, rpm: 24000, up: 5000, down: 6000 },
+      PWM: { out: freeOut("PWM"), en: "", hz: 5000, rpm: 24000, up: 3000, down: 3000 },
+      "10V": { out: freeOut("PWM"), en: "", hz: 5000, rpm: 24000, up: 3000, down: 3000 },
+      Relay: { out: freeOut("RELAY"), rpm: 24000, up: 3000, down: 3000 },
+      Laser: { out: freeOut("PWM"), en: "", hz: 5000, maxS: 1000 },
+      PlasmaSpindle: { en: freeOut("RELAY"), arcOk: freeIn(), arcWait: 1000 },
+    }[type] || {};
+    return Object.assign({ type }, d, keep);
+  }
+  B.addEventListener("click", (e) => {
+    const t = e.target.closest("button"); if (!t) return;
+    if (t.dataset.preset) { preset = t.dataset.preset; M = prep(Object.assign(clone(PRESETS[preset].m), { fw: M.fw, custom: M.custom, board: M.board === "custom" ? "custom" : PRESETS[preset].m.board })); resetMotion(); rebuild(true); startPose(); return; }
+    if (t.dataset.seg) {
+      let v = t.dataset.v; if (t.dataset.seg === "bed") v = v === "1";
+      if (t.dataset.seg === "custom.chip") { if (v === M.custom.chip) return; M.custom = Object.assign(clone(CUSTOM_DEFAULTS[v]), /^my_(s3|esp32)_board$/.test(M.custom.name) ? {} : { name: M.custom.name }); preset = null; rebuild(true, "Pins set to a starting layout for the " + S.CHIPS[v].label + ": change them to match your board"); return; }
+      setPath(M, t.dataset.seg, v); preset = null; if (t.dataset.seg === "bed") trail = [];
+      t.dataset.focus = t.dataset.seg + "=" + t.dataset.v;
+      rebuild(true);
+      const f = B.querySelector('[data-seg="' + t.dataset.seg + '"][data-v="' + t.dataset.v + '"]'); if (f) f.focus();
+      return;
+    }
+    if (t.dataset.addmotor) {
+      const L = t.dataset.addmotor, a = M.axes[L], used = new Set();
+      for (const k of ["x", "y", "z", "a"]) if (M.axes[k].on) M.axes[k].motors.forEach((mo) => used.add(mo.blk));
+      const blk = ["A", "Z", "Y", "X"].find((k) => !used.has(k) && !(boardOf(M).unusable || {})[k]);
+      if (!blk) return;
+      a.motors.push({ blk, lim: true, inv: L === "y" }); preset = null; rebuild(true, L.toUpperCase() + " motor1 on the " + blk + " block"); return;
+    }
+    if (t.dataset.addterm) {
+      const ids = new Set(M.custom.extra.map((x) => x.id)); let n = 1; const pre = t.dataset.addterm === "in" ? "IN" : "OUT";
+      while (ids.has(pre + n)) n++;
+      M.custom.extra.push({ id: pre + n, label: (t.dataset.addterm === "in" ? "Input " : "Output ") + n, pin: "", kind: t.dataset.addterm });
+      preset = null; rebuild(true); return;
+    }
+    if (t.dataset.delterm) { M.custom.extra.splice(+t.dataset.delterm, 1); preset = null; rebuild(true); return; }
+    if (t.dataset.delmotor) { M.axes[t.dataset.delmotor].motors.length = 1; preset = null; rebuild(true); return; }
+    if (t.dataset.addsp) { const i = M.spindles.length; M.spindles.push(null); M.spindles[i] = spDefaults(M.spindles.some((s) => s && s.type === "Laser") ? "PWM" : "Laser", i); M.spindles[i].tools = String(i + 1); preset = null; rebuild(true); return; }
+    if (t.dataset.delsp) { M.spindles.splice(+t.dataset.delsp, 1); preset = null; rebuild(true); return; }
+    if (t.dataset.usecalc) { const L = t.dataset.usecalc; M.axes[L].spm = Math.round(calcSpm(M.axes[L].calc) * 1000) / 1000; preset = null; rebuild(true, L.toUpperCase() + " steps set to " + fmt(M.axes[L].spm)); return; }
+  });
+
+  // ------------------------------------------------------------ config.yaml -> builder (best effort)
+  function importModel(t) {
+    const tree = S.parseConfig(t).root;
+    const v = (p) => { const n = S.get(tree, p); return n && n.value != null ? String(n.value) : ""; };
+    const g = (pin) => { const p = S.parsePin(pin || "NO_PIN"); return p.none ? null : "gpio." + p.gpio; };
+    const dv = (L, mk, f) => { const mo = S.get(tree, "axes." + L + "." + mk); if (!mo) return ""; for (const c of mo.children) { const n = S.child(c, f); if (n && n.value != null) return String(n.value); } return ""; };
+    const key = v("board");
+    let board = /dpCREATOR/i.test(key) ? "r3" : "custom";
+    if (board === "r3" && g(v("probe.pin")) === "gpio.45") board = "r2";
+    const custom = board === "custom" ? customFromTree(tree, t) : clone(M.custom);
+    const b = board === "custom" ? customBoard(custom) : BOARD[board], T = terminals(b);
+    const term = (pin, kinds) => { const gp = g(pin); if (!gp) return ""; const tt = T.find((x) => x.pin.split(":")[0] === gp && (!kinds || kinds.includes(x.kind))); return tt ? tt.id : ""; };
+    const m = clone(PRESETS.router.m);
+    m.custom = custom; m.fw = board === "custom" && !/\b(tools|offset_mm):/.test(t) ? "main" : M.fw === "main" && !/\b(tools|offset_mm):/.test(t) ? "main" : "dp";
+    m.board = board; m.name = v("name") || "machine";
+    const pulse = +v("stepping.pulse_us") || 3;
+    m.driver = pulse >= 5 ? (+v("stepping.dir_delay_us") >= 5 ? "tb6600" : "opto") : pulse <= 2 ? "stepstick" : "dm542";
+    m.holdIdle = +v("stepping.idle_ms") === 255;
+    let swType = null;
+    const notes = [];
+    for (const L of ["x", "y", "z", "a"]) {
+      const a = S.get(tree, "axes." + L);
+      if (!a) { m.axes[L].on = false; continue; }
+      const ax2 = m.axes[L];
+      ax2.on = true;
+      ax2.travel = +v("axes." + L + ".max_travel_mm") || ax2.travel;
+      ax2.spm = +v("axes." + L + ".steps_per_mm") || ax2.spm;
+      ax2.rate = +v("axes." + L + ".max_rate_mm_per_min") || ax2.rate;
+      ax2.accel = +v("axes." + L + ".acceleration_mm_per_sec2") || ax2.accel;
+      const homing = +v("axes." + L + ".homing.cycle") > 0;
+      ax2.sw = homing ? (/^true$/i.test(v("axes." + L + ".homing.positive_direction")) ? "max" : "min") : "none";
+      ax2.motors = [];
+      for (const mk of ["motor0", "motor1"]) {
+        const step = dv(L, mk, "step_pin");
+        if (!step) continue;
+        const sid = term(step, ["out"]);
+        const blk = sid ? sid.split(".")[0] : null;
+        if (!blk) { notes.push(L.toUpperCase() + " " + mk + " uses a pin that is not on an axis block"); continue; }
+        const lim = ["limit_all_pin", "limit_neg_pin", "limit_pos_pin"].map((k) => v("axes." + L + "." + mk + "." + k)).find((x) => g(x)) || "";
+        const hasLim = !!g(lim);
+        if (hasLim && swType === null) { const low = /:low/.test(lim); swType = (low === (b.limNC === ":low")) ? "nc" : "no"; }
+        const dir = dv(L, mk, "direction_pin");
+        ax2.motors.push({ blk, lim: hasLim, inv: /:low/.test(dir) });
+      }
+      if (!ax2.motors.length) { ax2.motors = [{ blk: L.toUpperCase(), lim: true }]; }
+    }
+    m.switchType = swType || "nc";
+    // a moving bed: the Y direction pin comment says so
+    const dn = S.get(tree, "axes.y.motor0.standard_stepper.direction_pin") || S.get(tree, "axes.y.motor0.stepstick.direction_pin");
+    m.bed = !!(dn && /\bbed\b/i.test(t.split("\n")[dn.line - 1] || ""));
+    if (m.bed) m.axes.y.motors.forEach((mo) => (mo.inv = !mo.inv));
+    m.axes.y.motors.forEach((mo, i) => { if (i === 0 && mo.inv) mo.inv = false; });
+    m.inputs = {}; m.outputs = {};
+    const IN = Object.fromEntries(INPUTS.map((x) => [x[0], x[3]]));
+    for (const [f, p] of Object.entries(IN)) { const id = term(v(p), ["in", "lim", "io"]); if (id) m.inputs[f] = id; else if (g(v(p))) notes.push(p + " is not on a terminal of this board"); }
+    const OUT = Object.fromEntries(OUTPUTS.map((x) => [x[0], x[3]]));
+    for (const [f, p] of Object.entries(OUT)) { const id = term(v(p), ["out", "io"]); if (id) m.outputs[f] = id; }
+    prep(m);
+    const f3 = (s) => (s || "").split(/\s+/).map(Number);
+    if (S.get(tree, "oled")) { m.oled = { on: true, sda: term(v("i2c0.sda_pin"), ["io", "in", "out"]), scl: term(v("i2c0.scl_pin"), ["io", "in", "out"]), w: +v("oled.width") || 128, h: +v("oled.height") || 64, addr: (v("oled.i2c_address") || "0x3c").toLowerCase(), flip: !/^false$/i.test(v("oled.flip")) }; }
+    const unq = (s) => String(s || "").replace(/^"(.*)"$/, "$1");
+    m.macros = { startup0: unq(v("macros.startup_line0")), m0: unq(v("macros.macro0")), m1: unq(v("macros.macro1")), m2: unq(v("macros.macro2")), m3: unq(v("macros.macro3")), afterHoming: unq(v("macros.after_homing")), afterReset: unq(v("macros.after_reset")), afterUnlock: unq(v("macros.after_unlock")) };
+    if (/^true$/i.test(v("parking.enable"))) m.parking = { on: true, target: +v("parking.target_mpos_mm") || -5, rate: +v("parking.rate_mm_per_min") || 800, pullout: +v("parking.pullout_distance_mm") || 5, pulloutRate: +v("parking.pullout_rate_mm_per_min") || 250 };
+    if (S.get(tree, "atc_manual")) m.atc = { on: true, safeZ: +v("atc_manual.safe_z_mpos_mm") || -5, change: f3(v("atc_manual.change_mpos_mm")), ets: f3(v("atc_manual.ets_mpos_mm")), etsZ: +v("atc_manual.ets_rapid_z_mpos_mm") || -5, seek: +v("atc_manual.probe_seek_rate_mm_per_min") || 200, feed: +v("atc_manual.probe_feed_rate_mm_per_min") || 80 };
+    m.spindles = [];
+    for (const c of tree.children) {
+      if (!schema.isSpindle(c.key) || c.key === "NoSpindle") continue;
+      const cv = (k) => { const n = S.child(c, k); return n && n.value != null ? String(n.value) : ""; };
+      const rpm = +((cv("speed_map").match(/(\d+)=100/) || [])[1]) || 24000;
+      let s;
+      if (VFDS.includes(c.key) || c.key === "ModbusVFD") s = { type: "VFD", vfd: VFDS.includes(c.key) ? c.key : "Huanyang", modbus: +cv("modbus_id") || 1, baud: +v("uart2.baud") || 9600, rpm, up: +cv("spinup_ms") || 5000, down: +cv("spindown_ms") || 6000 };
+      else if (c.key === "PlasmaSpindle") s = { type: "PlasmaSpindle", en: term(cv("enable_pin"), ["out", "io"]), arcOk: term(cv("arc_ok_pin"), ["in", "lim", "io"]), arcWait: +cv("arc_wait_ms") || 1000 };
+      else if (["PWM", "10V", "Relay", "Laser", "OnOff"].includes(c.key)) s = { type: c.key === "OnOff" ? "Relay" : c.key, out: term(cv("output_pin"), ["out", "io"]), en: term(cv("enable_pin"), ["out", "io"]), dir: term(cv("direction_pin"), ["out", "io"]), hz: +cv("pwm_hz") || 5000, rpm, maxS: rpm, low: /:low/.test(cv("output_pin")) && !(b.extra.find((x) => x.id === "PWM" && x.low)), up: +cv("spinup_ms") || 3000, down: +cv("spindown_ms") || 3000 };
+      else { notes.push(c.key + " is not in the builder"); continue; }
+      if (cv("tools")) { s.tools = cv("tools").split(/\s+/)[0]; s.off = (cv("offset_mm") || "0 0 0").split(/\s+/).map(Number); }
+      m.spindles.push(s);
+    }
+    if (!m.spindles.length) m.spindles.push({ type: "Relay", out: "", rpm: 24000 });
+    m.pendant = !!S.get(tree, "uart_channel1") && !!b.pendant;
+    m.net = S.get(tree, "ethernet") ? "eth" : "wifi";
+    m.ethInt = !!g(v("ethernet.int_pin")); m.ethHz = +v("ethernet.frequency_hz") || 8000000;
+    m.sd = !!S.get(tree, "sdcard"); m.sdHz = +v("sdcard.frequency_hz") || 4000000;
+    return { m, notes };
+  }
+  // a config from any other board: its pins become the custom board's terminals
+  function customFromTree(tree, t) {
+    const v = (p) => { const n = S.get(tree, p); return n && n.value != null ? String(n.value) : ""; };
+    const g = (pin) => { const p = S.parsePin(pin || "NO_PIN"); return p.none || p.gpio == null ? "" : "gpio." + p.gpio; };
+    const dv = (L, mk, f) => { const mo = S.get(tree, "axes." + L + "." + mk); if (!mo) return ""; for (const c of mo.children) { const n = S.child(c, f); if (n && n.value != null) return String(n.value); } return ""; };
+    const chip = chipOfPins(tree);
+    const c = { chip, octal: chip === "esp32s3", name: v("board") || "custom", engine: v("stepping.engine") || "RMT", pullups: /:pu/.test(t), blocks: { X: ["", "", ""], Y: ["", "", ""], Z: ["", "", ""], A: ["", "", ""] }, enable: g(v("axes.shared_stepper_disable_pin")), enableLow: /:low/.test(v("axes.shared_stepper_disable_pin")), extra: [], pendant: null, rs485: null, spi: [g(v("spi.miso_pin")), g(v("spi.mosi_pin")), g(v("spi.sck_pin"))], sd: g(v("sdcard.cs_pin")), eth: { cs: g(v("ethernet.cs_pin")), int: g(v("ethernet.int_pin")) } };
+    const free = ["X", "Y", "Z", "A"];
+    const motors = [];
+    for (const L of ["x", "y", "z", "a"]) for (const mk of ["motor0", "motor1"]) { const st = g(dv(L, mk, "step_pin")); if (st) motors.push({ L, mk, st }); }
+    motors.sort((a, b) => (a.mk > b.mk ? 1 : a.mk < b.mk ? -1 : 0));
+    for (const mo of motors) {
+      const want = mo.L.toUpperCase(), blk = free.includes(want) ? want : free[0];
+      if (!blk) break;
+      free.splice(free.indexOf(blk), 1);
+      const base = "axes." + mo.L + "." + mo.mk + ".";
+      c.blocks[blk] = [mo.st, g(dv(mo.L, mo.mk, "direction_pin")), g(["limit_all_pin", "limit_neg_pin", "limit_pos_pin"].map((k) => v(base + k)).find((x) => g(x)) || "")];
+      if (!c.enable) c.enable = g(dv(mo.L, mo.mk, "disable_pin"));
+    }
+    const seen = new Set(Object.values(c.blocks).flat().filter(Boolean));
+    let ni = 1, no = 1;
+    const term = (path, kind, label) => { const pin = g(v(path)); if (!pin || seen.has(pin)) return; seen.add(pin); c.extra.push({ id: kind === "in" ? "IN" + ni++ : "OUT" + no++, label, pin, kind }); };
+    term("i2c0.sda_pin", "io", "OLED SDA"); term("i2c0.scl_pin", "io", "OLED SCL");
+    INPUTS.forEach((x) => term(x[3], "in", x[1].replace(/ \(.*\)$/, "")));
+    for (const s of tree.children) {
+      if (!schema.isSpindle(s.key)) continue;
+      term(s.key + ".output_pin", "out", s.key + " signal"); term(s.key + ".enable_pin", "out", s.key + " enable"); term(s.key + ".arc_ok_pin", "in", "Arc OK"); term(s.key + ".direction_pin", "out", s.key + " direction");
+    }
+    OUTPUTS.forEach((x) => term(x[3], "out", x[2] === "Status lights" && x[0] !== "rgb" ? x[1] + " light" : x[1].replace(/ \(.*\)$/, "")));
+    if (S.get(tree, "uart_channel1") && g(v("uart1.txd_pin"))) c.pendant = { tx: g(v("uart1.txd_pin")), rx: g(v("uart1.rxd_pin")) };
+    if (g(v("uart2.txd_pin"))) c.rs485 = { tx: g(v("uart2.txd_pin")), rx: g(v("uart2.rxd_pin")), rts: g(v("uart2.rts_pin")) };
+    return c;
+  }
+  // what the builder can't express: it would be lost on import
+  function unsupported(t) {
+    const tree = S.parseConfig(t).root, out = new Set();
+    if (/\bi2so\.\d+/i.test(t) || S.child(tree, "i2so")) out.add("I2S shift-register pins (i2so)");
+    if (/\b(pinext|uart_channel\d*)\.\d+|\bpinext\d*\.\d+/i.test(t)) out.add("pin extenders");
+    const k = S.child(tree, "kinematics");
+    if (k && k.children.some((c) => !/^cartesian$/i.test(c.key))) out.add(k.children[0].key + " kinematics");
+    const ax = S.child(tree, "axes");
+    if (ax) for (const a of ax.children) for (const m of a.children) if (/^motor\d$/i.test(m.key)) for (const d of m.children) {
+      if (d.children.length === 0 && /^(standard_stepper|stepstick|null_motor)$/i.test(d.key)) continue;
+      if (/^(tmc_|rc_servo|solenoid|dynamixel|unipolar)/i.test(d.key)) out.add(d.key.replace(/^tmc_.*/i, "TMC drivers set over UART/SPI") + " motors");
+    }
+    if (ax && ax.children.some((a) => /^[bcuvw]$/i.test(a.key))) out.add("axes beyond A");
+    for (const c of tree.children) if (/^(BESC|HBridge|DAC|OnOff)$/i.test(c.key) || (/^ModbusVFD$/i.test(c.key))) out.add(c.key + " spindle");
+    return [...out];
+  }
+  function doImport() {
+    let r;
+    const no = (() => { try { return unsupported(ta.value); } catch (e) { return []; } })();
+    if (no.length) { showTab("yaml"); return toast("The builder can't edit this config without losing parts of it: it uses " + no.join(", ") + ". The drawing, wiring and checks still follow it here."); }
+    try { r = importModel(ta.value); } catch (e) { return toast("Could not read this config: " + e.message); }
+    // anything in the pasted config that the rebuilt one lacks is reported, so nothing disappears silently
+    try {
+      const before = S.parseConfig(ta.value).root, after = S.parseConfig(gen(prep(clone(r.m)))).root;
+      const ub = pinUses(before), ua = pinUses(after), lost = [];
+      for (const [n, list] of ub) if (!ua.has(n)) lost.push(list[0].name + " (IO" + n + ")");
+      const secs = (t) => new Set(t.children.filter((c) => c.children.length).map((c) => c.key.toLowerCase()));
+      const sa = secs(after);
+      for (const s of secs(before)) if (!sa.has(s) && !/^(macros|user_inputs|user_outputs|control|probe|coolant)$/.test(s)) lost.push(s + ":");
+      if (lost.length) r.notes.push(lost.join(", "));
+    } catch (e) { /* the import itself stands */ }
+    M = prep(r.m); preset = null;
+    showTab("build");
+    rebuild(true, "Loaded into the builder" + (r.notes.length ? ". Not carried over: " + r.notes.join("; ") : ""));
+  }
+  $("import").onclick = doImport; $("import2").onclick = doImport;
+
+  // ------------------------------------------------------------ read the config for the drawing
+  const ta = $("yaml");
+  function nval(n, d) { const v = n && n.value != null ? parseFloat(n.value) : NaN; return isNaN(v) ? d : v; }
+  const pinOn = (n) => !!(n && n.value != null && !S.parsePin(String(n.value)).none);
+  function readModel(t) {
+    const tree = S.parseConfig(t).root;
+    const ax = S.child(tree, "axes");
+    const axes = {};
+    for (const L of ["x", "y", "z", "a"]) {
+      const a = ax && S.child(ax, L);
+      if (!a) { if (L === "a") continue; throw new Error("needs axes " + L); }
+      const h = S.child(a, "homing");
+      const motors = a.children.filter((c) => /^motor[01]$/.test(c.key)).map((m) => {
+        const lim = ["limit_all_pin", "limit_neg_pin", "limit_pos_pin"].map((k) => S.child(m, k)).find((n) => n && !S.parsePin(n.value).none);
+        const drv = m.children.find((c) => S.child(c, "step_pin")) || null;
+        return { key: m.key, limit: lim ? lim.value : "", step: drv ? (S.child(drv, "step_pin") || {}).value || "" : "", dir: drv ? (S.child(drv, "direction_pin") || {}).value || "" : "", hard: /^true$/i.test((S.child(m, "hard_limits") || {}).value || "") };
+      }).filter((m) => m.step || m.limit);
+      const dirNode = (() => { const m0 = S.child(a, "motor0"); const d = m0 && m0.children.find((c) => S.child(c, "direction_pin")); return d && S.child(d, "direction_pin"); })();
+      axes[L] = {
+        travel: Math.max(5, nval(S.child(a, "max_travel_mm"), L === "z" ? 100 : L === "a" ? 360 : 500)),
+        spm: nval(S.child(a, "steps_per_mm"), 0), rate: nval(S.child(a, "max_rate_mm_per_min"), 1000),
+        homed: !!(h && nval(S.child(h, "cycle"), 0) > 0), cycle: nval(h && S.child(h, "cycle"), 0),
+        posDir: !!(h && /^true$/i.test((S.child(h, "positive_direction") || {}).value || "")),
+        mpos: nval(h && S.child(h, "mpos_mm"), 0),
+        soft: /^true$/i.test((S.child(a, "soft_limits") || {}).value || ""),
+        motors, hasSwitch: motors.some((m) => m.limit), hard: motors.some((m) => m.hard),
+        bedHint: !!(dirNode && /\bbed\b/i.test(t.split("\n")[dirNode.line - 1] || "")),
+      };
+    }
+    const spindles = tree.children.filter((c) => schema.isSpindle(c.key) && c.key !== "NoSpindle").map((s) => {
+      const off = ((S.child(s, "offset_mm") || {}).value || "0 0 0").split(/\s+/).map(Number);
+      return { kind: s.key, tools: ((S.child(s, "tools") || {}).value || "").trim(), offset: [off[0] || 0, off[1] || 0, off[2] || 0], modbus: (S.child(s, "modbus_id") || {}).value };
+    });
+    const g = (p) => pinOn(S.get(tree, p));
+    return {
+      axes, spindles, pulse: nval(S.get(tree, "stepping.pulse_us"), 4), dd: nval(S.get(tree, "stepping.dir_delay_us"), 0), name: (S.child(tree, "name") || {}).value || "",
+      board: (S.child(tree, "board") || {}).value || "",
+      io: {
+        probe: g("probe.pin"), toolsetter: g("probe.toolsetter_pin"), door: g("control.safety_door_pin"), estop: g("control.estop_pin"), reset: g("control.reset_pin"),
+        hold: g("control.feed_hold_pin"), start: g("control.cycle_start_pin"), homebtn: g("control.homing_button_pin"),
+        flood: g("coolant.flood_pin"), mist: g("coolant.mist_pin"), user: [0, 1, 2, 3, 4, 5, 6, 7].filter((i) => g("user_outputs.digital" + i + "_pin")),
+        macro: [0, 1, 2, 3].filter((i) => g("control.macro" + i + "_pin")), single: g("control.single_block_pin"),
+        leds: Object.fromEntries(["idle", "run", "hold", "alarm", "door"].map((k) => [k, g("status_outputs." + k + "_pin")])), rgb: g("rgbled.pin"),
+        oled: !!S.get(tree, "oled") && g("i2c0.sda_pin"),
+      },
+      pendant: !!S.get(tree, "uart_channel1"), eth: !!S.get(tree, "ethernet"), ethInt: g("ethernet.int_pin"), sd: !!S.get(tree, "sdcard"), tree,
+    };
+  }
+
+  function chipOfPins(tree) {
+    const ns = []; (function w(n) { for (const c of n.children) { if (c.children.length) w(c); else if (/(^|_)pin$/.test(c.key)) { const pp = S.parsePin(String(c.value || "")); if (pp.gpio != null) ns.push(pp.gpio); } } })(tree);
+    if (ns.some((n) => n > 39)) return "esp32s3";
+    if (ns.some((n) => [22, 23, 25].includes(n) || (n >= 32 && n <= 34))) return "esp32";
+    return "esp32s3";
+  }
+  function chipNow() {
+    if (src === "build") return M.board === "custom" ? { chip: M.custom.chip, octal: M.custom.chip === "esp32s3" && M.custom.octal } : { chip: "esp32s3", octal: true };
+    let tree; try { tree = S.parseConfig(text).root; } catch (e) { return { chip: "esp32s3", octal: true }; }
+    const key = ((S.child(tree, "board") || {}).value || "");
+    if (/dpCREATOR/i.test(key)) return { chip: "esp32s3", octal: true };
+    const chip = chipOfPins(tree);
+    return { chip, octal: chip === "esp32s3" };
+  }
+  function check() {
+    const cc = chipNow();
+    const r = S.validate(text, M.fw === "main" ? schemaMain : schema, { chip: cc.chip, octal: cc.octal });
+    $("status").innerHTML = (r.ok ? '<span class="pill ok">valid config</span>' : '<span class="pill err">' + r.errors + " error" + (r.errors > 1 ? "s" : "") + "</span>") + (r.warnings ? ' <span class="pill warn">' + r.warnings + " warning" + (r.warnings > 1 ? "s" : "") + "</span>" : "");
+    $("status").title = "Checked against the " + (M.fw === "main" ? "mainstream FluidNC" : "dpCREATOR FluidNC 4.1.1") + " key list and the " + S.CHIPS[cc.chip].label + " pin rules";
+    $("status").insertAdjacentHTML("beforeend", ' <span class="note">' + S.CHIPS[cc.chip].label + "</span>");
+    $("probs").innerHTML = r.problems.filter((p) => p.level !== "info").map((p) => '<li class="' + p.level + '"><span class="lv">' + (p.level === "error" ? "ERROR" : "WARN") + (p.line ? '<br><a data-line="' + p.line + '">line ' + p.line + "</a>" : "") + "</span><span>" + esc(p.msg) + "</span></li>").join("");
+    return r;
+  }
+  $("probs").addEventListener("click", (e) => { const a = e.target.closest("a[data-line]"); if (a) selectLine(+a.dataset.line, true); });
+  $("status").addEventListener("click", () => { if (!/pill ok/.test($("status").innerHTML) || true) showTab("yaml"); });
+  function selectLine(n, focus) {
+    const ls = ta.value.split("\n"); let pos = 0;
+    for (let i = 0; i < n - 1; i++) pos += ls[i].length + 1;
+    if (focus) ta.focus();
+    ta.setSelectionRange(pos, pos + (ls[n - 1] || "").length);
+    ta.scrollTop = Math.max(0, (n - 6) * 18);
+  }
+
+  function facts() {
+    const A = cfg.axes, fwHz = 1000000 / (2 * cfg.pulse + cfg.dd);
+    $("facts").innerHTML = Object.keys(A).map((L) => {
+      const a = A[L], hz = (a.spm * a.rate) / 60, u = L === "a" ? "°" : " mm";
+      const range = a.homed ? (a.posDir ? fmt(a.mpos - a.travel) + " to " + fmt(a.mpos) : fmt(a.mpos) + " to +" + fmt(a.mpos + a.travel)) : "no homing";
+      const mot = a.motors.length > 1 ? ", " + a.motors.length + " motors" : "";
+      return "<div><b>" + L.toUpperCase() + "</b> " + fmt(a.travel) + u + ", " + fmt(a.spm) + " steps, " + fmt(a.rate) + u + "/min = " + (hz / 1000).toFixed(1) + " kHz" + (hz > fwHz ? ' <span class="bad">over the firmware limit</span>' : "") + ", machine " + range + mot + "</div>";
+    }).join("") + (cfg.spindles.length ? "<div><b>Tools</b> " + cfg.spindles.map((s) => esc(s.kind) + (s.tools ? " (M6 T" + esc(s.tools) + ")" : "")).join(", ") + "</div>" : "");
+  }
+
+  // ------------------------------------------------------------ wiring view: every terminal of the board and what the config puts on it
+  const FRIEND = [
+    [/^axes\.(\w)\.(motor\d)\.\w+\.step_pin$/, (m) => m[1].toUpperCase() + " " + m[2] + " STEP"],
+    [/^axes\.(\w)\.(motor\d)\.\w+\.direction_pin$/, (m) => m[1].toUpperCase() + " " + m[2] + " DIR"],
+    [/^axes\.(\w)\.(motor\d)\.limit_(all|neg|pos)_pin$/, (m) => m[1].toUpperCase() + " " + m[2] + " limit switch"],
+    [/^axes\.shared_stepper_disable_pin$/, () => "Driver enable, all axes"],
+    [/^probe\.pin$/, () => "Probe"], [/^probe\.toolsetter_pin$/, () => "Tool setter"],
+    [/^control\.safety_door_pin$/, () => "Safety door"], [/^control\.reset_pin$/, () => "Reset button"], [/^control\.feed_hold_pin$/, () => "Feed hold button"],
+    [/^control\.cycle_start_pin$/, () => "Cycle start button"], [/^control\.estop_pin$/, () => "E-stop"], [/^control\.fault_pin$/, () => "Driver fault"], [/^control\.homing_button_pin$/, () => "Home button"],
+    [/^control\.macro(\d)_pin$/, (m) => "Macro " + m[1] + " button"],
+    [/^coolant\.flood_pin$/, () => "Flood / extraction (M8)"], [/^coolant\.mist_pin$/, () => "Mist / air (M7)"],
+    [/^user_outputs\.digital(\d)_pin$/, (m) => "User output " + m[1] + " (M62 P" + m[1] + ")"],
+    [/^user_inputs\.digital(\d)_pin$/, (m) => "User input " + m[1]],
+    [/^PlasmaSpindle\.enable_pin$/, () => "Plasma torch fire"], [/^PlasmaSpindle\.arc_ok_pin$/, () => "Plasma arc OK"],
+    [/^(\w+)\.output_pin$/, (m) => m[1] + " signal"], [/^(\w+)\.enable_pin$/, (m) => m[1] + " enable"], [/^(\w+)\.direction_pin$/, (m) => m[1] + " direction"],
+    [/^uart1\.(txd|rxd|rts)_pin$/, (m, t) => (S.get(t, "uart_channel1") ? "Pendant " : "UART1 ") + m[1].replace("d", "").toUpperCase()],
+    [/^uart2\.(txd|rxd|rts)_pin$/, (m) => "RS485 " + { txd: "TX", rxd: "RX", rts: "DE" }[m[1]]],
+    [/^spi\.(miso|mosi|sck)_pin$/, (m) => "SPI " + m[1].toUpperCase()], [/^sdcard\.cs_pin$/, () => "SD card CS"], [/^sdcard\.card_detect_pin$/, () => "SD card detect"],
+    [/^ethernet\.cs_pin$/, () => "W5500 CS"], [/^ethernet\.int_pin$/, () => "W5500 INT"], [/^ethernet\.rst_pin$/, () => "W5500 reset"],
+    [/^status_outputs\.(\w+)_pin$/, (m) => "Status light: " + m[1]], [/^rgbled\.pin$/, () => "RGB status LED"], [/^i2c\d\.(sda|scl)_pin$/, (m) => "OLED / I2C " + m[1].toUpperCase()],
+    [/^control\.single_block_pin$/, () => "Single block switch"], [/^user_outputs\.analog(\d)_pin$/, (m) => "PWM output " + m[1] + " (M67 E" + m[1] + ")"],
+  ];
+  function friendly(path, tree) { for (const [re, f] of FRIEND) { const m = path.match(re); if (m) return f(m, tree); } return path.replace(/\./g, "/"); }
+  function pinUses(tree) {
+    const out = new Map();
+    (function walk(n, p) {
+      for (const c of n.children) {
+        const path = p ? p + "." + c.key : c.key;
+        if (c.children.length) walk(c, path);
+        else if (/(^|_)pin$/.test(c.key) && c.value != null) {
+          const pp = S.parsePin(String(c.value));
+          if (!pp.none && pp.gpio != null) { if (!out.has(pp.gpio)) out.set(pp.gpio, []); out.get(pp.gpio).push({ path, name: friendly(path, tree), raw: String(c.value), line: c.line }); }
+        }
+      }
+    })(tree, "");
+    return out;
+  }
+  function guessBoard() {
+    if (src === "build") return M.board;
+    if (/dpCREATOR/i.test(cfg.board)) { const p = S.get(cfg.tree, "probe.pin"); return p && /gpio\.45/.test(p.value) ? "r2" : "r3"; }
+    return null;
+  }
+  function renderWiring() {
+    const W = $("wiring"); if (W.hidden || !cfg) return;
+    const uses = pinUses(cfg.tree), seen = new Set(), bk = guessBoard(), b = bk === "custom" ? boardOf(M) : bk && BOARD[bk];
+    const gnum = (pin) => +pin.split(":")[0].split(".")[1];
+    const row = (label, pin, extraCls) => {
+      if (!pin) return "";
+      const n = gnum(pin), u = uses.get(n) || []; seen.add(n);
+      const cls = u.length > 1 && !u.every((x) => /^(spi\.)/.test(x.path)) ? "clash" : u.length ? "" : "free";
+      return '<div class="wr ' + cls + (extraCls ? " " + extraCls : "") + '"><span class="t">' + esc(label) + '</span><span class="g">IO' + n + '</span><span class="f">' + (u.length ? u.map((x) => '<a data-line="' + x.line + '" title="' + esc(x.path + ": " + x.raw) + '">' + esc(x.name) + (/:low/.test(x.raw) ? " (active low)" : "") + "</a>").join("<br>") : extraCls === "dead" ? "not usable" : "not used") + "</span></div>";
+    };
+    let h = "";
+    if (b) {
+      h += '<div class="wg"><h3>' + esc(b.label) + (b.custom ? ": motor pins" : ": axis blocks") + '</h3><p class="wn">' + (b.custom ? "STEP, DIR and limit per axis, as set under Your board's pins." : "Each block: 1/3/5 +5V, 2 ENA−, 4 PUL−, 6 DIR−, 8/7 limit switch.") + (b.enable ? " Enable is shared: " + esc(b.enable.replace("gpio.", "IO")) + "." : "") + "</p>";
+      for (const [k, p] of Object.entries(b.blocks)) {
+        const dead = b.unusable && b.unusable[k] ? "dead" : "";
+        h += b.custom ? row(k + " STEP", p[0]) + row(k + " DIR", p[1]) + row(k + " limit", p[2]) : row(k + " STEP (pin 4)", p[0], dead) + row(k + " DIR (pin 6)", p[1], dead) + row(k + " limit (8/7)", p[2]);
+      }
+      if (b.custom && b.enable && b.enable !== "NO_PIN") h += row("Driver enable", b.enable);
+      else if (b.enable) seen.add(gnum(b.enable));
+      h += "</div>";
+      h += '<div class="wg"><h3>' + (b.custom ? "Inputs and outputs" : "I/O terminals") + "</h3>" + b.extra.map((t) => row(t.label, t.pin)).join("") + "</div>";
+      let ports = "";
+      if (b.pendant) ports += row("Pendant TX", b.pendant.tx) + row("Pendant RX", b.pendant.rx);
+      if (b.rs485) ports += row("RS485 TX", b.rs485.tx) + row("RS485 RX", b.rs485.rx) + row("RS485 DE", b.rs485.rts);
+      if (ports) h += '<div class="wg"><h3>Ports</h3><p class="wn">' + (b.custom ? "Pendant: SmartTabUI at 1 Mbaud. RS485 through a transceiver to the VFD." : "PENDANT: SmartTabUI at 1 Mbaud. RS485: A/B to the VFD.") + "</p>" + ports + "</div>";
+      h += '<div class="wg"><h3>SPI bus: SD card and W5500</h3><p class="wn">MISO/MOSI/SCK are shared by both. ' + (b.eth.intOnBoard ? "The W5500 INT is wired on the board." : b.eth.int ? "W5500 INT on IO" + gnum(b.eth.int) + "." : "No W5500 INT pin: it is polled.") + "</p>" + row("SPI MISO", b.spi[0]) + row("SPI MOSI", b.spi[1]) + row("SPI SCK", b.spi[2]) + row("SD card CS", b.sd) + row("W5500 CS", b.eth.cs) + row("W5500 INT", b.eth.int) + "</div>";
+    }
+    const other = [...uses.keys()].filter((n) => !seen.has(n)).sort((a, c) => a - c);
+    if (other.length) h += '<div class="wg"><h3>' + (b ? "Pins not on a board terminal" : "Pins in this config") + '</h3><p class="wn">' + (b ? "These need a wire soldered to the module, or they are a mistake." : "The board is not a dpCREATOR board, so the pins are listed by GPIO.") + "</p>" + other.map((n) => row("GPIO " + n, "gpio." + n)).join("") + "</div>";
+    W.innerHTML = h;
+  }
+  $("wiring").addEventListener("click", (e) => { const a = e.target.closest("a[data-line]"); if (a) { showTab("yaml"); selectLine(+a.dataset.line, true); } });
+
+  // ------------------------------------------------------------ drawing
+  const plan = $("plan"), elev = $("elev");
+  function el(tag, attrs, parent, textContent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) if (k !== "stroke-width") e.setAttribute(k, attrs[k]);
+    if (textContent != null) e.textContent = textContent;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  const phys = { x: 0, y: 0, z: 0, a: 0 };   // tool position from the left / front / bottom of the travel, mm (A in degrees)
+  let homed = false, alarm = "", workZero = null, activeTool = 0, step = 100, trail = [];
+  let D = {};
+  const bedState = { checked: false };   // what moves on Y: the builder says it, a pasted config says it in its Y DIR comment
+  const $bed = () => bedState;
+
+  function mainTool() { const sp = cfg.spindles; return sp.find((s) => s.kind !== "Laser" || sp.length === 1) || sp[0] || null; }
+  function accG(parent, secId, label) { return el("g", { class: "acc", tabindex: 0, role: "button", "data-sec": secId, "aria-label": label + ". Opens its settings." }, parent); }
+
+  function draw() {
+    const A = cfg.axes, tx = A.x.travel, ty = A.y.travel, bed = $bed().checked, io = cfg.io;
+    const big = Math.max(tx, ty);
+    const k = big / 1000;
+    const m = 120 * k + 60;
+    const rail = 40 * k + 14, beamW = 90 * k + 36, spR = 45 * k + 14;
+    plan.innerHTML = "";
+    const r = plan.getBoundingClientRect();
+    const sidePad = m + 140 * k + 70;
+    // the row of boxes below the frame is sized in screen pixels: work out the scale twice
+    let bottom = sidePad, vb, u = 1;
+    for (let i = 0; i < 3; i++) {
+      vb = [-sidePad, -ty - sidePad + (i ? 0 : 0), tx + 2 * sidePad, ty + sidePad + bottom];
+      u = Math.max(vb[2] / Math.max(1, r.width), vb[3] / Math.max(1, r.height)) || 1;
+      bottom = m + 150 * u + 30 * k;
+    }
+    vb = [-sidePad, -ty - sidePad, tx + 2 * sidePad, ty + sidePad + bottom];
+    u = Math.max(vb[2] / Math.max(1, r.width), vb[3] / Math.max(1, r.height)) || 1;
+    plan.setAttribute("viewBox", vb.join(" "));
+    plan.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    const fs = (px) => px * u;
+    const grid = el("g", {}, plan);
+    for (let x = -Math.floor(sidePad / 100) * 100; x <= tx + sidePad; x += 100) el("line", { x1: x, y1: -ty - sidePad, x2: x, y2: bottom, class: "g-grid" }, grid);
+    for (let y = -Math.floor(bottom / 100) * 100; y <= ty + sidePad; y += 100) el("line", { x1: -sidePad, y1: -y, x2: tx + sidePad, y2: -y, class: "g-grid" }, grid);
+    const mt = mainTool(), kind = mt ? mt.kind : "";
+    const isLaser = kind === "Laser", isPlasma = kind === "PlasmaSpindle";
+    // enclosure with a door when a safety door input is used
+    if (io.door) {
+      const e = fs(14);
+      el("rect", { x: -m - e, y: -ty - m - e, width: tx + 2 * m + 2 * e, height: ty + 2 * m + 2 * e, rx: fs(6), class: "enc" }, plan);
+      const dg = accG(plan, "inputs", "Safety door");
+      el("line", { x1: tx * 0.25, y1: m + e, x2: tx * 0.75, y2: m + e, class: "door" }, dg);
+      el("text", { x: tx / 2, y: m + e + fs(14), "text-anchor": "middle", class: "sw-t", "font-size": fs(11) }, dg, "door switch");
+    }
+    el("rect", { x: -m, y: -ty - m, width: tx + 2 * m, height: ty + 2 * m, class: "frame-fill", opacity: 0.35 }, plan);
+    el("rect", { x: -m, y: -ty - m, width: tx + 2 * m, height: ty + 2 * m, class: "frame" }, plan);
+    // bed: T-slots for a router, honeycomb for a laser, slats for a plasma table
+    const bedG = el("g", {}, plan);
+    const bw = tx + 2 * (m - rail - 16 * k), bx = -(m - rail - 16 * k);
+    const bh = bed ? ty + 60 * k : ty + 2 * (m - 30 * k), by = bed ? -ty - 30 * k : -ty - (m - 30 * k);
+    el("rect", { x: bx, y: by, width: bw, height: bh, class: "bed" }, bedG);
+    if (isLaser) {
+      const g = Math.max(fs(9), 20);
+      for (let x = bx + g; x < bx + bw; x += g) el("line", { x1: x, y1: by, x2: x, y2: by + bh, class: "hc" }, bedG);
+      for (let y = by + g; y < by + bh; y += g) el("line", { x1: bx, y1: y, x2: bx + bw, y2: y, class: "hc" }, bedG);
+    } else if (isPlasma) {
+      for (let x = bx + 50; x < bx + bw; x += 100) el("line", { x1: x, y1: by + 10 * k, x2: x, y2: by + bh - 10 * k, class: "slot" }, bedG);
+    } else {
+      const slotGap = big > 1500 ? 150 : 100;
+      for (let y = by + slotGap / 2; y < by + bh; y += slotGap) el("line", { x1: bx + 10 * k, y1: y, x2: bx + bw - 10 * k, y2: y, class: "slot" }, bedG);
+    }
+    const stw = Math.min(tx * 0.5, 800), sh = Math.min(ty * 0.4, 600);
+    const sx0 = tx * 0.08, sy0 = A.a ? ty * 0.3 : ty * 0.08;
+    el("rect", { x: sx0, y: -sy0 - sh, width: stw, height: sh, class: "stock", fill: "var(--env)" }, bedG);
+    el("text", { x: sx0 + fs(5), y: -sy0 - sh + fs(14), class: "lbl", "font-size": fs(12) }, bedG, isPlasma ? "sheet" : "stock");
+    if (io.probe) {
+      const pg = accG(bedG, "inputs", "Probe touch plate"), s = fs(16);
+      el("rect", { x: sx0 + stw - s - fs(4), y: -sy0 - s - fs(4), width: s, height: s, rx: fs(2), class: "ts", opacity: 0.85 }, pg);
+      el("text", { x: sx0 + stw - fs(4), y: -sy0 - s - fs(9), "text-anchor": "end", class: "sw-t", "font-size": fs(11) }, pg, "touch plate");
+    }
+    if (io.toolsetter) {
+      const tg = accG(bedG, "inputs", "Tool setter"), rr = fs(9), cx = Math.max(tx * 0.03, fs(14)), cy = -ty + Math.max(ty * 0.04, fs(14));
+      el("circle", { cx, cy, r: rr, class: "ts" }, tg);
+      el("circle", { cx, cy, r: rr * 0.45, class: "bx" }, tg);
+      el("text", { x: cx + rr + fs(5), y: cy + fs(4), class: "sw-t", "font-size": fs(11) }, tg, "tool setter");
+    }
+    // rotary A: a chuck and tailstock along X at the front of the bed
+    if (A.a) {
+      const ag = accG(bedG, "axes", "A rotary axis"), len = Math.min(tx * 0.7, 1200), dia = Math.max(60, Math.min(ty * 0.12, 200)), cy = -ty * 0.13, x0 = tx * 0.12;
+      el("rect", { x: x0 - fs(34), y: cy - dia * 0.65, width: fs(28), height: dia * 1.3, rx: fs(3), class: "motor" }, ag);
+      el("rect", { x: x0 - fs(6), y: cy - dia * 0.6, width: fs(10), height: dia * 1.2, class: "rot" }, ag);
+      el("rect", { x: x0 + fs(4), y: cy - dia / 2, width: len, height: dia, rx: dia * 0.08, class: "rot", opacity: 0.9 }, ag);
+      el("rect", { x: x0 + len + fs(4), y: cy - dia * 0.35, width: fs(18), height: dia * 0.7, class: "motor" }, ag);
+      D.rotStripe = el("line", { x1: x0 + fs(4), y1: cy, x2: x0 + fs(4) + len, y2: cy, class: "rot-s" }, ag);
+      D.rot = { cy, dia };
+      el("text", { x: x0 - fs(36), y: cy - dia * 0.65 - fs(5), class: "motor-t", "font-size": fs(12) }, ag, "A rotary · " + (A.a.motors[0] && A.a.motors[0].step || ""));
+    } else D.rotStripe = null;
+    D.bed = bedG;
+    for (const sx of [-m + rail / 2 + 6 * k, tx + m - rail / 2 - 6 * k]) {
+      el("rect", { x: sx - rail / 2, y: -ty - m + 10 * k, width: rail, height: ty + 2 * m - 20 * k, class: "rail" }, plan);
+      el("line", { x1: sx, y1: -ty - m + 14 * k, x2: sx, y2: m - 14 * k, class: "rack" }, plan);
+    }
+    el("rect", { x: 0, y: -ty, width: tx, height: ty, class: "env", "stroke-dasharray": fs(7) + " " + fs(4) }, bed ? bedG : plan);
+    const dimG = el("g", {}, plan);
+    const dy = -ty - m - fs(26), dx = tx + m + fs(26);
+    el("line", { x1: 0, y1: dy, x2: tx, y2: dy, class: "dim" }, dimG);
+    [0, tx].forEach((x) => el("line", { x1: x, y1: dy - fs(8), x2: x, y2: -ty - 6, class: "dim", "stroke-dasharray": "3 3" }, dimG));
+    el("text", { x: tx / 2, y: dy - fs(6), "text-anchor": "middle", class: "dim-t", "font-size": fs(15) }, dimG, "X travel " + fmt(tx) + " mm");
+    el("line", { x1: dx, y1: 0, x2: dx, y2: -ty, class: "dim" }, dimG);
+    [0, -ty].forEach((y) => el("line", { x1: tx + 6, y1: y, x2: dx + fs(8), y2: y, class: "dim", "stroke-dasharray": "3 3" }, dimG));
+    el("text", { x: dx + fs(16), y: -ty / 2, "text-anchor": "middle", class: "dim-t", "font-size": fs(15), transform: "rotate(-90 " + (dx + fs(16)) + " " + -ty / 2 + ")" }, dimG, "Y travel " + fmt(ty) + " mm");
+    [[0, dy], [tx, dy], [dx, 0], [dx, -ty]].forEach(([x, y]) => el("line", { x1: x - fs(4), y1: y + fs(4), x2: x + fs(4), y2: y - fs(4), class: "dim" }, dimG));
+    el("text", { x: tx / 2, y: m + (io.door ? fs(46) : fs(18)), "text-anchor": "middle", class: "front", "font-size": fs(13) }, plan, "FRONT · operator side");
+    D.trail = el("polyline", { class: "trail", points: "" }, bed ? bedG : plan);
+    // gantry
+    const gantry = el("g", {}, plan);
+    el("rect", { x: -m + 4 * k, y: -beamW / 2, width: tx + 2 * m - 8 * k, height: beamW, rx: 4 * k, class: "beam" }, gantry);
+    const ym = A.y.motors;
+    const yMotorX = [-m + rail / 2 + 6 * k, tx + m - rail / 2 - 6 * k];
+    ym.forEach((mo, i) => {
+      const mx = yMotorX[Math.min(i, 1)], s = Math.max(60, fs(18));
+      el("rect", { x: mx - s / 2, y: beamW / 2 - 2 * k, width: s, height: s, rx: 3 * k, class: "motor" }, gantry);
+      el("text", { x: mx + (i ? -s / 2 - fs(6) : s / 2 + fs(6)), y: beamW / 2 + s * 0.65, "text-anchor": i ? "end" : "start", class: "motor-t", "font-size": fs(12) }, gantry, "Y " + mo.key + (mo.step ? " · " + mo.step : ""));
+    });
+    D.gantry = gantry;
+    const car = el("g", {}, gantry);
+    const pw = 160 * k + 60, ph = beamW + 70 * k + 26;
+    el("rect", { x: -pw / 2, y: -ph / 2 - 20 * k, width: pw, height: ph, rx: 4 * k, class: "plate" }, car);
+    const xs = Math.max(55, fs(18));
+    A.x.motors.forEach((mo, i) => {
+      const ox = i ? pw / 2 - xs / 2 : -xs / 2 - (A.x.motors.length > 1 ? pw / 2 - xs / 2 : 0);
+      el("rect", { x: ox, y: -ph / 2 - 20 * k - xs + 4 * k, width: xs, height: xs, rx: 3 * k, class: "motor" }, car);
+    });
+    el("text", { x: pw / 2 + fs(6), y: -ph / 2 - 20 * k - xs / 2, class: "motor-t", "font-size": fs(12) }, car, "X" + (A.x.motors.length > 1 ? " ×2" : "") + " " + (A.x.motors[0] && A.x.motors[0].step || "") + (A.z.motors.length > 1 ? " · Z ×2" : ""));
+    // the main tool at the carriage origin
+    if (isLaser) {
+      const ls = spR * 1.2;
+      el("rect", { x: -ls / 2, y: -ls / 2, width: ls, height: ls, rx: 3 * k, class: "laser" }, car);
+      el("circle", { cx: 0, cy: 0, r: 4 * k + 2.5, class: "laser-c" }, car);
+    } else if (isPlasma) {
+      el("circle", { cx: 0, cy: 0, r: spR * 0.8, class: "torch" }, car);
+      el("path", { d: "M0," + -spR * 0.45 + " L" + spR * 0.18 + ",0 L0," + spR * 0.45 + " L" + -spR * 0.18 + ",0 Z", class: "torch-c" }, car);
+    } else {
+      el("circle", { cx: 0, cy: 0, r: spR, class: "spindle" }, car);
+      el("circle", { cx: 0, cy: 0, r: 4 * k + 2.5, class: "spindle-c" }, car);
+    }
+    el("text", { x: 0, y: ph / 2 - 20 * k + fs(14), "text-anchor": "middle", class: "lbl", "font-size": fs(11.5) }, car, kind ? (kind === "PlasmaSpindle" ? "plasma torch" : schema.isSpindle(kind) && VFDS.includes(kind) ? kind + " spindle" : kind) : "no spindle");
+    // other tools beside it at their offsets
+    cfg.spindles.filter((s) => s !== mt).forEach((s) => {
+      const lx = s.offset[0], ly = -s.offset[1], ls = 34 * k + 12;
+      const cls = s.kind === "Laser" ? "laser" : s.kind === "PlasmaSpindle" ? "torch" : "spindle";
+      el("rect", { x: lx - ls / 2, y: ly - ls / 2, width: ls, height: ls, rx: 2 * k, class: cls }, car);
+      el("circle", { cx: lx, cy: ly, r: 3 * k + 2, class: cls + "-c" }, car);
+      el("text", { x: lx + ls / 2 + fs(5), y: ly + fs(4), class: "lbl", "font-size": fs(12), fill: s.kind === "Laser" ? "var(--laser)" : "var(--tool)" }, car, s.kind + (s.tools ? " T" + s.tools : "") + " (" + s.offset.slice(0, 2).map(fmt).join(", ") + ")");
+    });
+    if (io.flood || io.mist) {
+      const cg = accG(car, "outputs", "Coolant");
+      const a0 = -spR * 1.1;
+      el("path", { d: "M" + (-pw / 2 + fs(4)) + "," + (ph / 2 - 30 * k) + " Q" + a0 + "," + spR * 1.4 + " " + (-spR * 0.5) + "," + spR * 0.55, class: "cool" }, cg);
+      el("text", { x: -pw / 2 - fs(4), y: ph / 2 - 30 * k, "text-anchor": "end", class: "cool-t", "font-size": fs(11) }, cg, [io.flood ? "M8" : "", io.mist ? "M7" : ""].filter(Boolean).join(" ") + (isLaser ? " air" : isPlasma ? "" : " coolant"));
+    }
+    D.car = car;
+    // limit switches
+    D.switches = [];
+    const swS = fs(15);
+    function sw(parent, axis, end, cx, cy, real, label) {
+      const g = el("g", { class: "sw" + (real ? "" : " ghost"), tabindex: 0, role: "button", "aria-label": (real ? label + " switch. Activate to move it to the other end." : "Move the " + axis.toUpperCase() + " switch here"), "data-axis": axis, "data-end": end }, parent);
+      el("rect", { x: cx - swS / 2, y: cy - swS / 2, width: swS, height: swS, rx: 3 * k }, g);
+      if (real) el("text", { x: cx, y: cy - swS / 2 - fs(4), "text-anchor": "middle", class: "sw-t", "font-size": fs(11) }, g, label);
+      D.switches.push(g);
+    }
+    if (A.x.hasSwitch) { const at = A.x.posDir ? "max" : "min"; sw(gantry, "x", "min", -swS, -beamW / 2 - swS * 0.8, at === "min", "X"); sw(gantry, "x", "max", tx + swS, -beamW / 2 - swS * 0.8, at === "max", "X"); }
+    if (A.y.hasSwitch) {
+      const at = A.y.posDir ? "max" : "min";
+      const n = Math.max(1, A.y.motors.filter((mo) => mo.limit).length);
+      const xsPos = n > 1 ? yMotorX.map((x, i) => x + (i ? -1 : 1) * (rail / 2 + swS)) : [yMotorX[1] - rail / 2 - swS];
+      xsPos.forEach((x, i) => {
+        const yy = (end) => (bed ? (end === "min" ? -ty - m * 0.55 : m * 0.55) : (end === "min" ? m * 0.55 : -ty - m * 0.55));
+        sw(plan, "y", "min", x, yy("min"), at === "min", n > 1 ? "Y" + i : "Y");
+        sw(plan, "y", "max", x, yy("max"), at === "max", n > 1 ? "Y" + i : "Y");
+      });
+    }
+    // directions
+    const ax = -m - fs(40), ay = m - 10 * k, al = fs(60);
+    const arr = el("g", {}, plan);
+    el("defs", {}, arr).innerHTML = '<marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" class="arw-h"/></marker>';
+    el("line", { x1: ax, y1: ay, x2: ax + al, y2: ay, class: "arw", "marker-end": "url(#ah)" }, arr);
+    el("line", { x1: ax, y1: ay, x2: ax, y2: ay - al, class: "arw", "marker-end": "url(#ah)" }, arr);
+    el("text", { x: ax + al + fs(4), y: ay + fs(5), class: "arw-t", "font-size": fs(13) }, arr, "+X");
+    el("text", { x: ax - fs(4), y: ay - al - fs(6), class: "arw-t", "font-size": fs(13) }, arr, "+Y");
+    // accessories along the front, below the frame: e-stop and buttons, pendant, VFD, controller
+    const rowY = m + (io.door ? fs(66) : fs(40)), H = fs(62);
+    let cxR = tx + m;
+    const box = (w, sec, label) => { cxR -= w; const g = accG(plan, sec, label); g.dataset.x = cxR; const x = cxR; cxR -= fs(16); return { g, x }; };
+    const ctl = box(fs(170), "ports", "Controller");
+    el("rect", { x: ctl.x, y: rowY, width: fs(170), height: H, rx: fs(5), class: "box" }, ctl.g);
+    el("text", { x: ctl.x + fs(8), y: rowY + fs(17), class: "box-t", "font-size": fs(13) }, ctl.g, ({ r3: "dpCREATOR R3", r2: "dpCREATOR R2" }[guessBoard()] || (cfg.board || "controller").slice(0, 20)));
+    const ports = [cfg.eth ? "ETH" : "WiFi", "USB", cfg.sd ? "SD" : null, cfg.pendant ? "PEND" : null, cfg.spindles.some((s) => VFDS.includes(s.kind) || s.kind === "ModbusVFD") ? "485" : null].filter(Boolean);
+    ports.forEach((p, i) => {
+      const w = fs(30), x = ctl.x + fs(8) + i * (w + fs(2.5)), y = rowY + H - fs(26);
+      el("rect", { x, y, width: w, height: fs(18), rx: fs(2), class: "bx" }, ctl.g);
+      el("text", { x: x + w / 2, y: y + fs(13), "text-anchor": "middle", class: "lbl", "font-size": fs(10) }, ctl.g, p);
+    });
+    if (io.oled) {
+      const o = box(fs(72), "extras", "OLED display");
+      el("rect", { x: o.x, y: rowY, width: fs(72), height: H, rx: fs(5), class: "box" }, o.g);
+      el("rect", { x: o.x + fs(7), y: rowY + fs(7), width: fs(58), height: fs(32), rx: fs(2), style: "fill:#0b1a2a;stroke:var(--ink)" }, o.g);
+      el("text", { x: o.x + fs(11), y: rowY + fs(20), "font-size": fs(9), style: "fill:#7fd4ff;font-family:var(--f-mono)" }, o.g, "Idle");
+      el("text", { x: o.x + fs(11), y: rowY + fs(32), "font-size": fs(9), style: "fill:#7fd4ff;font-family:var(--f-mono)" }, o.g, "X 0.00");
+      el("text", { x: o.x + fs(36), y: rowY + H - fs(8), "text-anchor": "middle", class: "lbl", "font-size": fs(10.5) }, o.g, "OLED");
+    }
+    const lights = [["idle", "var(--ok)"], ["run", "var(--acc2)"], ["hold", "var(--switch)"], ["alarm", "var(--err)"], ["door", "var(--warn)"]].filter(([k2]) => io.leds[k2]);
+    if (lights.length || io.rgb) {
+      const n = lights.length + (io.rgb ? 1 : 0), w = fs(34), L2 = box(w, "outputs", "Status lights");
+      el("rect", { x: L2.x, y: rowY - fs(4), width: w, height: H + fs(8), rx: fs(5), class: "box" }, L2.g);
+      const step2 = (H - fs(6)) / Math.max(n, 1);
+      lights.forEach(([k2, col], i) => el("circle", { cx: L2.x + w / 2, cy: rowY + fs(4) + step2 * (i + 0.5), r: Math.min(fs(6), step2 * 0.4), style: "fill:" + col + ";stroke:var(--ink)" }, L2.g));
+      if (io.rgb) el("circle", { cx: L2.x + w / 2, cy: rowY + fs(4) + step2 * (n - 0.5), r: Math.min(fs(6), step2 * 0.4), style: "fill:url(#rgbg);stroke:var(--ink)" }, L2.g);
+      el("defs", {}, L2.g).innerHTML = '<linearGradient id="rgbg"><stop offset="0" stop-color="#e33"/><stop offset=".5" stop-color="#3c3"/><stop offset="1" stop-color="#36f"/></linearGradient>';
+      el("text", { x: L2.x + w / 2, y: rowY + H + fs(18), "text-anchor": "middle", class: "lbl", "font-size": fs(10.5) }, L2.g, "lights");
+    }
+    // VFD box
+    const vfd = cfg.spindles.find((s) => VFDS.includes(s.kind) || s.kind === "ModbusVFD");
+    if (vfd) {
+      const v = box(fs(112), "tools", "VFD");
+      el("rect", { x: v.x, y: rowY, width: fs(112), height: H, rx: fs(5), class: "box" }, v.g);
+      el("text", { x: v.x + fs(8), y: rowY + fs(17), class: "box-t", "font-size": fs(13) }, v.g, vfd.kind + " VFD");
+      el("text", { x: v.x + fs(8), y: rowY + fs(34), class: "lbl", "font-size": fs(11) }, v.g, "RS485 id " + (vfd.modbus || 1));
+      el("path", { d: "M" + (v.x + fs(112)) + "," + (rowY + H * 0.7) + " H" + ctl.x, class: "cable" }, v.g);
+      el("path", { d: "M" + (v.x + fs(56)) + "," + rowY + " V" + (m - fs(4)), class: "cable" }, v.g);
+    }
+    if (cfg.pendant) {
+      const p = box(fs(58), "ports", "Pendant");
+      el("rect", { x: p.x, y: rowY - fs(4), width: fs(58), height: H + fs(8), rx: fs(9), class: "box" }, p.g);
+      el("rect", { x: p.x + fs(7), y: rowY + fs(4), width: fs(44), height: fs(30), rx: fs(3), class: "bx" }, p.g);
+      el("circle", { cx: p.x + fs(29), cy: rowY + H - fs(12), r: fs(8), class: "bx" }, p.g);
+      el("text", { x: p.x + fs(29), y: rowY + H + fs(18), "text-anchor": "middle", class: "lbl", "font-size": fs(11) }, p.g, "pendant");
+      el("path", { d: "M" + (p.x + fs(58)) + "," + (rowY + H * 0.35) + " C" + (p.x + fs(90)) + "," + (rowY - fs(14)) + " " + (ctl.x - fs(20)) + "," + (rowY - fs(14)) + " " + (ctl.x + fs(140)) + "," + rowY, class: "cable" }, p.g);
+    }
+    const btns = [["estop", "E-stop"], ["reset", "Reset"], ["hold", "Hold"], ["start", "Start"], ["homebtn", "Home"], ["single", "Single"]].filter(([k2]) => io[k2]).concat(io.macro.map((i) => ["macro", "M" + i]));
+    if (btns.length) {
+      const w = fs(16) + btns.length * fs(46), b2 = box(w, "inputs", "Buttons");
+      el("rect", { x: b2.x, y: rowY, width: w, height: H, rx: fs(5), class: "box" }, b2.g);
+      btns.forEach(([k2, l], i) => {
+        const cx = b2.x + fs(31) + i * fs(46), cy = rowY + fs(24);
+        if (k2 === "estop") { el("circle", { cx, cy, r: fs(15), class: "estop-r" }, b2.g); el("circle", { cx, cy, r: fs(10), class: "estop" }, b2.g); }
+        else el("circle", { cx, cy, r: fs(10), class: "bx", style: "fill:" + (k2 === "start" ? "var(--ok)" : k2 === "hold" ? "var(--switch)" : "var(--panel)") }, b2.g);
+        el("text", { x: cx, y: rowY + H - fs(8), "text-anchor": "middle", class: "lbl", "font-size": fs(10.5) }, b2.g, l);
+      });
+    }
+    if (cfg.io.user.length) {
+      const w = fs(96), o = box(w, "outputs", "User outputs");
+      el("rect", { x: o.x, y: rowY, width: w, height: H, rx: fs(5), class: "box" }, o.g);
+      el("text", { x: o.x + fs(8), y: rowY + fs(17), class: "box-t", "font-size": fs(12.5) }, o.g, "Relay module");
+      el("text", { x: o.x + fs(8), y: rowY + fs(34), class: "lbl", "font-size": fs(11) }, o.g, cfg.io.user.map((i) => "M62 P" + i).join(", "));
+    }
+    D.origin = el("g", {}, plan);
+    D.wz = el("g", {}, bed ? bedG : plan);
+    D.k = k; D.m = m; D.fs = fs; D.u = u;
+    drawElev();
+    place();
+  }
+  function openSec(id) {
+    showTab("build");
+    openSecs.add(id);
+    const d = $("sec-" + id);
+    if (d) { d.open = true; d.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); const s = d.querySelector("summary"); s && s.focus({ preventScroll: true }); }
+  }
+
+  function drawElev() {
+    const A = cfg.axes, tz = A.z.travel;
+    elev.innerHTML = "";
+    const H = tz + 160;
+    elev.setAttribute("viewBox", "-70 " + -(tz + 110) + " 170 " + (H + 30));
+    elev.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    const k = (tz + 190) / 260;
+    el("text", { x: 15, y: 10 * k + 13 * k, "text-anchor": "middle", class: "lbl", "font-size": 11 * k }, elev, "Z, side view");
+    el("rect", { x: -60, y: 0, width: 150, height: 10 * k, class: "bed" }, elev);
+    el("rect", { x: -40, y: -14 * k, width: 110, height: 14 * k, class: "stock", fill: "var(--env)" }, elev);
+    el("rect", { x: -62, y: -(tz + 70), width: 10, height: tz + 70, class: "rail" }, elev);
+    el("line", { x1: 80, y1: -30, x2: 80, y2: -30 - tz, class: "dim" }, elev);
+    el("text", { x: 86, y: -30 - tz / 2, class: "dim-t", "font-size": 11 * k, transform: "rotate(90 86 " + (-30 - tz / 2) + ")", "text-anchor": "middle" }, elev, fmt(tz) + " mm");
+    const z = el("g", {}, elev);
+    const mt = mainTool(), kind = mt ? mt.kind : "";
+    el("rect", { x: -18, y: -60, width: 36, height: 60, rx: 4, class: "plate" }, z);
+    if (kind === "Laser") { el("rect", { x: -10, y: -14, width: 20, height: 22, class: "laser" }, z); el("path", { d: "M0,8 L0,26", class: "wz" }, z); }
+    else if (kind === "PlasmaSpindle") { el("rect", { x: -7, y: -12, width: 14, height: 26, class: "torch" }, z); el("path", { d: "M-3,14 L3,14 L0,26 Z", class: "torch-c" }, z); }
+    else { el("rect", { x: -9, y: -10, width: 18, height: 20, class: "spindle" }, z); el("path", { d: "M-4,10 L4,10 L0,26 Z", class: "spindle-c" }, z); }
+    D.zg = z;
+    if (A.z.hasSwitch) {
+      const at = A.z.posDir ? "max" : "min";
+      for (const end of ["max", "min"]) {
+        const real = end === at, y = end === "max" ? -30 - tz - 40 : -30 + 6;
+        const g = el("g", { class: "sw" + (real ? "" : " ghost"), tabindex: 0, role: "button", "data-axis": "z", "data-end": end, "aria-label": real ? "Z switch. Activate to move it to the other end." : "Move the Z switch here" }, elev);
+        el("rect", { x: -48, y: y - 9, width: 18, height: 18, rx: 2 }, g);
+        if (real) el("text", { x: -39, y: y - 13, "text-anchor": "middle", class: "sw-t", "font-size": 10 * k }, g, "Z");
+        D.switches.push(g);
+      }
+    }
+    el("defs", {}, elev).innerHTML = '<marker id="ahz" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" class="arw-h"/></marker>';
+    el("line", { x1: 40, y1: -60, x2: 40, y2: -100, class: "arw", "marker-end": "url(#ahz)" }, elev);
+    el("text", { x: 46, y: -92, class: "arw-t", "font-size": 11 * k }, elev, "+Z");
+  }
+
+  let power = { x: 0, y: 0, z: 0, a: 0 };
+  function mpos(L) { const a = cfg.axes[L]; if (!a) return 0; if (!homed || !a.homed) return phys[L] - power[L]; return a.posDir ? a.mpos - (a.travel - phys[L]) : a.mpos + phys[L]; }
+  function physFromMpos(L, v) { const a = cfg.axes[L]; if (!homed || !a.homed) return v + power[L]; return a.posDir ? a.travel - (a.mpos - v) : v - a.mpos; }
+
+  function place() {
+    const A = cfg.axes, bed = $bed().checked, ty = A.y.travel;
+    D.car.setAttribute("transform", "translate(" + phys.x + " 0)");
+    if (bed) { D.gantry.setAttribute("transform", "translate(0 " + -ty / 2 + ")"); D.bed.setAttribute("transform", "translate(0 " + (-ty / 2 + phys.y) + ")"); }
+    else { D.gantry.setAttribute("transform", "translate(0 " + -phys.y + ")"); D.bed.setAttribute("transform", ""); }
+    D.zg.setAttribute("transform", "translate(0 " + (-30 - phys.z) + ")");
+    if (D.rotStripe) { const off = Math.sin((phys.a * Math.PI) / 180) * D.rot.dia * 0.42; D.rotStripe.setAttribute("transform", "translate(0 " + off + ")"); D.rotStripe.setAttribute("opacity", Math.cos((phys.a * Math.PI) / 180) > 0 ? 1 : 0.25); }
+    D.trail.setAttribute("points", trail.map((p) => p[0] + "," + -p[1]).join(" "));
+    D.origin.innerHTML = "";
+    if (homed) {
+      const ox = A.x.posDir ? A.x.travel : 0, oy = A.y.posDir ? A.y.travel : 0, s = D.fs(16);
+      const y0 = bed ? -oy - ty / 2 + phys.y : -oy;
+      el("path", { d: "M" + (ox - s) + "," + y0 + " H" + (ox + s) + " M" + ox + "," + (y0 - s) + " V" + (y0 + s), class: "origin" }, D.origin);
+      el("text", { x: ox + (ox ? s * 0.5 : -s * 0.5), y: y0 + (oy ? -s * 0.6 : s * 1.5), "text-anchor": ox ? "start" : "end", class: "origin-t", "font-size": D.fs(12) }, D.origin, "machine 0,0");
+    }
+    D.wz.innerHTML = "";
+    if (workZero) {
+      const wx = physFromMpos("x", workZero.x), wy = physFromMpos("y", workZero.y), r = D.fs(9);
+      el("circle", { cx: wx, cy: -wy, r, class: "wz" }, D.wz);
+      el("path", { d: "M" + (wx - r * 1.6) + "," + -wy + " H" + (wx + r * 1.6) + " M" + wx + "," + (-wy - r * 1.6) + " V" + (-wy + r * 1.6), class: "wz" }, D.wz);
+      el("text", { x: wx + r * 1.4, y: -wy - r * 1.1, class: "wz-t", "font-size": D.fs(12) }, D.wz, "work 0");
+    }
+    dro();
+  }
+
+  function dro() {
+    const extra = cfg.spindles.filter((s) => s !== mainTool());
+    const tool = activeTool ? extra[activeTool - 1] : null;
+    const letters = ["x", "y", "z"].concat(cfg.axes.a ? ["a"] : []);
+    const rows = letters.map((L, i) => {
+      const mp = mpos(L), off = tool && i < 3 ? tool.offset[i] : 0;
+      const w = (workZero && workZero[L] != null ? mp - workZero[L] : mp) + off;
+      return '<span class="ax">' + L.toUpperCase() + "</span><span>" + mp.toFixed(L === "a" ? 1 : 2) + "</span><span>" + w.toFixed(L === "a" ? 1 : 2) + "</span>";
+    }).join("");
+    const st = alarm ? '<span class="st alarm">Alarm · ' + esc(alarm) + "</span>" : anim ? '<span class="st run">' + (anim.kind === "home" ? "Homing" : "Jog") + "</span>" : '<span class="st idle">' + (homed ? "Idle" : "Idle · not homed") + (tool ? " · T" + (tool.tools || activeTool + 1) : "") + "</span>";
+    $("dro").innerHTML = "<b></b><b>Machine</b><b>Work</b>" + rows + st;
+  }
+
+  function toast(t, info) {
+    const m = $("msg"); m.textContent = t; m.className = "msg on" + (info ? " info" : "");
+    clearTimeout(toast.t); toast.t = setTimeout(() => (m.className = "msg"), 3600);
+  }
+
+  // ------------------------------------------------------------ motion
+  let anim = null;
+  const LET = ["x", "y", "z", "a"];
+  function moveTo(target, kind, done) {
+    const from = Object.assign({}, phys), to = Object.assign({}, from, target);
+    const moving = LET.filter((L) => to[L] !== from[L] && cfg.axes[L]);
+    const dist = Math.max(0, ...moving.map((L) => Math.abs(to[L] - from[L])));
+    const rate = Math.min(...moving.map((L) => cfg.axes[L].rate), 20000);
+    const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ms = reduce ? 0 : Math.max(200, Math.min(3500, ((dist / (rate / 60)) * 1000) / 2));
+    anim = { from, to, t0: performance.now(), ms, kind, done };
+    requestAnimationFrame(tick);
+  }
+  function tick(now) {
+    if (!anim) return;
+    const k = anim.ms ? Math.min(1, (now - anim.t0) / anim.ms) : 1;
+    const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    for (const L of LET) phys[L] = anim.from[L] + (anim.to[L] - anim.from[L]) * e;
+    const last = trail[trail.length - 1];
+    if (!last || Math.hypot(last[0] - phys.x, last[1] - phys.y) > 4) { trail.push([phys.x, phys.y]); if (trail.length > 600) trail.shift(); }
+    place();
+    if (k >= 1) { const d = anim.done; anim = null; dro(); d && d(); }
+    else requestAnimationFrame(tick);
+  }
+  function jog(L, dir) {
+    if (anim) return;
+    if (alarm) return toast("Alarm: send $X to unlock first.");
+    const a = cfg.axes[L]; if (!a) return;
+    if (L === "a") return moveTo({ a: phys.a + dir * Math.min(step, 90) }, "jog");
+    const d = dir * (L === "z" ? Math.min(step, 10) : step);
+    let t = phys[L] + d;
+    if (homed && a.soft && (t < -0.001 || t > a.travel + 0.001)) return toast("Soft limit: " + L.toUpperCase() + " would go past its " + fmt(a.travel) + " mm travel. The jog is refused.");
+    if (t < 0 || t > a.travel) {
+      const intoSwitch = a.hasSwitch && ((t > a.travel && a.posDir) || (t < 0 && !a.posDir));
+      t = Math.max(0, Math.min(a.travel, t));
+      moveTo({ [L]: t }, "jog", () => {
+        if (intoSwitch && a.hard) { alarm = "hard limit " + L.toUpperCase(); homed = false; power = Object.assign({}, phys); dro(); toast("ALARM:1 hard limit on " + L.toUpperCase() + ". Position is lost: $X, then home again."); }
+        else toast(L.toUpperCase() + " is at the end of its travel." + (a.hasSwitch && !a.hard ? " Without hard_limits a job would run into the frame here." : ""), true);
+      });
+      return;
+    }
+    moveTo({ [L]: t }, "jog");
+  }
+  function home() {
+    if (anim) return;
+    const A = cfg.axes;
+    const order = [1, 2, 3].map((c) => ["x", "y", "z"].filter((L) => A[L].homed && A[L].cycle === c)).filter((g) => g.length);
+    if (!order.length) return toast("No axis has homing configured (homing: cycle).");
+    alarm = ""; activeTool = 0; updateToolBtn();
+    const run = (i) => {
+      if (i >= order.length) {
+        homed = true; dro();
+        const dual = ["x", "y", "z"].filter((L) => A[L].motors.filter((m) => m.limit).length > 1);
+        toast("Homed. Each switch is machine 0" + (dual.length ? "; both " + dual.map((L) => L.toUpperCase()).join("/") + " motors stopped on their own switch, so the axis is square." : "."), true);
+        place();
+        return;
+      }
+      const t = {};
+      for (const L of order[i]) { if (!A[L].hasSwitch) return toast(L.toUpperCase() + " has homing on but no switch pin."); t[L] = A[L].posDir ? A[L].travel : 0; }
+      moveTo(t, "home", () => {
+        const back = {}; for (const L of order[i]) back[L] = A[L].posDir ? A[L].travel - 3 : 3;
+        moveTo(back, "home", () => { for (const L of order[i]) phys[L] = A[L].posDir ? A[L].travel : 0; place(); run(i + 1); });
+      });
+    };
+    run(0);
+  }
+
+  // ------------------------------------------------------------ edit from the drawing
+  function moveSwitch(axis, end) {
+    const a = cfg.axes[axis];
+    if ((end === "max") === a.posDir) return;
+    const words = { x: { min: "left", max: "right" }, y: { min: "front", max: "back" }, z: { min: "bottom", max: "top" } }[axis];
+    homed = false; workZero = null; trail = [];
+    if (src === "build") {
+      M.axes[axis].sw = end; preset = null; rebuild(true);
+    } else {
+      const nt = S.setValue(text, "axes." + axis + ".homing.positive_direction", end === "max" ? "true" : "false");
+      if (nt == null) return toast("This config has no axes/" + axis + "/homing/positive_direction to change.");
+      text = nt; ta.value = nt; reload(true);
+    }
+    const n = S.get(S.parseConfig(text).root, "axes." + axis + ".homing.positive_direction");
+    if (n) selectLine(n.line, false);
+    toast(axis.toUpperCase() + " switch now at the " + words[end] + " (positive_direction: " + (end === "max") + "). Home again.", true);
+  }
+  function onPlanClick(e) {
+    const g = e.target.closest(".sw");
+    if (g) {
+      const axis = g.getAttribute("data-axis"), end = g.getAttribute("data-end"), a = cfg.axes[axis];
+      moveSwitch(axis, !g.classList.contains("ghost") ? (a.posDir ? "min" : "max") : end);
+      return;
+    }
+    const acc = e.target.closest(".acc");
+    if (acc) openSec(acc.dataset.sec);
+  }
+  [plan, elev].forEach((s) => {
+    s.addEventListener("click", onPlanClick);
+    s.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target.closest(".sw,.acc")) { e.preventDefault(); onPlanClick(e); } });
+  });
+
+  // ------------------------------------------------------------ wiring it together
+  function updateToolBtn() {
+    const extra = cfg ? cfg.spindles.filter((s) => s !== mainTool()) : [];
+    $("tool").disabled = !extra.length;
+    $("tool").textContent = !extra.length ? "M6" : activeTool >= extra.length ? "M6 T0" : "M6 T" + (extra[activeTool].tools || activeTool + 2);
+  }
+  function reload(keepBed) {
+    let m;
+    try { m = readModel(text); } catch (e) { m = null; }
+    check();
+    if (!m) { toast("The drawing needs axes x, y and z in the config."); return; }
+    cfg = m;
+    for (const L of LET) phys[L] = cfg.axes[L] ? (L === "a" ? phys.a : Math.max(0, Math.min(cfg.axes[L].travel, phys[L]))) : 0;
+    if (!keepBed) $bed().checked = cfg.axes.y.bedHint;
+    if (src !== "build") $bed().checked = cfg.axes.y.bedHint;
+    if (activeTool > cfg.spindles.length - 1) activeTool = 0;
+    document.querySelectorAll(".ajog").forEach((b) => (b.disabled = !cfg.axes.a));
+    draw(); facts(); renderWiring(); updateToolBtn();
+  }
+  let tmr = null;
+  ta.addEventListener("input", () => {
+    clearTimeout(tmr);
+    tmr = setTimeout(() => { text = ta.value; src = "text"; $("handnote").hidden = false; reload(true); }, 250);
+  });
+  document.querySelectorAll("[data-step]").forEach((b) => b.addEventListener("click", () => { step = +b.dataset.step; document.querySelectorAll("[data-step]").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false")); }));
+  document.querySelectorAll("[data-j]").forEach((b) => b.addEventListener("click", () => { const [L, d] = b.dataset.j.split(","); jog(L, +d); }));
+  document.addEventListener("keydown", (e) => {
+    if (e.target === ta || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+    const k = { ArrowLeft: ["x", -1], ArrowRight: ["x", 1], ArrowUp: ["y", 1], ArrowDown: ["y", -1], PageUp: ["z", 1], PageDown: ["z", -1] }[e.key];
+    if (k && !e.target.closest("details,.tabs")) { e.preventDefault(); jog(k[0], k[1]); }
+  });
+  $("home").onclick = home;
+  $("unlock").onclick = () => { alarm = ""; power = Object.assign({}, phys); dro(); toast("$X: unlocked. The position is unknown until you home.", true); };
+  $("zero").onclick = () => { workZero = Object.assign(workZero || { z: mpos("z") }, { x: mpos("x"), y: mpos("y") }); place(); toast("G10 L20 P1 X0 Y0: work zero set here.", true); };
+  $("zeroz").onclick = () => { workZero = Object.assign(workZero || { x: mpos("x"), y: mpos("y") }, { z: mpos("z") }); place(); toast("G10 L20 P1 Z0: Z zero set here.", true); };
+  $("gozero").onclick = () => {
+    if (!workZero) return toast("Set a work zero first (Zero XY here).", true);
+    const t = { x: physFromMpos("x", workZero.x), y: physFromMpos("y", workZero.y) };
+    for (const L of ["x", "y"]) if (t[L] < -0.01 || t[L] > cfg.axes[L].travel + 0.01) return toast("Work zero is outside the travel: the WebUI would warn \"Goes past the travel\". Re-zero on the stock.");
+    moveTo(t, "jog");
+  };
+  $("tool").onclick = () => {
+    const extra = cfg.spindles.filter((s) => s !== mainTool());
+    if (!extra.length) return;
+    activeTool = (activeTool + 1) % (extra.length + 1);
+    const t = activeTool ? extra[activeTool - 1] : null;
+    updateToolBtn(); dro();
+    toast(t ? t.kind + " selected (M6 T" + (t.tools || activeTool + 1) + "): its offset " + t.offset.join(" ") + " mm is applied, so work coordinates now mean its point. The machine does not move." : "Main spindle selected (M6 T0).", true);
+  };
+  $("copy").onclick = async () => { try { await navigator.clipboard.writeText(ta.value); toast("config.yaml copied.", true); } catch (e) { ta.focus(); ta.select(); toast("Selected: press Ctrl+C to copy.", true); } };
+  function showTab(which) {
+    $("tab-build").setAttribute("aria-selected", which === "build"); $("tab-yaml").setAttribute("aria-selected", which === "yaml");
+    $("pane-build").hidden = which !== "build"; $("pane-yaml").hidden = which !== "yaml";
+  }
+  $("tab-build").onclick = () => showTab("build");
+  $("tab-yaml").onclick = () => showTab("yaml");
+  function showView(v) {
+    $("v-plan").setAttribute("aria-pressed", v === "plan"); $("v-wire").setAttribute("aria-pressed", v === "wire");
+    $("wiring").hidden = v !== "wire"; plan.style.visibility = v === "wire" ? "hidden" : "";
+    renderWiring();
+  }
+  $("v-plan").onclick = () => showView("plan");
+  $("v-wire").onclick = () => showView("wire");
+  function resetMotion() { homed = false; workZero = null; trail = []; activeTool = 0; alarm = ""; }
+  function startPose() { const A = cfg.axes; phys.x = A.x.travel * 0.55; phys.y = A.y.travel * 0.45; phys.z = A.z.travel * 0.6; phys.a = 0; power = Object.assign({}, phys); place(); }
+
+  let rz = null;
+  new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => cfg && draw(), 120); }).observe(plan.parentNode);
+  rebuild(true);
+  startPose();
+})();
+</script>
