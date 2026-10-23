@@ -61,6 +61,7 @@
   function vOverview() {
     main.innerHTML = '<p class="dps-mut">Loading…</p>';
     Promise.all([get('report'), get('invoices')]).then(function (r) {
+      if (tab !== 'overview') return;
       var rep = r[0], inv = r[1].invoices || [];
       var low = S.items.filter(function (i) { return num(i.reorder_at) > 0 && num(i.have) <= num(i.reorder_at); });
       var drafts = inv.filter(function (i) { return i.status === 'draft'; });
@@ -101,6 +102,7 @@
   function vInvoices() {
     main.innerHTML = '<p class="dps-mut">Loading…</p>';
     get('invoices').then(function (j) {
+      if (tab !== 'invoices') return;
       var inv = j.invoices || [];
       var h = '<div class="dps-card"><div class="dps-ch"><h2>Supplier invoices</h2>' + (CAN ? '<button type="button" class="dps-btn pri" id="dps-new-inv"><i class="fa fa-plus"></i> Add an invoice</button>' : '') + '</div>';
       h += inv.length ? table(['Date', 'Supplier', 'Invoice', 'Lines', 'Total EUR', 'File', 'Status'], inv.map(function (i) {
@@ -274,6 +276,7 @@
   function vBatches() {
     main.innerHTML = '<p class="dps-mut">Loading…</p>';
     get('batches').then(function (j) {
+      if (tab !== 'batches') return;
       var bs = j.batches || [];
       main.innerHTML = '<div class="dps-card"><div class="dps-ch"><h2>Build batches</h2>' + (CAN ? '<button type="button" class="dps-btn pri" id="dps-new-b"><i class="fa fa-wrench"></i> Record a build batch</button>' : '') + '</div>' +
         '<p class="dps-mut" style="margin-top:-4px">A batch uses parts from stock and adds the finished units that passed testing, at what they really cost.</p>' +
@@ -375,6 +378,7 @@
   function vSales() {
     main.innerHTML = '<p class="dps-mut">Loading…</p>';
     get('sales').then(function (j) {
+      if (tab !== 'sales') return;
       var ss = j.sales || [];
       main.innerHTML = '<div class="dps-card"><div class="dps-ch"><h2>Sales outside the shop</h2>' + (CAN ? '<button type="button" class="dps-btn pri" id="dps-new-s"><i class="fa fa-plus"></i> Record an outside sale</button>' : '') + '</div>' +
         '<p class="dps-mut" style="margin-top:-4px">Elecrow, Tindie, eBay, a trade show or by hand: the units come off the same stock the shop sells from.</p>' +
@@ -427,6 +431,7 @@
       var f = '&from=' + document.getElementById('dps-from').value + '&to=' + document.getElementById('dps-to').value;
       document.getElementById('dps-rep').innerHTML = '<p class="dps-mut">Loading…</p>';
       get('report', f).then(function (r) {
+        if (tab !== 'reports') return;
         var h = '<div class="dps-card"><h2>Profit by product</h2>' + (r.products.length ? '<table class="dps-t"><thead><tr><th>Product</th><th class="r">Sold in the shop</th><th class="r">Sold outside</th><th class="r">Revenue</th><th class="r">Fees</th><th class="r">Cost</th><th class="r">Profit</th><th class="r">Profit after your time</th></tr></thead><tbody>' + r.products.map(function (p) {
           return '<tr><td>' + esc(p.name) + '</td><td class="r">' + q(p.shop_q) + '</td><td class="r">' + q(p.out_q) + '</td><td class="r">' + eur(p.rev) + '</td><td class="r">' + eur(p.fees) + '</td><td class="r">' + eur(p.cost) + '</td><td class="r"><b>' + eur(p.profit) + '</b></td><td class="r">' + eur(p.profit_full) + '</td></tr>';
         }).join('') + '</tbody></table><p class="dps-mut" style="font-size:12px;margin:6px 0 0">Shop revenue is without VAT. Shop orders are costed at today\'s average cost; outside sales at the cost when they were sold.</p>' : '<p class="dps-mut">No sales of stock items in this period.</p>') + '</div>';
