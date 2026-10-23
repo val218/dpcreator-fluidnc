@@ -335,7 +335,7 @@ class ControllerExtensionModuleDpcDesk extends Controller {
 
 		// Dashboard widgets shown as they are on the classic dashboard
 		$data['widgets'] = array();
-		foreach (array('dpc_sales', 'dpc_devices') as $code) {
+		foreach (array('dpc_sales', 'dpc_devices', 'dpc_visitors_list') as $code) {
 			if ($this->config->get('dashboard_' . $code . '_status') && is_file(DIR_APPLICATION . 'controller/extension/dashboard/' . $code . '.php') && $this->user->hasPermission('access', 'extension/dashboard/' . $code)) {
 				try {
 					$html = $this->load->controller('extension/dashboard/' . $code . '/dashboard');
