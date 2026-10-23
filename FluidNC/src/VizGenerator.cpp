@@ -1114,6 +1114,8 @@ static void enqueue(const std::string& path, uint32_t delay, VizMode mode, bool 
     }
 }
 
+static void queue_internal(const std::string& line);  // below, with the command queue
+
 void viz_file_written(const std::string& path) {
     if (!on_sd(path) || !is_gcode(path)) return;
     enqueue(path, settle_ms, VizMode::Auto);
@@ -1125,8 +1127,6 @@ void viz_file_written(const std::string& path) {
     // protocol task: handled there (file_changed).
     queue_internal("$Viz/Changed=" + path);
 }
-
-static void queue_internal(const std::string& line);
 
 void viz_job_started(const std::string& path) {
     if (on_sd(path) && is_gcode(path)) enqueue(path, 0, VizMode::Job);
