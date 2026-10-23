@@ -1121,7 +1121,12 @@ void viz_file_written(const std::string& path) {
     // (Studio's Send always writes studio-job.nc): its preview is old. The
     // pendant asks again; that request joins the rebuild queued above.
     to_pendant("[MSG:VizStale:" + path + "]");
+    // Its preview file, a push of it and a prepared state belong to the
+    // protocol task: handled there (file_changed).
+    queue_internal("$Viz/Changed=" + path);
 }
+
+static void queue_internal(const std::string& line);
 
 void viz_job_started(const std::string& path) {
     if (on_sd(path) && is_gcode(path)) enqueue(path, 0, VizMode::Job);
@@ -1137,12 +1142,42 @@ void viz_file_removed(const std::string& path) {
         _q_len = _queue.size();
         if (path == _current) _cancel = true;
     }
+    // This may run on the web server task while the protocol task sends that
+    // very preview to the pendant: the push is stopped and the files removed
+    // there (file_gone), never under an open read.
+    queue_internal("$Viz/Gone=" + path);
+}
+
+// Protocol task: a G-code file was rewritten (changed) or deleted (gone).
+static void drop_preview_files(const std::string& nc) {
+    std::string vp = viz_path(nc);
+    if (_p.active && _p.path == vp) push_end();
     std::error_code ec;
-    FluidPath       mount { path, SD, ec };
+    FluidPath       mount { nc, SD, ec };
     if (!ec) {
-        remove(viz_path(path).c_str());
-        cache_drop(viz_path(path));
+        remove(vp.c_str());
+        cache_drop(vp);
     }
+}
+static void prep_clear(bool tell_pendant);
+static void prep_set(const std::string& state, const std::string& nc);
+static std::string _prep_nc;
+static std::string _prep_state = "none";
+static void file_changed(const std::string& nc) {
+    // The old preview must never be served for the new file (Run right after
+    // $Teach/Save showed the previous route); the rebuild is queued already.
+    drop_preview_files(nc);
+    // Prepared and confirmed on the pendant, then rewritten (Studio's Send to
+    // the same name): the confirmation was for the old file. Prepare again, so
+    // Run waits for the pendant to show the new one.
+    if (nc == _prep_nc && (_prep_state == "ready" || _prep_state == "loading")) {
+        to_pendant("[MSG:VZP:" + nc + "]");
+        prep_set("loading", nc);
+    }
+}
+static void file_gone(const std::string& nc) {
+    drop_preview_files(nc);
+    if (nc == _prep_nc) prep_clear(true);
 }
 
 static bool idle_no_job() {
@@ -1243,7 +1278,9 @@ bool viz_hold_job(Channel* in, const std::string& path, Channel* out, Channel* a
     _pj          = PendingJob();
     _pj.active   = true;
     _pj.in       = in;
-    _pj.out      = out;
+    // Hold the reply channel: a WebUI request that started the job is answered
+    // at once and its channel deleted when unused - Job::nest got a freed one.
+    _pj.out      = out && out->try_acquire_processing_ref() ? out : nullptr;
     _pj.ack      = ack;
     _pj.nc       = path;
     _pj.deadline = millis() + job_wait_ms;
@@ -1260,6 +1297,7 @@ void viz_cancel_pending_job() {
         _pj.ack->release_processing_ref();
     }
     delete _pj.in;
+    if (_pj.out) _pj.out->release_processing_ref();
     _pj = PendingJob();
     allChannels.print("[MSG:JobWait:cancelled]\r\n");
 }
@@ -1290,8 +1328,11 @@ static void pending_poll() {
     std::string nc = _pj.nc;
     _pj = PendingJob();
     recov_job_start(in, nc);
-    Job::nest(in, out, ack);
+    Job::nest(in, out, ack);              // takes its own reference to out
+    if (out) out->release_processing_ref();
 }
+
+bool viz_job_pending() { return _pj.active; }
 
 // ---------------------------------------------------------------------------
 // Prepare: "$Job/Prepare=<file>" (WebUI's Prepare button) shows the file on the
@@ -1306,9 +1347,6 @@ static void pending_poll() {
 // [MSG:VZC] (cancelled). Run from either side is the usual $SD/Run;
 // "$Job/Unprepare" cancels from either side; "$Job/Prepared" reports.
 // ---------------------------------------------------------------------------
-static std::string _prep_nc;
-static std::string _prep_state = "none";
-
 static void prep_broadcast() {
     std::string m = "[MSG:Prepared:" + _prep_state + ":" + _prep_nc + "]\r\n";
     allChannels.print_except(m.c_str(), static_cast<Channel*>(pendant_channel()));
@@ -1403,6 +1441,13 @@ bool viz_command(const char* line, Channel& out, bool on_protocol_task) {
     if (_cmds.size() < 16) _cmds.push_back({ line, from_pendant });
     _cmd_len = _cmds.size();
     return true;
+}
+
+// Work for the protocol task from any task (file hooks).
+static void queue_internal(const std::string& line) {
+    std::lock_guard<std::mutex> lock(_cmd_mutex);
+    if (_cmds.size() < 32) _cmds.push_back({ line, false });
+    _cmd_len = _cmds.size();
 }
 
 static void drain_commands() {
@@ -1525,6 +1570,8 @@ bool viz_handle_command(const char* line) {
     if (strncmp(cmd, "Generate=", 9) == 0) { viz_generate(cmd + 9); return true; }
     if (strncmp(cmd, "Push=", 5) == 0) { viz_push_request(cmd + 5); return true; }
     if (strncmp(cmd, "Shown=", 6) == 0) { viz_job_shown(cmd + 6); return true; }
+    if (strncmp(cmd, "Changed=", 8) == 0) { file_changed(sd_norm(cmd + 8)); return true; }
+    if (strncmp(cmd, "Gone=", 5) == 0) { file_gone(sd_norm(cmd + 5)); return true; }
     if (strncmp(cmd, "Delete=", 7) == 0) {
         std::string     p = sd_norm(cmd + 7);
         std::error_code ec;

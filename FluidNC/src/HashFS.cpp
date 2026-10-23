@@ -2,6 +2,7 @@
 #include "FileStream.h"
 #include "SHA256.h"
 #include "Driver/watchdog.h"
+#include "VizGenerator.h"  // viz_file_written / viz_file_removed
 
 std::map<std::string, std::string> HashFS::localFsHashes;
 
@@ -47,6 +48,7 @@ void HashFS::report_change() {
 
 void HashFS::delete_file(const std::filesystem::path& path, bool report) {
     localFsHashes.erase(path.filename().string());
+    viz_file_removed(path.string());  // G-code on the SD card: its preview goes too
     if (report) {
         report_change();
     }
@@ -68,6 +70,9 @@ bool HashFS::file_is_hashable(const std::filesystem::path& path) {
 }
 
 void HashFS::rehash_file(const std::filesystem::path& path, bool report) {
+    // Written, copied, received or renamed to this name: G-code on the SD card
+    // gets a fresh preview (only the WebDAV and upload paths said so before).
+    viz_file_written(path.string());
     if (file_is_hashable(path)) {
         std::string hash;
         if (hashFile(path, hash) != Error::Ok) {
@@ -82,7 +87,7 @@ void HashFS::rehash_file(const std::filesystem::path& path, bool report) {
 }
 void HashFS::rename_file(const std::filesystem::path& ipath, const std::filesystem::path& opath, bool report) {
     delete_file(ipath, false);
-    rehash_file(opath, report);
+    rehash_file(opath, report);  // also tells the previews: a new file under that name
 }
 
 void HashFS::hash_all() {

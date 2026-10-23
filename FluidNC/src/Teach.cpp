@@ -10,6 +10,7 @@
 #include "UartChannel.h"
 #include "FileStream.h"
 #include "FluidPath.h"
+#include "VizGenerator.h"  // viz_file_written
 #include "Config.h"  // MAX_N_AXIS
 
 #include <Arduino.h>  // millis
@@ -407,6 +408,9 @@ bool teach_command(const char* line, Channel& ch, bool on_protocol_task, bool& d
         } catch (...) {
             return err(ch, "cannot write the SD card"), true;
         }
+        // New route under the same name: its old preview must not be shown
+        // (Run right after Save showed the previous route on the pendant).
+        viz_file_written(std::string("/sd") + JOB_FILE);
         size_t lines = 0;
         for (char c : g) lines += c == '\n';
         all("[MSG:Teach:saved:" + std::string(JOB_FILE) + ":" + std::to_string(lines) + "]\n");
@@ -431,5 +435,17 @@ void teach_poll() {
             else do_measure(p.n);
         }
     }
-    if (dirty && state_is(State::Idle) && !Job::active()) save_list();
+    // Saved from here (polling task) once Idle. A failed save (no card) used to
+    // be tried again on every pass, each one a slow mount attempt that held up
+    // the WebUI and the pendant: tell once, then try every 30 s.
+    static uint32_t retryAt = 0;
+    static bool     told    = false;
+    if (dirty && state_is(State::Idle) && !Job::active() && (int32_t)(millis() - retryAt) >= 0) {
+        if (save_list()) {
+            told = false;
+        } else {
+            retryAt = millis() + 30000;
+            if (!told) { told = true; err_all("cannot save the waypoints on the SD card - is a card in?"); }
+        }
+    }
 }
