@@ -123,19 +123,20 @@ class ControllerExtensionModuleDpcDesk extends Controller {
 		$pyear = $range(date('Y-m-d H:i:s', strtotime('-1 year', $yr0)), date('Y-m-d H:i:s', strtotime('-1 year', $now + 1)));
 		$avg = function ($x) { return $x['n'] ? $x['t'] / $x['n'] : 0.0; };
 		$plural = function ($n) { return $n . ' order' . ($n == 1 ? '' : 's'); };
-		$delta = function ($cur, $prev, $what) {
-			if ($cur == 0 && $prev == 0) {
-				return array('cls' => 'flat', 'text' => 'no change ' . $what);
+		// $what: "yesterday", "last month", "2025"; $kind: '' for money, 'orders' when everything is free
+		$delta = function ($cur, $prev, $what, $kind = '') {
+			if ($cur == $prev) {
+				return array('cls' => 'flat', 'text' => 'Same as ' . $what);
 			}
 			if ($prev == 0) {
-				return array('cls' => 'up', 'text' => 'new ' . $what);
+				return array('cls' => 'up', 'text' => ($kind ? 'Up from no ' . $kind : 'Up from 0') . ' ' . ($what === 'yesterday' ? 'yesterday' : 'in ' . $what));
 			}
 			$p = ($cur - $prev) / $prev * 100;
-			return array('cls' => abs($p) < 0.5 ? 'flat' : ($p > 0 ? 'up' : 'down'), 'text' => ($p > 0 ? '+' : '') . round($p) . '% ' . $what);
+			return array('cls' => abs($p) < 0.5 ? 'flat' : ($p > 0 ? 'up' : 'down'), 'text' => ($p > 0 ? '+' : '') . round($p) . '%' . ($kind ? ' ' . $kind : '') . ' vs ' . $what);
 		};
 		$cmp = function ($a, $b, $what) use ($delta) {
 			$m = $a['t'] > 0 || $b['t'] > 0;
-			return $delta($m ? $a['t'] : $a['n'], $m ? $b['t'] : $b['n'], ($m ? '' : 'orders ') . $what);
+			return $delta($m ? $a['t'] : $a['n'], $m ? $b['t'] : $b['n'], $what, $m ? '' : 'orders');
 		};
 		// trend line: revenue, or orders while everything is free
 		$spark = function ($pts) {
@@ -165,10 +166,10 @@ class ControllerExtensionModuleDpcDesk extends Controller {
 			$spAvg[] = array('t' => $avg($p), 'n' => $p['n']);
 		}
 		$data['stats'] = array(
-			array('label' => 'Today', 'icon' => 'fa-sun-o', 'tone' => 'blue', 'value' => $this->money($today['t']), 'orders' => $plural($today['n']), 'delta' => $cmp($today, $yday, 'vs yesterday'), 'spark' => $spark($spDays), 'span' => 'last 14 days'),
-			array('label' => 'This month', 'icon' => 'fa-calendar', 'tone' => 'green', 'value' => $this->money($month['t']), 'orders' => $plural($month['n']), 'delta' => $cmp($month, $pmonth, 'vs last month'), 'spark' => $spark($spMonth), 'span' => date('F', $now) . ' by day'),
-			array('label' => 'This year', 'icon' => 'fa-line-chart', 'tone' => 'violet', 'value' => $this->money($year['t']), 'orders' => $plural($year['n']), 'delta' => $cmp($year, $pyear, 'vs ' . (date('Y', $now) - 1)), 'spark' => $spark($spYear), 'span' => date('Y', $now) . ' by month'),
-			array('label' => 'Average order', 'icon' => 'fa-shopping-basket', 'tone' => 'amber', 'value' => $this->money($avg($month)), 'orders' => 'this month', 'delta' => $delta($avg($month), $avg($pmonth), 'vs last month'), 'spark' => $spark($spAvg), 'span' => 'last 6 months')
+			array('label' => 'Today', 'icon' => 'fa-sun-o', 'tone' => 'blue', 'value' => $this->money($today['t']), 'orders' => $plural($today['n']), 'delta' => $cmp($today, $yday, 'yesterday'), 'spark' => $spark($spDays), 'span' => 'last 14 days'),
+			array('label' => 'This month', 'icon' => 'fa-calendar', 'tone' => 'green', 'value' => $this->money($month['t']), 'orders' => $plural($month['n']), 'delta' => $cmp($month, $pmonth, 'last month'), 'spark' => $spark($spMonth), 'span' => date('F', $now) . ' by day'),
+			array('label' => 'This year', 'icon' => 'fa-line-chart', 'tone' => 'violet', 'value' => $this->money($year['t']), 'orders' => $plural($year['n']), 'delta' => $cmp($year, $pyear, (string)(date('Y', $now) - 1)), 'spark' => $spark($spYear), 'span' => date('Y', $now) . ' by month'),
+			array('label' => 'Average order', 'icon' => 'fa-shopping-basket', 'tone' => 'amber', 'value' => $this->money($avg($month)), 'orders' => 'this month', 'delta' => $delta($avg($month), $avg($pmonth), 'last month'), 'spark' => $spark($spAvg), 'span' => 'last 6 months')
 		);
 		$names = array();
 		if ($S) {
