@@ -1,0 +1,68 @@
+<p>The <a href="/machine-builder">Machine builder</a> writes the <code>config.yaml</code> for your machine and draws the machine it describes, to scale. Choose the board, the axes, the spindles and lasers, and what goes on each input and output. Every change is checked against the firmware's own list of settings and the pin rules of the chip, so the file it gives you loads without errors.</p>
+<p>It is made for the <strong>dpCREATOR R3</strong>, and it also works with <strong>any ESP32 or ESP32-S3 board</strong> where you set the pins yourself, for <strong>dpCREATOR FluidNC</strong> or <strong>mainstream FluidNC</strong>. It runs in your browser: nothing is sent anywhere.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-overview.jpg" alt="The machine builder with a 1300 × 2500 router: settings on the left, the plan view in the middle, DRO and jog pad on the right" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>Start from a machine</h3>
+<p>Pick the example closest to yours, then change it: a 1300 × 2500 router with dual Y and a VFD, a 600 × 900 router with a VFD and a laser, a 1500 × 3000 plasma table, or a CO2 laser with a door interlock. The summary on each section header shows what is set without opening it.</p>
+
+<h3>1. Board and frame</h3>
+<ul>
+<li><strong>Board:</strong> dpCREATOR R3, R2, or <em>Other ESP32 / ESP32-S3 board</em> (see section 8).</li>
+<li><strong>Firmware:</strong> <em>dpCREATOR FluidNC 4.1.1</em> or <em>Mainstream FluidNC</em>. Both read the same settings, except that only dpCREATOR firmware has <code>tools:</code> and <code>offset_mm:</code> for a second tool beside the spindle. In mainstream mode extra tools still switch with M6 by tool number; their offset is written as a comment for you to set in your sender.</li>
+<li><strong>Stepper drivers:</strong> sets the pulse timing and the highest step rate. Speeds above what the driver can take are capped and the builder tells you.</li>
+<li><strong>What moves on Y</strong> (the gantry or the bed), <strong>limit switches</strong> NC or NO (NC is safer: a broken wire stops the machine), and whether the motors stay powered when idle.</li>
+</ul>
+
+<h3>2. Axes and motor blocks</h3>
+<p>At the top of <em>Axes and motors</em> you choose what each axis block drives. <strong>Any block can be any axis.</strong> The common case is a second Y motor (Y2) on the A block to square a gantry: each Y motor homes to its own switch, so homing squares the gantry every time. X2 and Z2 work the same way. A block you set to <em>not used</em> frees its STEP and DIR as outputs.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-axes.jpg" alt="Axes and motors: the block map with Y2 on the A block, and the X axis settings" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>For each axis set the travel, steps per mm, speed and acceleration. <em>Work out steps per mm</em> calculates it for a ballscrew, belt, rack and pinion or rotary axis, with microstepping and a gearbox. <em>Homing switch</em> says which end the switch is at; you can also click a switch in the drawing to move it to the other end. The A axis is a rotary axis in degrees, drawn as a chuck on the bed.</p>
+
+<h3>3. Spindles, lasers and torches</h3>
+<p>The main tool can be a <strong>VFD over RS485</strong> (Huanyang, H2A, H100, YL620, NowForever, Siemens V20, Danfoss VLT2800, Delta MS300, Folinn BD600, Mollom G70), a <strong>PWM</strong> or <strong>0-10 V</strong> spindle, a <strong>relay</strong> spindle, a <strong>laser</strong> or a <strong>plasma torch</strong> (fire output, arc-OK input and arc wait). Add up to two more tools beside it, for example a laser next to the router spindle: give each a tool number and its X/Y/Z offset from the spindle, and M6 T2 switches to it.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-tools.jpg" alt="A Huanyang VFD as the main tool and a laser as tool 2; the drawing shows the laser beside the spindle and the A rotary on the bed" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>With a tool setter set under Inputs, <strong>Manual tool change</strong> adds <code>atc_manual</code>: M6 goes to the change position, waits for the new tool, then measures it on the tool setter. On the R3 the recommended router + laser setup is the VFD on RS485 and the laser on the PWM output; see <a href="/docs/spindle-vfd-rs485">Spindle and VFD</a>.</p>
+
+<h3>4. Inputs</h3>
+<p>Every input is a list of the board's terminals: probe and tool setter; safety door, e-stop and driver fault; reset, feed hold, cycle start, home and single-block buttons; four macro buttons; four user inputs (M66). A terminal already in use is greyed out with what uses it. On the R3 the limit input of an axis block you don't use takes a switch or a button too.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-inputs.jpg" alt="Inputs grouped by probing, safety, buttons, macro buttons and user inputs" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>With a safety door you can turn on <strong>parking</strong>: opening the door lifts Z to a set height. The e-stop input stops the controller; it does not replace a hardwired e-stop that cuts the drivers' power.</p>
+
+<h3>5. Outputs and status lights</h3>
+<p>Flood (M8) and mist or air (M7), four user outputs (M62/M63) and a PWM output (M67), status lights for idle, running, hold, alarm and door, and a WS2812 RGB status LED whose colour follows the machine state. On the R3, STEP and DIR of a block you don't use (usually A) are 5 V logic outputs: they drive a relay module, an SSR input or a status light.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-outputs.jpg" alt="Outputs: coolant, user outputs and status lights" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>6. Display and macros</h3>
+<p><strong>OLED display:</strong> an SSD1306 status screen over I2C (128 × 64, 128 × 32 or 64 × 48). It needs two plain GPIO pins; on the R3 that is the J7 connector (GPIO43/44). Using J7 for the display gives up the UART0 serial console there; USB and the network still work.</p>
+<p><strong>Macros:</strong> a startup line, macros 0-3 (run from a macro button or <code>$Macros/Run=0</code>), and lines to run after homing and after unlock. Join commands with <code>&amp;</code>, for example <code>G0 Z-5&amp;G0 X0 Y0</code>.</p>
+
+<h3>7. Pendant, Ethernet and SD card</h3>
+<p>The SmartTabUI pendant on the PENDANT port, the W5500 Ethernet (SPI clock, and whether the INT line is used) or Wi-Fi only, and the SD card with its clock. The W5500 and the SD card share the SPI bus. See <a href="/docs/ethernet-w5500-setup">Ethernet (W5500) setup</a> for the IP settings.</p>
+
+<h3>8. Other ESP32 and ESP32-S3 boards</h3>
+<p>Choose <em>Other ESP32 / ESP32-S3 board</em> and the section <em>Your board's pins</em> opens. Pick the chip, then the GPIO behind each terminal: STEP, DIR and limit for each block, the driver enable (active high or low), your own named inputs, outputs and I/O pins, the pendant UART, RS485, SPI, SD card and W5500. Everything else in the builder then uses those terminals.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-custom.jpg" alt="Your board's pins: chip, motor pins, enable, inputs and outputs, ports" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>The pin lists follow the chip:</p>
+<table class="table table-bordered"><thead><tr><th></th><th>ESP32-S3</th><th>ESP32</th></tr></thead><tbody>
+<tr><td>Not usable</td><td>GPIO 26-32 (flash), 19/20 (USB), 35-37 on modules with octal PSRAM (N8R8, N16R8)</td><td>GPIO 6-11 (flash)</td></tr>
+<tr><td>Input only</td><td>none</td><td>GPIO 34-39, and they have no internal pull-up</td></tr>
+<tr><td>Strapping pins (marked)</td><td>0, 3, 45, 46</td><td>0, 2, 5, 12, 15</td></tr>
+</tbody></table>
+<p>Each pin can be used once; the SPI bus pins are shared by the SD card and the W5500 by design.</p>
+
+<h3>9. Check the config and the wiring</h3>
+<p>The badge next to the tabs shows whether the config is valid, and for which chip. <strong>Wiring</strong> lists every terminal of the board with what the config puts on it, marks free terminals and shows any pin used twice in red. Click a function to jump to its line.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-wiring.jpg" alt="The wiring view: every axis block, I/O terminal, port and SPI pin with its function" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>The <strong>config.yaml</strong> tab shows the file with a comment on every pin. You can edit it there, or paste your own config: the drawing, wiring and checks follow it. <em>Load into the builder</em> turns a pasted config back into builder settings. Configs that use things the builder can't edit (I2S shift-register pins as on the 6-Pack or MKS DLC32, TMC drivers set over UART or SPI, CoreXY and other kinematics, servos, pin extenders) stay in the text view, so nothing is lost.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-yaml.jpg" alt="The config.yaml tab with the generated file and the check result" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>10. Try it before you wire it</h3>
+<p>The jog pad and the arrow keys move the tool in the drawing. <strong>$H home</strong> runs the homing cycles in order and shows machine 0. Jog into a switch with hard limits on and you get the alarm the real machine would give. <em>Zero XY here</em> sets the work zero, and M6 switches between tools so you can see the offset applied.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-laser-light.jpg" alt="The CO2 laser example in the light theme, with the door enclosure" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>11. Put it on the board</h3>
+<ol>
+<li>Copy or save <code>config.yaml</code> from the config.yaml tab.</li>
+<li>Upload it to the controller: in the WebUI file manager, or on the <a href="/firmware">Flash Firmware</a> page choose <em>I have a config.yaml</em>, which writes it after flashing. See <a href="/docs/flashing-firmware-browser">Flashing firmware from your browser</a>.</li>
+<li>Restart with <code>$bye</code> and run the first checks: jog each axis a short way, check the directions, then home.</li>
+</ol>
