@@ -29,6 +29,8 @@
     { group: 'Go to', title: 'Orders', sub: 'Sales › Orders', href: base + 'sale/order' },
     { group: 'Go to', title: 'Add a product', sub: 'Catalog › Products', href: base + 'catalog/product/add' },
     { group: 'Go to', title: 'Inbox', sub: 'Email', href: base + 'extension/module/dpc_inbox' },
+    { group: 'Go to', title: 'Purchases and stock', sub: 'Invoices, stock, batches, outside sales', href: base + 'extension/module/dpc_stock' },
+    { group: 'Go to', title: 'Add a supplier invoice', sub: 'Purchases and stock', href: base + 'extension/module/dpc_stock&tab=invoices' },
     { group: 'Go to', title: 'Classic dashboard', sub: 'OpenCart', href: base + 'common/dashboard&classic=1' }
   ];
 

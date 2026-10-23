@@ -254,6 +254,9 @@ class ControllerExtensionModuleDpcDesk extends Controller {
 		$q[] = array('label' => 'Customers to approve', 'n' => $one("SELECT COUNT(*) FROM `{$P}customer_approval`"), 'link' => $this->link('customer/customer_approval'), 'alert' => 1);
 		$q[] = array('label' => 'R&D Club to review', 'n' => $k('rnd'), 'link' => HTTPS_CATALOG . 'rnd.php?f=admin', 'alert' => 1, 'hide' => !$this->hasTable('dpc_rnd_member'));
 		$q[] = array('label' => 'Support tickets', 'n' => $k('ticket'), 'link' => $this->link('extension/module/dpc_support', 'status=open'), 'alert' => 1, 'hide' => !$this->hasTable('dpc_ticket'));
+		$stockOn = $this->hasTable('dpc_inv_item') && is_file(DIR_APPLICATION . 'controller/extension/module/dpc_stock.php');
+		$q[] = array('label' => 'Parts running low', 'n' => $stockOn ? $one("SELECT COUNT(*) FROM `{$P}dpc_inv_item` i LEFT JOIN `{$P}product` p ON p.product_id = i.product_id WHERE i.status = 1 AND i.reorder_at > 0 AND (CASE WHEN i.product_id > 0 THEN p.quantity ELSE i.qty END) <= i.reorder_at") : 0, 'link' => $this->link('extension/module/dpc_stock', 'tab=items'), 'alert' => 1, 'hide' => !$stockOn);
+		$q[] = array('label' => 'Invoices to put in stock', 'n' => $stockOn ? $one("SELECT COUNT(*) FROM `{$P}dpc_inv_invoice` WHERE status = 'draft'") : 0, 'link' => $this->link('extension/module/dpc_stock', 'tab=invoices'), 'alert' => 0, 'hide' => !$stockOn);
 		$q[] = array('label' => 'Low stock (3 or less)', 'n' => $one("SELECT COUNT(*) FROM `{$P}product` WHERE status = 1 AND subtract = 1 AND shipping = 1 AND quantity <= 3"), 'link' => $this->link('catalog/product', 'sort=p.quantity&order=ASC'), 'alert' => 0);
 		$q[] = array('label' => 'Shipped products without weight', 'n' => $one("SELECT COUNT(*) FROM `{$P}product` WHERE status = 1 AND shipping = 1 AND weight <= 0"), 'link' => '#dpd-noweight', 'alert' => 1);
 		$q[] = array('label' => 'Products without a picture', 'n' => $one("SELECT COUNT(*) FROM `{$P}product` WHERE status = 1 AND (image IS NULL OR image = '' OR image = 'no_image.png')"), 'link' => '#dpd-noimage', 'alert' => 0);
@@ -350,6 +353,7 @@ class ControllerExtensionModuleDpcDesk extends Controller {
 
 		$data['classic'] = $this->link('common/dashboard', 'classic=1');
 		$data['settings'] = $this->link('extension/module/dpc_desk');
+		$data['stock_link'] = is_file(DIR_APPLICATION . 'controller/extension/module/dpc_stock.php') && $this->user->hasPermission('access', 'extension/module/dpc_stock') ? $this->link('extension/module/dpc_stock') : '';
 		$data['store'] = HTTPS_CATALOG;
 		$data['username'] = $this->user->getUserName();
 		$data['hello'] = (int)date('G') < 12 ? 'Good morning' : ((int)date('G') < 18 ? 'Good afternoon' : 'Good evening');

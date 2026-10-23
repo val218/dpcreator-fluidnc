@@ -9,6 +9,7 @@
       {% if inbox_on %}<a class="dpd-btn" href="{{ inbox_link }}"><i class="fa fa-envelope"></i> Inbox{% if inbox.reply %} <b class="dpd-badge">{{ inbox.reply }}</b>{% endif %}</a>{% endif %}
       <button type="button" class="dpd-btn" onclick="window.dpcSearch && dpcSearch.open()"><i class="fa fa-search"></i> Search <kbd>Ctrl K</kbd></button>
       <a class="dpd-btn" href="{{ store }}" target="_blank" rel="noopener"><i class="fa fa-external-link"></i> Shop</a>
+      {% if stock_link %}<a class="dpd-btn" href="{{ stock_link }}"><i class="fa fa-cubes"></i> Purchases and stock</a>{% endif %}
       <a class="dpd-btn dpd-quiet" href="{{ classic }}">Classic dashboard</a>
     </div>
   </div>

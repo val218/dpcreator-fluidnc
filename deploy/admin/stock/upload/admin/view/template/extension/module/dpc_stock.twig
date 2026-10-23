@@ -1,0 +1,87 @@
+{{ header }}{{ column_left }}
+<div id="content" class="dps">
+  <div class="dps-head">
+    <div><h1>Purchases and stock</h1><p>Supplier invoices, what's on the shelf, build batches and sales outside the shop. All money in EUR.</p></div>
+    <div class="dps-acts"><a class="dps-btn" href="{{ desk }}"><i class="fa fa-th-large"></i> Workbench</a></div>
+  </div>
+  <div class="dps-tabs" role="tablist">
+    <button type="button" role="tab" data-tab="overview" aria-selected="true">Overview</button>
+    <button type="button" role="tab" data-tab="invoices">Invoices</button>
+    <button type="button" role="tab" data-tab="items">Stock items</button>
+    <button type="button" role="tab" data-tab="batches">Build batches</button>
+    <button type="button" role="tab" data-tab="sales">Outside sales</button>
+    <button type="button" role="tab" data-tab="reports">Reports</button>
+    <button type="button" role="tab" data-tab="settings">Settings</button>
+  </div>
+  <div id="dps-main" aria-live="polite"><p class="dps-mut">Loading…</p></div>
+  <div id="dps-toast" role="status"></div>
+</div>
+<style>
+.dps,.dps-modal,#dps-toast{--ink:#1E2A35;--mut:#6B7885;--line:#E3E8ED;--acc:#1F6FB8;--accs:#E7F0FA;--red:#C42B1C;--amb:#B26A00;--ok:#1E8A57;color:var(--ink)}
+.dps{padding:18px 22px 40px;background:#F3F5F7;min-height:100vh}
+.dps h1{margin:0;font-size:28px;font-weight:700;color:var(--ink)}
+.dps-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.dps-head p{margin:2px 0 0;color:var(--mut)}
+.dps-btn{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:7px 12px;font-size:13px;font-weight:600;color:var(--ink)!important;cursor:pointer;text-decoration:none!important;line-height:1.3}
+.dps-btn:hover{border-color:var(--acc)}
+.dps-btn.pri{background:var(--acc);border-color:var(--acc);color:#fff!important}
+.dps-btn.pri:hover{background:#18599A}
+.dps-btn.sm{padding:4px 9px;font-size:12px}
+.dps-btn[disabled]{opacity:.5;cursor:default}
+.dps-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:14px}
+.dps-tabs button{border:0;background:none;padding:9px 14px;font-size:14px;font-weight:600;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-1px;cursor:pointer}
+.dps-tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--acc)}
+.dps-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.dps-card h2{margin:0 0 10px;font-size:16px;font-weight:700;color:var(--ink)}
+.dps-ch{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.dps-ch h2{margin:0}
+.dps-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.dps-kpi{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.dps-kpi span{display:block;font-size:12.5px;font-weight:600;color:var(--mut)}
+.dps-kpi b{display:block;font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.dps-kpi small{color:var(--mut)}
+.dps-grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.dps-t{width:100%;font-size:13px;border-collapse:collapse}
+.dps-t th{font-size:12px;font-weight:700;color:var(--mut);text-align:left;padding:6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.dps-t td{padding:7px 6px;border-bottom:1px solid #F0F2F4;vertical-align:middle}
+.dps-t .r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dps-t tr.click{cursor:pointer}.dps-t tr.click:hover td{background:#F7F9FA}
+.dps-t small{display:block;color:var(--mut);font-size:11.5px}
+.dps-t input,.dps-t select{width:100%}
+.dps-pill{display:inline-block;font-size:11px;font-weight:700;border-radius:10px;padding:2px 8px;background:#EEF1F4;color:var(--mut);white-space:nowrap}
+.dps-pill.product{background:#E7F0FA;color:#0C447C}.dps-pill.part{background:#EEEAFB;color:#3C3489}.dps-pill.material{background:#FBF0DC;color:#7A4A00}
+.dps-pill.draft{background:#FBF0DC;color:#7A4A00}.dps-pill.received{background:#E3F4EB;color:#155E3B}
+.dps-pill.low{background:#FDE4E1;color:#8A1F14}
+.dps-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 12px;margin-bottom:10px}
+.dps-form label{display:grid;gap:3px;font-size:12px;font-weight:600;color:var(--mut);min-width:0}
+.dps-form label.w2{grid-column:span 2}.dps-form label.w4{grid-column:1/-1}
+.dps input[type=text],.dps input[type=number],.dps input[type=date],.dps select,.dps textarea,.dps-modal input[type=text],.dps-modal input[type=number],.dps-modal input[type=date],.dps-modal select,.dps-modal textarea{font:13px inherit;color:var(--ink);background:#fff;border:1px solid #CFD7DE;border-radius:6px;padding:6px 8px;min-width:0;width:100%;box-sizing:border-box;height:auto}
+.dps input[type=number],.dps-modal input[type=number]{font-variant-numeric:tabular-nums}
+.dps textarea,.dps-modal textarea{min-height:54px}
+.dps .chk,.dps-modal .chk{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--ink)}
+.dps .chk input,.dps-modal .chk input{margin:0}
+.dps-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:10px 0}
+.dps-sum div{background:#F7F9FA;border-radius:8px;padding:8px 10px}
+.dps-sum span{display:block;font-size:11.5px;color:var(--mut);font-weight:600}
+.dps-sum b{font-size:17px;font-variant-numeric:tabular-nums}
+.dps-sum .big{background:var(--accs)}.dps-sum .big b{color:var(--acc)}
+.dps-mut{color:var(--mut)}
+.dps-warn{background:#FFF6E5;border:1px solid #F2D399;color:#6B4500;border-radius:8px;padding:8px 10px;font-size:13px;margin:8px 0}
+.dps-err{background:#FDECEA;border:1px solid #F1B9B2;color:#8A1F14;border-radius:8px;padding:8px 10px;font-size:13px;margin:8px 0}
+.dps-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dps-drop{border:2px dashed #CFD7DE;border-radius:8px;padding:12px;text-align:center;color:var(--mut);font-size:13px;cursor:pointer}
+.dps-drop.on{border-color:var(--acc);background:var(--accs)}
+.dps-drop a{font-weight:600}
+#dps-toast{position:fixed;right:20px;bottom:20px;background:var(--ink);color:#fff;border-radius:8px;padding:10px 14px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999;max-width:420px}
+#dps-toast.on{opacity:1}#dps-toast.bad{background:var(--red)}
+.dps-modal{position:fixed;inset:0;background:rgba(20,28,36,.45);z-index:9000;display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px;overflow:auto}
+.dps-modal>div{background:#fff;border-radius:12px;width:min(980px,100%);padding:18px 20px;box-shadow:0 18px 50px rgba(0,0,0,.3)}
+.dps-modal h3{margin:0 0 12px;font-size:18px;font-weight:700}
+.dps-modal .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;flex-wrap:wrap}
+@media (max-width:1000px){.dps-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dps-grid2{grid-template-columns:1fr}.dps-form{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.dps{padding:12px}.dps-form{grid-template-columns:1fr}.dps-form label.w2{grid-column:auto}}
+@media (prefers-reduced-motion:reduce){ #dps-toast{transition:none}}
+</style>
+<script>window.DPS_API = {{ api|json_encode }}; window.DPS_CAN = {{ can_modify }};</script>
+<script src="view/javascript/dpc-stock.js?v=1"></script>
+{{ footer }}
