@@ -707,9 +707,15 @@ namespace WebUI {
         if (r->hasParam(name, true)) return r->getParam(name, true)->value().c_str();
         return "";
     }
+    // "Stay logged in" ticked: 30 days; otherwise one shift (12 h on the board,
+    // and the browser drops the cookie when it is closed).
+    static bool auth_remember(AsyncWebServerRequest* r) { return auth_param(r, "remember") == "1"; }
+    static std::string login_key(AsyncWebServerRequest* r) { return DpcAuth::new_key(auth_remember(r) ? DpcAuth::SESSION_MIN : DpcAuth::SHIFT_MIN); }
     static void auth_reply(AsyncWebServerRequest* r, int code, const std::string& json, const std::string& key = "", bool drop = false) {
         AsyncWebServerResponse* resp = r->beginResponse(code, "application/json", json.c_str());
-        if (!key.empty()) resp->addHeader("Set-Cookie", ("dpc_key=" + key + "; Path=/; Max-Age=31536000; SameSite=Strict; HttpOnly").c_str());
+        if (!key.empty())
+            resp->addHeader("Set-Cookie",
+                            ("dpc_key=" + key + "; Path=/; " + (auth_remember(r) ? "Max-Age=2592000; " : "") + "SameSite=Strict; HttpOnly").c_str());
         if (drop) resp->addHeader("Set-Cookie", "dpc_key=; Path=/; Max-Age=0; SameSite=Strict; HttpOnly");
         resp->addHeader("Cache-Control", "no-store");
         r->send(resp);
@@ -725,7 +731,7 @@ namespace WebUI {
     void WebUI_Server::handle_dpc_auth(AsyncWebServerRequest* request) {
         auth_reply(request, 200,
                    std::string("{\"set\":") + (DpcAuth::is_set() ? "true" : "false") + ",\"ok\":" + (DpcAuth::request_ok(request) ? "true" : "false") +
-                       ",\"min\":" + std::to_string(DpcAuth::MIN_LEN) + ",\"lock\":" + std::to_string(DpcAuth::lockout_ms()) + "}");
+                       ",\"min\":" + std::to_string(DpcAuth::MIN_LEN) + ",\"lock\":" + std::to_string(DpcAuth::lockout_ms(DpcAuth::client(request))) + "}");
     }
     // First start: no password yet - the first visit sets it (or USB: $Auth/Set).
     void WebUI_Server::handle_dpc_auth_setup(AsyncWebServerRequest* request) {
@@ -733,28 +739,31 @@ namespace WebUI {
         std::string err;
         if (!DpcAuth::set_password(auth_param(request, "password"), err)) return auth_reply(request, 400, "{\"error\":" + json_str(err) + "}");
         log_info("Login password set from " << request->client()->remoteIP());
-        auth_reply(request, 200, "{\"ok\":true}", DpcAuth::new_key());
+        auth_reply(request, 200, "{\"ok\":true}", login_key(request));
     }
     void WebUI_Server::handle_dpc_auth_login(AsyncWebServerRequest* request) {
         if (!DpcAuth::is_set()) return auth_reply(request, 409, "{\"error\":\"no password yet: set one\"}");
-        if (uint32_t w = DpcAuth::lockout_ms()) return auth_reply(request, 429, "{\"error\":\"too many wrong passwords\",\"lock\":" + std::to_string(w) + "}");
-        if (!DpcAuth::check_password(auth_param(request, "password"))) {
+        if (uint32_t w = DpcAuth::lockout_ms(DpcAuth::client(request))) return auth_reply(request, 429, "{\"error\":\"too many wrong passwords\",\"lock\":" + std::to_string(w) + "}");
+        if (!DpcAuth::check_password(auth_param(request, "password"), DpcAuth::client(request))) {
             log_info("Login failed from " << request->client()->remoteIP());
-            return auth_reply(request, 403, "{\"error\":\"wrong password\",\"lock\":" + std::to_string(DpcAuth::lockout_ms()) + "}");
+            return auth_reply(request, 403, "{\"error\":\"wrong password\",\"lock\":" + std::to_string(DpcAuth::lockout_ms(DpcAuth::client(request))) + "}");
         }
-        auth_reply(request, 200, "{\"ok\":true}", DpcAuth::new_key());
+        auth_reply(request, 200, "{\"ok\":true}", login_key(request));
     }
     // Settings: change it - logged in and with the old password. Every other session ends.
     void WebUI_Server::handle_dpc_auth_change(AsyncWebServerRequest* request) {
         if (!DpcAuth::request_ok(request)) return auth_reply(request, 401, "{\"auth\":\"login\"}");
-        if (uint32_t w = DpcAuth::lockout_ms()) return auth_reply(request, 429, "{\"error\":\"too many wrong passwords\",\"lock\":" + std::to_string(w) + "}");
-        if (!DpcAuth::check_password(auth_param(request, "old"))) return auth_reply(request, 403, "{\"error\":\"the current password is wrong\"}");
+        if (uint32_t w = DpcAuth::lockout_ms(DpcAuth::client(request))) return auth_reply(request, 429, "{\"error\":\"too many wrong passwords\",\"lock\":" + std::to_string(w) + "}");
+        if (!DpcAuth::check_password(auth_param(request, "old"), DpcAuth::client(request))) return auth_reply(request, 403, "{\"error\":\"the current password is wrong\"}");
         std::string err;
         if (!DpcAuth::set_password(auth_param(request, "password"), err)) return auth_reply(request, 400, "{\"error\":" + json_str(err) + "}");
         log_info("Login password changed from " << request->client()->remoteIP());
-        auth_reply(request, 200, "{\"ok\":true}", DpcAuth::new_key());
+        auth_reply(request, 200, "{\"ok\":true}", login_key(request));
     }
-    void WebUI_Server::handle_dpc_auth_logout(AsyncWebServerRequest* request) { auth_reply(request, 200, "{\"ok\":true}", "", true); }
+    void WebUI_Server::handle_dpc_auth_logout(AsyncWebServerRequest* request) {
+        DpcAuth::end_session(request);  // the key itself ends, not just this browser's copy
+        auth_reply(request, 200, "{\"ok\":true}", "", true);
+    }
     // A key for a script / the PC drive tool (logged in only)
     void WebUI_Server::handle_dpc_auth_key(AsyncWebServerRequest* request) {
         if (!DpcAuth::request_ok(request)) return auth_reply(request, 401, "{\"auth\":\"login\"}");

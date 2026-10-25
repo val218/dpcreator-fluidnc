@@ -84,8 +84,9 @@ WiFi is off after this. To go back: `$network/type=WiFi`, then `$bye` (over USB)
 If `config.yaml` has no `ethernet:` section (for example after flashing a
 default config), the board uses WiFi instead even with `$network/type=Ethernet`
 (`[MSG:WARN: ... using WiFi so the board stays reachable]`): your saved WiFi
-network, or else its own **FluidNC** access point at `http://192.168.0.1`,
-where you can upload the right config.yaml. Ethernet comes back by itself once
+network. Its own access point (`http://192.168.0.1`) only starts if you have
+set an AP password (`$AP/Password`, section 17); otherwise connect over USB
+(dpcreator.eu → Flash Firmware → USB terminal) to put the right config.yaml back. Ethernet comes back by itself once
 the config has the `ethernet:` section.
 
 ---
@@ -968,8 +969,17 @@ WebSocket, files (`/upload`, `/files`, WebDAV `/sd`, `/flash`), Studio on the
 board, and telnet. The pages themselves (`/`, `*.html`, `*.js`...) load without
 it, so the login screen can show. The pendant (cable) and USB don't use it.
 
-- The WebUI keeps the session in a cookie (one year, ends when the password
-  changes). After 5 wrong passwords, logins wait 30 s (doubling, up to 5 min).
+- **Logging in and out:** a login lasts one shift - 12 hours, and the browser
+  forgets it when it is closed - unless **Stay logged in on this device**
+  is ticked (30 days). **Log out** in the header (or under Account) ends that
+  login on the board itself, not only in that browser; a running job carries
+  on. A password change ends every login. The board keeps up to 16 logins
+  (the oldest makes room). Without NTP (`$NTP/Enable`) the board counts the
+  12 h / 30 days only while it is switched on; the browser's own expiry
+  still counts real days.
+- **Wrong passwords:** after 5 from one address, that address waits 30 s
+  (doubling, up to 5 min). Other computers and phones can still log in, so
+  someone guessing can't lock the owner out.
 - **PC drive (WebDAV):** the drive script (WebUI → Files → PC drive) asks for
   the password, keeps it in Windows Credential Manager and, in its one admin
   step, lets Windows log in over http (`BasicAuthLevel` 2).
@@ -1008,7 +1018,7 @@ network update page (`/updatefw`) is not in this firmware.
 | Board stops answering (WebUI, pendant, serial) after the pendant was plugged in / rebooted | Fixed: XON/XOFF is off on the pendant UART — a noise byte that looked like XOFF paused the board's transmitter and blocked it. |
 | Hold / door / reset when the pendant is plugged in or rebooted | Fixed: line noise on the pendant UART is dropped. `$Pendant/Debug` shows how many bytes were dropped. |
 | WebUI goes offline / online or jerks while jogging | Fixed in builds from 5e5b8f2 on (with the pendant from 43f1a20 on): the pendant streams the handwheel as smooth jogs, state-change reports are spaced to at most one per 50 ms, and a busy WebSocket waits instead of being closed. If it still happens, the network link itself is slow: try a lower Ethernet SPI frequency in `config.yaml`. |
-| WebUI shows *"Controller restarted after a crash"* | Press **Copy details** and send the text: the reason (panic, task / interrupt watchdog), the crash backtrace and the last commands sent before it (`$Crash` prints them too). After a **task watchdog** reset (reason `task-watchdog`: a task stopped responding for 5 s) the details also name the task that missed the watchdog, what each watched task was doing then (polling task, protocol task, network task, with the HTTP request in progress) and the call stack of the task that was waiting - `$Crash` prints these as `[MSG:CrashWdt:...]`, the boot log as `Watchdog: ...`. To check that this works on your board, send `$Crash/TestWatchdog` while Idle: the board waits 8 s on purpose, restarts, and the notice then names that command. **Dismiss** (or `$Crash/Clear`) tells the board it was seen: the notice goes away in every open WebUI and stays away after reloads, until the next crash. One crash restarts with your `config.yaml`; only 3 crash restarts in a row fall back to the default config (WiFi AP `FluidNC`, no Ethernet) - reset the board to try again. |
+| WebUI shows *"Controller restarted after a crash"* | Press **Copy details** and send the text: the reason (panic, task / interrupt watchdog), the crash backtrace and the last commands sent before it (`$Crash` prints them too). After a **task watchdog** reset (reason `task-watchdog`: a task stopped responding for 5 s) the details also name the task that missed the watchdog, what each watched task was doing then (polling task, protocol task, network task, with the HTTP request in progress) and the call stack of the task that was waiting - `$Crash` prints these as `[MSG:CrashWdt:...]`, the boot log as `Watchdog: ...`. To check that this works on your board, send `$Crash/TestWatchdog` while Idle: the board waits 8 s on purpose, restarts, and the notice then names that command. **Dismiss** (or `$Crash/Clear`) tells the board it was seen: the notice goes away in every open WebUI and stays away after reloads, until the next crash. One crash restarts with your `config.yaml`; only 3 crash restarts in a row fall back to the default config (no Ethernet; WiFi joins only your saved network, and the board's own access point starts only if you set `$AP/Password` - otherwise it is reachable over USB only) - reset the board to try again. |
 | Boot shows *"Showing startup log from previous panic"* | Capture serial output at 115200 including `Guru Meditation` and `Backtrace:` lines and decode via **Actions → Run workflow** with the backtrace input. |
 
 Windows has no telnet client by default; test the port with PowerShell:

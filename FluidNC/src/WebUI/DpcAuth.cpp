@@ -11,6 +11,8 @@
 #include <esp_random.h>
 #include <nvs.h>
 #include <Arduino.h>  // millis
+#include <esp_timer.h>
+#include <ctime>
 
 #include <cstring>
 #include <mutex>
@@ -27,10 +29,60 @@ namespace {
     uint8_t              salt[16], hash[32], secret[32];
     std::string          basicOk;  // last Authorization header that matched (WebDAV sends it on every request)
 
-    // Lock-out after wrong passwords: 5 tries, then 30 s, doubling up to 5 min.
-    int      fails     = 0;
-    uint32_t lockUntil = 0;
-    uint32_t lockStep  = 30000;
+    // Sessions: kept on the board (NVS), so logging out ends the key itself
+    // (not just the browser's copy) and every key expires SESSION_MIN after
+    // the login. The browser's cookie expires at the same time.
+    struct Sess {
+        uint8_t  id[8];
+        uint32_t issued;  // board clock, minutes; 0 = free slot
+        uint32_t life;    // minutes it lasts (30 days "stay logged in", else a shift)
+    };
+    constexpr int SLOTS = 16;
+    Sess          sess[SLOTS];
+
+    // Board clock in minutes: real time when the board has it (NTP), else the
+    // last saved value plus the time since power-on (saved every 10 min), so
+    // it never goes back and survives restarts. Without NTP it only counts
+    // the time the board is on; the cookie's own expiry still counts days.
+    uint32_t clockBase  = 1;  // board clock at power-on
+    uint32_t clockSaved = 0;
+    uint32_t now_min() {
+        uint32_t t = clockBase + (uint32_t)(esp_timer_get_time() / 60000000LL);
+        time_t   w = time(nullptr);
+        if (w > 1700000000) {  // NTP time is set
+            uint32_t wm = (uint32_t)(w / 60);
+            if (wm > t) {
+                clockBase += wm - t;  // move forward to real time (never back)
+                t = wm;
+            }
+        }
+        return t;
+    }
+
+    // Lock-out after wrong passwords, per client (IP address), so a stranger's
+    // guesses never lock the owner out: 5 tries, then 30 s, doubling up to 5 min.
+    struct Lock {
+        uint32_t ip;
+        int      fails;
+        uint32_t until, step, seen;
+    };
+    constexpr int LOCKS = 8;
+    Lock          locks[LOCKS];
+    Lock&         lock_for(uint32_t ip) {
+        int pick = -1;
+        for (int i = 0; i < LOCKS; ++i)
+            if (locks[i].step && locks[i].ip == ip) return locks[i];
+        // a free entry, else the one least recently seen that is not locked out
+        uint32_t now = millis(), best = 0;
+        for (int i = 0; i < LOCKS; ++i) {
+            if (!locks[i].step) { pick = i; break; }
+            bool     locked = (int32_t)(locks[i].until - now) > 0;
+            uint32_t age    = now - locks[i].seen + (locked ? 0 : 0x40000000u);
+            if (pick < 0 || age > best) { pick = i; best = age; }
+        }
+        locks[pick] = { ip, 0, 0, 30000, now };
+        return locks[pick];
+    }
 
     void pw_hash(const uint8_t s[16], const std::string& pw, uint8_t out[32]) {
         mbedtls_sha256_context c;
@@ -58,14 +110,49 @@ namespace {
         size_t len = n;
         return nvs_get_blob(h, key, out, &len) == ESP_OK && len == n;
     }
+    void save_clock() {
+        uint32_t t = now_min();
+        if (t == clockSaved) return;
+        nvs_handle_t h;
+        if (nvs_open(NS, NVS_READWRITE, &h) != ESP_OK) return;
+        if (nvs_set_u32(h, "clock", t) == ESP_OK && nvs_commit(h) == ESP_OK) clockSaved = t;
+        nvs_close(h);
+    }
+    void store_sessions() {
+        nvs_handle_t h;
+        if (nvs_open(NS, NVS_READWRITE, &h) != ESP_OK) return;
+        nvs_set_blob(h, "sess", sess, sizeof(sess));
+        nvs_commit(h);
+        nvs_close(h);
+    }
     void load() {
         if (loaded) return;
         loaded = true;
         have   = false;
+        memset(sess, 0, sizeof(sess));
         nvs_handle_t h;
         if (nvs_open(NS, NVS_READONLY, &h) != ESP_OK) return;
         have = get_blob(h, "salt", salt, sizeof(salt)) && get_blob(h, "hash", hash, sizeof(hash)) && get_blob(h, "secret", secret, sizeof(secret));
+        if (!get_blob(h, "sess", sess, sizeof(sess))) memset(sess, 0, sizeof(sess));
+        static bool clockRead = false;
+        if (!clockRead) {
+            clockRead = true;
+            uint32_t c = 0;
+            if (nvs_get_u32(h, "clock", &c) == ESP_OK && c > clockBase) clockBase = c;
+            clockSaved = clockBase;
+        }
         nvs_close(h);
+        // keep the board clock going across restarts
+        static esp_timer_handle_t tick = nullptr;
+        if (!tick) {
+            esp_timer_create_args_t a = {};
+            a.callback                = [](void*) {
+                std::lock_guard<std::recursive_mutex> l(mtx);
+                save_clock();
+            };
+            a.name = "dpcauth";
+            if (esp_timer_create(&a, &tick) == ESP_OK) esp_timer_start_periodic(tick, 10ULL * 60 * 1000000);
+        }
     }
     bool store() {
         nvs_handle_t h;
@@ -160,34 +247,47 @@ namespace DpcAuth {
         pw_hash(salt, pw, hash);
         basicOk.clear();
         if (!store()) { loaded = false; load(); err = "could not save it (NVS)"; return false; }
-        have  = true;
-        fails = 0;
+        have = true;
+        memset(sess, 0, sizeof(sess));  // every session ends
+        store_sessions();
         return true;
     }
 
-    bool check_password(const std::string& pw) {
+    bool check_password(const std::string& pw, uint32_t client) {
         std::lock_guard<std::recursive_mutex> l(mtx);
         load();
-        if (!have || lockout_ms()) return false;
+        if (!have || lockout_ms(client)) return false;
         uint8_t h[32];
         pw_hash(salt, pw, h);
+        Lock& k = lock_for(client);
+        k.seen  = millis();
         if (same(h, hash, 32)) {
-            fails    = 0;
-            lockStep = 30000;
+            k.fails = 0;
+            k.step  = 30000;
             return true;
         }
-        if (++fails >= 5) {
-            fails     = 0;
-            lockUntil = millis() + lockStep;
-            if (lockStep < 300000) lockStep *= 2;
-            log_warn("Login: too many wrong passwords, locked for " << lockStep / 2000 << " s");
+        if (++k.fails >= 5) {
+            k.fails = 0;
+            k.until = millis() + k.step;
+            log_warn("Login: too many wrong passwords from " << IPAddress(client) << ", locked for " << k.step / 1000 << " s");
+            if (k.step < 300000) k.step *= 2;
         }
         return false;
     }
 
-    uint32_t lockout_ms() {
-        int32_t left = (int32_t)(lockUntil - millis());
-        return left > 0 ? (uint32_t)left : 0;
+    uint32_t lockout_ms(uint32_t client) {
+        std::lock_guard<std::recursive_mutex> l(mtx);
+        for (auto& k : locks)
+            if (k.step && k.ip == client) {
+                int32_t left = (int32_t)(k.until - millis());
+                return left > 0 ? (uint32_t)left : 0;
+            }
+        return 0;
+    }
+
+    uint32_t client(AsyncWebServerRequest* r) {
+        AsyncClient* c = r->client();
+        return c ? (uint32_t)c->remoteIP() : 0;
     }
 
     bool clear() {
@@ -200,34 +300,75 @@ namespace DpcAuth {
         }
         loaded = false;
         have   = false;
+        memset(sess, 0, sizeof(sess));
         basicOk.clear();
         return true;
     }
 
-    std::string new_key() {
+    std::string new_key(uint32_t minutes) {
         std::lock_guard<std::recursive_mutex> l(mtx);
         load();
-        uint8_t id[8], m[32];
-        esp_fill_random(id, sizeof(id));
-        mac(id, m);
-        return hex(id, 8) + hex(m, 16);
+        uint32_t now = now_min();
+        // a free or expired slot, else the oldest login makes room
+        int pick = 0;
+        for (int i = 0; i < SLOTS; ++i) {
+            if (!sess[i].issued || now - sess[i].issued >= sess[i].life) { pick = i; break; }
+            if (sess[i].issued < sess[pick].issued) pick = i;
+        }
+        uint8_t m[32];
+        esp_fill_random(sess[pick].id, 8);
+        sess[pick].issued = now;
+        sess[pick].life   = minutes ? minutes : SESSION_MIN;
+        store_sessions();
+        save_clock();
+        mac(sess[pick].id, m);
+        return hex(sess[pick].id, 8) + hex(m, 16);
+    }
+
+    namespace {
+        int find_key(const std::string& key) {  // slot of a valid, unexpired key, or -1
+            if (!have || key.size() != 48) return -1;
+            uint8_t id[8], got[16], m[32];
+            if (!unhex(key.substr(0, 16), id, 8) || !unhex(key.substr(16), got, 16)) return -1;
+            mac(id, m);
+            if (!same(m, got, 16)) return -1;
+            for (int i = 0; i < SLOTS; ++i) {
+                if (sess[i].issued && same(sess[i].id, id, 8)) {
+                    if (now_min() - sess[i].issued < sess[i].life) return i;
+                    sess[i] = {};  // expired
+                    store_sessions();
+                    return -1;
+                }
+            }
+            return -1;  // logged out, or pushed out by newer logins
+        }
+        std::string request_key(AsyncWebServerRequest* r) {
+            std::string k = cookie(r, "dpc_key");
+            if (k.empty() && r->hasHeader("X-DPC-Key")) k = r->getHeader("X-DPC-Key")->value().c_str();
+            if (k.empty() && r->hasParam("dpck")) k = r->getParam("dpck")->value().c_str();
+            return k;
+        }
     }
 
     bool key_ok(const std::string& key) {
         std::lock_guard<std::recursive_mutex> l(mtx);
         load();
-        if (!have || key.size() != 48) return false;
-        uint8_t id[8], got[16], m[32];
-        if (!unhex(key.substr(0, 16), id, 8) || !unhex(key.substr(16), got, 16)) return false;
-        mac(id, m);
-        return same(m, got, 16);
+        return find_key(key) >= 0;
+    }
+
+    void end_session(AsyncWebServerRequest* r) {
+        std::lock_guard<std::recursive_mutex> l(mtx);
+        load();
+        int i = find_key(request_key(r));
+        if (i >= 0) {
+            sess[i] = {};
+            store_sessions();
+        }
     }
 
     bool request_ok(AsyncWebServerRequest* r) {
         if (!is_set()) return false;
-        std::string k = cookie(r, "dpc_key");
-        if (k.empty() && r->hasHeader("X-DPC-Key")) k = r->getHeader("X-DPC-Key")->value().c_str();
-        if (k.empty() && r->hasParam("dpck")) k = r->getParam("dpck")->value().c_str();
+        std::string k = request_key(r);
         if (!k.empty() && key_ok(k)) return true;
         // HTTP Basic (WebDAV drive on the PC, scripts): any user name, the password
         if (r->hasHeader("Authorization")) {
@@ -239,7 +380,7 @@ namespace DpcAuth {
                 }
                 std::string up = b64decode(a.substr(6));
                 size_t      c  = up.find(':');
-                if (c != std::string::npos && check_password(up.substr(c + 1))) {
+                if (c != std::string::npos && check_password(up.substr(c + 1), client(r))) {
                     std::lock_guard<std::recursive_mutex> l(mtx);
                     basicOk = a;
                     return true;
