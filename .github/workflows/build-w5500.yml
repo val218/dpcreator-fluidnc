@@ -114,4 +114,4 @@ jobs:
           gh release delete w5500-latest -y --cleanup-tag || true
           gh release create w5500-latest out/* --prerelease --target "$GITHUB_SHA" \
             --title "dpCREATOR FluidNC 4.1.1 W5500 - latest build ($SHORT)" \
-            --notes "Latest build of branch fluidnc-4.1.1-w5500 (commit $SHORT), replaced on every push. merged-flash.bin = fresh board at 0x0 (overwrites config.yaml); firmware.bin = update at 0x10000 or via the WebUI. The dpCREATOR WebUI is installed separately from dpcreator.eu. See W5500_ETHERNET.md."
+            --notes "Latest build of branch fluidnc-4.1.1-w5500 (commit $SHORT), replaced on every push. merged-flash.bin = fresh board at 0x0 (overwrites config.yaml); firmware.bin = update at 0x10000 over USB (network updates are off since 063dee80). Set the login password over USB with $Auth/Set=<password> or on the first WebUI visit. The dpCREATOR WebUI is installed separately from dpcreator.eu. See W5500_ETHERNET.md."
