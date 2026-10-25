@@ -39,6 +39,15 @@ namespace WebUI {
         // back, which a client tolerates as "no options supported".
         enum class TelnetRx : uint8_t { data, iac, opt, sb, sbIac };
         TelnetRx _telnetRx     = TelnetRx::data;
+
+        // Login (DpcAuth.h): the first line must be the password; until then no
+        // input is run and no output is sent.
+        bool        _authed   = false;
+        bool        _prompted = false;
+        int         _authTries = 0;
+        std::string _authLine;
+        bool        loginStep();  // false: not logged in (yet)
+        void        say(const char* s);
         int      _peekPushback = -1;  // one filtered byte held for peek()
 
         int rawReadLocked();  // raw socket read + disconnect bookkeeping; _wifiMutex held

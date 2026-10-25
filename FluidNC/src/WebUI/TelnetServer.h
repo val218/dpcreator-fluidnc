@@ -14,7 +14,7 @@
 
 namespace WebUI {
     class TelnetServer : public Module {
-        static const int DEFAULT_TELNET_STATE      = 1;
+        static const int DEFAULT_TELNET_STATE      = 0;  // dpCREATOR: off unless turned on ($Telnet/Enable=ON)
         static const int DEFAULT_TELNETSERVER_PORT = 23;
 
         static const int MAX_TELNET_PORT = 65001;

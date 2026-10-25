@@ -948,7 +948,47 @@ for the laser: use set-up 1.
 - `Laser:` spindles are in laser mode: M4 power follows the speed, as in stock
   FluidNC.
 
-## 17. Troubleshooting
+## 17. Network security: login, Wi-Fi, updates
+
+**Login.** The controller has one admin password, chosen by you; there is no
+default password.
+
+- **First start:** the WebUI shows a login screen asking you to set it (8 to
+  64 characters). Or set it over USB first: `$Auth/Set=<password>` in the USB
+  terminal on dpcreator.eu → Flash Firmware.
+- **Change it:** WebUI → **Account** (the lock in the header): current password,
+  then the new one twice. All other browsers and the PC drive must log in again.
+- **Forgot it:** over USB, `$Auth/Set=<new password>` sets a new one;
+  `$Auth/Clear` removes it (the WebUI then asks for a new one). Network
+  channels can't do either once a password is set.
+- `$Auth/Status` answers `[MSG:Auth:set]` or `[MSG:Auth:unset]`.
+
+What needs the login: every network route - the WebUI's commands and
+WebSocket, files (`/upload`, `/files`, WebDAV `/sd`, `/flash`), Studio on the
+board, and telnet. The pages themselves (`/`, `*.html`, `*.js`...) load without
+it, so the login screen can show. The pendant (cable) and USB don't use it.
+
+- The WebUI keeps the session in a cookie (one year, ends when the password
+  changes). After 5 wrong passwords, logins wait 30 s (doubling, up to 5 min).
+- **PC drive (WebDAV):** the drive script (WebUI → Files → PC drive) asks for
+  the password, keeps it in Windows Credential Manager and, in its one admin
+  step, lets Windows log in over http (`BasicAuthLevel` 2).
+- **Telnet** is off by default (`$Telnet/Enable=ON` to use it). When on, the
+  first line you send must be the password.
+- The password is stored as a salted, iterated SHA-256 in NVS, never in plain
+  text, and never kept in the crash report's command list.
+
+**Wi-Fi.** `$WiFi/Mode` is `STA` by default: join your network, nothing else.
+The board's own access point (`AP`, or `STA>AP` when your network can't be
+reached) only starts once you have set its password, `$AP/Password=...`
+(8 characters or more). There is no default AP password, and the board never
+opens an access point without one.
+
+**Firmware updates** happen over USB only (dpcreator.eu → Flash Firmware, with
+the board in boot mode), so someone has to be at the machine. The old
+network update page (`/updatefw`) is not in this firmware.
+
+## 18. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|

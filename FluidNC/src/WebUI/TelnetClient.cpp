@@ -3,6 +3,7 @@
 
 #include "Platform.h"
 #include "TelnetClient.h"
+#include "DpcAuth.h"
 #include "TelnetServer.h"
 
 #include <WiFi.h>
@@ -197,8 +198,8 @@ namespace WebUI {
     }
 
     size_t TelnetClient::write(const uint8_t* buffer, size_t length) {
-        if (_state == -1 || buffer == nullptr || length == 0) {
-            return length;
+        if (_state == -1 || buffer == nullptr || length == 0 || !_authed) {
+            return length;  // nothing goes out before the login
         }
         xSemaphoreTake(_wifiMutex, portMAX_DELAY);
         bool isConnected = _wifiClient->connected();
@@ -232,6 +233,7 @@ namespace WebUI {
     }
 
     int TelnetClient::peek(void) {
+        if (!loginStep()) return -1;
         if (_peekPushback < 0) {
             _peekPushback = filteredRead();
         }
@@ -324,7 +326,51 @@ namespace WebUI {
         return result;
     }
 
+    void TelnetClient::say(const char* s) {
+        queueLine((const uint8_t*)s, strlen(s), TX_CRITICAL_RESERVE);
+        flushQueue();
+    }
+
+    bool TelnetClient::loginStep() {
+        if (_authed) return true;
+        if (!DpcAuth::is_set()) {
+            if (!_prompted) {
+                _prompted = true;
+                say("Set the login password first (WebUI, or USB: $Auth/Set=...)\r\n");
+                closeOnDisconnect();
+            }
+            return false;
+        }
+        if (!_prompted) {
+            _prompted = true;
+            say("dpCREATOR - password: ");
+        }
+        int c;
+        while ((c = filteredRead()) >= 0) {
+            if (c == '\r' || c == '\n') {
+                if (_authLine.empty()) continue;
+                bool ok = DpcAuth::check_password(_authLine);
+                _authLine.clear();
+                if (ok) {
+                    _authed = true;
+                    say("\r\nok\r\n");
+                    return true;
+                }
+                if (++_authTries >= 3 || DpcAuth::lockout_ms()) {
+                    say("\r\nwrong password\r\n");
+                    closeOnDisconnect();
+                    return false;
+                }
+                say("\r\nwrong password - password: ");
+            } else if (_authLine.size() < DpcAuth::MAX_LEN + 2) {
+                _authLine += (char)c;
+            }
+        }
+        return false;
+    }
+
     int TelnetClient::read(void) {
+        if (!loginStep()) return -1;
         if (_peekPushback >= 0) {
             int c         = _peekPushback;
             _peekPushback = -1;

@@ -13,9 +13,12 @@ rem    dpcreator-sd-drive.cmd remove              remove drive + auto-reconnect
 rem
 rem  What it does:
 rem   1. Once, with one Windows admin prompt: WebClient (the Windows WebDAV
-rem      client) starts automatically, and its 50 MB file size limit is lifted.
-rem   2. Maps http://<board>/sd to a drive letter, named "dpCREATOR SD".
-rem   3. Adds a hidden sign-in task (Startup folder) that reconnects the drive.
+rem      client) starts automatically, its 50 MB file size limit is lifted, and
+rem      it may log in to the board (password login over http, BasicAuthLevel 2).
+rem   2. Asks for the controller's password (the one you log in to the WebUI
+rem      with) and keeps it in Windows Credential Manager for this board.
+rem   3. Maps http://<board>/sd to a drive letter, named "dpCREATOR SD".
+rem   4. Adds a hidden sign-in task (Startup folder) that reconnects the drive.
 rem ===========================================================================
 
 set "DEFAULT_IP=192.168.10.104"
@@ -57,12 +60,13 @@ echo [2/4] Windows WebDAV client ...
 set "NEED_ADMIN=0"
 sc qc WebClient | find /i "AUTO_START" >nul || set "NEED_ADMIN=1"
 reg query "%WEBCLIENT_KEY%" /v FileSizeLimitInBytes 2>nul | find /i "0xffffffff" >nul || set "NEED_ADMIN=1"
+reg query "%WEBCLIENT_KEY%" /v BasicAuthLevel 2>nul | find /i "0x2" >nul || set "NEED_ADMIN=1"
 if "%NEED_ADMIN%"=="1" (
     echo   One-time setup needs administrator rights: answer YES on the next prompt.
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Start-Process cmd.exe -Verb RunAs -Wait -WindowStyle Hidden -ArgumentList '/c sc config WebClient start= auto & reg add %WEBCLIENT_KEY% /v FileSizeLimitInBytes /t REG_DWORD /d 4294967295 /f & net stop WebClient & net start WebClient' } catch { exit 1 }"
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Start-Process cmd.exe -Verb RunAs -Wait -WindowStyle Hidden -ArgumentList '/c sc config WebClient start= auto & reg add %WEBCLIENT_KEY% /v FileSizeLimitInBytes /t REG_DWORD /d 4294967295 /f & reg add %WEBCLIENT_KEY% /v BasicAuthLevel /t REG_DWORD /d 2 /f & net stop WebClient & net start WebClient' } catch { exit 1 }"
     if errorlevel 1 (
-        echo   Admin prompt was cancelled. The drive may still work, but WebClient
-        echo   will not start by itself and files over 50 MB will not copy.
+        echo   Admin prompt was cancelled. Without it Windows refuses the board's
+        echo   password login over http, so the drive can't be mapped.
     )
 )
 sc query WebClient | find /i "RUNNING" >nul || (
@@ -72,12 +76,22 @@ sc query WebClient | find /i "RUNNING" >nul || (
 echo   OK
 
 echo [3/4] Mapping %LETTER%: to %URL% ...
+echo   Enter the controller's password (the WebUI login; nothing shows while you type).
+set "PW="
+for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "$p = Read-Host 'Password' -AsSecureString; [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($p))"`) do set "PW=%%P"
+if not defined PW (
+    echo   No password entered.
+    goto :end
+)
+rem Kept in Credential Manager, so the drive reconnects at sign-in without asking.
+cmdkey /add:%BOARD% /user:dpcreator /pass:"%PW%" >nul
 net use %LETTER%: /delete /y >nul 2>&1
-net use %LETTER%: %URL% /persistent:yes
+net use %LETTER%: %URL% /user:dpcreator "%PW%" /persistent:yes
+set "PW="
 if errorlevel 1 (
-    echo   Mapping failed. Check that http://%BOARD% opens the dpCREATOR WebUI and
-    echo   that the SD card shows in its Files panel, then restart the PC once
-    echo   and run this again.
+    echo   Mapping failed. Check the password ^(log in to http://%BOARD% with it^),
+    echo   that the SD card shows in the WebUI's Files panel, then restart the PC
+    echo   once and run this again.
     goto :end
 )
 rem Drive name shown in This PC (both key spellings Windows uses for WebDAV).
@@ -103,6 +117,7 @@ set "LETTER=%~2"
 if "%LETTER%"=="" set "LETTER=S"
 net use %LETTER%: /delete /y
 del "%STARTUP_FILE%" >nul 2>&1
+if not "%~3"=="" cmdkey /delete:%~3 >nul 2>&1
 echo Removed %LETTER%: and the sign-in reconnect.
 
 :end

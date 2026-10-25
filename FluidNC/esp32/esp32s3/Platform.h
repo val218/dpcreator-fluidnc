@@ -4,7 +4,7 @@
 
 #define WEAK_LINK __attribute__((weak))
 #define WITH_MBEDTLS
-#define HAVE_UPDATE
+// #define HAVE_UPDATE  // dpCREATOR: no firmware update over the network (/updatefw): USB only, at the machine
 
 #define MAX_N_UARTS (SOC_UART_NUM + MAX_N_USB_HOST)
 #define MAX_N_I2C SOC_I2C_NUM
