@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DokUIENv5 xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Precizejums>false</Precizejums>
+  <NmrKods>40203123456</NmrKods>
+  <ParskNo>2026-03-10T00:00:00</ParskNo>
+  <ParskLidz>2026-12-31T00:00:00</ParskLidz>
+  <TaksGads>2026</TaksGads>
+  <TaksMenesis>9</TaksMenesis>
+  <TaksCeturksnis xsi:nil="true" />
+  <PedejaDeklaracija>false</PedejaDeklaracija>
+  <Epasts>info@dpcreator.eu</Epasts>
+  <Talrunis>+37120000000</Talrunis>
+  <IeprZaudejumi>false</IeprZaudejumi>
+  <IzmaksatasUnNosacitasDividendes>1</IzmaksatasUnNosacitasDividendes>
+  <NodoklisArvalstis>false</NodoklisArvalstis>
+  <IrVeiktiZiedojumi>0</IrVeiktiZiedojumi>
+  <IzmaksasNavNodoklis>0</IzmaksasNavNodoklis>
+  <NodoklaParmaksa>0</NodoklaParmaksa>
+  <R01>100</R01>
+  <R02>0</R02>
+  <R03>125</R03>
+  <R04>25</R04>
+  <R05>0</R05>
+  <R05_1>0</R05_1>
+  <R05_2>0</R05_2>
+  <R05_3>0</R05_3>
+  <R06>0</R06>
+  <R06_1>0</R06_1>
+  <R06_7>0</R06_7>
+  <R06_8>0</R06_8>
+  <R07>0</R07>
+  <R08>0</R08>
+  <R12>0</R12>
+  <R13>25</R13>
+  <R14>125</R14>
+  <R15>0</R15>
+  <R16>0</R16>
+  <R17>125</R17>
+  <R18>0</R18>
+  <R19>0</R19>
+  <R20>0</R20>
+  <R21>0</R21>
+  <R22>125</R22>
+  <R23>25</R23>
+  <R24>0</R24>
+  <R25>0</R25>
+  <R26>25</R26>
+  <R27>0</R27>
+  <R27_1>0</R27_1>
+  <R27_2>0</R27_2>
+  <R27_3>0</R27_3>
+  <R28>0</R28>
+  <R28_1>0</R28_1>
+  <R28_2>0</R28_2>
+  <R29>25</R29>
+  <R31>0</R31>
+  <R31_1>0</R31_1>
+  <R31_2>0</R31_2>
+  <Tab1_1 />
+  <Tab1_2 />
+  <Tab1_3 />
+  <Tab02 />
+  <Tab05_1 />
+  <Tab06_2 />
+  <Tab08 />
+  <Tab09_1 />
+  <Tab15 />
+  <Tab16 />
+  <Tab31_2 />
+  <Pielikumi />
+</DokUIENv5>
