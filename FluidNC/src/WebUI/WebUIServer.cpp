@@ -9,6 +9,7 @@
 #include "Error.h"     // ErrorException
 
 #include "WebUIServer.h"
+#include "DpcAuth.h"
 
 #if !HOSTED
 #    include "WifiScanAsync.h"  // beginAsyncWifiScan(), pollAsyncWifiScan()
@@ -322,6 +323,8 @@ namespace WebUI {
         _headerFilter->keep("Accept");
         _headerFilter->keep("Accept-Encoding");
         _headerFilter->keep("Cookie");
+        _headerFilter->keep("Authorization");  // login: HTTP Basic (WebDAV drive)
+        _headerFilter->keep("X-DPC-Key");      // login: session key from scripts
         _headerFilter->keep("If-None-Match");
         _headerFilter->keep("User-Agent");
 
@@ -338,6 +341,28 @@ namespace WebUI {
         _headerFilter->keep("Destination");
 
         _webserver->addMiddlewares({ _headerFilter });
+        // Login (DpcAuth.h): every route needs a session key or the password,
+        // except the pages themselves and the login routes. Before any handler,
+        // the WebSocket upgrade and WebDAV included.
+        _webserver->addMiddleware([](AsyncWebServerRequest* request, ArMiddlewareNext next) {
+            if (DpcAuth::is_public(request) || DpcAuth::request_ok(request)) {
+                next();
+                return;
+            }
+            if (request->isWebSocketUpgrade()) {
+                request->send(401);
+                return;
+            }
+            AsyncWebServerResponse* r =
+                request->beginResponse(401, "application/json", DpcAuth::is_set() ? "{\"auth\":\"login\"}" : "{\"auth\":\"setup\"}");
+            // WebDAV clients (the PC drive) log in with HTTP Basic; browsers' own
+            // fetches must not get the browser's login box, the WebUI has its own.
+            const char* ua  = request->hasHeader("User-Agent") ? request->getHeader("User-Agent")->value().c_str() : "";
+            bool        dav = !(request->method() == HTTP_GET || request->method() == HTTP_POST || request->method() == HTTP_HEAD) ||
+                       strstr(ua, "DAV") || strstr(ua, "WebDAV");
+            if (dav && DpcAuth::is_set()) r->addHeader("WWW-Authenticate", "Basic realm=\"dpCREATOR\", charset=\"UTF-8\"");
+            request->send(r);
+        });
         // Task watchdog report: which request async_tcp is in (WdTrace.h).
         _webserver->addMiddleware([](AsyncWebServerRequest* request, ArMiddlewareNext next) {
             wd_task(WD_NET);
@@ -387,6 +412,14 @@ namespace WebUI {
 
         //need to be there even no authentication to say to UI no authentication
         _webserver->on("/login", HTTP_ANY, handle_login);
+
+        // dpCREATOR login (DpcAuth.h)
+        _webserver->on("/dpc/auth", HTTP_GET, handle_dpc_auth);
+        _webserver->on("/dpc/auth/setup", HTTP_POST, handle_dpc_auth_setup);
+        _webserver->on("/dpc/auth/login", HTTP_POST, handle_dpc_auth_login);
+        _webserver->on("/dpc/auth/change", HTTP_POST, handle_dpc_auth_change);
+        _webserver->on("/dpc/auth/logout", HTTP_ANY, handle_dpc_auth_logout);
+        _webserver->on("/dpc/auth/key", HTTP_GET, handle_dpc_auth_key);
 
         //web commands
         _webserver->on("/command", HTTP_ANY, handle_web_command);
@@ -667,6 +700,65 @@ namespace WebUI {
 
     void WebUI_Server::send404Page(AsyncWebServerRequest* request) {
         sendWithOurAddress(request, PAGE_404, 404);
+    }
+
+    // ---- dpCREATOR login (DpcAuth.h) ----
+    static std::string auth_param(AsyncWebServerRequest* r, const char* name) {
+        if (r->hasParam(name, true)) return r->getParam(name, true)->value().c_str();
+        return "";
+    }
+    static void auth_reply(AsyncWebServerRequest* r, int code, const std::string& json, const std::string& key = "", bool drop = false) {
+        AsyncWebServerResponse* resp = r->beginResponse(code, "application/json", json.c_str());
+        if (!key.empty()) resp->addHeader("Set-Cookie", ("dpc_key=" + key + "; Path=/; Max-Age=31536000; SameSite=Strict; HttpOnly").c_str());
+        if (drop) resp->addHeader("Set-Cookie", "dpc_key=; Path=/; Max-Age=0; SameSite=Strict; HttpOnly");
+        resp->addHeader("Cache-Control", "no-store");
+        r->send(resp);
+    }
+    static std::string json_str(const std::string& s) {
+        std::string o = "\"";
+        for (char c : s) {
+            if (c == '"' || c == '\\') o += '\\';
+            o += c;
+        }
+        return o + "\"";
+    }
+    void WebUI_Server::handle_dpc_auth(AsyncWebServerRequest* request) {
+        auth_reply(request, 200,
+                   std::string("{\"set\":") + (DpcAuth::is_set() ? "true" : "false") + ",\"ok\":" + (DpcAuth::request_ok(request) ? "true" : "false") +
+                       ",\"min\":" + std::to_string(DpcAuth::MIN_LEN) + ",\"lock\":" + std::to_string(DpcAuth::lockout_ms()) + "}");
+    }
+    // First start: no password yet - the first visit sets it (or USB: $Auth/Set).
+    void WebUI_Server::handle_dpc_auth_setup(AsyncWebServerRequest* request) {
+        if (DpcAuth::is_set()) return auth_reply(request, 409, "{\"error\":\"a password is set already: log in\"}");
+        std::string err;
+        if (!DpcAuth::set_password(auth_param(request, "password"), err)) return auth_reply(request, 400, "{\"error\":" + json_str(err) + "}");
+        log_info("Login password set from " << request->client()->remoteIP());
+        auth_reply(request, 200, "{\"ok\":true}", DpcAuth::new_key());
+    }
+    void WebUI_Server::handle_dpc_auth_login(AsyncWebServerRequest* request) {
+        if (!DpcAuth::is_set()) return auth_reply(request, 409, "{\"error\":\"no password yet: set one\"}");
+        if (uint32_t w = DpcAuth::lockout_ms()) return auth_reply(request, 429, "{\"error\":\"too many wrong passwords\",\"lock\":" + std::to_string(w) + "}");
+        if (!DpcAuth::check_password(auth_param(request, "password"))) {
+            log_info("Login failed from " << request->client()->remoteIP());
+            return auth_reply(request, 403, "{\"error\":\"wrong password\",\"lock\":" + std::to_string(DpcAuth::lockout_ms()) + "}");
+        }
+        auth_reply(request, 200, "{\"ok\":true}", DpcAuth::new_key());
+    }
+    // Settings: change it - logged in and with the old password. Every other session ends.
+    void WebUI_Server::handle_dpc_auth_change(AsyncWebServerRequest* request) {
+        if (!DpcAuth::request_ok(request)) return auth_reply(request, 401, "{\"auth\":\"login\"}");
+        if (uint32_t w = DpcAuth::lockout_ms()) return auth_reply(request, 429, "{\"error\":\"too many wrong passwords\",\"lock\":" + std::to_string(w) + "}");
+        if (!DpcAuth::check_password(auth_param(request, "old"))) return auth_reply(request, 403, "{\"error\":\"the current password is wrong\"}");
+        std::string err;
+        if (!DpcAuth::set_password(auth_param(request, "password"), err)) return auth_reply(request, 400, "{\"error\":" + json_str(err) + "}");
+        log_info("Login password changed from " << request->client()->remoteIP());
+        auth_reply(request, 200, "{\"ok\":true}", DpcAuth::new_key());
+    }
+    void WebUI_Server::handle_dpc_auth_logout(AsyncWebServerRequest* request) { auth_reply(request, 200, "{\"ok\":true}", "", true); }
+    // A key for a script / the PC drive tool (logged in only)
+    void WebUI_Server::handle_dpc_auth_key(AsyncWebServerRequest* request) {
+        if (!DpcAuth::request_ok(request)) return auth_reply(request, 401, "{\"auth\":\"login\"}");
+        auth_reply(request, 200, "{\"key\":\"" + DpcAuth::new_key() + "\"}");
     }
 
     void WebUI_Server::handle_root(AsyncWebServerRequest* request) {

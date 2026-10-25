@@ -2,6 +2,7 @@
 // Use of this source code is governed by a GPLv3 license that can be found in the LICENSE file.
 
 #include "Settings.h"
+#include <algorithm>  // std::min
 #include "PathRetrace.h"   // PathRetrace plugin (TabUI pendant)
 #include "VizGenerator.h"  // VizGenerator plugin (TabUI pendant)
 #include "ZAdjust.h"
@@ -445,6 +446,11 @@ static Error cmd_log_verbose(const char* value, AuthenticationLevel auth_level, 
     }
     return Error::Ok;
 }
+// The network login's $Auth/... commands, in WebUI/DpcAuth.cpp when the WebUI is built.
+WEAK_LINK bool dpc_auth_command(const char* line, Channel& out) {
+    return false;
+}
+
 static Error home(AxisMask axisMask, Channel& out) {
     // see if blocking control switches are active
     if (config->_control->pins_block_unlock()) {
@@ -1423,7 +1429,22 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
         return Error::Ok;
     }
     if ((line[0] == '$' || line[0] == '[') && strncasecmp(line, "$Crash", 6) != 0) {
-        crash_trail_note(line);  // kept across a crash restart ($Crash lists them)
+        // kept across a crash restart ($Crash lists them, the WebUI shows them):
+        // never a password ($Auth/Set=, $AP/Password=, [ESP101]...)
+        std::string low(line);
+        for (auto& c : low) c = (char)tolower((unsigned char)c);
+        bool secret = low.find("$auth/") == 0 || low.find("password") != std::string::npos || low.find("[esp101]") == 0 ||
+                      low.find("[esp106]") == 0 || low.find("[esp555]") == 0;
+        if (secret) {
+            std::string cut(line, std::min(low.find('='), low.size()));
+            crash_trail_note((cut + "=***").c_str());
+        } else {
+            crash_trail_note(line);
+        }
+    }
+    // $Auth/... - the network login (WebUI/DpcAuth.cpp; builds without the WebUI have none)
+    if (dpc_auth_command(line, channel)) {
+        return Error::Ok;
     }
 
     // PathRetrace / VizGenerator plugin commands (TabUI pendant).

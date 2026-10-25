@@ -595,6 +595,12 @@ namespace WebUI {
             const char* SSID = _ap_ssid->get();
 
             const char* password = _ap_password->get();
+            // Never an open access point, never a shared default password.
+            if (strlen(password) < 8) {
+                log_warn("Access point not started: set its password first ($AP/Password=..., 8 characters or more)");
+                WiFi.mode(WIFI_OFF);
+                return false;
+            }
 
             int8_t channel = int8_t(_ap_channel->get());
 
@@ -608,7 +614,7 @@ namespace WebUI {
             WiFi.softAPConfig(ip, ip, mask);
 
             //Start AP
-            if (WiFi.softAP(SSID, (strlen(password) > 0) ? password : NULL, channel)) {
+            if (WiFi.softAP(SSID, password, channel)) {
                 log_info("AP started");
                 return true;
             }
@@ -693,7 +699,9 @@ namespace WebUI {
             // _hostname is created earlier by NetSettingsModule (see NetSettings.cpp)
             _ap_channel  = new IntSetting("AP Channel", WEBSET, WA, "ESP108", "AP/Channel", 1, 1, 14);
             _ap_ip       = new IPaddrSetting("AP Static IP", WEBSET, WA, "ESP107", "AP/IP", "192.168.0.1");
-            _ap_password = new PasswordSetting("AP Password", "ESP106", "AP/Password", "12345678");
+            // No default AP password (a password every board shares): the access
+            // point only starts once the user has set one (StartAP).
+            _ap_password = new PasswordSetting("AP Password", "ESP106", "AP/Password", "");
             _ap_ssid     = new StringSetting("AP SSID", WEBSET, WA, "ESP105", "AP/SSID", "FluidNC", MIN_SSID_LENGTH, MAX_SSID_LENGTH);
             _ap_country =
                 new EnumSetting("AP regulatory domain", WEBSET, WA, NULL, "AP/Country", getWifiCountryDefault(), getWifiCountryOptions());
@@ -706,7 +714,9 @@ namespace WebUI {
                 "Station Security", WEBSET, WA, NULL, "Sta/MinSecurity", wifiImpl().staSecurityDefault(), wifiImpl().staSecurityOptions());
             _sta_password = new PasswordSetting("Station Password", "ESP101", "Sta/Password", "");
 
-            _mode = new EnumSetting("WiFi mode", WEBSET, WA, "ESP116", "WiFi/Mode", WiFiFallback, &wifiModeOptions);
+            // STA by default: "STA>AP" opened the board's own access point whenever the
+            // home network could not be reached.
+            _mode = new EnumSetting("WiFi mode", WEBSET, WA, "ESP116", "WiFi/Mode", WiFiSTA, &wifiModeOptions);
             if (wifiImpl().supportsPsMode()) {
                 _wifi_ps_mode = new EnumSetting(
                     "WiFi power saving mode", WEBSET, WA, NULL, "WiFi/PsMode", wifiImpl().psModeDefault(), wifiImpl().psModeOptions());

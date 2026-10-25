@@ -100,6 +100,12 @@ namespace WebUI {
         static void        handle_root(AsyncWebServerRequest* request);
         static void        handle_trace(AsyncWebServerRequest* request);
         static void        handle_login(AsyncWebServerRequest* request);
+        static void        handle_dpc_auth(AsyncWebServerRequest* request);
+        static void        handle_dpc_auth_setup(AsyncWebServerRequest* request);
+        static void        handle_dpc_auth_login(AsyncWebServerRequest* request);
+        static void        handle_dpc_auth_change(AsyncWebServerRequest* request);
+        static void        handle_dpc_auth_logout(AsyncWebServerRequest* request);
+        static void        handle_dpc_auth_key(AsyncWebServerRequest* request);
         static void        handle_not_found(AsyncWebServerRequest* request);
         static void        _handle_web_command(AsyncWebServerRequest* request, bool);
         static void        handle_web_command(AsyncWebServerRequest* request) { _handle_web_command(request, false); }
