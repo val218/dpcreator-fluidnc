@@ -349,14 +349,14 @@ namespace WebUI {
         while ((c = filteredRead()) >= 0) {
             if (c == '\r' || c == '\n') {
                 if (_authLine.empty()) continue;
-                bool ok = DpcAuth::check_password(_authLine);
+                bool ok = DpcAuth::check_password(_authLine, (uint32_t)_wifiClient->remoteIP());
                 _authLine.clear();
                 if (ok) {
                     _authed = true;
                     say("\r\nok\r\n");
                     return true;
                 }
-                if (++_authTries >= 3 || DpcAuth::lockout_ms()) {
+                if (++_authTries >= 3 || DpcAuth::lockout_ms((uint32_t)_wifiClient->remoteIP())) {
                     say("\r\nwrong password\r\n");
                     closeOnDisconnect();
                     return false;
