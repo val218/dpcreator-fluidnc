@@ -1214,6 +1214,8 @@ void make_user_commands() {
     new ReportCommand("SA", "Alarm/Send", sendAlarm, anyState);
     new ReportCommand("Heap", "Heap/Show", showHeap, anyState);
     new ReportCommand("MBV", "Modbus/Values", showModbusValues, anyState);
+    extern void make_motion_commands();  // MotionInfo.cpp: $Motion/Show, $Motion/Steps (pendant)
+    make_motion_commands();
 #ifdef HEAPDIFF
     new ReportCommand("HS", "Heap/Snapshot", heap_snapshot, anyState);
     new ReportCommand("HD", "Heap/Diff", heap_diff, anyState);
