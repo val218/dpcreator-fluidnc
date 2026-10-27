@@ -10,9 +10,8 @@
 namespace Machine {
 
     class UserInputs : public Configuration::Configurable {
-        // TODO - analog pins are read the same as digital. The Pin
-        // API should either be extended to support analog reads, or
-        // a new AnalogPin class should be created.
+        // Analog pins are read with the ADC (analogValue()); they must be
+        // ADC-capable GPIOs.
 
     public:
         UserInputs();
@@ -21,6 +20,14 @@ namespace Machine {
         static InputPin digitalInput[];
         // Should be AnalogPin but we do not have such a thing yet
         static InputPin analogInput[];
+
+        // analogN_scale / analogN_offset: value = percent x scale + offset
+        static float analogScale[];
+        static float analogOffset[];
+
+        // M66 E<n> L0: 0-100 % of the ADC range (averaged), then scale and offset.
+        // False if pin n is not an analog input.
+        bool analogValue(size_t n, float& value);
 
         void init();
         void group(Configuration::HandlerBase& handler) override;

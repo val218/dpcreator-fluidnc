@@ -2218,7 +2218,10 @@ static Error gc_wait_on_input(bool is_digital, objnum_t input_number, WaitOnInpu
                 log_error(pin.legend() << " is not defined");
                 return Error::PParamMaxExceeded;
             }
-            result = (float)pin.get();
+            if (!config->_userInputs->analogValue(input_number, result)) {
+                log_error(pin.legend() << " cannot be read");
+                return Error::PParamMaxExceeded;
+            }
             set_numbered_param(5399, result);
             log_debug("M66: " << pin.legend() << " result=" << result);
         }
