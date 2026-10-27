@@ -65,7 +65,9 @@ namespace Machine {
 
         handler.section("stepping", _stepping);
 
-        handler.sections("uart", 1, MAX_N_UARTS, true, _uarts);
+        // uart0: is allowed too: it takes UART0 (J7 on the dpCREATOR R3) away from the
+        // console for a uart_channel (I/O expander); the console stays on USB.
+        handler.sections("uart", 0, MAX_N_UARTS, false, _uarts);
         handler.sections("uart_channel", 1, MAX_N_UARTS, true, _uart_channels);
 
         // An RS485 Modbus RTU bus shared by a VFD spindle and Modbus I/O modules

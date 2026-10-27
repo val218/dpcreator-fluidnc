@@ -35,6 +35,13 @@
 
 extern void make_user_commands();
 
+// UART0 handed from the console to config.yaml (esp32s3/Console.cpp). Other
+// platforms have no second console, so they keep UART0 for it.
+WEAK_LINK bool console_release_uart0() {
+    log_error("uart0: UART0 is the only console on this board, it can't be used for a uart_channel");
+    return false;
+}
+
 void setup() {
     platform_preinit();
 
@@ -72,7 +79,13 @@ void setup() {
         log_info("Board " << config->_board);
 
         // The initialization order reflects dependencies between the subsystems
-        for (size_t i = 1; i < MAX_N_UARTS; i++) {
+
+        // uart0: in config.yaml gives UART0 to a uart_channel (an I/O expander on
+        // J7). The boot log above went to UART0; from here the console is USB only.
+        if (config->_uarts[0] && !console_release_uart0()) {
+            config->_uarts[0] = nullptr;  // keep the console (the reason is logged)
+        }
+        for (size_t i = 0; i < MAX_N_UARTS; i++) {
             if (config->_uarts[i]) {
                 config->_uarts[i]->begin();
             }
