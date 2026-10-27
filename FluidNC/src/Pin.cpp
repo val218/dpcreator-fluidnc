@@ -120,6 +120,7 @@ const char* Pin::parse(std::string_view pin_str, Pins::PinDetail*& pinImplementa
         if (pin_type.length() == 7 && isdigit(pin_type[6])) {
             auto deviceId     = pin_type[6] - '0';
             pinImplementation = new Pins::ExtPinDetail(deviceId, pinnum_t(pin_number), parser);
+            return nullptr;
         } else {
             // For now this should be sufficient, if not we can easily change it to 100 extenders:
             return "Incorrect pin extender specification. Expected 'pinext[0-9].[port number]'.";

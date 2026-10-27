@@ -26,6 +26,10 @@ namespace MotorDrivers {
         auto axisIndex     = axis_index();
         auto dualAxisIndex = dual_axis_index();
 
+        if (_step_pin.slow() || _dir_pin.slow()) {
+            log_config_error(name() << ": step and direction pins can't be Modbus extender pins (too slow)");
+            return;
+        }
         _step_pin.setAttr(Pin::Attr::Output);
         _dir_pin.setAttr(Pin::Attr::Output);
 

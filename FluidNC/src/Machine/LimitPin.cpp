@@ -47,6 +47,10 @@ namespace Machine {
     }
 
     void LimitPin::init() {
+        if (defined() && slow()) {
+            log_config_error(legend() << ": limit and homing switches can't be Modbus extender pins (too slow for homing)");
+            return;
+        }
         _pLimited = Stepping::limit_var(_axis, _motorNum);
         EventPin::init();
     }

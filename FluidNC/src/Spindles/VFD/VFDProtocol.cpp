@@ -2,6 +2,7 @@
 
 #include "Spindles/VFDSpindle.h"
 #include "MotionControl.h"  // mc_critical
+#include "Modbus/ModbusBus.h"  // a bus shared with Modbus I/O modules
 
 #include <freertos/task.h>
 #include <freertos/queue.h>
@@ -149,6 +150,14 @@ namespace Spindles {
                         hex_msg(cmd.msg, "RS485 Tx: ", cmd.tx_length);
                     }
 
+                    // With a modbus_bus: on this UART, hold the bus for the
+                    // request and its answer so an I/O module's poll can't
+                    // interleave; without one, nothing changes.
+                    std::recursive_mutex* bus_lock = Modbus::Bus::lock_for(&uart);
+                    if (bus_lock) {
+                        bus_lock->lock();
+                    }
+
                     // Flush the UART and write the data:
                     uart.flushRx();
                     uart.write(cmd.msg, cmd.tx_length);
@@ -158,6 +167,9 @@ namespace Spindles {
                     size_t read_length  = 0;
                     size_t current_read = uart.timedReadBytes(rx_message, cmd.rx_length, response_ticks);
                     read_length += current_read;
+                    if (bus_lock) {
+                        bus_lock->unlock();
+                    }
                     unresponsive = read_length != 0;
 
                     // Apparently some Huanyang report modbus errors in the correct way

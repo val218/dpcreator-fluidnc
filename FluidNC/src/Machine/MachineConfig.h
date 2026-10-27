@@ -27,6 +27,7 @@
 #include "UartChannel.h"
 #include "Driver/Console.h"
 #include "Module.h"
+#include "Modbus/ModbusBus.h"
 #if SUPPORT_LISTENERS
 #    include "Listeners/SysListener.h"
 #endif
@@ -122,6 +123,8 @@ namespace Machine {
 
         UartChannel* _uart_channels[MAX_N_UARTS] = { nullptr };
         Uart*        _uarts[MAX_N_UARTS]         = { nullptr };
+
+        Modbus::Bus* _modbus_bus = nullptr;  // modbus_bus: RS485 shared by a VFD and Modbus I/O modules
 
         float _arcTolerance      = 0.002f;
         float _junctionDeviation = 0.01f;

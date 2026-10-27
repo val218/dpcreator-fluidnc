@@ -49,7 +49,7 @@ section_meta:
   axes.<letter>: { repeatable: true, key_pattern: '[xyzabcuvw]' }
   axes.<letter>.motorN: { repeatable: true, key_pattern: 'motor[01]' }
   extenders.pinextenderN: { repeatable: true, key_pattern: 'pinextender[0-9]' }
-  extenders.pinextenderN.<i2c_chip>: { child_types: [pca9535_9555, pca9539] }
+  extenders.pinextenderN.<i2c_chip>: { child_types: [modbus_io, pca9535_9555, pca9539] }
   i2cN: { repeatable: true, key_pattern: 'i2c[0-9]' }
   uartN: { repeatable: true, key_pattern: 'uart[0-9]' }
   uart_channelN: { repeatable: true, key_pattern: 'uart_channel[0-9]' }

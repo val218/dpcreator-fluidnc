@@ -19,6 +19,7 @@
 #include "Machine/MachineConfig.h"
 #include "Machine/UserInputs.h"
 #include "Machine/UserOutputs.h"
+#include "Modbus/ModbusBus.h"
 #include "SettingsDefinitions.h"
 #include "MotionControl.h"               // probe_succeeded
 #include "Limit.h"                       // limits_get_state
@@ -540,6 +541,18 @@ void report_realtime_status(Channel& channel) {
 
     if (report_pin_string.length()) {
         msg << "|Pn:" << report_pin_string;
+    }
+
+    if (report_modbus && report_modbus->get() && Modbus::Bus::active()) {
+        static uint32_t last_mb = 0;
+        uint32_t        now     = get_ms();
+        if (now - last_mb >= 250) {
+            std::string v = Modbus::Bus::status_values();
+            if (!v.empty()) {
+                last_mb = now;
+                msg << "|MB:" << v;
+            }
+        }
     }
 
     if (report_userio && report_userio->get()) {

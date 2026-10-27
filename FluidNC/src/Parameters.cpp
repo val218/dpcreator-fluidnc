@@ -22,6 +22,9 @@
 #include <algorithm>
 
 #include "Expression.h"
+#ifndef UNIT_TEST
+#    include "Modbus/ModbusBus.h"
+#endif
 
 // See documentation "4.1. Numbered Parameters" for list of numbered parameters
 // that LinuxCNC supports.
@@ -266,6 +269,9 @@ bool get_system_param(const std::string& name, float& result) {
         auto axis = search->second;
         result    = to_inches(axis, get_mpos()[axis]);
         return true;
+    }
+    if (sysn.rfind("_mb_", 0) == 0) {  // #<_mb_NAME>: a Modbus analog value (modbus_io ainN: name:)
+        return Modbus::Bus::get_value(sysn.substr(4), result);
     }
     if (std::find(unsupported_sys.begin(), unsupported_sys.end(), sysn) != unsupported_sys.end()) {
         result = 0.0;

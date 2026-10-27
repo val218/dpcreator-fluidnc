@@ -67,6 +67,10 @@ namespace Machine {
 
         handler.sections("uart", 1, MAX_N_UARTS, true, _uarts);
         handler.sections("uart_channel", 1, MAX_N_UARTS, true, _uart_channels);
+
+        // An RS485 Modbus RTU bus shared by a VFD spindle and Modbus I/O modules
+        // (extenders: pinextN: modbus_io:). Optional.
+        handler.section("modbus_bus", _modbus_bus);
 #if MAX_N_I2SO
         // We currently support only one I2S bus
         handler.section("i2so", _i2so);

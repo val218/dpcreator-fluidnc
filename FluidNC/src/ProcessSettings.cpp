@@ -2,6 +2,7 @@
 // Use of this source code is governed by a GPLv3 license that can be found in the LICENSE file.
 
 #include "Settings.h"
+#include "Modbus/ModbusBus.h"  // $Modbus/Values
 #include <algorithm>  // std::min
 #include "PathRetrace.h"   // PathRetrace plugin (TabUI pendant)
 #include "VizGenerator.h"  // VizGenerator plugin (TabUI pendant)
@@ -1118,6 +1119,12 @@ static Error sendAlarm(const char* value, AuthenticationLevel auth_level, Channe
     return Error::Ok;
 }
 
+// $Modbus/Values: every Modbus I/O module's inputs, outputs and analog values, once.
+static Error showModbusValues(const char* value, AuthenticationLevel auth_level, Channel& out) {
+    Modbus::Bus::report_values(out);
+    return Error::Ok;
+}
+
 static Error showHeap(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (size_t maxBlock = platform_max_free_block()) {
         log_info("Heap free: " << xPortGetFreeHeapSize() << " min: " << heapLowWater << " max block: " << (unsigned)maxBlock
@@ -1206,6 +1213,7 @@ void make_user_commands() {
 
     new ReportCommand("SA", "Alarm/Send", sendAlarm, anyState);
     new ReportCommand("Heap", "Heap/Show", showHeap, anyState);
+    new ReportCommand("MBV", "Modbus/Values", showModbusValues, anyState);
 #ifdef HEAPDIFF
     new ReportCommand("HS", "Heap/Snapshot", heap_snapshot, anyState);
     new ReportCommand("HD", "Heap/Diff", heap_diff, anyState);

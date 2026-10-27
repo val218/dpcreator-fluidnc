@@ -108,6 +108,10 @@ void setup() {
         }
 #    endif
 
+        if (config->_modbus_bus) {
+            config->_modbus_bus->init();  // before the extenders on it
+        }
+
 #    if SUPPORT_PIN_EXTENDERS
         // We have to initialize the extenders first, before pins are used
         if (config->_extenders) {

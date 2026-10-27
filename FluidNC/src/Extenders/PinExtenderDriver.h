@@ -8,6 +8,8 @@
 
 #include "Platform.h"
 
+class InputPin;
+
 namespace Extenders {
     class PinExtenderDriver : public Configuration::Configurable {
     public:
@@ -23,6 +25,11 @@ namespace Extenders {
 
         virtual void attachInterrupt(pinnum_t index, void (*callback)(void*, bool), void* arg, uint8_t mode);
         virtual void detachInterrupt(pinnum_t index);
+
+        // Input pins tell their InputPin about changes (user inputs, control buttons).
+        virtual void registerEvent(pinnum_t index, InputPin* obj);
+        // True for extenders too slow for step, direction and limit pins (Modbus).
+        virtual bool slow() const { return false; }
 
         // Name is required for the configuration factory to work.
         virtual const char* name() const = 0;

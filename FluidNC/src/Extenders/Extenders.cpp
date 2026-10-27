@@ -3,6 +3,8 @@
 
 #include "Extenders.h"
 
+#include <string>
+
 namespace Extenders {
     PinExtender::PinExtender() : _driver(nullptr) {}
 
@@ -22,15 +24,13 @@ namespace Extenders {
     }
 
     void Extenders::group(Configuration::HandlerBase& handler) {
-        for (int i = 0; i < 10; ++i) {
-            char tmp[11 + 3];
-            tmp[0] = 0;
-            strcat(tmp, "pinextender");
-
-            for (size_t i = 0; i < 10; ++i) {
-                tmp[11] = char(i + '0');
-                tmp[12] = '\0';
-                handler.section(tmp, _pinDrivers[i]);
+        // pinext0: .. pinext9: (the name the pins use, pinext0.3), or the older pinextender0: ..
+        for (size_t i = 0; i < 10; ++i) {
+            std::string a = "pinext" + std::to_string(i);
+            std::string b = "pinextender" + std::to_string(i);
+            handler.section(a.c_str(), _pinDrivers[i]);
+            if (handler.handlerType() == Configuration::HandlerType::Parser) {
+                handler.section(b.c_str(), _pinDrivers[i]);  // read the old name; $Config/Dump writes pinextN
             }
         }
     }

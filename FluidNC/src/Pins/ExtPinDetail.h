@@ -19,6 +19,8 @@ namespace Pins {
         PinCapabilities _capabilities;
         PinAttributes   _attributes;
 
+        Extenders::PinExtenderDriver* owner();
+
     public:
         ExtPinDetail(uint32_t device, pinnum_t index, const PinOptionsParser& options);
 
@@ -37,6 +39,9 @@ namespace Pins {
 
         void          setAttr(PinAttributes value, uint32_t frequency) override;
         PinAttributes getAttr() const override;
+
+        void registerEvent(InputPin* obj) override;
+        bool slow() const override;  // a Modbus pin: not for step, direction or limits
 
         ~ExtPinDetail() override;
     };
