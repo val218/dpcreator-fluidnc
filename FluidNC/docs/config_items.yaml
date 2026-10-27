@@ -3837,6 +3837,47 @@ user_inputs:
     description: |
       Analog input slot 3.
 
+  analog0_scale:
+    type: pin
+    default: '1.0'
+    description: |
+      M66 E0 L0 returns percent x scale + offset (percent: 0-100 of the ADC range).
+
+  analog0_offset:
+    type: pin
+    default: '0.0'
+    description: |
+
+  analog1_scale:
+    type: pin
+    default: '1.0'
+    description: |
+
+  analog1_offset:
+    type: pin
+    default: '0.0'
+    description: |
+
+  analog2_scale:
+    type: pin
+    default: '1.0'
+    description: |
+
+  analog2_offset:
+    type: pin
+    default: '0.0'
+    description: |
+
+  analog3_scale:
+    type: pin
+    default: '1.0'
+    description: |
+
+  analog3_offset:
+    type: pin
+    default: '0.0'
+    description: |
+
 # Same data-driven-list shape as control: above. All fields are Strings (one config-file line, "&"-separated).
 macros:
   startup_line0:
