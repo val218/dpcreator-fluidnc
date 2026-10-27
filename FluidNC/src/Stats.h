@@ -14,6 +14,7 @@
 //   $Stats/Time=<unix>     the time now
 //   $Stats/ResetService    spindle service counter to 0 (bearings, brushes ...)
 #pragma once
+#include <cstdint>
 #include <string>
 
 class Channel;

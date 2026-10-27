@@ -89,6 +89,25 @@ bool xSemaphoreGive(SemaphoreHandle_t lock) {
     return false;
 }
 
+SemaphoreHandle_t xSemaphoreCreateRecursiveMutex() {
+    auto s    = new Semaphore {};
+    s->rmutex = new std::recursive_mutex();
+    return s;
+}
+bool xSemaphoreTakeRecursive(SemaphoreHandle_t m, TickType_t xTicksToWait) {
+    if (!m || !m->rmutex) return false;
+    if (xTicksToWait == portMAX_DELAY) {
+        m->rmutex->lock();
+        return true;
+    }
+    return m->rmutex->try_lock();  // like the plain mutex above: no timed wait on the host
+}
+bool xSemaphoreGiveRecursive(SemaphoreHandle_t m) {
+    if (!m || !m->rmutex) return false;
+    m->rmutex->unlock();
+    return true;
+}
+
 SemaphoreHandle_t xSemaphoreCreateBinary() {
     return new Semaphore { nullptr, new std::binary_semaphore(0), nullptr, nullptr };
 }
@@ -120,6 +139,9 @@ void vSemaphoreDelete(SemaphoreHandle_t xSemaphore) {
         delete xSemaphore->count;
         xSemaphore->count = nullptr;
     }
+
+    delete xSemaphore->rmutex;
+    xSemaphore->rmutex = nullptr;
 
     if (xSemaphore->count_lock != nullptr) {
         delete xSemaphore->count_lock;
