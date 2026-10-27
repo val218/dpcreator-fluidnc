@@ -40,7 +40,7 @@ void UartChannel::init(Uart* uart) {
         log_info(name() << " created");
     }
     sendGreeting();
-    if (_uart_num) {
+    if (_uart_num || static_cast<Channel*>(this) != &Console) {  // an expander, also one on UART0 (J7)
         getExpanderId();
     }
 }
@@ -60,7 +60,15 @@ static const uint32_t greeting_repeat_ms = 1000;
 // sends the greeting, and an idle machine sends nothing after it.  If the
 // device waits for data before talking, neither side ever starts.  Repeat the
 // greeting, with a status report, until a complete line arrives.
+void UartChannel::release() {
+    _released = true;
+    allChannels.deregistration(this);
+}
+
 void UartChannel::handle() {
+    if (_released) {
+        return;
+    }
     if (_peer_spoke || !_report_interval_ms || _uart->_rxd_pin.undefined()) {
         return;
     }
@@ -142,11 +150,17 @@ void UartChannel::queueInput(const char* buf, size_t len) {
 }
 
 size_t UartChannel::write(uint8_t c) {
+    if (_released) {
+        return 1;
+    }
     _last_tx_ms = millis();
     return _uart->write(c);
 }
 
 size_t UartChannel::write(const uint8_t* buffer, size_t length) {
+    if (_released) {
+        return length;
+    }
     _last_tx_ms = millis();
     // Replace \n with \r\n
     if (_addCR) {
@@ -176,14 +190,23 @@ size_t UartChannel::write(const uint8_t* buffer, size_t length) {
 }
 
 int UartChannel::available() {
+    if (_released) {
+        return 0;
+    }
     return _uart->available();
 }
 
 int UartChannel::peek() {
+    if (_released) {
+        return -1;
+    }
     return _uart->peek();
 }
 
 int UartChannel::rx_buffer_available() {
+    if (_released) {
+        return 0;
+    }
     return _uart->rx_buffer_available();
 }
 
@@ -234,6 +257,9 @@ bool UartChannel::lineComplete(char* line, char c) {
 }
 
 int UartChannel::read() {
+    if (_released) {
+        return -1;
+    }
     int c;
     for (;;) {
         c = _uart->read();
@@ -284,6 +310,9 @@ void UartChannel::set_rt_guard(bool on) {
 }
 
 void UartChannel::flushRx() {
+    if (_released) {
+        return;
+    }
     _uart->flushRx();
     Channel::flushRx();
 }
@@ -300,7 +329,7 @@ size_t UartChannel::timedReadBytes(char* buffer, size_t length, TickType_t timeo
         --remlen;
     }
 
-    auto thislen = _uart->timedReadBytes(buffer, remlen, timeout);
+    auto thislen = _released ? 0 : _uart->timedReadBytes(buffer, remlen, timeout);
     remlen -= thislen;
 
     return length - remlen;

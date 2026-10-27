@@ -3,9 +3,10 @@ name: dpCREATOR 4-axis CNC (W5500)
 meta: ESP32-S3-WROOM-1-N16R8, FluidNC 4.1.1 + W5500
 
 # ------------------------------------------------------------------
-# UART0 = FluidNC console, fixed in firmware (not configurable here):
-#   TXD0 = GPIO43, RXD0 = GPIO44, 115200 8N1  (UART_0 connector J7)
-#   Reserved for future GPIO expansion (needs a firmware change).
+# UART0 = FluidNC console: TXD0 = GPIO43, RXD0 = GPIO44, 115200 8N1
+#   (UART_0 connector J7). A uart0: section gives it to an I/O expander
+#   (uart_channel2 with uart_num: 0); the console then stays on USB only.
+#   See W5500_ETHERNET.md section 18.
 # USB CDC console on native USB (GPIO19/20) is also available.
 # ------------------------------------------------------------------
 

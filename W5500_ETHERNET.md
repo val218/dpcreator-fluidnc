@@ -998,7 +998,116 @@ opens an access point without one.
 the board in boot mode), so someone has to be at the machine. The old
 network update page (`/updatefw`) is not in this firmware.
 
-## 18. Troubleshooting
+## 18. Inputs, outputs and Modbus I/O (dpCREATOR Motion)
+
+Everything here is off until config.yaml or a setting uses it; old configs
+load unchanged.
+
+**Waiting for an input.** `M66 P<n> L<mode> Q<seconds>` waits for user
+digital input n: L1 rising edge, L2 falling edge, L3 high, L4 low. Like M62 it
+waits for the moves before it to finish; feed hold and reset still work while
+it waits. `#5399` is then the input's state, or -1 when Q seconds passed
+first (as in LinuxCNC). `M66 P<n> L0` reads it at once. M66 on an input that
+is not set in config.yaml is now an error (it used to answer ok).
+
+**Analog inputs on the board.** `user_inputs: analog0_pin: gpio.4` (an ADC
+pin, GPIO 1-20 on the ESP32-S3) is read with `M66 E0 L0`: 0-100 % of the ADC
+range (0 to about 3.1 V), averaged over 8 readings, into `#5399`. Optional
+`analog0_scale` / `analog0_offset` turn it into your unit
+(value = percent x scale + offset). A pin that is not ADC-capable is a
+config error.
+
+**Inputs and outputs in the status report.** `$Report/UserIO=On` adds
+`|UI:01000000|UO:10000000`: one character per user digital pin, pin 0 first,
+up to the highest pin in config.yaml. Off by default.
+
+**Modbus I/O modules.** An off-the-shelf RS485 Modbus RTU box (8 inputs / 8
+relays and the like) becomes pins, on the same RS485 pair as a Modbus VFD
+(different Modbus IDs):
+
+```yaml
+uart2:                 # the RS485 port (R3: TX 42, RX 41, DE 40)
+  txd_pin: gpio.42
+  rxd_pin: gpio.41
+  rts_pin: gpio.40
+  baud: 9600
+  mode: 8N1
+modbus_bus:
+  uart_num: 2
+  poll_ms: 20          # how often the modules are read
+extenders:
+  pinext0:
+    modbus_io:
+      modbus_id: 3
+      inputs: 8            # pinext0.0 .. pinext0.7
+      outputs: 8           # pinext0.8 .. pinext0.15
+      input_function: 2    # 2 discrete inputs (1 coils, 3/4 registers, 16 per register)
+      output_function: 15  # 15 coils (5 one at a time, 6/16 holding registers)
+      fail_alarm: false    # true: a silent module raises alarm 16
+      ain0:                # analog values: ain0 .. ain7
+        register: 0        # input register (function: 3 for a holding register)
+        name: arm_j1       # #<_mb_arm_j1>
+        scale: 0.088       # raw x scale + offset
+        offset: -180
+        index: 0           # also M66 E0 L0
+      aout0:               # aout0 .. aout3
+        register: 10       # holding register, function 6
+        index: 0           # M67 / M68 E0 Q<percent>
+        max: 1000          # the value for Q100
+user_inputs:
+  digital0_pin: pinext0.0
+user_outputs:
+  digital0_pin: pinext0.8
+control:
+  cycle_start_pin: pinext0.1
+```
+
+- The pins work for user inputs and outputs, control buttons, coolant and
+  the like. They are refused for step, direction and limit/homing switches:
+  a Modbus round trip takes tens of milliseconds.
+- Outputs are written when they change, inputs read every `poll_ms`.
+  At 9600 baud one request takes 15-20 ms on the wire, so with outputs or a
+  VFD the real cycle is about 40-60 ms; 19200 or 38400 baud is faster.
+- The VFD goes first on a shared bus: a spindle command waits at most for
+  one I/O request already on the wire.
+- A module that stops answering for 3 polls gives one
+  `[MSG:ERR: modbus_io 3 not answering]` (and `answering again` later);
+  its inputs keep their last value.
+- `$Modbus/Values` prints every module's inputs, outputs and values once.
+  `$Report/Modbus=On` adds `|MB:arm_j1=42.5,tank=80.1` to the status report
+  (named values only, at most every 250 ms).
+- G-code: `o100 while [#<_mb_tank> LT 80]`, `M66 E0 L0`, `M68 E0 Q50`.
+
+**UART0 (J7) for an I/O expander.** A `uart0:` section gives UART0 to a
+`uart_channel` (an expander on FluidNC's channel protocol, pins
+`uart_channel2.N`):
+
+```yaml
+uart0:
+  txd_pin: gpio.43
+  rxd_pin: gpio.44
+  baud: 115200
+  mode: 8N1
+uart_channel2:
+  uart_num: 0
+```
+
+The boot log still goes to UART0 until config.yaml is read; then
+`[MSG:INFO: UART0 used by uart_channel2, console on USB only]` and the
+console is the USB port only. It needs the USB console on
+(`$USBCDC/Enable=ON`); otherwise UART0 stays the console and an error says
+why. Without a `uart0:` section nothing changes.
+
+**Testing without a machine.** The Linux host build
+(`pio run -e linux_x86_64`) runs the real firmware code. Next to the
+program: `native_localfs/config.yaml`, `native_sd/` for files,
+`native_gpio/<n>` (exists = GPIO n high), `native_gpio/adc<n>` (raw ADC
+value) and `tools/modbus_sim.py --dir .`, a simulated Modbus module on a
+pseudo terminal (its state in `modbus_sim.json`).
+
+---
+
+## 19. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|

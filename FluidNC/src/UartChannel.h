@@ -43,6 +43,10 @@ private:
     volatile uint32_t _rx_dropped      = 0;
     bool              _trace           = false;  // echo pendant lines to the other channels
 
+    // The UART0 console after config.yaml gave UART0 to a uart_channel (J7
+    // expander): it neither reads nor writes any more.
+    bool _released = false;
+
     static constexpr int _ack_timeout = 2000;
 
 public:
@@ -56,6 +60,7 @@ public:
     uint32_t rx_dropped() const { return _rx_dropped; }
     void     set_rt_guard(bool on);
     void     set_trace(bool on) { _trace = on; }
+    void     release();  // stop using the UART for good (the console handing UART0 to config.yaml)
     bool     trace() const { return _trace; }
 
     UartChannel(objnum_t num, bool addCR = false);
