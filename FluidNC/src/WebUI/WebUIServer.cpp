@@ -608,7 +608,7 @@ namespace WebUI {
         bool        isGzip = false;
         FileStream* file   = NULL;
         try {
-            file = new FileStream(fpath, "r", LocalFS);
+            file = new FileStream(fpath, "r");  // fpath is already resolved (re-resolving it broke the host build, whose prefix is relative)
         } catch (const ErrorException& err) {
             if (acceptGz) {
                 try {

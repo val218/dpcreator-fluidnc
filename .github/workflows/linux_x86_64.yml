@@ -2,6 +2,10 @@ name: Build linux_x86_64
 
 on:
   workflow_dispatch:
+  push:
+    branches: [fluidnc-4.1.1-w5500]
+  pull_request:
+    branches: [fluidnc-4.1.1-w5500]
 
 jobs:
   build:
@@ -31,6 +35,13 @@ jobs:
 
       - name: Build linux_x86_64
         run: pio run -e linux_x86_64
+
+      - name: Smoke test (boots, answers $I, runs a file from the host "SD card")
+        run: |
+          mkdir -p smoke/native_localfs smoke/native_sd && cd smoke
+          printf 'G21 G90\nG1 X1 F600\n(PRINT,smoke ok)\nM2\n' > native_sd/smoke.nc
+          (printf '$I\n$SD/Run=/smoke.nc\n'; sleep 4) | timeout 10 ../.pio/build/linux_x86_64/program - | tee out.txt || true
+          grep -q "VER:" out.txt
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
