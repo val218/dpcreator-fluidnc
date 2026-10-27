@@ -1203,13 +1203,11 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
         }
         // Q is the timeout in seconds (conditionally optional)
         //  - Ignored if L is 0 (Immediate).
-        //  - Error if value 0 seconds, and L is not 0 (Immediate).
+        //  - Error if value 0 seconds (or less), and L is not 0 (Immediate).
         if (bitnum_is_true(value_words, GCodeWord::Q)) {
-            if (gc_block.values.q != 0.0) {
-                if (wait_mode != WaitOnInputMode::Immediate) {
-                    // Non-immediate waits must have a non-zero timeout
-                    return Error::GcodeValueWordInvalid;
-                }
+            if (wait_mode != WaitOnInputMode::Immediate && !(gc_block.values.q > 0.0f)) {
+                // Non-immediate waits must have a non-zero timeout
+                return Error::GcodeValueWordInvalid;
             }
         } else {
             if (wait_mode != WaitOnInputMode::Immediate) {
@@ -1907,12 +1905,8 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
             if (input_number < 0) {
                 return std::nullopt;
             }
-            if (isWaitOnInputDigital) {
-                if (input_number > MaxUserDigitalPin) {
-                    return std::nullopt;
-                } else if (input_number > MaxUserAnalogPin) {
-                    return std::nullopt;
-                }
+            if (input_number >= (isWaitOnInputDigital ? MaxUserDigitalPin : MaxUserAnalogPin)) {
+                return std::nullopt;
             }
             return (objnum_t)input_number;
         };
@@ -1923,7 +1917,10 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
         auto const input_number = *maybe_input_number;
         auto const wait_mode    = *validate_wait_on_input_mode_value(gc_block.values.l);
         auto const timeout      = gc_block.values.q;
-        gc_wait_on_input(isWaitOnInputDigital, input_number, wait_mode, timeout);
+        Error      err          = gc_wait_on_input(isWaitOnInputDigital, input_number, wait_mode, timeout);
+        if (err != Error::Ok) {
+            return deferred_err(err);  // e.g. an input that is not set in config.yaml
+        }
     }
 
     // [9. Override control ]: NOT SUPPORTED. Always enabled, except for parking control.
@@ -2219,6 +2216,73 @@ static Error gc_wait_on_input(bool is_digital, objnum_t input_number, WaitOnInpu
         return Error::Ok;
     }
 
-    // TODO - implement rest of modes
-    return Error::GcodeValueWordInvalid;
+    // L1 rise, L2 fall, L3 high, L4 low: digital inputs only (checked by the
+    // parser). Like M62 the wait is synchronised with motion: the moves before
+    // it finish first. Up to Q seconds; on timeout #5399 = -1 (as LinuxCNC),
+    // else #5399 = the input's state. Feed hold, reset and the other realtime
+    // commands keep working while it waits.
+    if (input_number >= MaxUserDigitalPin) {
+        return Error::PParamMaxExceeded;
+    }
+    auto& pin = config->_userInputs->digitalInput[input_number];
+    if (pin.undefined()) {
+        log_error(pin.legend() << " is not defined");
+        return Error::PParamMaxExceeded;
+    }
+    if (state_is(State::CheckMode)) {
+        set_numbered_param(5399, 0);
+        return Error::Ok;
+    }
+    protocol_buffer_synchronize();
+    if (sys.abort()) {
+        return Error::Ok;
+    }
+
+    const uint32_t limit_ms = timeout >= 4.0e6f ? 0xFFFFFFFFu : (uint32_t)(timeout * 1000.0f + 0.5f);
+    const uint32_t start    = get_ms();
+    // pin.read(), not get(): get() is updated by pin events, which the main
+    // loop handles only after this line returns.
+    bool           last     = pin.read();
+    bool           seen_low = !last, seen_high = last;  // for the edges: the opposite level must be seen first
+    while (true) {
+        bool v    = pin.read();
+        bool done = false;
+        switch (mode) {
+            case WaitOnInputMode::High:
+                done = v;
+                break;
+            case WaitOnInputMode::Low:
+                done = !v;
+                break;
+            case WaitOnInputMode::Rise:
+                done = v && !last && seen_low;
+                break;
+            case WaitOnInputMode::Fall:
+                done = !v && last && seen_high;
+                break;
+            default:
+                return Error::GcodeValueWordInvalid;
+        }
+        if (v) {
+            seen_high = true;
+        } else {
+            seen_low = true;
+        }
+        last = v;
+        if (done) {
+            set_numbered_param(5399, v ? 1.0f : 0.0f);
+            log_debug("M66: " << pin.legend() << " L" << int(mode) << " met after " << (get_ms() - start) << " ms");
+            return Error::Ok;
+        }
+        if (get_ms() - start >= limit_ms) {
+            set_numbered_param(5399, -1.0f);
+            log_debug("M66: " << pin.legend() << " timed out");
+            return Error::Ok;
+        }
+        protocol_execute_realtime();  // hold, reset, status reports
+        if (sys.abort()) {
+            return Error::Ok;
+        }
+        delay_ms(1);
+    }
 }

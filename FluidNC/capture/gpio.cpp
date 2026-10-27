@@ -7,9 +7,15 @@
 #include "Protocol.h"
 #include "Driver/fluidnc_gpio.h"
 
+#include <filesystem>
+#include <string>
+
 void gpio_write(pinnum_t pin, bool value) {}
+// Host build: an input reads high while the file native_gpio/<pin> exists, so
+// tests and Motion can drive user inputs, probe, limits ("touch native_gpio/5").
 bool gpio_read(pinnum_t pin) {
-    return 0;
+    std::error_code ec;
+    return std::filesystem::exists("native_gpio/" + std::to_string(int(pin)), ec);
 }
 void gpio_mode(pinnum_t pin, bool input, bool output, bool pullup, bool pulldown, bool opendrain) {}
 void gpio_drive_strength(pinnum_t pin, uint8_t strength) {}
@@ -34,8 +40,17 @@ static int32_t gpio_deltat_ticks[MAX_N_GPIO + 1]     = { 0 };
 // Do not send events for changes that occur too soon
 static void gpio_set_rate_limit(int32_t gpio_num, uint32_t ms) {}
 
+static gpio_mask_t gpio_mask(int32_t gpio_num);
 static inline gpio_mask_t get_gpios() {
-    return ((uint64_t(0) << 32) | 0) ^ gpios_inverted;
+    // Host build: the levels come from native_gpio/<pin> files (gpio_read),
+    // read only for the pins something listens to.
+    gpio_mask_t raw = 0;
+    for (int32_t g = 0; g <= MAX_N_GPIO && g < 64; ++g) {
+        if ((gpios_interest & gpio_mask(g)) && gpio_read(g)) {
+            raw |= gpio_mask(g);
+        }
+    }
+    return raw ^ gpios_inverted;
 }
 static gpio_mask_t gpio_mask(int32_t gpio_num) {
     return 1ULL << gpio_num;
@@ -87,23 +102,12 @@ void gpio_rearm(int32_t gpio_num) {
 }
 
 static void gpio_send_event(int32_t gpio_num, bool active) {
-#if 0
-    auto    end_ticks  = gpio_next_event_ticks[gpio_num];
-    int32_t this_ticks = int32_t(xTaskGetTickCount());
-    if (end_ticks == 0 || ((this_ticks - end_ticks) > 0)) {
-        end_ticks = this_ticks + gpio_deltat_ticks[gpio_num];
-        if (end_ticks == 0) {
-            end_ticks = 1;
-        }
-        gpio_next_event_ticks[gpio_num] = end_ticks;
-
-        auto arg = gpioArgs[gpio_num];
-        if (arg) {
-            protocol_send_event_from_ISR(active ? &pinActiveEvent : &pinInactiveEvent, arg);
-        }
-        gpios_update(gpios_current, gpio_num, active);
+    // Host build: no rate limit; every change polled is sent once.
+    auto arg = gpioArgs[gpio_num];
+    if (arg) {
+        protocol_send_event_from_ISR(active ? &pinActiveEvent : &pinInactiveEvent, arg);
     }
-#endif
+    gpios_update(gpios_current, gpio_num, active);
 }
 
 void poll_gpios() {
