@@ -4,6 +4,7 @@
 
 #include "UserOutputs.h"
 #include "Config.h"  // log_*
+#include "Modbus/ModbusBus.h"
 
 namespace Machine {
     UserOutputs::UserOutputs() {
@@ -39,6 +40,9 @@ namespace Machine {
         }
         for (size_t io_num = 0; io_num < MaxUserAnalogPin; io_num++) {
             setAnalogPercent(io_num, 0);
+            if (_analogOutput[io_num].undefined()) {
+                Modbus::Bus::analog_out(int(io_num), 0);  // a Modbus module's analog output (aoutN: index)
+            }
         }
     }
 
