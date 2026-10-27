@@ -192,8 +192,9 @@ namespace Extenders {
         tx[4]          = count >> 8;
         tx[5]          = count & 0xFF;
         size_t n       = Modbus::bus->transact(tx, 6, rx, sizeof(rx), 0);
-        if (n < 3 || n < size_t(3 + rx[2])) {
-            return false;
+        size_t want    = regs ? size_t(2 * count) : size_t((count + 7) / 8);
+        if (n < 3 || rx[2] != want || n < 3 + want) {
+            return false;  // not the answer to this request
         }
         uint64_t bits = 0;
         if (regs) {
@@ -202,7 +203,7 @@ namespace Extenders {
                 bits |= uint64_t(v) << (16 * r);
             }
         } else {
-            for (int b = 0; b < rx[2]; ++b) {
+            for (size_t b = 0; b < want && b < 8; ++b) {
                 bits |= uint64_t(rx[3 + b]) << (8 * b);
             }
         }

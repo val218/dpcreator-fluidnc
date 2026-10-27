@@ -89,7 +89,10 @@ namespace Pins {
             _attributes = _attributes | PinAttributes::ActiveLow;
         }
 
-        owner()->setupPin(_index, _attributes);
+        // ExtPinDetail inverts for :low itself; the driver gets the pin without ActiveLow
+        // (I2C extenders inverted too, so :low cancelled out)
+        Pins::PinAttributes driverAttr = value;
+        owner()->setupPin(_index, driverAttr);
         if (_attributes.has(PinAttributes::Output)) {
             write(value.has(PinAttributes::InitialOn));
         }

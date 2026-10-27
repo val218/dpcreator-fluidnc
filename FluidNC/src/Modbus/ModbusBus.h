@@ -65,6 +65,7 @@ namespace Modbus {
 
         // Modbus I/O modules register here when they are set up.
         void add(Device* d);
+        void start();  // the poll task, once every module is added (Main.cpp)
 
         // One request/response on the wire: adds the address byte's CRC,
         // retries, checks the answer (address, function, length, CRC).

@@ -544,14 +544,9 @@ void report_realtime_status(Channel& channel) {
     }
 
     if (report_modbus && report_modbus->get() && Modbus::Bus::active()) {
-        static uint32_t last_mb = 0;
-        uint32_t        now     = get_ms();
-        if (now - last_mb >= 250) {
-            std::string v = Modbus::Bus::status_values();
-            if (!v.empty()) {
-                last_mb = now;
-                msg << "|MB:" << v;
-            }
+        std::string v = Modbus::Bus::status_values();  // refreshed at most every 250 ms
+        if (!v.empty()) {
+            msg << "|MB:" << v;
         }
     }
 
