@@ -48,6 +48,11 @@ namespace Machine {
             return !isOn;  // It is okay to turn off an undefined pin, for safety
         }
         pin.synchronousWrite(isOn);
+        if (isOn) {
+            _digitalState |= 1u << io_num;
+        } else {
+            _digitalState &= ~(1u << io_num);
+        }
         return true;
     }
 

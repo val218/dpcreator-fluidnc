@@ -17,6 +17,8 @@
 #include "Report.h"
 
 #include "Machine/MachineConfig.h"
+#include "Machine/UserInputs.h"
+#include "Machine/UserOutputs.h"
 #include "SettingsDefinitions.h"
 #include "MotionControl.h"               // probe_succeeded
 #include "Limit.h"                       // limits_get_state
@@ -538,6 +540,35 @@ void report_realtime_status(Channel& channel) {
 
     if (report_pin_string.length()) {
         msg << "|Pn:" << report_pin_string;
+    }
+
+    if (report_userio && report_userio->get()) {
+        // One character per user digital pin, pin 0 first, up to the highest pin set in config.yaml
+        int ni = 0, no = 0;
+        for (int i = 0; i < MaxUserDigitalPin; ++i) {
+            if (config->_userInputs && config->_userInputs->digitalInput[i].defined()) {
+                ni = i + 1;
+            }
+            if (config->_userOutputs && config->_userOutputs->_digitalOutput[i].defined()) {
+                no = i + 1;
+            }
+        }
+        if (ni) {
+            std::string ui;
+            for (int i = 0; i < ni; ++i) {
+                auto& p = config->_userInputs->digitalInput[i];
+                ui += (p.defined() && p.get()) ? '1' : '0';
+            }
+            msg << "|UI:" << ui;
+        }
+        if (no) {
+            std::string uo;
+            uint32_t    st = config->_userOutputs->digitalState();
+            for (int i = 0; i < no; ++i) {
+                uo += (st >> i) & 1 ? '1' : '0';
+            }
+            msg << "|UO:" << uo;
+        }
     }
 
     if (report_wco_counter > 0) {

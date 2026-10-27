@@ -15,6 +15,7 @@ StringSetting* build_info;
 StringSetting* start_message;
 
 IntSetting* status_mask;
+EnumSetting* report_userio;
 
 IntSetting* sd_fallback_cs;
 
@@ -108,6 +109,10 @@ void make_settings() {
         new StringSetting("Message issued at startup", EXTENDED, WG, NULL, "Start/Message", "Grbl \\V [FluidNC \\B (\\X) \\H]", 0, 40);
 
     gcode_echo = new EnumSetting("GCode Echo Enable", WEBSET, WG, NULL, "GCode/Echo", 0, &onoffOptions);
+
+    // |UI:<inputs>|UO:<outputs> in the status report: one character per user
+    // digital pin, pin 0 first ('1' on, '0' off or not set). For Motion's live view.
+    report_userio = new EnumSetting("User I/O in status report", EXTENDED, WG, NULL, "Report/UserIO", 0, &onoffOptions);
 }
 
 void make_proxies() {

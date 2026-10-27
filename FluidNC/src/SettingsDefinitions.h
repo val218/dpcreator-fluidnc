@@ -9,6 +9,7 @@ extern StringSetting* build_info;
 extern StringSetting* start_message;
 
 extern IntSetting* status_mask;
+extern EnumSetting* report_userio;
 
 extern IntSetting* sd_fallback_cs;
 

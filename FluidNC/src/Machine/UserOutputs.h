@@ -10,6 +10,7 @@
 namespace Machine {
     class UserOutputs : public Configuration::Configurable {
         uint32_t _current_value[MaxUserAnalogPin];
+        uint32_t _digitalState = 0;  // bit n: digital output n is on (status report |UO:)
 
     public:
         UserOutputs();
@@ -24,6 +25,7 @@ namespace Machine {
         void group(Configuration::HandlerBase& handler) override;
         bool setDigital(size_t io_num, bool isOn);
         bool setAnalogPercent(size_t io_num, float percent);
+        uint32_t digitalState() const { return _digitalState; }
 
         virtual ~UserOutputs();
     };
