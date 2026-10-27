@@ -16,6 +16,7 @@ StringSetting* start_message;
 
 IntSetting* status_mask;
 EnumSetting* report_userio;
+EnumSetting* report_modbus;
 
 IntSetting* sd_fallback_cs;
 
@@ -113,6 +114,9 @@ void make_settings() {
     // |UI:<inputs>|UO:<outputs> in the status report: one character per user
     // digital pin, pin 0 first ('1' on, '0' off or not set). For Motion's live view.
     report_userio = new EnumSetting("User I/O in status report", EXTENDED, WG, NULL, "Report/UserIO", 0, &onoffOptions);
+
+    // |MB:name=value,... in the status report (Modbus analog values with a name), at most every 250 ms.
+    report_modbus = new EnumSetting("Modbus values in status report", EXTENDED, WG, NULL, "Report/Modbus", 0, &onoffOptions);
 }
 
 void make_proxies() {

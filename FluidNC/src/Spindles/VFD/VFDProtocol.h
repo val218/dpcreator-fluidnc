@@ -77,6 +77,9 @@ namespace Spindles {
         public:
             static QueueHandle_t vfd_speed_queue;
 
+            // True while VFD commands wait to be sent (a shared Modbus bus lets them go first).
+            static bool commands_waiting() { return vfd_cmd_queue && uxQueueMessagesWaiting(vfd_cmd_queue) > 0; }
+
             VFDProtocol() {}
             VFDProtocol(const VFDProtocol&)            = delete;
             VFDProtocol(VFDProtocol&&)                 = delete;

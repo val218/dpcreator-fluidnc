@@ -138,6 +138,9 @@ public:
 
     void registerEvent(InputPin* obj) { _detail->registerEvent(obj); };
 
+    // Too slow for step, direction and limit/homing switches (a Modbus extender pin).
+    inline bool slow() const { return _detail->slow(); }
+
     inline void disarm() { _detail->disarm(); };
     inline void rearm() { _detail->rearm(); };
 

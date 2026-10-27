@@ -21,6 +21,7 @@
 #include "Machine/MachineConfig.h"
 #include "Parameters.h"
 #include "Flowcontrol.h"
+#include "Modbus/ModbusBus.h"  // Modbus analog values (M66 E, M67 / M68 E)
 
 #include <string.h>  // memset
 #include <math.h>    // sqrt etc.
@@ -1893,7 +1894,10 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
             if (gc_block.modal.io_control == IoControl::SetAnalogSync) {
                 protocol_buffer_synchronize();
             }
-            if (!config->_userOutputs->setAnalogPercent((int)gc_block.values.e, gc_block.values.q)) {
+            if (config->_userOutputs->_analogOutput[(int)gc_block.values.e].undefined() &&
+                Modbus::Bus::analog_out((int)gc_block.values.e, gc_block.values.q)) {
+                // written to the Modbus module's register (modbus_io aoutN:)
+            } else if (!config->_userOutputs->setAnalogPercent((int)gc_block.values.e, gc_block.values.q)) {
                 return deferred_err(Error::PParamMaxExceeded);
             }
         } else {
@@ -2205,6 +2209,12 @@ static Error gc_wait_on_input(bool is_digital, objnum_t input_number, WaitOnInpu
             }
             auto& pin = config->_userInputs->analogInput[input_number];
             if (pin.undefined()) {
+                // A Modbus analog value with index: <n> (modbus_io ainN:)
+                if (Modbus::Bus::analog_in(int(input_number), result)) {
+                    set_numbered_param(5399, result);
+                    log_debug("M66: Modbus E" << int(input_number) << " result=" << result);
+                    return Error::Ok;
+                }
                 log_error(pin.legend() << " is not defined");
                 return Error::PParamMaxExceeded;
             }

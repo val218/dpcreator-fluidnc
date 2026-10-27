@@ -44,6 +44,9 @@ namespace Pins {
 
         virtual bool canStep() { return false; }
 
+        // Too slow for step, direction and limit/homing switches (a Modbus extender pin).
+        virtual bool slow() const { return false; }
+
         virtual void registerEvent(InputPin* obj);
         virtual void disarm();
         virtual void rearm();
