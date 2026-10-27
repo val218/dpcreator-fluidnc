@@ -46,6 +46,9 @@ Channel&    Console = Uart0;
 #include "Machine/MachineConfig.h"
 #include "Logging.h"
 #include <driver/uart.h>
+#include <esp_log.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 // config.yaml has a uart0: section: a uart_channel (an I/O expander on J7)
 // gets UART0 and the console stays on USB CDC only. Called once config.yaml
@@ -63,6 +66,12 @@ bool console_release_uart0() {
     }
     log_info("UART0 used by " << user << ", console on USB only");
     Uart0.release();
+    // ESP-IDF's own log (Wi-Fi, drivers) would go out on UART0 into the
+    // expander's data: off. (A crash dump still goes to UART0: the ROM does that.)
+    esp_log_level_set("*", ESP_LOG_NONE);
+    // A read or write that started before release() finishes inside the driver
+    // (reads wait at most a few ms): give it time before the driver goes.
+    vTaskDelay(pdMS_TO_TICKS(50));
     uart_driver_delete(UART_NUM_0);  // uart0: begin() installs it again with its own pins and baud
     return true;
 }

@@ -130,6 +130,9 @@ void setup() {
         if (config->_extenders) {
             config->_extenders->init();
         }
+        if (config->_modbus_bus) {
+            config->_modbus_bus->start();  // every Modbus module is registered now
+        }
 #    endif
 
 #    if SUPPORT_LISTENERS

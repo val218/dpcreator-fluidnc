@@ -12,6 +12,10 @@ const ArgEvent probeEvent { protocol_do_probe };
 Probe::ProbeEventPin::ProbeEventPin(const char* legend) : EventPin(&probeEvent, ExecAlarm::None, legend) {}
 
 void Probe::init() {
+    if ((_probePin.defined() && _probePin.slow()) || (_toolsetterPin.defined() && _toolsetterPin.slow())) {
+        log_config_error("probe: the probe and toolsetter can't be Modbus extender pins (too slow, the tool would overshoot)");
+        return;
+    }
     _probePin.init();
     _toolsetterPin.init();
 }

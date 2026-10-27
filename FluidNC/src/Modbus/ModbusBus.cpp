@@ -79,8 +79,11 @@ namespace Modbus {
     }
 
     void Bus::add(Device* d) {
-        _devices.push_back(d);
-        if (!_started && _uart) {
+        _devices.push_back(d);  // during start-up only; the task starts after (start())
+    }
+
+    void Bus::start() {
+        if (!_started && _uart && !_devices.empty()) {
             _started = true;
             // Same priority and core as the VFD task: the I/O is never more
             // important than motion, and the VFD jumps the queue (see task()).
@@ -266,14 +269,22 @@ namespace Modbus {
         }
     }
     std::string Bus::status_values() {
-        std::string s;
+        // Built at most every 250 ms and given to every channel's report
+        // (one shared timer handed |MB: to whichever channel asked first).
+        static std::string cached;
+        static uint32_t    built = 0;
+        uint32_t           now   = xTaskGetTickCount() * portTICK_PERIOD_MS;
         if (!bus) {
-            return s;
+            return "";
         }
-        for (auto d : bus->_devices) {
-            d->values_line(s);
+        if (built == 0 || now - built >= 250) {
+            built = now ? now : 1;
+            cached.clear();
+            for (auto d : bus->_devices) {
+                d->values_line(cached);
+            }
         }
-        return s;
+        return cached;
     }
 
     Bus::~Bus() {
