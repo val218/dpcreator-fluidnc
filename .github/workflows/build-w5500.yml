@@ -31,9 +31,10 @@ jobs:
           path: |
             ~/.cache/pip
             ~/.platformio
-          key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}
+          # v2: a fresh start - older caches mixed two platforms named espressif32
+          key: ${{ runner.os }}-pio-v2-${{ hashFiles('platformio.ini') }}
           restore-keys: |
-            ${{ runner.os }}-pio-
+            ${{ runner.os }}-pio-v2-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -49,7 +50,8 @@ jobs:
           set -o pipefail
           # Compiler errors also go to the run's annotations (readable without the log)
           pio run -e wifi_s3 2>&1 | tee build.log || {
-            { grep -iE "error|undefined|multiple definition|ld:|relocation|first defined|exception" build.log | grep -v "^Compiling\|^Archiving\|^Indexing" | head -8; tail -2 build.log; } | while IFS= read -r l; do echo "::error::$l"; done
+            grep -iE "error|undefined|multiple definition|ld:|relocation|first defined|exception" build.log | grep -v "^Compiling\|^Archiving\|^Indexing" | head -8 | while IFS= read -r l; do echo "::error::$l"; done
+            echo "::error title=last lines::$(tail -25 build.log | sed ':a;N;$!ba;s/\n/%0A/g')"
             exit 1
           }
 
