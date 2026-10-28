@@ -1,0 +1,16 @@
+# dpCREATOR FluidNC - starter config for ESP32 (WROOM-32) boards
+#
+# This file has no pins on purpose: every ESP32 board is wired differently.
+# Replace it with your board's config.yaml (the board maker's FluidNC config,
+# or one made with the dpCREATOR Machine Builder on dpcreator.eu), then restart.
+#
+# Network: there is no Wi-Fi access point and no default password.
+# Over USB (dpcreator.eu -> Flash Firmware -> terminal):
+#   $Sta/SSID=<your network>
+#   $Sta/Password=<your Wi-Fi password>
+#   $Auth/Set=<login password, 8-64 characters>
+# then restart. The WebUI asks for the login password.
+
+board: ESP32 (WROOM-32)
+name: dpCREATOR FluidNC - no machine configured yet
+meta: Replace this file with your board's config.yaml
