@@ -158,7 +158,7 @@ axes:
     motor0:
       limit_all_pin: NO_PIN              # LIM_A is used as the vacuum input below
       hard_limits: false
-      pulloff_mm: 0.000
+      pulloff_mm: 1.000                  # not used (A has no homing), must be > 0
       standard_stepper:
         step_pin: gpio.17
         direction_pin: gpio.18

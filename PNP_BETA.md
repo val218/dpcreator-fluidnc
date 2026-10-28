@@ -303,6 +303,7 @@ Photos/video link:
 | Problem | Likely cause | Fix |
 |---|---|---|
 | "error" after `$Config/Filename` | typo in the file, or missing section | `$Startup/Show`, check the line it names |
+| `Cannot open configuration file` and `Using default configuration` | the yaml is not on the flash (went to SD, or the browser renamed it) | `$Config/Filename=config.yaml`, `$bye`, upload to the **flash** tab of Files, check with `$LocalFS/List`. The default config has no network, so do this over USB |
 | Every move gives an alarm / "homing required" | `must_home: true` | home first (`$H`) |
 | Valve on when it should be off | output polarity | `digital1_pin: gpio.21:low` |
 | Vacuum reads 1 with the tip open | input polarity | `digital0_pin: gpio.38` (remove `:low`) |
