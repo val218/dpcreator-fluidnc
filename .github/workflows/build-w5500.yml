@@ -49,7 +49,7 @@ jobs:
           set -o pipefail
           # Compiler errors also go to the run's annotations (readable without the log)
           pio run -e wifi_s3 2>&1 | tee build.log || {
-            grep -E "error|undefined|multiple definition|ld:|relocation|first defined" build.log | grep -v "^Compiling\|^Archiving\|^Indexing" | head -10 | while IFS= read -r l; do echo "::error::$l"; done
+            { grep -iE "error|undefined|multiple definition|ld:|relocation|first defined|exception" build.log | grep -v "^Compiling\|^Archiving\|^Indexing" | head -8; tail -2 build.log; } | while IFS= read -r l; do echo "::error::$l"; done
             exit 1
           }
 
@@ -78,10 +78,15 @@ jobs:
         id: wroom32
         continue-on-error: true
         shell: bash
+        env:
+          # Its own PlatformIO home: the ESP32 build uses platform-espressif32
+          # 6.9.0 (core 2.0.17), the S3 the pioarduino platform; both are named
+          # "espressif32" and must not share one install.
+          PLATFORMIO_CORE_DIR: ${{ github.workspace }}/.pio-esp32
         run: |
           set -o pipefail
           pio run -e wifi 2>&1 | tee build-wroom32.log || {
-            grep -E "error|undefined|multiple definition|ld:|relocation|first defined|overflow" build-wroom32.log | grep -v "^Compiling\|^Archiving\|^Indexing" | head -10 | while IFS= read -r l; do echo "::warning title=WROOM-32 build::$l"; done
+            grep -iE "error|undefined|multiple definition|ld:|relocation|first defined|overflow|exception" build-wroom32.log | grep -v "^Compiling\|^Archiving\|^Indexing" | head -10 | while IFS= read -r l; do echo "::warning title=WROOM-32 build::$l"; done
             exit 1
           }
           grep -E "^(RAM|Flash):" build-wroom32.log | while IFS= read -r l; do echo "::notice title=WROOM-32 size::$l"; done
@@ -93,6 +98,7 @@ jobs:
         env:
           # starter config.yaml without pins (the R3 config's pins do not exist on ESP32)
           PLATFORMIO_DATA_DIR: FluidNC/data_esp32
+          PLATFORMIO_CORE_DIR: ${{ github.workspace }}/.pio-esp32
         run: pio run -e wifi -t build_merged
 
       - name: Collect ESP32 WROOM-32 binaries
