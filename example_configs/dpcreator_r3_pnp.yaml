@@ -15,7 +15,6 @@ meta: ESP32-S3-WROOM-1-N16R8, dpCREATOR FluidNC 4.1.1 + W5500, PnP phase 1 (no v
 #      machine coordinates).
 #
 #  Lines marked  <-- SET  depend on your mechanics.
-#  Lines marked  <-- VERIFY  must be checked on your own board/wiring.
 # ==================================================================
 
 stepping:
