@@ -1,0 +1,212 @@
+board: dpCREATOR R3
+name: dpCREATOR R3 Pick and Place (beta)
+meta: ESP32-S3-WROOM-1-N16R8, dpCREATOR FluidNC 4.1.1 + W5500, PnP phase 1 (no vision)
+
+# ==================================================================
+#  dpCREATOR PnP - BETA config. Read PNP_BETA.md before using it.
+#
+#  What changes compared with the standard R2/R3 router config:
+#    - A axis      -> nozzle rotation (degrees), no homing, no limit
+#    - Relay       -> vacuum pump          (user output 0: M62 P0 / M63 P0)
+#    - PWM output  -> vacuum valve         (user output 1: M62 P1 / M63 P1)
+#                    (spindle section removed, a PnP has no spindle)
+#    - LIM_A input -> vacuum switch        (user input 0:  M66 P0 L0 -> #5399)
+#    - Homing is required before any move (feeder positions are in
+#      machine coordinates).
+#
+#  Lines marked  <-- SET  depend on your mechanics.
+#  Lines marked  <-- VERIFY  must be checked on your own board/wiring.
+# ==================================================================
+
+stepping:
+  engine: RMT
+  idle_ms: 255
+  pulse_us: 4
+  dir_delay_us: 1
+  disable_delay_us: 0
+  segments: 12
+
+# ---------------- SPI bus: SD card + W5500 ----------------
+spi:
+  miso_pin: gpio.13
+  mosi_pin: gpio.11
+  sck_pin: gpio.12
+
+sdcard:
+  cs_pin: gpio.10
+  card_detect_pin: NO_PIN
+  frequency_hz: 8000000
+
+ethernet:
+  cs_pin: gpio.14
+  int_pin: gpio.9                        # NO_PIN if INT is not wired
+  rst_pin: NO_PIN
+  phy_type: w5500
+  phy_addr: 1
+  frequency_hz: 8000000
+
+# ---------------- UART1: SmartTabUI pendant ----------------
+uart1:
+  txd_pin: gpio.1
+  rxd_pin: gpio.2
+  rts_pin: NO_PIN
+  cts_pin: NO_PIN
+  baud: 1000000
+  mode: 8N1
+
+uart_channel1:
+  uart_num: 1
+  report_interval_ms: 75
+  message_level: Info
+
+# ---------------- UART2: RS485 (not used by PnP phase 1) ----------------
+uart2:
+  txd_pin: gpio.42
+  rxd_pin: gpio.41
+  rts_pin: gpio.40
+  cts_pin: NO_PIN
+  baud: 9600
+  mode: 8N1
+
+# ---------------- Axes ----------------
+kinematics:
+  Cartesian:
+
+axes:
+  shared_stepper_disable_pin: gpio.8     # STEP_EN_RAW - add :low if drivers enable on low
+  shared_stepper_reset_pin: NO_PIN
+  homing_runs: 2
+
+  x:
+    steps_per_mm: 80.000                 # <-- SET (e.g. GT2 belt, 20T pulley, 1/16 = 80)
+    max_rate_mm_per_min: 6000.000        # <-- SET  start slow, raise after testing
+    acceleration_mm_per_sec2: 500.000    # <-- SET
+    max_travel_mm: 400.000               # <-- SET
+    soft_limits: true                    # safe: needs homing (start: must_home: true)
+    homing:
+      cycle: 2
+      positive_direction: false
+      mpos_mm: 0.000
+      feed_mm_per_min: 200.000
+      seek_mm_per_min: 1500.000
+      settle_ms: 250
+    motor0:
+      limit_all_pin: gpio.47:low         # LIM_X
+      hard_limits: false
+      pulloff_mm: 2.000
+      standard_stepper:
+        step_pin: gpio.4
+        direction_pin: gpio.5
+        disable_pin: NO_PIN
+
+  y:
+    steps_per_mm: 80.000                 # <-- SET
+    max_rate_mm_per_min: 6000.000        # <-- SET
+    acceleration_mm_per_sec2: 500.000    # <-- SET
+    max_travel_mm: 300.000               # <-- SET
+    soft_limits: true
+    homing:
+      cycle: 2
+      positive_direction: false
+      mpos_mm: 0.000
+      feed_mm_per_min: 200.000
+      seek_mm_per_min: 1500.000
+      settle_ms: 250
+    motor0:
+      limit_all_pin: gpio.48:low         # LIM_Y
+      hard_limits: false
+      pulloff_mm: 2.000
+      standard_stepper:
+        step_pin: gpio.6
+        direction_pin: gpio.7
+        disable_pin: NO_PIN
+
+  # Z = nozzle up/down. Homes UP (top = Z 0), work is in negative Z.
+  z:
+    steps_per_mm: 400.000                # <-- SET (e.g. T8x8 lead screw, 1/16 = 400)
+    max_rate_mm_per_min: 3000.000        # <-- SET
+    acceleration_mm_per_sec2: 300.000    # <-- SET
+    max_travel_mm: 40.000                # <-- SET  nozzle stroke
+    soft_limits: true
+    homing:
+      cycle: 1                           # Z first, so the nozzle is up before X/Y move
+      positive_direction: true
+      mpos_mm: 0.000
+      feed_mm_per_min: 100.000
+      seek_mm_per_min: 800.000
+      settle_ms: 250
+    motor0:
+      limit_all_pin: gpio.45:low         # LIM_Z
+      hard_limits: false
+      pulloff_mm: 2.000
+      standard_stepper:
+        step_pin: gpio.15
+        direction_pin: gpio.16
+        disable_pin: NO_PIN
+
+  # A = nozzle rotation in DEGREES. Not homed: the app treats the nozzle
+  # angle at power-up as 0 (set the nozzle straight before homing).
+  # steps_per_mm here means steps per degree:
+  #   (motor steps per rev x microsteps x gear ratio) / 360
+  #   200 x 16 x 1 / 360 = 8.889
+  a:
+    steps_per_mm: 8.889                  # <-- SET
+    max_rate_mm_per_min: 36000.000       # degrees per minute (= 100 rpm)
+    acceleration_mm_per_sec2: 2000.000   # degrees per second^2
+    max_travel_mm: 720.000
+    soft_limits: false
+    motor0:
+      limit_all_pin: NO_PIN              # LIM_A is used as the vacuum input below
+      hard_limits: false
+      pulloff_mm: 0.000
+      standard_stepper:
+        step_pin: gpio.17
+        direction_pin: gpio.18
+        disable_pin: NO_PIN
+
+# ---------------- Probe (R3: separate PROBE on GPIO3) ----------------
+# Optional: board height / nozzle touch-off later. Not needed for phase 1.
+probe:
+  pin: gpio.3:low
+  toolsetter_pin: NO_PIN
+  check_mode_start: true
+
+# ---------------- PnP outputs ----------------
+#   P0 = relay (GPIO39)      -> vacuum pump
+#   P1 = PWM output (GPIO21) -> vacuum valve, through a MOSFET module or SSR.
+#        Never connect a solenoid coil straight to the PWM terminal.   <-- VERIFY
+#
+#   In jobs use M62/M63 (they wait until the machine has stopped moving).
+#   M64/M65 switch at once, even mid-move: use them only by hand.
+user_outputs:
+  digital0_pin: gpio.39                  # pump  (relay)
+  digital1_pin: gpio.21                  # valve (PWM terminal)    <-- VERIFY polarity
+
+# ---------------- PnP inputs ----------------
+#   P0 = LIM_A terminal -> vacuum switch (normally open, closes on vacuum),
+#        wired between LIM_A and LIMIT COM like an endstop.
+#   Read with:  G4 P0.1  then  M66 P0 L0   ->  #5399 = 1 vacuum OK, 0 no vacuum
+#   (G4 first: M66 reads at once and does not wait for moves to finish.)
+user_inputs:
+  digital0_pin: gpio.38:low              # vacuum switch           <-- VERIFY polarity
+
+# No spindle and no coolant on a PnP.
+coolant:
+  flood_pin: NO_PIN
+  mist_pin: NO_PIN
+
+control:
+  safety_door_pin: NO_PIN
+  reset_pin: NO_PIN
+  feed_hold_pin: NO_PIN
+  cycle_start_pin: NO_PIN
+
+# Manual test buttons (WebUI / pendant macros). M64/M65 = immediate.
+macros:
+  Macro0: M64P0                          # pump on
+  Macro1: M65P0&M65P1                    # pump off + valve off (all off)
+  Macro2: M64P1                          # valve on  (nozzle sucks)
+  Macro3: M65P1                          # valve off (nozzle vents, part drops)
+
+start:
+  must_home: true

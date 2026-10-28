@@ -6,6 +6,8 @@ live Z adjust, handwheel rewind, pendant previews, macros, job history and
 crash diagnostics, kept by the board itself. W5500 Ethernet is included too,
 but it is no longer the main point (upstream FluidNC is adding it).
 
+**Pick and place (beta):** [PNP_BETA.md](PNP_BETA.md) — R3 as a PnP controller, no camera yet
+
 Full guide: **[W5500_ETHERNET.md](W5500_ETHERNET.md)** · Download:
 [latest release](https://github.com/val218/dpcreator-fluidnc/releases/tag/w5500-latest)
 
