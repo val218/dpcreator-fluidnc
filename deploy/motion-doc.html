@@ -2,7 +2,7 @@
 
 <div class="alert alert-info"><strong>Beta.</strong> Motion runs on the dpCREATOR R3 and on any board with FluidNC 3.8 or newer. It is one page that lives on the controller's own memory, like the WebUI: no install, no internet, no account. It will be installed from the <a href="/firmware">Flash Firmware</a> page, like Studio. Want to try it before that? <a href="index.php?route=information/contact">Contact us</a> or join the <a href="/rnd-club">R&amp;D Club</a>.</div>
 
-<p><img src="image/catalog/dpc-site/shots/motion-l-arm-3d.jpg" alt="dpCREATOR Motion: a 4-joint robot arm with its taught positions, the sequence of steps and the timeline" style="max-width:100%;height:auto;border-radius:6px"></p>
+<p><img src="image/catalog/dpc-site/shots/motion-d-arm.jpg" alt="dpCREATOR Motion: a 4-joint robot arm with its taught positions, the sequence of steps and the timeline" style="max-width:100%;height:auto;border-radius:6px"></p>
 
 <h3>How it works</h3>
 <p>Motion follows the way a machine is really built: <strong>one motor or sensor at a time</strong>. Add a part, test it, and only then add the next one. When the machine works, teach it its movements and run them. The three stages are always across the top of the screen:</p>
@@ -14,16 +14,16 @@
 <p><em>Simple</em> (the default) shows only what a beginner needs. <em>All features</em> adds the parts library, the 2D view, the console, the timeline, the full step list, the G-code and the config.</p>
 
 <h3>Start: what are you building?</h3>
-<p><img src="image/catalog/dpc-site/shots/motion-l-start.jpg" alt="The first screen: pick the kind of machine and the controller" style="max-width:360px;width:100%;height:auto;border-radius:6px;float:right;margin:0 0 12px 18px"></p>
+<p><img src="image/catalog/dpc-site/shots/motion-start.jpg" alt="The first screen: pick the kind of machine and the controller" style="max-width:360px;width:100%;height:auto;border-radius:6px;float:right;margin:0 0 12px 18px"></p>
 <p>The first screen asks which controller you have (<em>dpCREATOR R3</em> or <em>Another FluidNC board</em>) and what kind of machine you are building: a gantry, a linear slide, a conveyor, a rotary indexer, a robot arm or something else. The kind only decides where Motion puts each part in 3D (a gantry's X rides on Y, Z on X; an arm's joints stack). It never limits what you can add.</p>
 <p>New to Motion? <strong>New here? Try it first</strong> is a 2-minute walkthrough in the simulator, no board needed. <em>Or open a finished example</em> loads a complete machine with its movements: robot arm, conveyor with pusher, rotary indexer, XY pick and place, camera slider, or a servo arm with four hobby servos.</p>
 <div style="clear:both"></div>
 
 <h3>Stage 1: build the machine</h3>
-<p><img src="image/catalog/dpc-site/shots/motion-l-builder.jpg" alt="Build the machine: the parts library, the 3D machine, the selected arm joint and its position card" style="max-width:100%;height:auto;border-radius:6px"></p>
+<p><img src="image/catalog/dpc-site/shots/motion-builder.jpg" alt="Build the machine: the parts library, the 3D machine, the selected arm joint and its position card" style="max-width:100%;height:auto;border-radius:6px"></p>
 <p>The <strong>Build it step by step</strong> card lists the parts your kind of machine usually has, with <strong>+ Add</strong> next to each, plus <strong>+ Motor</strong>, <strong>+ Sensor / switch</strong> and <strong>+ Output / tool</strong> for anything else. In <em>All features</em> the parts library on the left has every part (linear axis, turntable, arm joint, hobby servo, conveyor, gripper, vacuum cup, spindle, custom tools, endstops, sensors, signal lights, valves). Drag a part onto the 3D view and it snaps onto a carriage, a profile, a table or the end of an arm joint, and moves with it.</p>
 
-<p><img src="image/catalog/dpc-site/shots/motion-l-add-motor.jpg" alt="Add a motor: how it moves, which terminals it is plugged into, and the wiring picture" style="max-width:300px;width:100%;height:auto;border-radius:6px;float:right;margin:0 0 12px 18px"></p>
+<p><img src="image/catalog/dpc-site/shots/motion-add-motor.jpg" alt="Add a motor: how it moves, which terminals it is plugged into, and the wiring picture" style="max-width:300px;width:100%;height:auto;border-radius:6px;float:right;margin:0 0 12px 18px"></p>
 <p><strong>Adding a motor:</strong></p>
 <ol>
   <li>Name it (<em>Y: front – back</em>).</li>
@@ -39,7 +39,7 @@
 <h3>Only what your controller can drive</h3>
 <p>Motion reads the controller's <code>config.yaml</code>. A part that needs something the config doesn't have (a motor axis, a free input or output, a Modbus module on RS485) is greyed out; click it to see why and <strong>Add to config</strong> the lines that provide it. On the R3 that includes the relay, the 0–10 V and PWM outputs, spare LIMIT inputs used as sensors, and a Modbus I/O module on RS485.</p>
 <p>Motion edits its own copy of the config, marks every changed line and checks it for pins used twice. <strong>Apply to board</strong> uploads it as <code>motion-config.yaml</code> and restarts the controller; your old <code>config.yaml</code> stays on the board, so going back is one command.</p>
-<p style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/motion-l-board-map.jpg" alt="R3 board map: every terminal and what uses it" style="flex:1 1 440px;max-width:100%;height:auto;border-radius:6px"><img src="image/catalog/dpc-site/shots/motion-l-config.jpg" alt="Controller config card with the YAML Motion builds against" style="flex:0 1 280px;max-width:280px;height:auto;border-radius:6px"></p>
+<p style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/motion-board-map.jpg" alt="R3 board map: every terminal and what uses it" style="flex:1 1 440px;max-width:100%;height:auto;border-radius:6px"><img src="image/catalog/dpc-site/shots/motion-config.jpg" alt="Controller config card with the YAML Motion builds against" style="flex:0 1 280px;max-width:280px;height:auto;border-radius:6px"></p>
 <p>The <strong>Board map</strong> shows every terminal of the R3 and what your machine uses it for; connected, the inputs and outputs light up live. On another board it is a list of the config's pins.</p>
 
 <h3>Test every part before the next</h3>
@@ -51,11 +51,11 @@
   <li><strong>Output:</strong> On / Off: it should click, light or move.</li>
 </ul>
 <p>Connected, the test first offers <strong>Send and restart</strong> so the board gets the new config. When it works press <strong>It works</strong>: Motion remembers that config as the last working one.</p>
-<p><img src="image/catalog/dpc-site/shots/motion-l-not-working.jpg" alt="Not working? Motion checks what it can and asks what happens" style="max-width:520px;width:100%;height:auto;border-radius:6px"></p>
+<p><img src="image/catalog/dpc-site/shots/motion-not-working.jpg" alt="Not working? Motion checks what it can and asks what happens" style="max-width:520px;width:100%;height:auto;border-radius:6px"></p>
 <p><strong>Not working?</strong> on every part first checks what Motion can see itself: is the board connected, in alarm, is the new config sent, is the part in the config, is a limit switch pressed, has the config changed since it last worked (with <em>Go back to the last working config</em>). Then it asks what happens (doesn't move, wrong way, wrong distance, sensor never or always on…) and ends with a fix: a one-click config change, or what to check on the machine.</p>
 
 <h3>Stage 2: teach movements</h3>
-<p><img src="image/catalog/dpc-site/shots/motion-l-arm.jpg" alt="Teach movements: the robot arm, all steps as a list with start times, and the timeline" style="max-width:100%;height:auto;border-radius:6px"></p>
+<p><img src="image/catalog/dpc-site/shots/motion-timeline.jpg" alt="Teach movements: the robot arm, all steps as a list with start times, and the timeline" style="max-width:100%;height:auto;border-radius:6px"></p>
 <ol>
   <li>Move the machine where it should go: the jog bar under the 3D view, the arrow keys, dragging in 3D, or the pendant's handwheel.</li>
   <li>Press <strong>+ Position here</strong>. A <em>Go to</em> step is added.</li>
@@ -66,7 +66,7 @@
 <p>A machine can have several <strong>sequences</strong> (<em>Pick and place</em>, <em>Park</em>…), each its own program. <strong>Play</strong> runs the sequence in the simulator; <strong>Step by step</strong> stops before every step. In <em>All features</em>, <strong>Time</strong> shows the timeline: a bar per step, a line per axis, a row per output and the cycle time.</p>
 
 <h3>Stage 3: run it</h3>
-<p><img src="image/catalog/dpc-site/shots/motion-l-run.jpg" alt="Run it: the robot arm picking, gripper on, with Pause, Stop and the speed slider" style="max-width:100%;height:auto;border-radius:6px"></p>
+<p><img src="image/catalog/dpc-site/shots/motion-run.jpg" alt="Run it: the robot arm picking, gripper on, with Pause, Stop and the speed slider" style="max-width:100%;height:auto;border-radius:6px"></p>
 <p>Pick the sequence, then <strong>Simulation</strong> or <strong>Machine</strong>. On the machine, Motion uploads the program to the controller's SD card (or its flash when there is no card) and starts it there, so the program runs on the controller, not in the browser: closing the page doesn't stop it. While it runs:</p>
 <ul>
   <li>the running step is highlighted and named;</li>
@@ -77,7 +77,7 @@
 <p><strong>Send to machine</strong> copies every sequence to the controller with its step names. The SmartTabUI pendant can then list them and start any of them on its own, without the computer.</p>
 
 <h3>Examples</h3>
-<p style="display:flex;flex-wrap:wrap;gap:12px"><img src="image/catalog/dpc-site/shots/motion-l-conveyor.jpg" alt="Conveyor with a part sensor, a pusher and a running light" style="flex:1 1 300px;max-width:100%;height:auto;border-radius:6px"><img src="image/catalog/dpc-site/shots/motion-l-gantry.jpg" alt="XY pick and place gantry with a vacuum cup" style="flex:1 1 300px;max-width:100%;height:auto;border-radius:6px"></p>
+<p style="display:flex;flex-wrap:wrap;gap:12px"><img src="image/catalog/dpc-site/shots/motion-conveyor.jpg" alt="Conveyor with a part sensor, a pusher and a running light" style="flex:1 1 300px;max-width:100%;height:auto;border-radius:6px"><img src="image/catalog/dpc-site/shots/motion-gantry.jpg" alt="XY pick and place gantry with a vacuum cup" style="flex:1 1 300px;max-width:100%;height:auto;border-radius:6px"></p>
 <ul>
   <li><strong>Conveyor:</strong> run the belt until the part sensor sees a part, push it off, wait until it is gone, repeat forever.</li>
   <li><strong>XY pick and place:</strong> X, Y and a lift with a vacuum cup, from a tray to a box.</li>
