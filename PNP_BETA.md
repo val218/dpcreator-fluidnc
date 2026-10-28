@@ -117,7 +117,10 @@ Notes:
 ## 5. Install the config
 
 1. **Back up your current `config.yaml`** (WebUI → Files → flash → download it).
-2. Upload `dpcreator_r3_pnp.yaml` to the board's flash (WebUI → Files → flash).
+2. Upload `dpcreator_r3_pnp.yaml` to the board's **flash**, not the SD card
+   (WebUI → Files → flash tab). Config files are only read from flash; a yaml on
+   SD gives `Cannot open configuration file`. Check it is there with
+   `$LocalFS/List`.
 3. Make it the active config and restart:
 
    ```
