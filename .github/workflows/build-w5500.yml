@@ -4,7 +4,7 @@ on:
   push:
     # bt-decode: a copy of a released commit plus .github/backtrace.txt, to
     # decode a crash backtrace against that build (see the Decode step)
-    branches: [ fluidnc-4.1.1-w5500, bt-decode, wroom32-build ]
+    branches: [ fluidnc-4.1.1-w5500, bt-decode ]
   workflow_dispatch:
     inputs:
       backtrace:
