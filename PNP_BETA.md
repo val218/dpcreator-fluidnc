@@ -9,7 +9,7 @@
 |---|---|
 | Version | PnP beta 0.1 — 2026-10-28 |
 | Firmware | dpCREATOR FluidNC 4.1.1 (W5500 build, release `w5500-latest`) |
-| Board | dpCREATOR R3 (v4.0.3) |
+| Board | dpCREATOR R3 (v4.0.3) — board-only test passed on a pre-production board; production R3 not yet tested |
 | Config | `example_configs/dpcreator_r3_pnp.yaml` |
 | Test files | `examples/pnp/pnp_01_bench_test.nc`, `examples/pnp/pnp_02_single_part.nc` |
 
@@ -346,8 +346,9 @@ Coming next, in this order:
 
 ## Changelog
 
-- **0.1 (2026-10-28)** — board-only test passed on a real R3: config loads, relay
-  (pump), PWM (valve) and LIM_A (vacuum) with the polarities as shipped; LIMIT inputs
-  need 24 V board power.
+- **0.1 (2026-10-28)** — board-only test passed on a pre-production test board: config
+  loads, relay (pump), PWM (valve) and LIM_A (vacuum) work with the polarities as
+  shipped; LIMIT inputs need 24 V board power. **To be repeated on the production R3
+  boards before this beta is released.**
 - **0.1 (2026-10-28)** — first beta: config, bench test, single-part template, this guide;
   board-only test for a bare R3.

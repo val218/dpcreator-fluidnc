@@ -15,6 +15,8 @@ meta: ESP32-S3-WROOM-1-N16R8, dpCREATOR FluidNC 4.1.1 + W5500, PnP phase 1 (no v
 #      machine coordinates).
 #
 #  Lines marked  <-- SET  depend on your mechanics.
+#  Pump/valve/vacuum polarity: checked on a pre-production test board,
+#  to be confirmed again on the production R3 boards.
 # ==================================================================
 
 stepping:
@@ -179,7 +181,7 @@ probe:
 #   M64/M65 switch at once, even mid-move: use them only by hand.
 user_outputs:
   digital0_pin: gpio.39                  # pump  (relay)
-  digital1_pin: gpio.21                  # valve (PWM terminal), polarity checked on R3
+  digital1_pin: gpio.21                  # valve (PWM terminal), works on test board; re-check on production R3
 
 # ---------------- PnP inputs ----------------
 #   P0 = LIM_A terminal -> vacuum switch (normally open, closes on vacuum),
@@ -187,7 +189,7 @@ user_outputs:
 #   Read with:  G4 P0.1  then  M66 P0 L0   ->  #5399 = 1 vacuum OK, 0 no vacuum
 #   (G4 first: M66 reads at once and does not wait for moves to finish.)
 user_inputs:
-  digital0_pin: gpio.38:low              # vacuum switch, polarity checked on R3
+  digital0_pin: gpio.38:low              # vacuum switch, works on test board; re-check on production R3
                                          # (needs 24 V board power: isolated LIMIT supply)
 
 # No spindle and no coolant on a PnP.
