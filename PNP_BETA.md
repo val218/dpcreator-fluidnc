@@ -313,6 +313,7 @@ Photos/video link:
 | Vacuum always 0 | switch threshold too high, leak, or wiring | cover the tip, adjust the switch, check LIM_A ↔ LIMIT COM |
 | Part drops during travel | weak vacuum, leak at the union, nozzle too small | check hoses, use a bigger nozzle |
 | Part sticks to the nozzle on place | valve does not vent | 3/2 valve vent port must be open; raise `G4 P0.1` after `M63 P1` |
+| DRO shows A in mm (`G0 A90` → A 90.000 mm) | FluidNC labels every axis in mm | normal: for A the number is degrees (`steps_per_mm` = steps per degree). Check one real 90° turn with a mark on the nozzle |
 | Nozzle angle drifts | A losing steps | lower A rate/acceleration, raise motor current |
 | `M66` error | input not defined in config | check `user_inputs:` |
 | Part placed off by the same amount every time | taught position, or nozzle not centred | re-teach; check nozzle runout by rotating 360° |
