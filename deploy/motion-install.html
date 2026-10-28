@@ -1,0 +1,230 @@
+<!-- MOTION -->
+  <div id="dpc-motion" class="dpc-fw-panel">
+  <div class="dpc-fw-card">
+    <p class="dpc-fw-title">dpCREATOR Motion – automate any project with FluidNC</p>
+    <div class="dpc-fw-meta">
+      <span class="dpc-fw-badge dpc-fw-badge-free">Free with the R3</span>
+      <span class="dpc-fw-badge dpc-fw-badge-paid">Beta</span>
+      <span class="dpc-fw-badge dpc-fw-badge-chip">Any FluidNC 4.x</span>
+      <span class="dpc-fw-badge dpc-fw-badge-ver dpcm-ver"></span>
+    </div>
+    <p class="dpc-fw-changelog">Build your own machine one part at a time: add each motor, sensor and output as you wire it, test it, then teach the positions and run the sequence from the controller. Motion writes the controller config and the G-code for you.</p>
+    <p class="dpc-fw-changelog">The <strong>simulator</strong> on dpcreator.eu runs the example machines in your browser, no board and no account needed. To move a real machine, install Motion on the controller below.</p>
+    <p style="margin:10px 0 0"><a class="dpc-fw-btn dpc-fw-btn-flash" href="/motion/" target="_blank" rel="noopener" style="text-decoration:none">Open the simulator</a>
+      &nbsp; <a href="/docs/dpcreator-motion" style="font-size:13px">How Motion works</a></p>
+  </div>
+
+  <div class="dpc-fw-card" id="dpcm-card">
+    <p class="dpc-fw-title">Install Motion on your controller</p>
+    <div class="dpc-fw-meta">
+      <span class="dpc-fw-badge dpc-fw-badge-free">Free with the R3</span>
+      <span class="dpc-fw-badge dpc-fw-badge-paid">€39 for other boards</span>
+      <span class="dpc-fw-badge dpc-fw-badge-chip">Any FluidNC 4.x</span>
+    </div>
+    <p class="dpc-fw-changelog">
+      Motion is copied into the controller's flash, next to its WebUI. It then works without internet, reads the controller's config, and runs your sequences from the controller itself.
+    </p>
+    <ul class="dpc-fw-changelog" style="margin:0 0 8px;padding-left:18px">
+      <li><strong>dpCREATOR firmware:</strong> opens at <code>http://&lt;your board&gt;/motion.html</code>, with live inputs and outputs, fast sensor waits and the step names on the SmartTabUI pendant.</li>
+      <li><strong>Stock FluidNC 4.x:</strong> opens at <code>http://&lt;your board&gt;/flash/motion.html</code>. Sequences run the same way; limit switches and the probe show live.</li>
+    </ul>
+    <p class="dpc-fw-changelog" style="font-size:12px;color:#888">
+      Needs FluidNC 4.0 or newer (stock or dpCREATOR) and about <strong>400 KB free</strong> in the flash. The installer checks the firmware, that the machine is idle and the free space before it writes anything.
+    </p>
+    <div id="dpcm-state" class="dpc-fw-notice">Checking your account…</div>
+    <div id="dpcm-go" style="margin-top:12px;display:none">
+      <ol style="font-size:13px;margin:0 0 10px;padding-left:18px">
+        <li>Connect the controller to this computer with a USB cable. The machine must be idle.</li>
+        <li>Click the button and choose the controller's serial port.</li>
+      </ol>
+      <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" id="dpcm-install">⚡&nbsp; Install Motion on my controller</button>
+      <div id="dpcm-progress" style="display:none;margin-top:12px">
+        <div id="dpcm-step" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
+        <div style="height:6px;background:#eee;border-radius:3px;overflow:hidden"><div id="dpcm-bar" style="height:6px;width:0;background:#0F6E56;transition:width .2s"></div></div>
+      </div>
+      <div id="dpcm-result" class="dpc-fw-notice" style="display:none"></div>
+      <details style="margin-top:8px;font-size:12px;color:#888"><summary>Details</summary><pre id="dpcm-log" style="max-height:200px;overflow:auto;font-size:11px;white-space:pre-wrap"></pre></details>
+    </div>
+  </div>
+  </div>
+
+<script>
+/* dpCREATOR Motion installer (Flash Firmware page, Motion tab): puts Motion (one gzipped
+ * page, licensed by dpcreator.eu) into the controller's flash over USB as
+ * /localfs/motion.html.gz. Same steps and checks as the Studio installer: firmware,
+ * machine idle, free space; nothing is removed before the new copy is safely stored.
+ *   - dpCREATOR firmware (reports a board ID): opens at /motion.html
+ *   - stock FluidNC 4.x: opens at /flash/motion.html */
+(function (root) {
+  var TMP = "/localfs/motion.tmp", PAGE = "/localfs/motion.html.gz";
+  var MARGIN = 24 * 1024;
+  var BUY = "index.php?route=product/product&product_id=391";
+  var R3 = "index.php?route=product/product&product_id=381";
+  var LOGIN = "index.php?route=account/login";
+  function kb(n) { return Math.round(n / 1024) + " KB"; }
+  function bytes(v, unit) { return parseFloat(v) * ({ B: 1, KB: 1024, MB: 1048576, GB: 1073741824 }[unit] || 1); }
+
+  async function install(W, port, fetchFile, ui) {
+    var link = W.Link(port, ui.log);
+    await new Promise(function (r) { setTimeout(r, 600); });
+    link.drain();
+
+    ui.step("Checking the controller");
+    var board = "";
+    for (var i = 0; i < 2 && !board; i++) {
+      link.drain();
+      await link.send("$Board/ID");
+      var m = await link.line(/\[MSG:BoardID:([0-9A-F]{12}):api=\d+\]|^error:/, 3000);
+      if (m && m[1]) board = m[1];
+      else if (m) break;
+    }
+    if (board) await link.line(/^ok$/, 1500);
+    link.drain();
+    var info = await W.command(link, "$I", 4000);
+    var ver = null;
+    (info.lines || []).forEach(function (l) { var v = /\[VER:[^\]]*?FluidNC v(\d+)\.(\d+)(?:\.(\d+))?/.exec(l); if (v) ver = v; });
+    if (!board) {
+      if (!ver && !info.ok) throw new Error("The controller does not answer. Check the port and that FluidNC is running.");
+      if (!ver) throw new Error("This controller does not report a FluidNC version. Motion needs FluidNC 4.0 or newer.");
+      if (+ver[1] < 4) throw new Error("This controller runs FluidNC v" + ver[1] + "." + ver[2] + (ver[3] ? "." + ver[3] : "") + ". Motion on the controller needs FluidNC 4.0 or newer: update the firmware first.");
+    }
+
+    link.drain();
+    await link.write(new Uint8Array([0x3f]));
+    var st = await link.line(/^<([A-Za-z]+)/, 3000);
+    if (!st) throw new Error("The controller does not answer. Check the port and that FluidNC is running.");
+    if (!/^(Idle|Alarm)$/.test(st[1])) throw new Error("The machine is " + st[1] + ". Try again when it is Idle.");
+
+    var list0 = await W.command(link, "$LocalFS/List", 5000);
+    var lines = list0.lines || [];
+    var sizes = {};
+    lines.forEach(function (l) { var x = /\[FILE:\s*([^|\]]+)\|SIZE:(\d+)/.exec(l); if (x) sizes[x[1].trim()] = +x[2]; });
+    var free = null;
+    lines.forEach(function (l) { var x = /Free:\s*([\d.]+)\s*(B|KB|MB|GB)/.exec(l); if (x) free = bytes(x[1], x[2]); });
+
+    ui.step("Getting Motion from dpcreator.eu");
+    var file = await fetchFile(board);
+
+    var old = sizes["motion.html.gz"] || 0, tmpOld = sizes["motion.tmp"] || 0;
+    var need = file.bytes.length + MARGIN;
+    var replaceFirst = false;
+    if (free !== null) {
+      var avail = free + tmpOld;
+      if (avail < need) {
+        if (avail + old >= need) replaceFirst = true;
+        else throw new Error("Not enough room in the controller's flash: Motion needs " + kb(need) + ", " + kb(avail + old) + " is free. Delete unused files from the flash and try again.");
+      }
+    }
+
+    ui.step("Sending Motion to the controller");
+    if (sizes["motion.tmp"] !== undefined) await W.command(link, "$LocalFS/Delete=" + TMP, 4000);
+    if (replaceFirst) await W.command(link, "$LocalFS/Delete=" + PAGE, 5000);
+    link.drain();
+    await link.send("$Xmodem/Receive=" + TMP);
+    try {
+      await W.xmodemSend(link, file.bytes, ui.progress);
+    } catch (e) {
+      await W.command(link, "$LocalFS/Delete=" + TMP, 4000).catch(function () {});
+      throw new Error(e.message + " Try again.");
+    }
+    var done = await link.line(/Received (\d+) bytes|Reception failed.*|^error:.*/, 8000);
+    if (!done || !done[1] || +done[1] !== file.bytes.length) {
+      await W.command(link, "$LocalFS/Delete=" + TMP, 4000);
+      throw new Error("The controller did not store Motion" + (done && !done[1] ? ": " + done[0] : "") + ". Its flash may be full: delete unused files there and try again.");
+    }
+    await link.line(/^ok$/, 2000);
+
+    ui.step("Switching to the new Motion");
+    if (old && !replaceFirst) await W.command(link, "$LocalFS/Delete=" + PAGE, 5000);
+    var r = await W.command(link, "$LocalFS/Rename=" + TMP + ">" + PAGE, 5000);
+    if (!r.ok) throw new Error("Could not activate Motion (" + (r.error || "") + "). Try the install again.");
+    return { board: board, version: file.version, path: board ? "/motion.html" : "/flash/motion.html",
+             fluidnc: ver ? ver[1] + "." + ver[2] + (ver[3] ? "." + ver[3] : "") : "" };
+  }
+
+  var W = root.DPCWebUiInstaller;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  if (!W || !$("dpcm-card")) return;
+
+  var shop = {
+    access: function () { return fetch("/motion.php?f=access", { credentials: "same-origin", cache: "no-store" }).then(function (r) { return r.json(); }); },
+    version: function () { return fetch("/motion.php?f=version").then(function (r) { return r.json(); }); },
+    fetchFile: async function (board) {
+      var r = await fetch("/motion.php?f=install", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-DPC-Installer": "1" },
+        body: JSON.stringify({ board: board || "" }),
+      });
+      if (!r.ok) {
+        var j = {}; try { j = await r.json(); } catch (e) {}
+        throw new Error({
+          login_required: "Log in to your dpcreator.eu account first.",
+          licence_required: "Your account has no Motion licence yet.",
+          too_many_installs: "Too many installs in the last hour. Please try again later.",
+          not_available: "Motion is not available right now. Please try again in a few minutes.",
+        }[j.error] || "The shop could not prepare Motion (" + (j.error || r.status) + ").");
+      }
+      var data = new Uint8Array(await r.arrayBuffer());
+      var want = r.headers.get("X-DPC-Sha256");
+      if (want && root.crypto && crypto.subtle) {
+        var h = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", data))).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+        if (h !== want) throw new Error("The download was damaged. Please try again.");
+      }
+      return { bytes: data, version: r.headers.get("X-DPC-Version") || "" };
+    },
+  };
+
+  function result(ok, html) {
+    var r = $("dpcm-result");
+    r.style.display = ""; r.style.background = ok ? "#E1F5EE" : "#FCEBEB"; r.style.color = ok ? "#085041" : "#791F1F";
+    r.innerHTML = html;
+  }
+
+  function render(a) {
+    var st = $("dpcm-state");
+    if (!a.logged_in) { st.innerHTML = '<a href="' + LOGIN + '">Log in</a> to install Motion on your controller. Just trying it? The <a href="/motion/" target="_blank" rel="noopener">simulator</a> needs no account.'; return; }
+    if (!a.entitled) {
+      st.innerHTML = 'Your account has no Motion licence yet. Motion is free with the <a href="' + R3 + '">dpCREATOR R3</a>; for another FluidNC board <a href="' + BUY + '">get dpCREATOR Motion</a>. In the R&amp;D Club? <a href="index.php?route=information/contact">Ask us</a> to add your account to the beta.';
+      return;
+    }
+    st.textContent = { hardware: "Motion licence included with your dpCREATOR R3.", bought: "Motion licence active.", beta: "Motion beta, licensed to your account (R&D Club).", admin: "Shop admin: installs licensed to dpCREATOR." }[a.via] || "Motion licence active.";
+    $("dpcm-go").style.display = "";
+    if (!("serial" in navigator)) {
+      $("dpcm-install").disabled = true; $("dpcm-install").className = "dpc-fw-btn dpc-fw-btn-lock";
+      $("dpcm-install").textContent = "Needs Chrome or Edge on a computer";
+    }
+  }
+
+  $("dpcm-install").onclick = async function () {
+    var btn = this, port = null, logEl = $("dpcm-log");
+    logEl.textContent = ""; $("dpcm-result").style.display = "none";
+    try { port = await W.openSerial(); } catch (e) { if (e && e.name !== "NotFoundError") result(false, "Could not open the port: " + esc(e.message || e) + ". Close other programs that use it and try again."); return; }
+    btn.disabled = true;
+    $("dpcm-progress").style.display = ""; $("dpcm-bar").style.width = "0";
+    try {
+      var r = await install(W, port, shop.fetchFile, {
+        log: function (l) { logEl.textContent += l + "\n"; },
+        step: function (s) { $("dpcm-step").textContent = s + "…"; },
+        progress: function (p) { $("dpcm-bar").style.width = Math.round(p * 100) + "%"; },
+      });
+      $("dpcm-bar").style.width = "100%"; $("dpcm-step").textContent = "Done";
+      result(true, "<strong>dpCREATOR Motion is on your controller" + (r.board ? " (board …" + esc(r.board.slice(-6)) + ")" : r.fluidnc ? " (FluidNC " + esc(r.fluidnc) + ")" : "") + ".</strong> Open <code>http://&lt;your board&gt;" + r.path + "</code> (for example <code>http://fluidnc.local" + r.path + "</code>). It connects to the controller by itself." +
+        (r.board ? " If the browser downloads the page instead of opening it, open <code>/flash/motion.html</code> or update the controller firmware." : ""));
+    } catch (e) {
+      $("dpcm-step").textContent = "Stopped";
+      result(false, esc(e.message || e));
+    } finally {
+      btn.disabled = false;
+      if (port) port.close();
+    }
+  };
+
+  shop.version().then(function (v) {
+    var t = v.version ? "build " + v.version.split(" ")[0] : "";
+    document.querySelectorAll(".dpcm-ver").forEach(function (e) { e.textContent = t; e.style.display = t ? "" : "none"; });
+  }).catch(function () {});
+  shop.access().then(render).catch(function () { $("dpcm-state").innerHTML = 'Motion installs from here once the shop is set up for it. Meanwhile, try the <a href="/motion/" target="_blank" rel="noopener">simulator</a>.'; });
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+
