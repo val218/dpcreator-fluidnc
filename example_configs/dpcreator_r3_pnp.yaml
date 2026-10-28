@@ -174,13 +174,13 @@ probe:
 # ---------------- PnP outputs ----------------
 #   P0 = relay (GPIO39)      -> vacuum pump
 #   P1 = PWM output (GPIO21) -> vacuum valve, through a MOSFET module or SSR.
-#        Never connect a solenoid coil straight to the PWM terminal.   <-- VERIFY
+#        Never connect a solenoid coil straight to the PWM terminal.
 #
 #   In jobs use M62/M63 (they wait until the machine has stopped moving).
 #   M64/M65 switch at once, even mid-move: use them only by hand.
 user_outputs:
   digital0_pin: gpio.39                  # pump  (relay)
-  digital1_pin: gpio.21                  # valve (PWM terminal)    <-- VERIFY polarity
+  digital1_pin: gpio.21                  # valve (PWM terminal), polarity checked on R3
 
 # ---------------- PnP inputs ----------------
 #   P0 = LIM_A terminal -> vacuum switch (normally open, closes on vacuum),
@@ -188,7 +188,8 @@ user_outputs:
 #   Read with:  G4 P0.1  then  M66 P0 L0   ->  #5399 = 1 vacuum OK, 0 no vacuum
 #   (G4 first: M66 reads at once and does not wait for moves to finish.)
 user_inputs:
-  digital0_pin: gpio.38:low              # vacuum switch           <-- VERIFY polarity
+  digital0_pin: gpio.38:low              # vacuum switch, polarity checked on R3
+                                         # (needs 24 V board power: isolated LIMIT supply)
 
 # No spindle and no coolant on a PnP.
 coolant:

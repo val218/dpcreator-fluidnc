@@ -152,6 +152,11 @@ build anything.
 You need: the board on USB or the network, a short piece of wire, and a multimeter
 (or just your ears for the relay).
 
+**Power the board from its 24 V supply, not only USB.** The LIMIT inputs (and so the
+vacuum input on LIM_A) run from the isolated B0505S supply; on USB power alone they
+never change. STEP/DIR also need E_STOP at 3.3 V (an NC button or a wire bridge from
+E_STOP to +3.3V) if you want real pulses on the A terminal.
+
 1. Install the config (section 5) and check `$Startup/Show` has no errors.
 2. The board starts in alarm because homing is required and there are no endstops.
    Unlock it with `$X` (this treats all axes as homed; fine for a bench test, never
@@ -170,6 +175,10 @@ You need: the board on USB or the network, a short piece of wire, and a multimet
 
    Write down the voltage the PWM terminal gives when on — the MOSFET module or SSR
    for the valve must switch at that level.
+
+No status line on `?`? Some terminals hide the `<...>` status lines. Read the input
+directly instead: `M66 P0 L0` then `(PRINT, vacuum=#5399)`, which prints
+`vacuum=1.000000` with the wire on and `0.000000` without.
 
 If `|UI:` shows `1` without the wire, remove `:low` from `digital0_pin` in the
 config. If `|UO:` shows the valve on while the PWM terminal reads 0 V, the output is
@@ -310,6 +319,7 @@ Photos/video link:
 | Every move gives an alarm / "homing required" | `must_home: true` | home first (`$H`) |
 | Valve on when it should be off | output polarity | `digital1_pin: gpio.21:low` |
 | Vacuum reads 1 with the tip open | input polarity | `digital0_pin: gpio.38` (remove `:low`) |
+| Vacuum always 0, even with a wire on LIM_A | board on USB power only: the isolated limit supply is off | power the board from 24 V |
 | Vacuum always 0 | switch threshold too high, leak, or wiring | cover the tip, adjust the switch, check LIM_A ↔ LIMIT COM |
 | Part drops during travel | weak vacuum, leak at the union, nozzle too small | check hoses, use a bigger nozzle |
 | Part sticks to the nozzle on place | valve does not vent | 3/2 valve vent port must be open; raise `G4 P0.1` after `M63 P1` |
@@ -336,5 +346,8 @@ Coming next, in this order:
 
 ## Changelog
 
+- **0.1 (2026-10-28)** — board-only test passed on a real R3: config loads, relay
+  (pump), PWM (valve) and LIM_A (vacuum) with the polarities as shipped; LIMIT inputs
+  need 24 V board power.
 - **0.1 (2026-10-28)** — first beta: config, bench test, single-part template, this guide;
   board-only test for a bare R3.
