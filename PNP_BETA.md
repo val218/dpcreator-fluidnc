@@ -20,6 +20,7 @@
 3. [What you need](#3-what-you-need)
 4. [Wiring](#4-wiring)
 5. [Install the config](#5-install-the-config)
+   - [Board-only test (no PnP hardware)](#board-only-test-no-pnp-hardware)
 6. [First power-up](#6-first-power-up)
 7. [Bench test](#7-bench-test)
 8. [Your first part](#8-your-first-part)
@@ -139,6 +140,38 @@ Notes:
 
 To go back to the router: `$Config/Filename=config.yaml` then `$bye`.
 
+### Board-only test (no PnP hardware)
+
+You can check the config and both outputs and the input on a bare R3, with no motors,
+pump, valve or machine connected. Do this first; it proves the board side before you
+build anything.
+
+You need: the board on USB or the network, a short piece of wire, and a multimeter
+(or just your ears for the relay).
+
+1. Install the config (section 5) and check `$Startup/Show` has no errors.
+2. The board starts in alarm because homing is required and there are no endstops.
+   Unlock it with `$X` (this treats all axes as homed; fine for a bench test, never
+   on a real machine).
+3. `$Report/UserIO=On`, then watch the status report.
+4. Test each item and write the result in the test log:
+
+   | Test | Do | Pass when |
+   |---|---|---|
+   | Pump output | Macro0 (`M64P0`), then Macro1 | relay clicks on, then off; `\|UO:10` then `\|UO:00` |
+   | Valve output | Macro2 (`M64P1`), then Macro3 | PWM terminal to GND reads high, then 0 V; `\|UO:01` then `\|UO:00` |
+   | Vacuum input | wire from LIM_A to LIMIT COM, then remove it | `\|UI:1` with the wire, `\|UI:0` without |
+   | Reset drops outputs | Macro0 + Macro2, then Reset (Ctrl-X) | relay off, PWM 0 V, `\|UO:00` |
+   | Nozzle axis | `G0 A90`, `G0 A0` | position shows A 90 then 0 (scope/LED on A STEP if you have one) |
+   | Bench test file | run `pnp_01_bench_test.nc` from SD | every step runs; steps 3–4 with/without the wire on LIM_A |
+
+   Write down the voltage the PWM terminal gives when on — the MOSFET module or SSR
+   for the valve must switch at that level.
+
+If `|UI:` shows `1` without the wire, remove `:low` from `digital0_pin` in the
+config. If `|UO:` shows the valve on while the PWM terminal reads 0 V, the output is
+inverted: use `gpio.21:low`.
+
 ## 6. First power-up
 
 1. Power the board with **pump and valve power off**.
@@ -251,6 +284,8 @@ Mechanics (belts/screws, motors, nozzle motor):
 Pump / valve / vacuum switch models:
 
 Config loaded without errors?  yes / no   (paste error lines)
+Board-only test   pump: ok/fail   valve: ok/fail (PWM on = ___ V)   input: ok/fail
+                  reset drops outputs: ok/fail   A moves: ok/fail   bench file: ok/fail
 Homing OK?                     yes / no
 Outputs by hand (macros)  pump: ok/fail   valve: ok/fail   |UO:/|UI: shown: yes/no
 
@@ -296,4 +331,5 @@ Coming next, in this order:
 
 ## Changelog
 
-- **0.1 (2026-10-28)** — first beta: config, bench test, single-part template, this guide.
+- **0.1 (2026-10-28)** — first beta: config, bench test, single-part template, this guide;
+  board-only test for a bare R3.
