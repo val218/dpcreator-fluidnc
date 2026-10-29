@@ -1,0 +1,51 @@
+<div class="dpf"><style>
+.dpf{color:inherit;font-size:16px;line-height:1.6}
+.dpf .dpf-hero{padding:8px 0 24px;border-bottom:1px solid rgba(128,128,128,.25);margin-bottom:28px}
+.dpf .dpf-hero p{max-width:760px;font-size:18px;margin:0 0 18px}
+.dpf .dpf-btns{display:flex;flex-wrap:wrap;gap:10px}
+.dpf .dpf-btn{display:inline-block;background:#2b8fe0;color:#fff !important;padding:12px 20px;border-radius:4px;font-weight:600;text-decoration:none}
+.dpf .dpf-btn.line{background:transparent;color:inherit !important;border:1px solid rgba(128,128,128,.5)}
+.dpf h2{margin:36px 0 14px;font-size:28px}
+.dpf .dpf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.dpf .dpf-card{border:1px solid rgba(128,128,128,.3);border-radius:8px;padding:18px}
+.dpf .dpf-card h3{margin:0 0 8px;font-size:19px}
+.dpf .dpf-card p{margin:0 0 8px}
+.dpf .dpf-card a{font-weight:600}
+.dpf table{width:100%;border-collapse:collapse;margin:8px 0 0}
+.dpf th,.dpf td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(128,128,128,.25);vertical-align:top}
+.dpf .dpf-wrap{overflow-x:auto}
+.dpf ol li{margin-bottom:6px}
+</style>
+<div class="dpf-hero">
+<p>dpCREATOR FluidNC is FluidNC 4.1.1 with the things a working machine needs: it picks a job up again after a power cut, lets you change the depth while it cuts, and talks to the SmartTabUI pendant and the dpCREATOR apps. It is free for registered customers and runs any FluidNC <code>config.yaml</code>.</p>
+<div class="dpf-btns"><a class="dpf-btn" href="/firmware">Flash it in your browser</a><a class="dpf-btn line" href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=33">Release notes</a></div>
+</div>
+
+<h2>What it adds to FluidNC</h2>
+<div class="dpf-grid">
+<div class="dpf-card"><h3>Job recovery</h3><p>The board writes down where every SD-card job is. After a power cut or an E-stop it suggests the safest line to restart from, lets you dry-run to it, and carries on.</p><a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=21">How job recovery works</a></div>
+<div class="dpf-card"><h3>Live Z adjust and rewind</h3><p>Change the cutting depth while the job runs, or hold, wind the tool back along the path with the handwheel and re-cut.</p><a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=22">Live Z adjust and handwheel rewind</a></div>
+<div class="dpf-card"><h3>Wired Ethernet</h3><p>On the R2 and R3, a W5500 Ethernet connection to your network instead of Wi-Fi.</p><a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=16">Ethernet (W5500) setup</a></div>
+<div class="dpf-card"><h3>SD card on the network</h3><p>Open the controller's SD card as a network drive and copy jobs to it from your computer.</p><a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=18">SD card as a network drive</a></div>
+<div class="dpf-card"><h3>A login for the board</h3><p>Protect the board on your network with a password. Set it when you install, or on your first visit.</p><a href="/firmware">Set up on the Flash Firmware page</a></div>
+<div class="dpf-card"><h3>Pendant and apps</h3><p>Works with the SmartTabUI pendant (measure, Record &amp; Retrace, job recovery at the machine) and runs the dpCREATOR apps from the controller's own memory.</p><a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=13">System overview</a></div>
+</div>
+
+<h2>Which build for your board</h2>
+<div class="dpf-wrap"><table>
+<thead><tr><th>Board</th><th>Build</th><th>What you get</th></tr></thead>
+<tbody>
+<tr><td>dpCREATOR R3 and R2</td><td>ESP32-S3</td><td>Everything above, with W5500 Ethernet. The full WebUI is free with the R3.</td></tr>
+<tr><td>Other ESP32-S3 boards</td><td>ESP32-S3</td><td>The same build. Needs an ESP32-S3 module with 8 MB PSRAM.</td></tr>
+<tr><td>ESP32 (WROOM-32) boards</td><td>ESP32</td><td>Wi-Fi instead of Ethernet; features that need more memory use smaller versions. WebUI Lite is free.</td></tr>
+</tbody>
+</table></div>
+
+<h2>Install and update</h2>
+<ol>
+<li>Log in to your dpcreator.eu account (free).</li>
+<li>Open the <a href="/firmware">Flash Firmware</a> page in Chrome or Edge on a computer and connect the board by USB.</li>
+<li>Pick your board and a configuration, tick the apps, enter your Wi-Fi and a login, and press Flash. Nothing is installed on your computer.</li>
+</ol>
+<p>Updating keeps your configuration: the page reads it from the board and writes it back after flashing. <a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=24">Updating firmware and keeping your config</a> · <a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=25">Troubleshooting</a></p>
+</div>
