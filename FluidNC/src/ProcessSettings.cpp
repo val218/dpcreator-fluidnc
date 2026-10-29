@@ -12,6 +12,7 @@
 #include "MacroLib.h"
 #include "PendantLink.h"   // $Pendant/Status
 #include "Teach.h"         // $Teach/..., $Pendant/Point
+#include "Camera.h"        // $Camera, $Camera/Aim
 #include "Parameters.h"  // global_named_params
 
 #define CRASH_TEST
@@ -1585,6 +1586,11 @@ Error execute_line(const char* line, Channel& channel, AuthenticationLevel auth_
             }
             return Error::Ok;
         }
+    }
+    // Camera crosshair: $Camera, $Camera/Aim= (Camera.h); $Camera/URL and
+    // $Camera/Calib are ordinary settings and fall through.
+    if (camera_command(line, channel)) {
+        return Error::Ok;
     }
     // Record & Retrace list on the board, and the pendant's double-tap
     // ($Pendant/Point): read-only and pending Add/Measure answered here, the

@@ -1,5 +1,6 @@
 #include "Machine/MachineConfig.h"
 #include "SettingsDefinitions.h"
+#include "Camera.h"
 #include "Config.h"
 #include "Stepping.h"
 #include "Machine/Homing.h"
@@ -113,6 +114,8 @@ void make_settings() {
 
     // |UI:<inputs>|UO:<outputs> in the status report: one character per user
     // digital pin, pin 0 first ('1' on, '0' off or not set). For Motion's live view.
+    make_camera_settings();  // Camera/URL, Camera/Calib (Camera.cpp)
+
     report_userio = new EnumSetting("User I/O in status report", EXTENDED, WG, NULL, "Report/UserIO", 0, &onoffOptions);
 
     // |MB:name=value,... in the status report (Modbus analog values with a name), at most every 250 ms.
