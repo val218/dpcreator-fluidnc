@@ -12,7 +12,7 @@ html:not(.dpc-light):not(.route-common-home) #content p,html:not(.dpc-light):not
 html:not(.dpc-light):not(.route-common-home) #content a:not(.btn):not([class*=dpc]):not([class*=dpch]):not([class*=dpe]):not([class*=dpp]){color:var(--k-link)}
 
 /* title band: dark with a fine drawing grid, as on the docs */
-html:not(.dpc-light):not(.route-common-home) body h1.title.page-title{background-color:#0a0d11!important;background-image:linear-gradient(rgba(124,203,247,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,203,247,.06) 1px,transparent 1px)!important;background-size:24px 24px!important;background-position:center top!important;color:var(--k-text)!important;border-bottom:1px solid var(--k-line)}
+html:not(.dpc-light):not(.route-common-home) body h1.title.page-title{background-color:#0a0d11!important;background-image:linear-gradient(rgba(124,203,247,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,203,247,.06) 1px,transparent 1px)!important;background-size:24px 24px!important;background-position:center top!important;color:var(--k-text)!important;border-bottom:1px solid var(--k-line);text-transform:none!important;font-family:"Barlow Condensed",Barlow,sans-serif!important;letter-spacing:0!important}
 html:not(.dpc-light):not(.route-common-home) body h1.title.page-title:after{background:var(--k-acc)!important}
 html:not(.dpc-light):not(.route-common-home) .breadcrumb{background:transparent!important}
 html:not(.dpc-light):not(.route-common-home) .breadcrumb::before{background:#0a0d11!important}
@@ -67,3 +67,8 @@ html:not(.dpc-light):not(.route-common-home) #content .cart-total,html:not(.dpc-
 html:not(.dpc-light):not(.route-common-home) #content .nav-tabs>li>a{color:var(--k-mute)!important;background:transparent!important;border-color:var(--k-line)!important}
 html:not(.dpc-light):not(.route-common-home) #content .nav-tabs>li.active>a{color:var(--k-text)!important;background:var(--k-card)!important}
 html:not(.dpc-light):not(.route-common-home) #content hr{border-color:var(--k-line)}
+
+/* filter column: price boxes dark; the brand filter has one brand with no logo, so it is hidden (both themes) */
+html:not(.dpc-light):not(.route-common-home) .side-column .filter-price-min,html:not(.dpc-light):not(.route-common-home) .side-column .filter-price-max,html:not(.dpc-light):not(.route-common-home) .side-column input[type=text]{background:#10151b!important;color:var(--k-text)!important;border:1px solid #33404c!important}
+html:not(.dpc-light):not(.route-common-home) .side-column .panel,html:not(.dpc-light):not(.route-common-home) .side-column .panel-heading,html:not(.dpc-light):not(.route-common-home) .side-column .panel-title{background:transparent!important;color:var(--k-body)!important;border-color:var(--k-line)!important}
+.side-column .module-item-m{display:none!important}
