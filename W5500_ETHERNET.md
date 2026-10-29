@@ -1107,7 +1107,71 @@ pseudo terminal (its state in `modbus_sim.json`).
 
 ---
 
-## 19. Troubleshooting
+## 19. Camera crosshair (IP / ESP32 camera on the head)
+
+A small Wi-Fi camera fixed to the head becomes a crosshair: aim at a hole,
+a corner or a mark instead of the tool. Any camera that serves a JPEG
+snapshot or an MJPEG stream over http works (the dpCREATOR ESP32-S3
+camera, ESP32-CAM, most IP cameras). USB cameras can't be shown in the
+WebUI (browsers allow them only on https pages).
+
+**The head camera firmware** (`camera/` in this repository; ready files in
+the release): for an ESP32-S3-EYE or Freenove ESP32-S3 CAM
+(`camera-s3-eye-flash.bin`), a Seeed XIAO ESP32S3 Sense
+(`camera-xiao-s3-flash.bin`) or an AI-Thinker ESP32-CAM
+(`camera-esp32cam-flash.bin`, its flash LED lights the work). Flash the file
+at 0x0 on the camera board, then on its USB serial port (115200):
+
+    wifi <network> <password>       (wifi "My Net" password for names with spaces)
+    status                          its addresses
+    host <name> | forget | restart
+
+Without Wi-Fi it opens the network `dpc-camera-XXXX` (password `dpccamera`);
+http://192.168.4.1 sets the Wi-Fi there. Once on the workshop network:
+`http://<camera>/capture` (the newest frame - what the WebUI polls),
+`http://<camera>:81/stream` (MJPEG), `http://<camera>/` (preview, picture
+size, quality, flip/mirror, light), also as `http://dpc-camera.local`. Its
+pictures carry `Access-Control-Allow-Origin: *`. Give the camera a fixed
+address in the router (DHCP reservation): the WebUI keeps the address.
+
+**WebUI → Tools → Camera crosshair:**
+
+1. *Camera setup*: the camera's address, e.g. `http://192.168.1.60/capture`
+   (snapshots, every 300 ms) or `http://192.168.1.60:81/stream` (MJPEG).
+2. *Calibrate* at the height you work at: make a small mark with the tool
+   (a dot with a V-bit or a pen), *Next*; jog until the crosshair is on
+   the mark, *Next* (this gives the offset tool → crosshair); click the
+   mark three times while the head moves 5 mm in X and Y (this gives the
+   picture scale and rotation). *Offset only* skips the scale.
+3. Use it:
+   - **Waypoint here**: a Record & Retrace waypoint at the crosshair. While
+     the panel is open, *Waypoints at the crosshair* is on and the
+     pendant's Record takes the waypoint at the crosshair too.
+   - **XY zero here**, **Tool to crosshair** (moves the head so the tool is
+     where the crosshair was; asks first).
+   - **Click moves the head**: click on the picture and the crosshair goes
+     there.
+   - **Hole centre (3 clicks)** on the hole's edge: centre and diameter;
+     then crosshair there / XY zero there / waypoint there.
+     **Edge angle (2 clicks)**: how much the stock is turned.
+
+The address and the calibration are kept on the board, shared by every
+WebUI and the pendant:
+
+| Command | |
+|---|---|
+| `$Camera` | `[MSG:Camera:url:...]`, `[MSG:Camera:calib:...]`, `[MSG:Camera:aim:0\|1]` |
+| `$Camera/URL=http://...` | the camera's address (`-` clears it) |
+| `$Camera/Calib=ox,oy,a,b,c,d,mz` | offset tool → crosshair (mm), pixels → mm, calibration Z (`-` clears it) |
+| `$Camera/Aim=1` / `0` | waypoints at the crosshair; the WebUI renews it, it ends by itself after 2.5 minutes |
+
+The offset and the scale are exact at the calibration height; the panel
+warns when Z is more than 1 mm away from it. On a FluidNC without these
+commands the panel shows the picture only.
+
+---
+
+## 20. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|

@@ -4,6 +4,7 @@
 #include "Serial.h"       // allChannels
 #include "System.h"       // get_mpos
 #include "Report.h"       // mpos_to_wpos
+#include "Camera.h"       // camera_aim_offset
 #include "State.h"        // state_is
 #include "Job.h"          // Job::active
 #include "PendantLink.h"  // pendant_channel
@@ -178,13 +179,19 @@ namespace {
         TeachPt p;
         if (!pts.empty()) p = pts.back();  // like the previous one: repeated holes need no setup
         work_xyz(p.x, p.y, p.z);
+        float ox, oy;
+        bool  cam = camera_aim_offset(ox, oy);  // the WebUI aims with the camera: the point under the crosshair
+        if (cam) {
+            p.x = std::round((p.x + ox) * 1000) / 1000;
+            p.y = std::round((p.y + oy) * 1000) / 1000;
+        }
         if (!pts.empty() && std::hypot(pts.back().x - p.x, pts.back().y - p.y) < 0.05) {
             return err_all("same XY as waypoint " + std::to_string(pts.size()) + ": jog to the next mark first");
         }
         if (op) p.op = op;
         pts.push_back(p);
         dirty = true;
-        all("[MSG:Teach:added:" + std::to_string(pts.size()) + ":" + (fromPendant ? "pendant" : "ui") + "]\n");
+        all("[MSG:Teach:added:" + std::to_string(pts.size()) + ":" + (fromPendant ? "pendant" : "ui") + (cam ? ":camera" : "") + "]\n");
         all(pt_line(pts.size() - 1));
     }
     void do_measure(int n) {
