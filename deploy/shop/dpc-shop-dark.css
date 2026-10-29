@@ -8,7 +8,7 @@ html:not(.dpc-light):not(.route-common-home){--k-bg:#0d1014;--k-card:#151b22;--k
 html:not(.dpc-light):not(.route-common-home) body{background:var(--k-bg)!important;color:var(--k-body)}
 html:not(.dpc-light):not(.route-common-home) #content,html:not(.dpc-light):not(.route-common-home) .site-wrapper>.container{background:transparent!important}
 html:not(.dpc-light):not(.route-common-home) #content h1,html:not(.dpc-light):not(.route-common-home) #content h2,html:not(.dpc-light):not(.route-common-home) #content h3,html:not(.dpc-light):not(.route-common-home) #content h4,html:not(.dpc-light):not(.route-common-home) #content legend,html:not(.dpc-light):not(.route-common-home) #content .module-title,html:not(.dpc-light):not(.route-common-home) #content label,html:not(.dpc-light):not(.route-common-home) #content strong{color:var(--k-text)}
-html:not(.dpc-light):not(.route-common-home) #content p,html:not(.dpc-light):not(.route-common-home) #content li,html:not(.dpc-light):not(.route-common-home) #content td,html:not(.dpc-light):not(.route-common-home) #content dd{color:var(--k-body)}
+html:not(.dpc-light):not(.route-common-home) #content p:not([class]),html:not(.dpc-light):not(.route-common-home) #content li:not([class]),html:not(.dpc-light):not(.route-common-home) #content td:not([class]),html:not(.dpc-light):not(.route-common-home) #content dd:not([class]){color:var(--k-body)}
 html:not(.dpc-light):not(.route-common-home) #content a:not(.btn):not([class*=dpc]):not([class*=dpch]):not([class*=dpe]):not([class*=dpp]){color:var(--k-link)}
 
 /* title band: dark with a fine drawing grid, as on the docs */
@@ -30,9 +30,9 @@ html:not(.dpc-light):not(.route-common-home) #content .form-control:focus{border
 html:not(.dpc-light):not(.route-common-home) #content .input-group-addon{background:var(--k-card2);border-color:#33404c;color:var(--k-body)}
 
 /* tables */
-html:not(.dpc-light):not(.route-common-home) #content .table,html:not(.dpc-light):not(.route-common-home) #content table:not(.dpe table){background:transparent!important;color:var(--k-body);border-color:var(--k-line)!important}
+html:not(.dpc-light):not(.route-common-home) #content .table,html:not(.dpc-light):not(.route-common-home) #content table:not(.dpe table):not(.dpp table){background:transparent!important;color:var(--k-body);border-color:var(--k-line)!important}
 html:not(.dpc-light):not(.route-common-home) #content .table>thead>tr>td,html:not(.dpc-light):not(.route-common-home) #content .table>thead>tr>th{background:var(--k-card)!important;color:var(--k-text)!important;border-color:var(--k-line)!important}
-html:not(.dpc-light):not(.route-common-home) #content .table td,html:not(.dpc-light):not(.route-common-home) #content .table th,html:not(.dpc-light):not(.route-common-home) #content table td,html:not(.dpc-light):not(.route-common-home) #content table th{background-color:transparent!important;border-color:var(--k-line)!important}
+html:not(.dpc-light):not(.route-common-home) #content .table td,html:not(.dpc-light):not(.route-common-home) #content .table th,html:not(.dpc-light):not(.route-common-home) #content table:not(.dpe table):not(.dpp table) td,html:not(.dpc-light):not(.route-common-home) #content table:not(.dpe table):not(.dpp table) th{background-color:transparent!important;border-color:var(--k-line)!important}
 html:not(.dpc-light):not(.route-common-home) #content .table-striped>tbody>tr:nth-of-type(odd){background:rgba(255,255,255,.025)!important}
 
 /* category and search grid */
