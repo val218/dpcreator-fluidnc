@@ -636,6 +636,13 @@ static Error showSpindle(const char* value, AuthenticationLevel auth_level, Chan
     return Error::Ok;
 }
 
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#    define MCU_NAME "esp32s3"
+#elif defined(CONFIG_IDF_TARGET_ESP32)
+#    define MCU_NAME "esp32"
+#else
+#    define MCU_NAME "other"
+#endif
 static Error showBoardId(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (value && *value) {
         return Error::InvalidStatement;
@@ -648,6 +655,9 @@ static Error showBoardId(const char* value, AuthenticationLevel auth_level, Chan
     // [MSG:BoardMem:psram=<KB>:ok] or [MSG:BoardMem:psram=<KB>:bad:<why>]
     std::string mem = "[MSG:BoardMem:psram=" + std::to_string(psram_total_kb()) + (*psram_problem() ? std::string(":bad:") + psram_problem() : std::string(":ok")) + "]\n";
     out.print(mem.c_str());
+    // The chip, for the pendant (lighter use of an ESP32 WROOM-32 controller):
+    // [MSG:BoardMcu:esp32s3] / [MSG:BoardMcu:esp32]
+    out.print("[MSG:BoardMcu:" MCU_NAME "]\n");
 #endif
     return Error::Ok;
 }
