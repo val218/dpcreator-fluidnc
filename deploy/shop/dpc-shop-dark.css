@@ -1,0 +1,69 @@
+/* dpCREATOR shop pages in the site's dark style.
+   Shop, product, cart, checkout, account, search, contact and info pages get the same dark ground, title band and
+   cards as the home page and the docs. Only when the visitor hasn't chosen the light theme (html.dpc-light).
+   The home page and the docs keep their own styles. Remove the <link> in Journal > Settings > Custom code to undo. */
+html:not(.dpc-light):not(.route-common-home){--k-bg:#0d1014;--k-card:#151b22;--k-card2:#1b232c;--k-line:#26303a;--k-text:#eef2f5;--k-body:#c3ccd5;--k-mute:#95a2af;--k-link:#7ccbf7;--k-acc:#2b8fe0}
+
+/* ground and text */
+html:not(.dpc-light):not(.route-common-home) body{background:var(--k-bg)!important;color:var(--k-body)}
+html:not(.dpc-light):not(.route-common-home) #content,html:not(.dpc-light):not(.route-common-home) .site-wrapper>.container{background:transparent!important}
+html:not(.dpc-light):not(.route-common-home) #content h1,html:not(.dpc-light):not(.route-common-home) #content h2,html:not(.dpc-light):not(.route-common-home) #content h3,html:not(.dpc-light):not(.route-common-home) #content h4,html:not(.dpc-light):not(.route-common-home) #content legend,html:not(.dpc-light):not(.route-common-home) #content .module-title,html:not(.dpc-light):not(.route-common-home) #content label,html:not(.dpc-light):not(.route-common-home) #content strong{color:var(--k-text)}
+html:not(.dpc-light):not(.route-common-home) #content p,html:not(.dpc-light):not(.route-common-home) #content li,html:not(.dpc-light):not(.route-common-home) #content td,html:not(.dpc-light):not(.route-common-home) #content dd{color:var(--k-body)}
+html:not(.dpc-light):not(.route-common-home) #content a:not(.btn):not([class*=dpc]):not([class*=dpch]):not([class*=dpe]):not([class*=dpp]){color:var(--k-link)}
+
+/* title band: dark with a fine drawing grid, as on the docs */
+html:not(.dpc-light):not(.route-common-home) body h1.title.page-title{background-color:#0a0d11!important;background-image:linear-gradient(rgba(124,203,247,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,203,247,.06) 1px,transparent 1px)!important;background-size:24px 24px!important;background-position:center top!important;color:var(--k-text)!important;border-bottom:1px solid var(--k-line)}
+html:not(.dpc-light):not(.route-common-home) body h1.title.page-title:after{background:var(--k-acc)!important}
+html:not(.dpc-light):not(.route-common-home) .breadcrumb{background:transparent!important}
+html:not(.dpc-light):not(.route-common-home) .breadcrumb::before{background:#0a0d11!important}
+html:not(.dpc-light):not(.route-common-home) .breadcrumb a,html:not(.dpc-light):not(.route-common-home) .breadcrumb li{color:var(--k-mute)!important}
+
+/* cards and panels */
+html:not(.dpc-light):not(.route-common-home) #content .panel,html:not(.dpc-light):not(.route-common-home) #content .panel-body,html:not(.dpc-light):not(.route-common-home) #content .panel-heading,html:not(.dpc-light):not(.route-common-home) #content .well,html:not(.dpc-light):not(.route-common-home) #content .list-group-item,html:not(.dpc-light):not(.route-common-home) .side-column .panel-body,html:not(.dpc-light):not(.route-common-home) .side-column .module-body,html:not(.dpc-light):not(.route-common-home) #content .module-body{background:var(--k-card)!important;border-color:var(--k-line)!important;color:var(--k-body)}
+html:not(.dpc-light):not(.route-common-home) #content .buttons,html:not(.dpc-light):not(.route-common-home) #content .buttons.clearfix,html:not(.dpc-light):not(.route-common-home) #content .pagination-results,html:not(.dpc-light):not(.route-common-home) #content .ias-noneleft{background:var(--k-card)!important;border:1px solid var(--k-line);border-radius:8px;color:var(--k-body)}
+html:not(.dpc-light):not(.route-common-home) .side-column,html:not(.dpc-light):not(.route-common-home) .side-column .module-title,html:not(.dpc-light):not(.route-common-home) .side-column label,html:not(.dpc-light):not(.route-common-home) .side-column a{color:var(--k-body)}
+html:not(.dpc-light):not(.route-common-home) .side-column .module-title{color:var(--k-text)!important;border-color:var(--k-line)!important}
+
+/* forms */
+html:not(.dpc-light):not(.route-common-home) #content .form-control,html:not(.dpc-light):not(.route-common-home) .side-column .form-control,html:not(.dpc-light):not(.route-common-home) #content select,html:not(.dpc-light):not(.route-common-home) #content textarea,html:not(.dpc-light):not(.route-common-home) #content input[type=text],html:not(.dpc-light):not(.route-common-home) #content input[type=email],html:not(.dpc-light):not(.route-common-home) #content input[type=password],html:not(.dpc-light):not(.route-common-home) #content input[type=tel],html:not(.dpc-light):not(.route-common-home) #content input[type=number]{background:#10151b!important;color:var(--k-text)!important;border:1px solid #33404c!important;border-radius:5px}
+html:not(.dpc-light):not(.route-common-home) #content .form-control:focus{border-color:var(--k-acc)!important;box-shadow:0 0 0 2px rgba(43,143,224,.25)!important}
+html:not(.dpc-light):not(.route-common-home) #content .input-group-addon{background:var(--k-card2);border-color:#33404c;color:var(--k-body)}
+
+/* tables */
+html:not(.dpc-light):not(.route-common-home) #content .table,html:not(.dpc-light):not(.route-common-home) #content table:not(.dpe table){background:transparent!important;color:var(--k-body);border-color:var(--k-line)!important}
+html:not(.dpc-light):not(.route-common-home) #content .table>thead>tr>td,html:not(.dpc-light):not(.route-common-home) #content .table>thead>tr>th{background:var(--k-card)!important;color:var(--k-text)!important;border-color:var(--k-line)!important}
+html:not(.dpc-light):not(.route-common-home) #content .table td,html:not(.dpc-light):not(.route-common-home) #content .table th,html:not(.dpc-light):not(.route-common-home) #content table td,html:not(.dpc-light):not(.route-common-home) #content table th{background-color:transparent!important;border-color:var(--k-line)!important}
+html:not(.dpc-light):not(.route-common-home) #content .table-striped>tbody>tr:nth-of-type(odd){background:rgba(255,255,255,.025)!important}
+
+/* category and search grid */
+html:not(.dpc-light):not(.route-common-home) #content .products-filter{background:var(--k-card)!important;border:1px solid var(--k-line);border-radius:8px;color:var(--k-body)}
+html:not(.dpc-light):not(.route-common-home) #content .product-thumb{background:var(--k-card)!important;border:1px solid var(--k-line)!important;border-radius:10px;overflow:hidden;box-shadow:none!important;transition:border-color .2s,transform .2s}
+html:not(.dpc-light):not(.route-common-home) #content .product-thumb:hover{border-color:var(--k-acc)!important;transform:translateY(-2px)}
+html:not(.dpc-light):not(.route-common-home) #content .product-thumb .image{background:#fff}
+html:not(.dpc-light):not(.route-common-home) #content .product-thumb .caption,html:not(.dpc-light):not(.route-common-home) #content .product-thumb .caption>div{background:transparent!important}
+html:not(.dpc-light):not(.route-common-home) #content .product-thumb .name a{color:var(--k-text)!important;font-weight:600}
+html:not(.dpc-light):not(.route-common-home) #content .product-thumb .description,html:not(.dpc-light):not(.route-common-home) #content .product-thumb .stats{color:var(--k-mute)!important;background:transparent!important}
+html:not(.dpc-light):not(.route-common-home) #content .product-thumb .price,html:not(.dpc-light):not(.route-common-home) #content .product-thumb .price-normal,html:not(.dpc-light):not(.route-common-home) #content .product-thumb .price-new{color:var(--k-text)!important}
+
+/* product page */
+html:not(.dpc-light):not(.route-common-home) .product-info .main-image .swiper-container{background:#fff;border-radius:10px}
+html:not(.dpc-light):not(.route-common-home) .product-info .additional-images img{border-radius:6px}
+html:not(.dpc-light):not(.route-common-home) .product-info .product-stats,html:not(.dpc-light):not(.route-common-home) .product-info .product-stats li,html:not(.dpc-light):not(.route-common-home) .product-info .product-stats b{color:var(--k-body)!important}
+html:not(.dpc-light):not(.route-common-home) .product-info .product-price,html:not(.dpc-light):not(.route-common-home) .product-info .product-price-new{color:var(--k-text)!important}
+html:not(.dpc-light):not(.route-common-home) .product-info .product-price-old{color:var(--k-mute)!important}
+html:not(.dpc-light):not(.route-common-home) .product-info .wishlist-compare a,html:not(.dpc-light):not(.route-common-home) .product-info .btn-wishlist,html:not(.dpc-light):not(.route-common-home) .product-info .btn-compare{color:var(--k-mute)!important}
+html:not(.dpc-light):not(.route-common-home) .product-info .stepper input,html:not(.dpc-light):not(.route-common-home) .product-info .stepper{background:#10151b!important;color:var(--k-text)!important;border-color:#33404c!important}
+html:not(.dpc-light):not(.route-common-home) .dpc-product-description>.module-title,html:not(.dpc-light):not(.route-common-home) .product-blocks .module-title{color:var(--k-text)!important;border-color:var(--k-line)!important}
+html:not(.dpc-light):not(.route-common-home) #content .dpc-callout{background:#13202b!important;border:1px solid #1f3a52!important;border-left:4px solid var(--k-acc)!important;border-radius:8px;color:var(--k-body)!important}
+html:not(.dpc-light):not(.route-common-home) #content .dpc-callout strong{color:var(--k-text)}
+html:not(.dpc-light):not(.route-common-home) #content .tags a{background:var(--k-card)!important;color:var(--k-body)!important;border:1px solid var(--k-line)}
+
+/* account, cart, checkout */
+html:not(.dpc-light):not(.route-common-home) #content .alert-info{background:#13202b!important;border-color:#1f3a52!important;color:var(--k-body)!important}
+html:not(.dpc-light):not(.route-common-home) #content .alert-success{background:#10261b!important;border-color:#1f4a33!important;color:#cfe9da!important}
+html:not(.dpc-light):not(.route-common-home) #content .alert-danger,html:not(.dpc-light):not(.route-common-home) #content .alert-warning{background:#2a1517!important;border-color:#5a2a2e!important;color:#f0d6d8!important}
+html:not(.dpc-light):not(.route-common-home) #content .account-list a,html:not(.dpc-light):not(.route-common-home) #content .list-unstyled a{color:var(--k-link)}
+html:not(.dpc-light):not(.route-common-home) #content .cart-total,html:not(.dpc-light):not(.route-common-home) #content .cart-page .table td{color:var(--k-body)}
+html:not(.dpc-light):not(.route-common-home) #content .nav-tabs>li>a{color:var(--k-mute)!important;background:transparent!important;border-color:var(--k-line)!important}
+html:not(.dpc-light):not(.route-common-home) #content .nav-tabs>li.active>a{color:var(--k-text)!important;background:var(--k-card)!important}
+html:not(.dpc-light):not(.route-common-home) #content hr{border-color:var(--k-line)}
