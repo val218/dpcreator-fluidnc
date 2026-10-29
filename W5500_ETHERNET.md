@@ -1115,6 +1115,25 @@ snapshot or an MJPEG stream over http works (the dpCREATOR ESP32-S3
 camera, ESP32-CAM, most IP cameras). USB cameras can't be shown in the
 WebUI (browsers allow them only on https pages).
 
+**The head camera firmware** (`camera/` in this repository; ready files in
+the release): for an ESP32-S3-EYE or Freenove ESP32-S3 CAM
+(`camera-s3-eye-flash.bin`), a Seeed XIAO ESP32S3 Sense
+(`camera-xiao-s3-flash.bin`) or an AI-Thinker ESP32-CAM
+(`camera-esp32cam-flash.bin`, its flash LED lights the work). Flash the file
+at 0x0 on the camera board, then on its USB serial port (115200):
+
+    wifi <network> <password>       (wifi "My Net" password for names with spaces)
+    status                          its addresses
+    host <name> | forget | restart
+
+Without Wi-Fi it opens the network `dpc-camera-XXXX` (password `dpccamera`);
+http://192.168.4.1 sets the Wi-Fi there. Once on the workshop network:
+`http://<camera>/capture` (the newest frame - what the WebUI polls),
+`http://<camera>:81/stream` (MJPEG), `http://<camera>/` (preview, picture
+size, quality, flip/mirror, light), also as `http://dpc-camera.local`. Its
+pictures carry `Access-Control-Allow-Origin: *`. Give the camera a fixed
+address in the router (DHCP reservation): the WebUI keeps the address.
+
 **WebUI → Tools → Camera crosshair:**
 
 1. *Camera setup*: the camera's address, e.g. `http://192.168.1.60/capture`
