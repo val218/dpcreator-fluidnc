@@ -1,0 +1,179 @@
+<p>Kas mainījies katrā dpCREATOR kontroliera programmaparatūras, SmartTabUI pults programmaparatūras un dpCREATOR WebUI būvējumā, jaunākās vispirms. Jaunāko izmaiņu saraksts atjaunojas pats, tiklīdz tiek publicēts jauns būvējums. Visas trīs atjaunina no lapas <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>. Tās tiek izstrādātas kopā, tāpēc atjauniniet tās visas vienlaikus.</p>
+
+<div class="dpc-callout"><strong>Atradāt kļūdu?</strong> Rakstiet mums, ko darījāt, kas notika, un norādiet būvējumu numurus: WebUI kājene rāda WebUI un kontroliera būvējumus, un pults savu būvējumu rāda sāknēšanas ekrānā. Ja kontrolieris pārstartējās pats, pievienojiet avārijas atskaiti: <code>$Crash</code> konsolē vai <em>Copy details</em> WebUI.</div>
+
+<style>
+.dpc-auto{margin:22px 0 34px}
+.dpc-auto[hidden]{display:none}
+.dpc-auto .an-builds{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:0 0 20px}
+.dpc-auto .an-build{border:1px solid rgba(127,127,127,.3);border-radius:4px;padding:12px 14px}
+.dpc-auto .an-build b{display:block;font-size:14px}
+.dpc-auto .an-build span{font:12.5px ui-monospace,Menlo,Consolas,monospace;opacity:.75}
+.dpc-auto .an-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.dpc-auto .an-tabs button{border:1px solid rgba(127,127,127,.35);background:transparent;border-radius:3px;padding:6px 12px;font-size:13px;cursor:pointer;color:inherit}
+.dpc-auto .an-tabs button[aria-selected="true"]{background:#2b8fe0;border-color:#2b8fe0;color:#fff}
+.dpc-auto .an-day{margin:14px 0 4px;font-weight:700;font-size:14px}
+.dpc-auto ul{margin:0 0 6px;padding-left:0;list-style:none}
+.dpc-auto li{padding:4px 0 4px 64px;position:relative;line-height:1.45;font-size:14px}
+.dpc-auto li i{position:absolute;left:0;top:6px;font-style:normal;font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:rgba(43,143,224,.15);color:#1b6fb5}
+.dpc-auto li i.fx{background:rgba(46,155,74,.15);color:#237a3a}
+.dpc-auto .an-more{margin-top:8px;border:0;background:none;color:#2b8fe0;cursor:pointer;padding:0;font-size:14px}
+.dpc-auto .an-foot{font-size:12.5px;opacity:.7;margin-top:12px}
+</style>
+<section class="dpc-auto" id="dpc-auto" hidden>
+<h2>Pašreizējie būvējumi</h2>
+<div class="an-builds" id="an-builds"></div>
+<h2>Jaunākās izmaiņas</h2>
+<p>Atjaunojas automātiski no katra publicētā būvējuma, jaunākās vispirms.</p>
+<div class="an-tabs" role="tablist" id="an-tabs"></div>
+<div id="an-list"></div>
+<p class="an-foot" id="an-foot"></p>
+</section>
+<script>
+(function(){
+  var box=document.getElementById("dpc-auto"); if(!box) return;
+  var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
+  var fmt=function(d){var p=d.split("-");var m=["January","February","March","April","May","June","July","August","September","October","November","December"];return p.length===3?(+p[2])+" "+m[+p[1]-1]+" "+p[0]:d;};
+  fetch("/notes.php",{cache:"no-cache"}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
+    var P=(d.products||[]).filter(function(p){return p.entries&&p.entries.length;}); if(!P.length) return;
+    document.getElementById("an-builds").innerHTML=d.products.map(function(p){return '<div class="an-build"><b>'+esc(p.name)+'</b><span>build '+esc(p.build||"-")+(p.date?" · "+esc(fmt(p.date)):"")+'</span></div>';}).join("");
+    var tabs=document.getElementById("an-tabs"), list=document.getElementById("an-list"), cur=0, all=false;
+    function show(i){cur=i;
+      [].forEach.call(tabs.children,function(b,k){b.setAttribute("aria-selected",k===i?"true":"false");});
+      var e=P[i].entries, n=all?e.length:Math.min(15,e.length), h="", day="";
+      for(var k=0;k<n;k++){var x=e[k]; if(x.date!==day){if(day)h+="</ul>"; day=x.date; h+='<div class="an-day">'+esc(fmt(day))+'</div><ul>';}
+        h+='<li><i class="'+(x.type==="fixed"?"fx":"nw")+'">'+(x.type==="fixed"?"Fixed":"New")+'</i>'+esc(x.text)+'</li>';}
+      if(day)h+="</ul>";
+      if(e.length>15) h+='<button type="button" class="an-more">'+(all?"Show fewer":"Show all "+e.length+" changes")+'</button>';
+      list.innerHTML=h; var m=list.querySelector(".an-more"); if(m)m.onclick=function(){all=!all;show(cur);};
+    }
+    tabs.innerHTML=P.map(function(p,i){return '<button type="button" role="tab">'+esc(p.name.replace(/ firmware$/,""))+'</button>';}).join("");
+    [].forEach.call(tabs.children,function(b,i){b.onclick=function(){all=false;show(i);};});
+    document.getElementById("an-foot").textContent="Last checked "+new Date(d.updated).toLocaleString()+".";
+    box.hidden=false; show(0);
+  }).catch(function(){});
+})();
+</script>
+
+<h2>Galvenās izmaiņas skaidrojumā</h2>
+<p>Galveno izmaiņu kopsavilkums vienkāršā valodā līdz 2026. gada 20. oktobrim.</p>
+<h3>dpCREATOR kontroliera programmaparatūra</h3>
+<p>FluidNC 4.1.1 ar W5500 Ethernet un dpCREATOR komandām. Bez maksas katram klientam.</p>
+
+<h4>2026. gada 20. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> lāzers blakus frēzei: piešķiriet lāzera vārpstai savu instrumenta numuru (<code>tools: 2</code>) un tās nobīdi attiecībā pret frēzes asmeni (<code>offset_mm:</code>). <code>M6 T2</code> pārslēdz uz lāzeru ar piemērotu nobīdi, tāpēc viena darba nulle der abiem. Skatiet <a href="index.php?route=journal3/blog/post&journal_blog_post_id=28#router-and-laser">Frēze un lāzers vienā mašīnā</a>.</li>
+<li><strong>Jauns:</strong> lāzera darbu rīka ceļa priekšskatījumā ir iekļauta jauda, tāpēc pults un WebUI rāda apdegumu.</li>
+<li><strong>Jauns:</strong> <code>$Homed</code> paziņo WebUI un pultij, kurām asīm kopš ieslēgšanas veikts homing.</li>
+<li><strong>Labots:</strong> pults varēja bezgalīgi gaidīt priekšskatījumu, ja fails tika augšupielādēts vēlreiz, kamēr tā priekšskatījums tika sūtīts.</li>
+</ul>
+
+<h4>2026. gada 17. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> SmartTabUI pults, pieslēdzoties kontrolierim, paziņo savu mikroshēmas ID un būvējumu, tāpēc WebUI var parādīt, kura pults pieslēgta.</li>
+<li><strong>Mainīts:</strong> noklusējuma <code>config.yaml</code> un dokumentācija nosauc SmartTabUI pulti.</li>
+</ul>
+
+<h4>2026. gada 16. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> Record & Retrace punktu saraksts glabājas plates SD kartē. Pults un WebUI rediģē to pašu sarakstu, un pults ar to strādā bez datora. Saglabājot tiek ierakstīts <code>/retrace.nc</code> ar urbumiem un apaļām vai taisnstūra kabatām.</li>
+<li><strong>Jauns:</strong> kad WebUI rīks (Centre Finder, Offcuts) pārņem pults dubultspiedienus, pults par to tiek informēta, tāpēc punkts nonāk pareizajā vietā.</li>
+</ul>
+
+<h4>2026. gada 15. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> dubultspiediens uz pults ENABLE pogas nosūta punktu WebUI rīkiem.</li>
+</ul>
+
+<h4>2026. gada 13. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> tiek izmantota plates 8 MB PSRAM. Platēm ar moduli, kuram ir par maz PSRAM, WebUI un lapā Flash Firmware tiek rādīts brīdinājums.</li>
+<li><strong>Jauns:</strong> plate paziņo savu ID, ko izmanto WebUI instalētājs. dpCREATOR WebUI tagad tiek instalēts atsevišķi no programmaparatūras.</li>
+<li><strong>Labots:</strong> kontrolieris varēja avarēt, piekļūstot SD kartei, kad tam pietrūka iekšējās atmiņas. Pults priekšskatījumi tagad gaida atmiņu.</li>
+</ul>
+
+<h4>2026. gada 12. oktobris</h4>
+<ul>
+<li><strong>Labots:</strong> uzdevumu sargtaimera (watchdog) izraisītas pārstartēšanas. WebUI atvēršana varēja nobloķēt kontrolieri, kamēr tas sūtīja statusa ziņojumus.</li>
+<li><strong>Labots:</strong> WebUI kļuva lēns un pults priekšskatījumi neizdevās, kamēr kontrolieris sūtīja datus pultij. Sūtījumi pultij tiek buferēti, un priekšskatījumu sūtīšana tiek dozēta.</li>
+<li><strong>Uzlabots:</strong> WebUI paliek savienots pārvietošanas laikā. Veci statusa ziņojumi tiek atmesti, nevis savienojums aizvērts.</li>
+<li><strong>Jauns:</strong> pēc sargtaimera pārstartēšanas kontrolieris saglabā atskaiti par to, ko tas darīja; to rāda <code>$Crash</code>, sāknēšanas žurnāls un WebUI.</li>
+</ul>
+
+<h3>SmartTabUI pults programmaparatūra</h3>
+<p>Pults programmaparatūra, instalē no lapas Flash Firmware. Atjauninot jūsu pults iestatījumi saglabājas.</p>
+
+<h4>2026. gada 20. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> PART skats DRO ekrānā rāda detaļu, ko darbs izgatavo, izgrieztu no bloka, reāllaikā darba izpildes laikā. Pagrieziet to ar rokratu (AXIS pozīcijā OFF) vai pārslēdziet uz ēnotu skatu no augšas. Lāzera darbi rāda apdegumu.</li>
+<li><strong>Jauns:</strong> trešais korekciju lodziņš rāda LASER, kamēr izvēlēts lāzers vai ielādēts lāzera darbs.</li>
+</ul>
+
+<h4>2026. gada 17. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> reģistrācija. Pults tiek reģistrēta pēc mikroshēmas ID pirmajā reizē, kad to instalē ar licenci. Nekas netiek bloķēts: nereģistrēta pults darbojas pilnībā un sāknēšanas ekrānā un iestatījumos rāda <em>Not registered</em>. Skatiet <a href="index.php?route=journal3/blog/post&journal_blog_post_id=32">SmartTabUI instalēšana, atjaunināšana un reģistrēšana</a>.</li>
+<li><strong>Jauns:</strong> Record režīmā katram punktam var iestatīt padevi, iegremdēšanu un rampu (spirālveida ieejas leņķi).</li>
+<li><strong>Jauns:</strong> Rewind rāda progresa joslu, cik tālu atpakaļ pa ceļu tas ir, un panelis paliek atvērts, līdz Rewind beidzas.</li>
+<li><strong>Mainīts:</strong> Measure → Go to centre vispirms paceļ Z līdz augšai, tāpat kā Home → Go to 0.</li>
+</ul>
+
+<h4>2026. gada 16. oktobris</h4>
+<ul>
+<li><strong>Jauna programmaparatūra:</strong> SmartTabUI, uzrakstīta no nulles. DRO ar soļa pārslēgu, homing un zondes izvēlne, makro, vārpsta, failu pārlūks ar rīka ceļa priekšskatījumu, Prepare un Run, Z korekcija darba laikā, Rewind, darba atjaunošana un Record & Retrace.</li>
+<li><strong>Jauns:</strong> dubultspiediens uz ENABLE jautā, vai mērīt detaļu vai ierakstīt punktus.</li>
+<li><strong>Jauns:</strong> Dark, Neutral un Light tēmas; iestatījumi ar ieeju monitoru un UART monitoru; pārstartēšana, 3 sekundes turot E-stop + ENABLE.</li>
+<li><strong>Jauns:</strong> sāknēšanas ekrāns ar būvējuma numuru un skaņas signāli, pagriežot ass vai soļa pārslēgu.</li>
+<li><strong>Labots:</strong> Record & Retrace uznirstošais logs pats aizvērās pēc katra punkta.</li>
+<li><strong>Labots:</strong> Z korekcija darba laikā tagad paliek ekrānā, līdz kontrolieris to apstiprina.</li>
+<li><strong>Labots:</strong> faila izpilde vairs neaiztur citas pults komandas.</li>
+</ul>
+
+<h3>dpCREATOR WebUI</h3>
+<p>Pārlūka saskarne, ko instalē platē no lapas Flash Firmware (cilne WebUI).</p>
+
+<h4>2026. gada 20. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> 3D skats reāllaikā darba izpildes laikā: vārpsta vai lāzera modulis kustas pāri darbam, griezumi iekrāsoti pēc dziļuma, un kartīte rāda atlikušo laiku un progresu. Slēdži Follow, Auto-fit, Spindle view un Stock.</li>
+<li><strong>Jauns:</strong> detaļas skats (Part view): detaļa, izgriezta no bloka ar izvēlēto frēzi, reāllaikā darba izpildes laikā, pēc izvēles ar blāvu rīka ceļu pa virsu. Lāzera darbi rāda apdegumu.</li>
+<li><strong>Jauns:</strong> izpildes josla zem skata ar Cycle start, Pause, Stop, Probe, dzesēšanu un korekciju slīdņiem. Lāzera darbam tā rāda lāzera jaudu %.</li>
+<li><strong>Jauns:</strong> pozīcija rāda kolonnas Work un Machine, zīmi <em>Not homed</em>, ja mašīnai nav veikts homing, un nullēšanai vajadzīga īsa turēšana, tāpēc nejaušs klikšķis nevar pārvietot darba nulli.</li>
+<li><strong>Jauns:</strong> Probe Z0 ar kontaktplāksni vai 3D zondi.</li>
+<li><strong>Jauns:</strong> lāzeram ar savu instrumenta numuru instrumentu kolonnā ir poga <em>T2 laser</em>.</li>
+<li><strong>Jauns:</strong> poga Studio pārslēdz uz Studio cilni, ja tā jau ir atvērta, un Studio poga WebUI pārslēdz atpakaļ.</li>
+<li><strong>Labots:</strong> galds un gājiens tiek zīmēti tikai tad, kad tie ir reāli (ieslēgts homing un programmatūras robežas), tāpēc mašīnā bez homing darbs vairs netiek rādīts ārpus režģa.</li>
+<li><strong>Labots:</strong> kājene varēja rādīt aktuālu būvējumu sarkanā krāsā.</li>
+</ul>
+
+<h4>2026. gada 17. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> paziņojums par atjauninājumu. Aptuveni reizi dienā WebUI jautā dpcreator.eu, vai ir jaunāki būvējumi, un kājenē rāda <em>update available</em>. To var izslēgt kājenē.</li>
+<li><strong>Jauns:</strong> kājene rāda pieslēgtās pults būvējumu.</li>
+<li><strong>Jauns:</strong> paziņojums par reģistrāciju. Nekas netiek bloķēts: nereģistrēts WebUI rāda nelielu paziņojumu, ko var paslēpt uz nedēļu.</li>
+</ul>
+
+<h4>2026. gada 16. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> Record & Retrace ir punktu karte un izvēlētā punkta redaktors, kā Record režīmā pultī.</li>
+<li><strong>Jauns:</strong> punktu saraksts glabājas platē un ir kopīgs ar pulti; taisnstūra kabatas.</li>
+<li><strong>Jauns:</strong> <em>Measure part</em> pultī atver Centre Finder; stūru notīrīšana tos notīra abās pusēs.</li>
+</ul>
+
+<h4>2026. gada 15. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> Centre Finder: izmēriet detaļu pēc tās stūriem, redziet tās izmēru, iestatiet darba nulli tās centrā vai stūrī un izveidojiet virsmas nolīdzināšanas darbu.</li>
+<li><strong>Jauns:</strong> Record & Retrace: pārvietojieties uz atzīmētiem punktiem, pievienojiet punktus un pārvērtiet tos urbšanas vai kabatu frēzēšanas darbā.</li>
+<li><strong>Jauns:</strong> Offcuts → DXF: ierakstiet atgriezumu vai sagataves kontūras (ar 45° malu piesaisti) un eksportējiet tās kā DXF, lai uz tām izvietotu savu rasējumu.</li>
+<li><strong>Jauns:</strong> instrumentu bibliotēka ar peldošu instrumentu izvēli, instrumenta maiņas režīmi ar novietošanas pozīcijām katram instrumentam un M6 makro ģenerators.</li>
+<li><strong>Jauns:</strong> materiāla augstuma zondēšana, Z0 iestatīšana no instrumenta garuma mērītāja un X0/Y0 iestatīšana izmērītos punktos.</li>
+<li><strong>Jauns:</strong> pārvietošana (arī pa 45° diagonālēm) turpina darboties, kamēr atvērts Centre Finder, Record & Retrace vai Offcuts.</li>
+<li><strong>Labots:</strong> no WebUI saglabātie faili varēja nonākt platē tukši. Saglabāšana tagad tiek pārbaudīta un atkārtota.</li>
+<li><strong>Labots:</strong> Record & Retrace sarakstu saspieda G-koda priekšskatījums, un tas varēja pievienot to pašu punktu divreiz.</li>
+<li><strong>Labots:</strong> Record & Retrace logs varēja palikt ekrānā pēc aizvēršanas; drošais Z tagad pēc noklusējuma ir 5 mm, un darbi ar problēmām tiek bloķēti.</li>
+</ul>
+
+<h4>2026. gada 13. oktobris</h4>
+<ul>
+<li><strong>Jauns:</strong> dpCREATOR WebUI ir atsevišķs produkts, ko instalē platē no dpcreator.eu.</li>
+<li><strong>Labots:</strong> divas vienlaikus atvērtas WebUI cilnes vairs necīnās par savienojumu ar plati.</li>
+<li><strong>Jauns:</strong> brīdinājums, ja plates modulim nav 8 MB PSRAM, un ziņojums, kas paskaidro, kad pults priekšskatījumi apstājas, jo platei trūkst atmiņas.</li>
+</ul>

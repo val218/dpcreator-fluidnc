@@ -1,0 +1,82 @@
+<p>SmartTabUI ir dpCREATOR pults programmaparatūra: 2.8" skārienekrāns, rokrats ar AXIS un STEP pārslēgiem, ENABLE poga un E-stop, ar vienu kabeli uz kontrolieri. Šajā lapā aprakstīti ekrāni, pārvietošana un pults iestatījumi. Darbu izpildei, atjaunošanai, Z korekcijai un atritināšanai, kā arī Measure un Record šajā sadaļā ir atsevišķi raksti.</p>
+<div class="alert alert-info"><strong>Prasības:</strong> SmartTabUI pults un dpCREATOR WebUI darbojas ar <strong>dpCREATOR FluidNC programmaparatūru</strong> kontrolierī (bez maksas, instalē no <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Tās balstās uz komandām, ko pievieno šī programmaparatūra &ndash; priekšskatījumi, Prepare, Rewind, Z korekcija, darba atjaunošana, makro, Measure un Record &ndash; tāpēc standarta FluidNC netiek atbalstīts.</div>
+
+<h3>Startēšana</h3>
+<ul>
+  <li>Sāknēšanas ekrānā redzams dpCREATOR logotips, būvējuma numurs un 5 sekunžu josla. <strong>Turiet ENABLE, kamēr rit josla</strong>, lai atvērtu iestatījumus (Settings).</li>
+  <li>Pēc tam pults pieslēdzas kontrolierim. Kamēr kontrolieris neatbild, redzams <em>No connection</em>: pārbaudiet kabeli (cilne Term rāda, kas pienāk).</li>
+  <li><strong>Pults pārstartēšana:</strong> nospiediet E-stop un turiet ENABLE 3 sekundes.</li>
+</ul>
+
+<h3>Ekrāns</h3>
+<ul>
+  <li><strong>Galvene:</strong> mašīnas stāvoklis (Idle, Cycle, Hold, Jog, Alarm, Homing), <em>STP</em>, kamēr nospiests E-stop, notiekošā pārvietošana vai darba progress, un EN / TX / RX indikatori.</li>
+  <li><strong>DRO (pa kreisi):</strong> katras ass darba pozīcija. Ar AXIS pārslēgu izvēlētā ass ir izcelta savā krāsā, zem tās — solis (x1 / x10 / x100).</li>
+  <li><strong>Skats (pa labi):</strong> darba rīka ceļš ar cilnēm XY / XZ / YZ / 3D / PART (skatiet <em>PART skats</em> zemāk). Kamēr darbs izpildās, jau izgrieztā daļa ir zilganā krāsā un instruments ir atzīmēts. Ja darba nav, redzams mašīnas darba laukums.</li>
+  <li><strong>FEED / RAPID / SPND:</strong> pieskarieties vienam, tad grieziet rokratu, lai mainītu šo korekciju (smalki soļi pie x1, rupji pie x10 un x100). Pieskarieties vēlreiz vai atlaidiet ENABLE, lai atgrieztos pie pārvietošanas. SPND rāda <strong>LASER</strong>, kamēr izvēlētā vārpsta ir lāzers vai ielādēts lāzera darbs.</li>
+  <li><strong>Apakšējā josla:</strong> cilnes DRO, HOME, FILES, TERM un MACROS. Kamēr darbs izpildās, tā kļūst par <strong>Hold / Resume · Z adj · Abort</strong>.</li>
+</ul>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-dro-idle-v2.png" alt="Pults DRO ekrāns dīkstāvē" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-running-3d.png" alt="Pults izpilda darbu 3D skatā" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Pa kreisi: DRO ekrāns miera stāvoklī. Pa labi: izpildās 3D reljefs, līdz šim izgrieztais zilganā krāsā, progress zem skata.</p>
+<h3>Pārvietošana (jog)</h3>
+<ol>
+  <li>Izvēlieties asi ar AXIS pārslēgu (OFF = pārvietošana izslēgta).</li>
+  <li>Izvēlieties soli: <strong>x1 = 0.01 mm</strong>, <strong>x10 = 0.1 mm</strong>, <strong>x100 = 1 mm</strong> uz klikšķi.</li>
+  <li>Grieziet rokratu. Jo ātrāk griežat, jo ātrāk kustas; atlaižot kustība uzreiz apstājas.</li>
+</ol>
+<p>Vai ENABLE jātur, ir atkarīgs no iestatījuma <strong>P6 BTN</strong> (zemāk). Ja ENABLE vajadzīgs, bet netiek turēts, ap ekrānu redzams plāns sarkans rāmis; tas pazūd, kamēr turat ENABLE.</p>
+
+<h3>PART skats</h3>
+<p><strong>PART</strong> rāda detaļu, ko darbs izgatavo: rīka ceļu, izgrieztu blokā ar lodveida frēzi, apgaismotu un iekrāsotu pēc dziļuma. Darba laikā tas tiek izgriezts reāllaikā.</p>
+<ul>
+<li>Kad AXIS pārslēgs ir pozīcijā <strong>OFF</strong>, grieziet rokratu, lai pagrieztu bloku.</li>
+<li><strong>TOP</strong> (skatā) pārslēdz starp slīpu 3D bloku un ēnotu skatu no augšas.</li>
+<li><strong>Lāzera darbi</strong> tā vietā redzami kā apdegums uz saplākšņa: jo tumšāks, jo lielāka jauda. Tam vajadzīga kontroliera programmaparatūra, sākot ar būvējumu 3bbf865d, kas kopā ar priekšskatījumu sūta lāzera jaudu.</li>
+<li>Detalizācija atbilst priekšskatījumam, ko sūta kontrolieris: lielā failā smalkas detaļas izskatās maigākas nekā WebUI.</li>
+</ul>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-part-3d.png" alt="PART skats: darbs kā izgriezts bloks" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-part-top.png" alt="PART skats no augšas" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-part-running.png" alt="PART skats izgriež darba izpildes laikā" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-laser-running.png" alt="Lāzera darbs: apdegums PART skatā, korekciju lodziņā LASER" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Augšā: 3D reljefs pirms izpildes, slīpi un no augšas. Apakšā: reāllaikā izgriezts līdz 63%, un lāzera gravējums, kas tiek dedzināts, ar LASER trešajā lodziņā.</p>
+<h3>Cilnes</h3>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><strong>DRO</strong></td><td>Pozīcijas, korekcijas un rīka ceļa skats.</td></tr>
+    <tr><td><strong>HOME</strong></td><td>Home All (vispirms Z, tad X un Y) un atsevišķas asis; <strong>Probe</strong> (Z virsma, X/Y mala, stūris, caurums, izcilnis, instrumenta garums); darba nobīde G54–G59; Zero X / Y / Z / visas; Go to 0 (Z vispirms paceļas); Unlock un Park; gala slēdžu stāvokļi.</td></tr>
+    <tr><td><strong>FILES</strong></td><td>SD karte: atveriet mapes, <strong>Text</strong> faila lasīšanai, <strong>View</strong> tā rīka ceļa parādīšanai, <strong>Prepare</strong> tā ielādei izpildei (skatiet <em>Darba izpilde</em>).</td></tr>
+    <tr><td><strong>TERM</strong></td><td>Viss, ko saka kontrolieris (zaļā krāsā), jūsu komandas (zilganā krāsā), Soft Reset un ātrās komandas.</td></tr>
+    <tr><td><strong>MACROS</strong></td><td>Augšā vārpsta CW / CCW / Stop un dzesēšana, tad makro, kas WebUI atzīmēti "pultī". Katra poga rāda makro G-kodu; makro ar "vispirms jautāt" vajadzīgi divi pieskārieni.</td></tr>
+  </tbody>
+</table>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-home.png" alt="Cilne HOME" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-files.png" alt="Cilne FILES" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Cilnes HOME un FILES.</p>
+<h3>Zondēšana</h3>
+<ol>
+  <li>HOME → <strong>Probe</strong>, izvēlieties ciklu. Attēls rāda, kur novietot instrumentu, piem., <em>tool beside the edge, below the top</em>.</li>
+  <li>Izvēlieties malu vai stūri. Šajā lapā rokrats pārvieto asis, tāpēc instrumentu varat novietot tepat.</li>
+  <li><strong>Start:</strong> turiet ENABLE un pieskarieties divreiz. Zonde pieskaras divreiz (ātri, tad lēni), iestata darba nulli izvēlētajā WCS un atgriežas sākuma vietā.</li>
+</ol>
+<p>Zondes iestatījumi (plāksnes biezums, instrumenta diametrs, attālumi, padeves, atstarpes, WCS, instrumenta garuma mērītājs) ir tajā pašā izvēlnē.</p>
+
+<h3>Iestatījumi</h3>
+<p>Turiet ENABLE sāknēšanas joslas laikā. Grieziet rokratu, lai izvēlētos rindu, pieskarieties, lai to mainītu; <strong>Save & Boot</strong> saglabā iestatījumus un pārstartē.</p>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><strong>THEME</strong></td><td>Dark, Neutral vai Light.</td></tr>
+    <tr><td><strong>MACHINE</strong></td><td>CNC, nazis / plotteris vai lāzers.</td></tr>
+    <tr><td><strong>P6 BTN</strong></td><td>Ko dara ENABLE: <strong>Gate</strong> – jātur, lai pārvietotu un lietotu ekrānu (drošākais); <strong>Jog</strong> – jātur, lai pārvietotu, ekrāns darbojas arī bez tā; <strong>Touch</strong> un <strong>Off</strong> – nav vajadzīgs; <strong>Macro</strong> – nospiežot izpilda makro, kas izvēlēts P6 MACRO.</td></tr>
+    <tr><td><strong>DRO AXES</strong></td><td>XYZ, XYZA, XY vai XYYZ (divi Y motori).</td></tr>
+    <tr><td><strong>BRIGHT / VOL</strong></td><td>Ekrāna spilgtums, skaņas signāla skaļums (0 = bez skaņas; E-stop sirēna vienmēr ir skaļa).</td></tr>
+    <tr><td><strong>MAINT</strong></td><td>Apkopes atgādinājums pēc tik daudzām darba stundām; <em>Reset Maint</em> pēc apkopes.</td></tr>
+    <tr><td><strong>AREA, HOME</strong></td><td>Darba laukums un sākuma stūris, nolasīti no kontroliera config.yaml.</td></tr>
+    <tr><td><strong>LICENCE</strong></td><td>Reģistrēta vai nē, un šīs pults <strong>mikroshēmas ID</strong> (vajadzīgs atbalstam).</td></tr>
+  </tbody>
+</table>
+<p><strong>Inputs</strong> (iestatījumu apakšā) reāllaikā rāda katru slēdzi, rokratu, E-stop un pieskārienus – pirmā vieta, kur skatīties, ja kāds slēdzis šķietami nedarbojas. <strong>UART</strong> rāda savienojumu ar kontrolieri. Lai izietu, turiet E-stop 2 sekundes.</p>
+
+<h3>Skaņas</h3>
+<ul>
+  <li>Īss klikšķis: pieskārāties ekrāna pogai. Augošs signāls: ENABLE nospiests, zemāks signāls: atlaists.</li>
+  <li>Viens signāls, kad AXIS pārslēgs nostājas (augstāks uz ass, zemāks uz OFF), īss augsts signāls, kad mainās STEP pārslēgs.</li>
+  <li>Augsts signāls: punkts ir fiksēts (ENABLE dubultpieskāriens).</li>
+  <li>Divtoņu sirēna: 4 reizes pie trauksmes, 3 reizes pilnā skaļumā pie E-stop.</li>
+</ul>
+<p>Ja, nospiežot ENABLE, nav nekāda signāla, slēdžu bloks nav pieslēgts – pārbaudiet Settings → Inputs.</p>
+

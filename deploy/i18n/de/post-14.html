@@ -1,0 +1,11 @@
+<p>Führen Sie diese Schritte einmal bei einem neuen Board aus. Boards aus dem Shop sind bereits geflasht — beginnen Sie bei Schritt 2.</p>
+<ol>
+<li><strong>Neueste Firmware flashen</strong> (nur bei leerem Board oder großem Update): Seite <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> → Controller → <em>Flash latest via browser</em>. Verwenden Sie Chrome oder Edge.</li>
+<li><strong>Netzwerk verbinden.</strong> Stecken Sie ein Ethernet-Kabel in das Board. Eine Neuinstallation startet mit Ethernet und aktivem DHCP. Die IP finden Sie in Ihrem Router oder über USB mit <code>$Ethernet/Status</code>.</li>
+<li><strong>WebUI öffnen</strong> unter <code>http://fluidnc.local</code> oder <code>http://&lt;board-ip&gt;</code>.</li>
+<li><strong>Maschine in <code>config.yaml</code> einrichten.</strong> Die Firmware startet mit der Beispielkonfiguration für dpCREATOR R2/R3. Stellen Sie mindestens <code>steps_per_mm</code>, <code>max_travel_mm</code> und die Referenzfahrt-Richtung für jede Achse sowie Ihre Spindel ein. Bearbeiten Sie die Datei im Dateimanager der WebUI und starten Sie dann mit <code>$bye</code> neu.</li>
+<li><strong>Handbediengerät anschließen</strong> (optional). Die Kopfzeile der WebUI zeigt ein Pendant-Symbol, wenn es verbunden ist.</li>
+<li><strong>Bewegung sorgfältig prüfen.</strong> Verfahren Sie jede Achse ein kurzes Stück und prüfen Sie die Richtung. Lösen Sie jeden Endschalter von Hand aus, bevor Sie eine Referenzfahrt machen.</li>
+<li><strong>Referenzfahrt</strong> mit <code>$H</code> oder der Home-Taste, dann den Werkstück-Nullpunkt setzen.</li>
+</ol>
+<p><strong>Tipp:</strong> Geben Sie dem Board eine feste IP (statisch oder als DHCP-Reservierung im Router). Das Netzlaufwerk und gSender brauchen eine Adresse, die sich nicht ändert.</p>

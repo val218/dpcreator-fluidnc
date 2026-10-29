@@ -1,0 +1,43 @@
+<p>Jauna programmaparatūras instalācija jau startē ar <strong>ieslēgtu Ethernet un DHCP</strong>: iespraudiet kabeli un atrodiet IP adresi. Šī lapa noderēs, lai pārietu uz fiksētu IP adresi vai atgrieztos no Wi-Fi.</p>
+<h3>1. config.yaml jābūt Ethernet sadaļai</h3>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>spi:
+  miso_pin: gpio.13
+  mosi_pin: gpio.11
+  sck_pin: gpio.12
+
+ethernet:
+  cs_pin: gpio.14
+  int_pin: gpio.9        # NO_PIN if INT is not wired
+  rst_pin: NO_PIN
+  phy_type: w5500
+  phy_addr: 1
+  frequency_hz: 8000000  # safe on a bus shared with the SD card</code></pre>
+<p><strong>Svarīgi:</strong> ja <code>int_pin</code> ir iestatīts, bet INT patiesībā nav pieslēgts, savienojums izveidojas, taču neviena pakete nepienāk (DHCP neizdodas, ping beidzas ar noildzi). Tādā gadījumā iestatiet <code>int_pin: NO_PIN</code>.</p>
+<p>Bez sadaļas <code>ethernet:</code> plate pārslēdzas uz Wi-Fi, lai paliktu sasniedzama — jūsu saglabātajā tīklā vai savā <strong>FluidNC</strong> piekļuves punktā adresē <code>http://192.168.0.1</code>.</p>
+<h3>2. Izvēlieties DHCP vai fiksētu IP</h3>
+<p>Nosūtiet šīs komandas caur USB (seriālā konsole) pa vienai rindai.</p>
+<p><strong>Automātiski (DHCP):</strong></p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>$network/type=Ethernet
+$Ethernet/IPMode=DHCP
+$bye</code></pre>
+<p><strong>Fiksēta IP</strong> (ieteicams — izmantojiet brīvu adresi savā tīklā):</p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>$network/type=Ethernet
+$Ethernet/IPMode=Static
+$Ethernet/IP=192.168.10.50
+$Ethernet/Netmask=255.255.255.0
+$Ethernet/Gateway=192.168.10.1
+$bye</code></pre>
+<p>Pēc tam Wi-Fi ir izslēgts. Lai atgrieztos: caur USB <code>$network/type=WiFi</code> un tad <code>$bye</code>.</p>
+<h3>3. Pārbaudiet</h3>
+<p>Pēc pārstartēšanas <code>$Ethernet/Status</code> vai <code>$Startup/Show</code> jāparāda <em>Ethernet link up</em> un <em>Ethernet IP is …</em>. Tad no datora izpildiet <code>ping</code> uz šo IP un atveriet <code>http://&lt;ip&gt;</code> vai <code>http://fluidnc.local</code>.</p>
+<h3>4. gSender caur Ethernet</h3>
+<ol><li>gSender atveriet <strong>Config → Ethernet</strong>.</li>
+<li>Ievadiet plates IP adresi un portu <code>23</code> (vai savu <code>$Telnet/Port</code>), noklikšķiniet <strong>Apply Settings</strong>.</li>
+<li>Savienojuma izvēlnē izvēlieties ierakstu <strong>Ethernet</strong>, nevis COM portu.</li></ol>
+<p><strong>Neizmantojiet</strong> gSender režīmu <em>Remote Mode</em> — tas paredzēts paša datora adresei un dod kļūdu "Remote mode has been disabled".</p>
+<h3>Noderīgas komandas</h3>
+<table class="table table-bordered"><tbody>
+<tr><td><code>$Ethernet/Status</code></td><td>Savienojums, IP, maska, vārteja, MAC</td></tr>
+<tr><td><code>$Ethernet/Init</code></td><td>Palaist W5500 manuāli (testam)</td></tr>
+<tr><td><code>$network/type</code></td><td>WiFi vai Ethernet</td></tr>
+<tr><td><code>$Telnet/Port</code></td><td>Ports, kuram pieslēdzas gSender (pēc noklusējuma 23)</td></tr></tbody></table>

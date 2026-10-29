@@ -1,0 +1,22 @@
+<h3>Ierakstīšana</h3>
+<table class="table table-bordered"><thead><tr><th>Problēma</th><th>Risinājums</th></tr></thead><tbody>
+<tr><td>Nav seriālā porta, ko izvēlēties</td><td>Izmantojiet Chrome vai Edge, USB <em>datu</em> kabeli un citu USB portu. Aizveriet citas programmas, kas izmanto portu (gSender, seriālo monitoru).</td></tr>
+<tr><td>"Device not supported" / nevar pieslēgties</td><td>Pievienojot USB, turiet nospiestu pogu <strong>BOOT</strong>, lai ieietu sāknētāja režīmā, un mēģiniet vēlreiz. Pārbaudiet, vai izvēlējāties pareizo cilni (kontrolieris vai pults).</td></tr>
+<tr><td>Pārlūks lejupielādi sauc par bīstamu</td><td>Viltus trauksme nezināmam failam. Izvēlieties <em>Keep</em> / <em>Download anyway</em>.</td></tr></tbody></table>
+<h3>Tīkls</h3>
+<table class="table table-bordered"><thead><tr><th>Problēma</th><th>Risinājums</th></tr></thead><tbody>
+<tr><td><code>Ethernet PHY init failed</code></td><td>Trūkst sadaļas <code>spi:</code> vai <code>ethernet:</code>, nepareizi izvadi vai pieslēgums.</td></tr>
+<tr><td>Savienojums ir, bet IP 0.0.0.0, ping neizdodas</td><td>INT ir iestatīts, bet nav pieslēgts: iestatiet <code>int_pin: NO_PIN</code>. Vai arī tīklā nav DHCP servera.</td></tr>
+<tr><td>Statiska IP: "Destination host unreachable"</td><td>Plate un dators ir dažādos apakštīklos. Izmantojiet adresi jūsu datora apakštīklā.</td></tr>
+<tr><td>gSender: "Remote mode has been disabled"</td><td>Izmantojiet <strong>Config → Ethernet</strong>, nevis Remote Mode.</td></tr>
+<tr><td>gSender: nevar pieslēgties</td><td>IP/portam sadaļā Config → Ethernet jāsakrīt ar plati (<code>$Telnet/Port</code>, pēc noklusējuma 23). Noklikšķiniet Apply Settings.</td></tr>
+<tr><td>Plate Wi-Fi piekļuves punktā "FluidNC"</td><td>config.yaml nav sadaļas <code>ethernet:</code>, vai plate 3 reizes pēc kārtas avarēja. Atveriet <code>http://192.168.0.1</code> un augšupielādējiet pareizo konfigurāciju.</td></tr></tbody></table>
+<h3>Pults</h3>
+<table class="table table-bordered"><thead><tr><th>Problēma</th><th>Risinājums</th></tr></thead><tbody>
+<tr><td><code>$Pendant/Status</code> rāda <code>none</code></td><td>config.yaml nav sadaļas <code>uart_channel1</code>.</td></tr>
+<tr><td>Pultī nav ceļa vai ceļš ir nepareizs</td><td>Meklējiet WebUI konsolē <code>VizErr</code>; izveidojiet no jauna ar faila pogu <strong>.viz</strong>.</td></tr>
+<tr><td><code>RX overflow</code> / sajauktas ziņas pults terminālī</td><td>Kabelī pazūd baiti: izmantojiet īsāku vai ekranētu kabeli vai mazāku datu pārraides ātrumu (vienādu abās pusēs). <code>$Pendant/Debug</code> rāda skaitītājus.</td></tr>
+<tr><td>Pultī nav darba atjaunošanas</td><td>Kontroliera programmaparatūra ir vecāka par pults programmaparatūru. Ierakstiet abās.</td></tr></tbody></table>
+<h3>Avārijas</h3>
+<p>Ja WebUI rāda <em>Controller restarted after a crash</em>, nospiediet <strong>Copy details</strong> un nosūtiet tekstu mums, izmantojot <a href="index.php?route=information/contact">saziņas formu</a>.</p>
+<p>Problēma, iespējams, jau ir novērsta jaunākā versijā: skatiet <a href="index.php?route=journal3/blog/post&journal_blog_post_id=33">izmaiņu aprakstus un kļūdu labojumus</a>, tad atjauniniet no lapas <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>.</p>

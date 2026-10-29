@@ -1,0 +1,2218 @@
+<!--
+  DPCreator Firmware & Downloads Page - COMPLETE
+  Paste this entire content into Catalog → Information → Firmware & Downloads → Description (HTML mode)
+-->
+
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js"></script>
+
+<style>
+.dpc-fw { font-family: inherit; }
+.dpc-fw-tabs { display: flex; gap: 0; border-bottom: 1px solid #ddd; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.dpc-fw-tab {
+  padding: 10px 18px; font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1px solid transparent; border-bottom: none;
+  color: #666; background: none; border-radius: 5px 5px 0 0;
+  margin-bottom: -1px; transition: color .15s; line-height: 1;
+}
+.dpc-fw-tab:hover { color: #333; background: #f5f5f5; }
+.dpc-fw-tab.active { color: #185FA5; border-color: #ddd; border-bottom-color: #fff; background: #fff; }
+.dpc-fw-panel { display: none; }
+.dpc-fw-panel.active { display: block; }
+.dpc-fw-card {
+  background: #fff; border: 1px solid #e5e5e5;
+  border-radius: 8px; padding: 16px 20px; margin-bottom: 12px;
+}
+.dpc-fw-title { font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 0 0 6px; }
+.dpc-fw-meta { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.dpc-fw-badge {
+  display: inline-block; font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 99px; white-space: nowrap;
+}
+.dpc-fw-badge-free  { background: #E1F5EE; color: #085041; }
+.dpc-fw-badge-paid  { background: #FAEEDA; color: #633806; }
+.dpc-fw-badge-chip  { background: #E6F1FB; color: #0C447C; }
+.dpc-fw-badge-ver   { background: #F1EFE8; color: #444441; }
+.dpc-fw-badge-new   { background: #EEEDFE; color: #3C3489; }
+.dpc-fw-changelog {
+  font-size: 12px; color: #666; margin: 0 0 12px; line-height: 1.65;
+  border-left: 2px solid #e8e8e8; padding-left: 10px;
+}
+.dpc-fw-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.dpc-fw-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 500; padding: 7px 14px;
+  border-radius: 4px; border: none; cursor: pointer;
+  white-space: nowrap; text-decoration: none; line-height: 1;
+}
+.dpc-fw-btn-dl     { background: #185FA5; color: #fff; }
+.dpc-fw-btn-dl:hover { background: #0C447C; color: #fff; }
+.dpc-fw-btn-flash  { background: #0F6E56; color: #fff; }
+.dpc-fw-btn-flash:hover { background: #085041; color: #fff; }
+.dpc-fw-btn-upload { background: #534AB7; color: #fff; }
+.dpc-fw-btn-upload:hover { background: #3C3489; color: #fff; }
+.dpc-fw-btn-buy    { background: #BA7517; color: #fff; }
+.dpc-fw-btn-buy:hover { background: #854F0B; color: #fff; }
+.dpc-fw-btn-lock   { background: #f0f0f0; color: #aaa; cursor: not-allowed; }
+.dpc-fw-section    {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .07em; color: #aaa; margin: 1.25rem 0 .65rem;
+}
+.dpc-fw-divider    { border: none; border-top: 1px solid #f0f0f0; margin: 1rem 0; }
+.dpc-fw-notice     {
+  font-size: 12px; color: #888; background: #fafafa;
+  border-radius: 5px; padding: 8px 12px; margin-top: 10px; line-height: 1.5;
+}
+.dpc-fw-notice a   { color: #185FA5; }
+
+.dpc-modal-overlay {
+  display: none; position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.55); z-index: 99999;
+  align-items: center; justify-content: center;
+}
+.dpc-modal-overlay.active { display: flex; }
+.dpc-modal {
+  background: #fff; border-radius: 8px; padding: 28px 30px;
+  max-width: 480px; width: 92%; position: relative;
+  max-height: 90vh; overflow-y: auto;
+}
+.dpc-modal h4    { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+.dpc-modal-sub   { font-size: 12px; color: #888; margin: 0 0 18px; }
+.dpc-modal-close {
+  position: absolute; top: 10px; right: 14px;
+  background: none; border: none; font-size: 22px;
+  cursor: pointer; color: #bbb; line-height: 1;
+}
+.dpc-modal-close:hover { color: #333; }
+.dpc-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-bottom: 12px; font-size: 13px; line-height: 1.55;
+}
+.dpc-step-n {
+  min-width: 22px; height: 22px; border-radius: 50%;
+  background: #185FA5; color: #fff; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+}
+.dpc-step-n.ok { background: #0F6E56; }
+.dpc-modal-notice {
+  font-size: 12px; color: #999; margin-top: 14px;
+  padding-top: 12px; border-top: 1px solid #eee;
+}
+.dpc-modal-notice strong { color: #666; }
+.dpc-modal-notice a { color: #185FA5; }
+esp-web-install-button { display: block; margin-top: 6px; }
+esp-web-install-button button,
+esp-web-install-button [slot="activate"] {
+  background: #0F6E56; color: #fff; border: none;
+  padding: 10px 18px; border-radius: 4px;
+  font-size: 13px; font-weight: 500; cursor: pointer; width: 100%;
+}
+esp-web-install-button button:hover,
+esp-web-install-button [slot="activate"]:hover { background: #085041; }
+
+/* ===== Firmware & Downloads in the homepage style (dpx): graphite, Barlow, blue ===== */
+.dpc-fw-x .dpx-sec{padding:36px 0 64px}
+.dpc-fw-x .dpc-fw{font-family:'Barlow',Arial,sans-serif;font-size:15px;line-height:1.6;color:#e6e9ec}
+.dpc-fw-x .dpc-fw p{margin:0 0 10px}
+.dpc-fw-x .dpc-fw code{background:rgba(255,255,255,.07);color:#cfe3f5;padding:1px 5px;border-radius:2px;font-size:.92em}
+.dpc-fw-x .dpc-fw a{color:#5fb0ff}
+.dpc-fw-x .dpc-fw a:hover{color:#8fc4f5}
+.dpc-fw-x .dpc-fw strong{color:#fff}
+/* tabs: like the homepage machine-type tabs */
+.dpc-fw-x .dpc-fw-tabs{gap:8px;border-bottom:0;margin-bottom:22px}
+.dpc-fw-x .dpc-fw-tabs .dpc-fw-tab{padding:7px 14px;border:1.5px solid #3a4550;border-radius:2px;margin:0;font:600 16px 'Barlow Condensed',sans-serif;color:#cfd9e2;background:none;line-height:1.3}
+.dpc-fw-x .dpc-fw-tabs .dpc-fw-tab:hover{border-color:#2b8fe0;color:#fff;background:none}
+.dpc-fw-x .dpc-fw-tabs .dpc-fw-tab.active{background:#2b8fe0;border-color:#2b8fe0;color:#fff}
+/* cards: the dark plates of the homepage */
+.dpc-fw-x .dpc-fw-card{background:linear-gradient(180deg,#29313a 0%,#20272e 100%);border:1px solid #36404a;border-radius:6px;padding:22px 24px;margin-bottom:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05);color:#e6e9ec}
+.dpc-fw-x .dpc-fw-title{font:600 26px/1.15 'Barlow Condensed','Arial Narrow',sans-serif;color:#fff;margin:0 0 10px}
+.dpc-fw-x .dpc-fw-meta{gap:6px;margin-bottom:12px}
+.dpc-fw-x .dpc-fw-badge{font:600 14px/1.5 'Barlow Condensed',sans-serif;color:#9fb3c6;border:1px solid #46525e;background:rgba(0,0,0,.25);border-radius:2px;padding:0 7px}
+.dpc-fw-x .dpc-fw-badge-free{color:#7fd8b2;border-color:#2e6553}
+.dpc-fw-x .dpc-fw-badge-paid{color:#ffc46b;border-color:#6d5426}
+.dpc-fw-x .dpc-fw-badge-chip{color:#8fc4f5;border-color:#2c4f70}
+.dpc-fw-x .dpc-fw-changelog{font-size:15px;color:#a3b1be;border-left:2px solid #3a4550;padding-left:12px;margin:0 0 16px;line-height:1.6}
+.dpc-fw-x .dpc-fw-card > p:not([class]){color:#a3b1be;font-size:15px}
+/* buttons: dpx-btn */
+.dpc-fw-x .dpc-fw-btn,#dpc-flash-modal .dpc-fw-btn{font:600 17px/1.2 'Barlow Condensed',sans-serif;padding:10px 20px;border-radius:2px;gap:6px;text-decoration:none!important;transition:background .15s,border-color .15s,color .15s}
+.dpc-fw-x .dpc-fw-btn-flash,.dpc-fw-x .dpc-fw-btn-dl,.dpc-fw-x .dpc-fw-btn-upload{background:#2b8fe0;color:#fff!important;border:0}
+.dpc-fw-x .dpc-fw-btn-flash:hover,.dpc-fw-x .dpc-fw-btn-dl:hover,.dpc-fw-x .dpc-fw-btn-upload:hover{background:#1f74bd}
+.dpc-fw-x .dpc-fw-btn-ghost,.dpc-fw-x .dpc-fw-btn-buy,.dpc-fw-x #dpc-tools .dpct-quiet{background:none;color:#dbe6ef!important;border:1.5px solid #dbe6ef}
+.dpc-fw-x .dpc-fw-btn-ghost:hover,.dpc-fw-x .dpc-fw-btn-buy:hover,.dpc-fw-x #dpc-tools .dpct-quiet:hover{background:#2b8fe0;border-color:#2b8fe0;color:#fff!important}
+.dpc-fw-x .dpc-fw-btn-lock{background:#2d353d;color:#7d8b98!important;border:0}
+.dpc-fw-x .dpc-fw-btn:focus-visible,.dpc-fw-x .dpc-fw-tab:focus-visible{outline:3px solid #ffd24a;outline-offset:2px}
+/* notes and side help */
+.dpc-fw-x .dpc-fw-notice{background:rgba(0,0,0,.22);border:1px solid #36404a;color:#a9b7c4;font-size:14px;border-radius:3px;padding:10px 12px}
+.dpc-fw-x .dpc-fw-section{display:none}
+.dpc-fw-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
+@media (max-width:860px){.dpc-fw-grid{grid-template-columns:1fr}}
+.dpc-fw-aside{background:#161b20;border:1px solid #2a3139;border-radius:6px;padding:18px 20px;font-size:14px;line-height:1.6;color:#a9b7c4}
+.dpc-fw-aside h5{font:600 20px 'Barlow Condensed',sans-serif;margin:0 0 10px;color:#fff}
+.dpc-fw-aside ol{margin:0;padding-left:18px}
+.dpc-fw-aside li{margin-bottom:6px}
+.dpc-fw-aside li::marker{color:#5fb0ff;font-weight:600}
+.dpc-fw-aside p{margin:10px 0 0!important;font-size:13px;color:#7f90a0}
+.dpc-fw-badge:empty{display:none}
+/* WebUI installer bits that had light inline colours */
+.dpc-fw-x #dpcw-step{color:#fff}
+.dpc-fw-x #dpcw-progress > div:last-child{background:#2d353d!important}
+.dpc-fw-x #dpcw-bar{background:#2b8fe0!important}
+.dpc-fw-x #dpcw-log{color:#a9b7c4;background:#161b20;padding:8px;border-radius:3px}
+.dpc-fw-x #dpcw-list button{color:#a9b7c4!important;background:none;border:1px solid #46525e}
+/* Board tools on dark */
+.dpc-fw-x #dpc-tools .dpct-status{color:#a9b7c4}
+.dpc-fw-x #dpc-tools .dpct-tabs{border-bottom-color:#36404a}
+.dpc-fw-x #dpc-tools .dpct-tab{color:#a9b7c4;font:600 17px 'Barlow Condensed',sans-serif}
+.dpc-fw-x #dpc-tools .dpct-tab[aria-selected=true]{border-bottom-color:#2b8fe0;color:#fff}
+.dpc-fw-x #dpc-tools .dpct-out{background:#0f1419;border:1px solid #2a3139;color:#d6e2ec}
+.dpc-fw-x #dpc-tools .dpct-input,.dpc-fw-x #dpc-tools .dpct-field input,.dpc-fw-x #dpc-tools .dpct-field select,.dpc-fw-x #dpc-tools .dpct-etext{background:#11161b;border:1px solid #3a4550;color:#e6e9ec;border-radius:2px}
+.dpc-fw-x #dpc-tools .dpct-chip{background:#20272e;border:1px solid #3a4550;color:#cfd9e2;border-radius:2px}
+.dpc-fw-x #dpc-tools .dpct-chip:hover{border-color:#2b8fe0;color:#fff;background:#20272e}
+.dpc-fw-x #dpc-tools .dpct-danger{color:#ff8a82;border-color:#6b3330}
+.dpc-fw-x #dpc-tools .dpct-muted,.dpc-fw-x #dpc-tools .dpct-table th{color:#7f90a0}
+.dpc-fw-x #dpc-tools .dpct-table td,.dpc-fw-x #dpc-tools .dpct-table th{border-bottom-color:#2a3139}
+.dpc-fw-x #dpc-tools .dpct-name,.dpc-fw-x #dpc-tools .dpct-acts button,.dpc-fw-x #dpc-tools .dpct-path a{color:#5fb0ff}
+.dpc-fw-x #dpc-tools .dpct-acts button.del{color:#ff8a82}
+.dpc-fw-x #dpc-tools .dpct-prog{background:#2d353d}
+.dpc-fw-x #dpc-tools .dpct-prog div{background:#2b8fe0}
+.dpc-fw-x #dpc-tools .dpct-editor,.dpc-fw-x #dpc-tools fieldset{border-color:#36404a}
+.dpc-fw-x #dpc-tools legend{color:#fff;font:600 18px 'Barlow Condensed',sans-serif}
+.dpc-fw-x #dpc-tools .dpct-warn{background:#3a1d1c;color:#ffb3ad;border-color:#6b3330}
+/* flash modal */
+#dpc-flash-modal .dpc-modal{background:#20272e;border:1px solid #36404a;color:#e6e9ec;font-family:'Barlow',Arial,sans-serif;border-radius:6px}
+#dpc-flash-modal .dpc-modal h4{font:600 24px 'Barlow Condensed',sans-serif;color:#fff}
+#dpc-flash-modal .dpc-modal-sub,#dpc-flash-modal .dpc-modal-notice{color:#a9b7c4;border-top-color:#36404a}
+#dpc-flash-modal .dpc-modal-notice strong{color:#fff}
+#dpc-flash-modal .dpc-step-n{background:#2b8fe0}
+#dpc-flash-modal .dpc-modal-close{color:#7f90a0}
+esp-web-install-button button,esp-web-install-button [slot="activate"]{background:#2b8fe0!important;border-radius:2px!important;font:600 18px 'Barlow Condensed',sans-serif!important}
+.dpc-fw-x{margin:-20px 0}
+</style>
+
+<div class="dpx dpc-fw-x"><section class="dpx-sec dpx-light"><div class="dpx-wrap">
+<div class="dpc-fw">
+  <div class="dpc-fw-tabs">
+    <button class="dpc-fw-tab active" onclick="dpcTab(this,'dpc-ctrl')">Controller-Firmware</button>
+    <button class="dpc-fw-tab" onclick="dpcTab(this,'dpc-pendant')">Pendant-Firmware</button>
+    <button class="dpc-fw-tab" onclick="dpcTab(this,'dpc-webui')">WebUI</button>
+    <button class="dpc-fw-tab" onclick="dpcTab(this,'dpc-studio')">Studio</button>
+    <button class="dpc-fw-tab" onclick="dpcTab(this,'dpc-motion')">Motion</button>
+    <button class="dpc-fw-tab" onclick="dpcTab(this,'dpc-3d')">3D-Druckdateien</button>
+    <button class="dpc-fw-tab" onclick="dpcTab(this,'dpc-tools')">Platinen-Tools</button>
+  </div>
+
+  <!-- CONTROLLER FIRMWARE -->
+  <div id="dpc-ctrl" class="dpc-fw-panel active">
+    <div class="dpc-fw-grid">
+      <div class="dpc-fw-card">
+        <p class="dpc-fw-title">dpCREATOR Controller-Firmware</p>
+        <div class="dpc-fw-meta">
+          <span class="dpc-fw-badge dpc-fw-badge-free">Kostenlos</span>
+          <span class="dpc-fw-badge dpc-fw-badge-chip">ESP32-S3 oder ESP32 WROOM-32</span>
+          <span class="dpc-fw-badge dpc-fw-badge-ver dpc-fw-ver" data-fw="controller">build 5b069b62 · 2026-10-17</span>
+        </div>
+        <p class="dpc-fw-changelog">FluidNC 4.1.1 mit W5500-Ethernet, der neueste Build, automatisch aktualisiert. Beim Flashen wird ein vollständiges Image geschrieben, das <strong>config.yaml ersetzt</strong>. Die folgenden Schritte erhalten Ihre Maschinenkonfiguration: Sie wird zuerst geprüft und nach dem Flashen zurückgeschrieben.</p>
+        <div id="dpcs-flow" data-fw="controller" data-fw-manifest="https://dpcreator.eu/fw.php?fw=controller&amp;f=manifest" data-name="dpCREATOR controller firmware" data-fw-bin="https://dpcreator.eu/fw.php?fw=controller&amp;f=bin"></div>
+        <p class="dpc-fw-notice">ESP32-S3-Platinen brauchen ein Modul mit 8 MB PSRAM (N8R8, N16R8 oder N32R8V). ESP32-WROOM-32-Platinen erhalten einen eigenen Build; ihre Apps laufen von der SD-Karte. <a href="#" onclick="dpcTab(document.querySelector('[onclick*=dpc-tools]'),'dpc-tools');return false">Platine prüfen</a></p>
+      </div>
+      <aside class="dpc-fw-aside">
+        <h5>So funktioniert es</h5>
+        <ol>
+          <li>Verwenden Sie Chrome oder Edge auf einem Computer.</li>
+          <li>Wählen Sie Ihre Maschinenkonfiguration: Ihre <code>config.yaml</code>, den Builder oder die auf der Platine.</li>
+          <li>Verbinden Sie den Controller per USB und flashen Sie.</li>
+          <li>Die Seite schreibt <code>config.yaml</code> zurück, startet die Platine neu und prüft ihr Boot-Log.</li>
+          <li>Die angehakten Apps (WebUI, Studio, Motion) werden direkt danach installiert.</li>
+          <li>Führen Sie die Prüfungen für den ersten Lauf an der Maschine durch.</li>
+        </ol>
+        <p>Port nicht aufgeführt? Halten Sie BOOT gedrückt, während Sie das USB-Kabel einstecken.</p>
+        <p>Sie brauchen eine Konfiguration für eine neue Maschine? Verwenden Sie den <a href="/machine-builder">Machine Builder</a>.</p>
+      </aside>
+    </div>
+  </div>
+
+  <!-- PENDANT FIRMWARE -->
+  <div id="dpc-pendant" class="dpc-fw-panel">
+    <div class="dpc-fw-grid">
+      <div class="dpc-fw-card">
+        <p class="dpc-fw-title">SmartTabUI-Firmware für das Handbediengerät</p>
+        <div class="dpc-fw-meta">
+          <span class="dpc-fw-badge dpc-fw-badge-paid">€49.99 Lizenz</span>
+          <span class="dpc-fw-badge dpc-fw-badge-chip">ESP32 · 2,8"-Touchscreen</span>
+          <span class="dpc-fw-badge dpc-fw-badge-ver dpc-fw-ver" data-fw="pendant">build a02da6e · 2026-10-16</span>
+        </div>
+        <p class="dpc-fw-changelog">Der neueste Build für das Handbediengerät, automatisch aktualisiert. Wird direkt von dieser Seite installiert, ohne Download. Ein Handbediengerät wird bei der ersten Installation mit einer Lizenz anhand seiner Chip-ID registriert; registrierte Handbediengeräte erhalten Updates von jedem Konto aus. Ihre Einstellungen am Handbediengerät bleiben erhalten.</p>
+        <div id="dpc-pendant-flash" data-compact="1"></div>
+        <script type="module" src="/fw-flash.js"></script>
+        <div class="dpc-fw-actions">
+          <a href="https://dpcreator.eu/index.php?route=product/product&amp;product_id=377" class="dpc-fw-btn dpc-fw-btn-ghost">Details zur Lizenz</a>
+        </div>
+      </div>
+      <aside class="dpc-fw-aside">
+        <h5>So flashen Sie</h5>
+        <ol>
+          <li>Verwenden Sie Chrome oder Edge auf einem Computer.</li>
+          <li>Ziehen Sie das Controller-Kabel vom Handbediengerät ab.</li>
+          <li>Verbinden Sie das Handbediengerät per USB, klicken Sie auf <strong>Connect and install</strong> und wählen Sie seinen Port.</li>
+          <li>Warten Sie auf <strong>Done</strong>: Das Handbediengerät startet von selbst neu.</li>
+          <li>Stecken Sie das Controller-Kabel wieder ein.</li>
+        </ol>
+      </aside>
+    </div>
+  </div>
+
+  <!-- WEBUI -->
+  <div id="dpc-webui" class="dpc-fw-panel">
+  <div class="dpc-fw-card">
+    <p class="dpc-fw-title">dpCREATOR WebUI</p>
+    <div class="dpc-fw-meta">
+      <span class="dpc-fw-badge dpc-fw-badge-paid">€19.99</span>
+      <span class="dpc-fw-badge dpc-fw-badge-free">Kostenlos zu jeder dpCREATOR Platine und jedem SmartTabUI-Handbediengerät</span>
+      <span class="dpc-fw-badge dpc-fw-badge-ver" id="dpcw-ver">build 7eff30b · 2026-10-17</span>
+    </div>
+    <p class="dpc-fw-changelog">3D-Werkzeugbahnansicht mit Fortschritt, Job-Wiederaufnahme, Live-Z-Korrektur, Zurückfahren, Start ab Zeile, Job-Historie und Dateimanager, auf PC, Tablet oder Smartphone. Wird von dieser Seite per USB auf Ihrer Platine installiert; eine Lizenz gilt für 2 Platinen.</p>
+
+    <div id="dpcw-state" class="dpc-fw-notice">WebUI-Lizenz aktiv.</div>
+
+    <div id="dpcw-boards" style="margin-top: 10px;">
+      <p style="font-size:13px;margin:0 0 6px"><strong>Ihre Platinen</strong> <span id="dpcw-count">(1 von 2)</span></p>
+      <ul id="dpcw-list" style="font-size:13px;margin:0 0 6px;padding-left:18px"><li>Platine …2F9014 <span style="color:#999">hinzugefügt 2026-10-13, letzte Installation 2026-10-17</span> <button type="button" class="dpc-fw-btn dpc-fw-btn-lock" style="cursor: pointer; color: rgb(102, 102, 102); padding: 3px 8px;">Entfernen</button></li></ul>
+      <p id="dpcw-release-note" class="dpc-fw-notice" style="display:none"></p>
+    </div>
+
+    <div id="dpcw-go" style="margin-top: 12px;">
+      <ol style="font-size:13px;line-height:1.6;padding-left:18px;margin:0 0 10px">
+        <li>Verwenden Sie <strong>Chrome oder Edge auf einem Computer</strong>. Schließen Sie gSender, ein Terminal oder alles andere, was den USB-Port der Platine nutzt.</li>
+        <li>Verbinden Sie den Controller per USB-Kabel mit dem Computer. Die Maschine muss im Ruhezustand (Idle) sein.</li>
+        <li>Klicken Sie auf <strong>Auf meiner Platine installieren</strong> und wählen Sie den Port der Platine.</li>
+      </ol>
+      <div class="dpc-fw-actions">
+        <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" id="dpcw-install">⚡&nbsp; Auf meiner Platine installieren</button>
+      </div>
+      <div id="dpcw-progress" style="display:none;margin-top:12px">
+        <div id="dpcw-step" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
+        <div style="height:6px;background:#eee;border-radius:3px;overflow:hidden"><div id="dpcw-bar" style="height:6px;width:0;background:#0F6E56;transition:width .2s"></div></div>
+      </div>
+      <div id="dpcw-result" class="dpc-fw-notice" style="display:none"></div>
+      <details style="margin-top:8px;font-size:12px;color:#888"><summary>Details</summary><pre id="dpcw-log" style="max-height:200px;overflow:auto;font-size:11px;white-space:pre-wrap"></pre></details>
+    </div>
+
+    <p class="dpc-fw-notice">Erfordert die kostenlose <a href="index.php?route=product/product&amp;product_id=379">dpCREATOR FluidNC-Firmware</a>, einen Build ab Oktober 2026 (er meldet die ID der Platine). Wenn Sie die komplette Controller-Firmware (Merged Image) flashen, kommt die Standardseite von FluidNC zurück: Installieren Sie die WebUI danach erneut, dabei wird kein weiterer Platinenplatz verbraucht. Die Standardseite bleibt als <strong>Classic UI</strong> auf der Platine.</p>
+  </div>
+
+  <div class="dpc-fw-card">
+    <p class="dpc-fw-title">Standard-WebUI von FluidNC</p>
+    <div class="dpc-fw-meta"><span class="dpc-fw-badge dpc-fw-badge-free">Kostenlos</span></div>
+    <p class="dpc-fw-changelog">Die Standardseite von FluidNC: DRO, Joggen, Dateien, Konsole und Einstellungen. Sie ist in der kostenlosen Controller-Firmware enthalten, nichts zu installieren.</p>
+  </div>
+</div>
+
+  <!-- STUDIO -->
+  <div id="dpc-studio" class="dpc-fw-panel">
+  <div class="dpc-fw-card">
+    <p class="dpc-fw-title">dpCREATOR Studio Basic – entwerfen und G-Code erzeugen</p>
+    <div class="dpc-fw-meta">
+      <span class="dpc-fw-badge dpc-fw-badge-free">Kostenlos</span>
+      <span class="dpc-fw-badge dpc-fw-badge-chip">Jeder FluidNC-Controller</span>
+      <span class="dpc-fw-badge dpc-fw-badge-ver dpcs-ver"></span>
+    </div>
+    <p class="dpc-fw-changelog">Zeichnen oder importieren (SVG, DXF, PDF, Bilder), festlegen, wie jede Form gefräst wird, auf virtuellem Material prüfen und den G-Code für Ihre Fräse oder Ihren Laser erzeugen.</p>
+    <p class="dpc-fw-changelog"><strong>Die Browser-Version funktioniert mit jedem FluidNC-Controller</strong> – Standard-FluidNC, jede Platine, jede WebUI. Öffnen, Design erstellen, die <code>.nc</code>-Datei herunterladen und wie gewohnt ausführen. Kein Konto, nichts zu installieren.</p>
+    <p style="margin:10px 0 0"><a class="dpc-fw-btn dpc-fw-btn-flash" href="/studio/" target="_blank" rel="noopener" style="text-decoration:none">Studio im Browser öffnen</a>
+      &nbsp; <a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=34" style="font-size:13px">So funktioniert Studio</a></p>
+  </div>
+
+  <div class="dpc-fw-notice" style="margin:0 0 12px;background:rgba(38,172,255,.10);border:1px solid rgba(38,172,255,.35);color:inherit;border-radius:8px;padding:12px 16px;font-size:13px;line-height:1.55">
+    <strong style="color:#8fd3ff">Empfohlen: Studio auf dem Controller installieren.</strong> Die Browser-Version hängt von Ihrer Internetverbindung und vom Browser ab: Eine sichere Website darf nicht mit einer Maschine in Ihrem Netzwerk kommunizieren, also laden Sie jede Datei herunter und wieder hoch. Auf dem Controller installiert (jedes FluidNC 4.x), läuft Studio von der Maschine selbst – es funktioniert ohne Internet, läuft weiter, auch wenn dpcreator.eu nicht erreichbar ist, und <strong style="color:#8fd3ff">Send</strong> legt den Job direkt auf die SD-Karte. Mit der dpCREATOR-Firmware kommt der Job außerdem vorbereitet in der WebUI und am Handbediengerät an, bereit für Run.
+  </div>
+
+  <div class="dpc-fw-card" id="dpcs-card">
+    <p class="dpc-fw-title">Studio auf Ihrem Controller installieren</p>
+    <div class="dpc-fw-meta">
+      <span class="dpc-fw-badge dpc-fw-badge-free">Empfohlen</span>
+      <span class="dpc-fw-badge dpc-fw-badge-free">Kostenlos mit Konto</span>
+      <span class="dpc-fw-badge dpc-fw-badge-chip">Jedes FluidNC 4.x</span>
+    </div>
+    <p class="dpc-fw-changelog">
+      Studio wird neben die WebUI in den Flash des Controllers kopiert und funktioniert dann ohne Internet.
+    </p>
+    <ul class="dpc-fw-changelog" style="margin:0 0 8px;padding-left:18px">
+      <li><strong>dpCREATOR-Firmware:</strong> öffnet sich unter <code>http://&lt;your board&gt;/studio.html</code> oder über die Schaltfläche <strong>Studio</strong> in der dpCREATOR WebUI. <strong>Send</strong> legt den Job auf die SD-Karte, vorbereitet in der WebUI und am Handbediengerät, bereit für Run.</li>
+      <li><strong>Standard-FluidNC 4.x:</strong> öffnet sich unter <code>http://&lt;your board&gt;/flash/studio.html</code>. <strong>Send</strong> legt die Datei auf die SD-Karte; starten Sie sie aus der Dateiliste Ihrer WebUI.</li>
+    </ul>
+    <p class="dpc-fw-changelog" style="font-size:12px;color:#888">
+      Erfordert FluidNC 4.0 oder neuer (Standard oder dpCREATOR) und etwa <strong>500 KB freien Platz</strong> im Flash. Der Installer prüft die Firmware, den Ruhezustand der Maschine und den freien Platz, bevor er etwas schreibt.
+      <a href="index.php?route=journal3/blog/post&amp;journal_blog_post_id=35">Installationsanleitung</a>
+    </p>
+    <div id="dpcs-state" class="dpc-fw-notice">Ihr Konto wird geprüft…</div>
+    <div id="dpcs-go" style="margin-top:12px;display:none">
+      <ol style="font-size:13px;margin:0 0 10px;padding-left:18px">
+        <li>Verbinden Sie den Controller per USB-Kabel mit diesem Computer. Die Maschine muss im Ruhezustand (Idle) sein.</li>
+        <li>Klicken Sie auf die Schaltfläche und wählen Sie den seriellen Port des Controllers.</li>
+      </ol>
+      <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" id="dpcs-install">⚡&nbsp; Studio auf meinem Controller installieren</button>
+      <div id="dpcs-progress" style="display:none;margin-top:12px">
+        <div id="dpcs-step" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
+        <div style="height:6px;background:#eee;border-radius:3px;overflow:hidden"><div id="dpcs-bar" style="height:6px;width:0;background:#0F6E56;transition:width .2s"></div></div>
+      </div>
+      <div id="dpcs-result" class="dpc-fw-notice" style="display:none"></div>
+      <details style="margin-top:8px;font-size:12px;color:#888"><summary>Details</summary><pre id="dpcs-log" style="max-height:200px;overflow:auto;font-size:11px;white-space:pre-wrap"></pre></details>
+    </div>
+  </div>
+  </div>
+
+<script>
+/* dpCREATOR WebUI installer: puts the licensed WebUI on a board over USB.
+ *
+ * Runs on the dpcreator.eu Flash Firmware page (Chrome or Edge on a computer:
+ * Web Serial). Steps:
+ *   1. open the board's USB serial port, ask $Board/ID and the machine state
+ *   2. POST the chip ID to /webui.php?f=install -> the page licensed to it
+ *   3. $Xmodem/Receive=/localfs/webui.tmp and send it (XModem-1K, CRC-16)
+ *   4. check the size the board reports, keep the stock page as legacy.html.gz
+ *      (Classic UI), and rename webui.tmp to index.html.gz
+ * Nothing is deleted before the new page is safely on the board.
+ */
+(function (root) {
+  "use strict";
+
+  const SOH = 0x01, STX = 0x02, EOT = 0x04, ACK = 0x06, NAK = 0x15, CAN = 0x18, CTRLZ = 0x1a;
+  const TMP = "/localfs/webui.tmp", INDEX = "/localfs/index.html.gz", LEGACY = "/localfs/legacy.html.gz";
+
+  function crc16(buf, off, len) {
+    let crc = 0;
+    for (let i = off; i < off + len; i++) {
+      crc ^= buf[i] << 8;
+      for (let j = 0; j < 8; j++) crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+    }
+    return crc;
+  }
+
+  /** Byte stream from the board with line and raw readers. `port` has
+   *  read() -> Promise<Uint8Array|null> and write(Uint8Array) -> Promise. */
+  function Link(port, log) {
+    const q = [];          // received bytes not yet consumed
+    let waiters = [];
+    let closed = false;
+    let lineBuf = "";
+    const lines = [];       // complete text lines (only in text mode)
+    let raw = false;
+
+    (async () => {
+      try {
+        for (;;) {
+          const chunk = await port.read();
+          if (!chunk) break;
+          if (raw) {
+            for (const b of chunk) q.push(b);
+          } else {
+            for (const b of chunk) {
+              if (b === 10) { lines.push(lineBuf.replace(/\r$/, "")); log && log("< " + lines[lines.length - 1]); lineBuf = ""; }
+              else lineBuf += String.fromCharCode(b);
+            }
+          }
+          const w = waiters; waiters = []; w.forEach((f) => f());
+        }
+      } catch (e) { /* port closed */ }
+      closed = true;
+      const w = waiters; waiters = []; w.forEach((f) => f());
+    })();
+
+    function wait(ms) {
+      return new Promise((res) => {
+        const t = setTimeout(() => { waiters = waiters.filter((x) => x !== done); res(false); }, ms);
+        function done() { clearTimeout(t); res(true); }
+        waiters.push(done);
+      });
+    }
+
+    return {
+      write: (bytes) => port.write(bytes),
+      async send(text) { log && log("> " + text); await port.write(new TextEncoder().encode(text + "\n")); },
+      setRaw(on) {
+        raw = on;
+        if (on) { q.length = 0; for (const c of lineBuf) q.push(c.charCodeAt(0)); lineBuf = ""; return; }
+        // back to text: bytes that arrived after the last raw read are text
+        for (const b of q.splice(0)) {
+          if (b === 10) { lines.push(lineBuf.replace(/\r$/, "")); log && log("< " + lines[lines.length - 1]); lineBuf = ""; }
+          else lineBuf += String.fromCharCode(b);
+        }
+      },
+      /** next raw byte, or -1 after ms */
+      async byte(ms) {
+        const end = Date.now() + ms;
+        while (!q.length) {
+          if (closed) return -1;
+          const left = end - Date.now();
+          if (left <= 0 || !(await wait(left))) { if (!q.length) return -1; }
+        }
+        return q.shift();
+      },
+      /** first line matching re (lines before it are dropped), or null after ms */
+      async line(re, ms) {
+        const end = Date.now() + ms;
+        for (;;) {
+          while (lines.length) { const l = lines.shift(); const m = re.exec(l); if (m) return m; }
+          if (closed) return null;
+          const left = end - Date.now();
+          if (left <= 0 || !(await wait(left))) { if (!lines.length) return null; }
+        }
+      },
+      drain() { lines.length = 0; q.length = 0; },
+      get closed() { return closed; },
+    };
+  }
+
+  /** Send one command and wait for ok / error:N. Returns {ok, lines, error}. */
+  async function command(link, cmd, ms = 4000) {
+    link.drain();
+    await link.send(cmd);
+    const got = [];
+    const end = Date.now() + ms;
+    for (;;) {
+      const m = await link.line(/^.*$/, Math.max(1, end - Date.now()));
+      if (!m) return { ok: false, lines: got, error: "timeout" };
+      const l = m[0];
+      if (l === "ok") return { ok: true, lines: got };
+      if (/^error:/.test(l)) return { ok: false, lines: got, error: l };
+      if (l.startsWith("<")) continue;   // status report
+      got.push(l);
+    }
+  }
+
+  /** XModem-1K/CRC sender for FluidNC's xmodemReceive. */
+  async function xmodemSend(link, data, progress) {
+    // The board waits 1 s, then sends 'C' every 2 s (16 tries). Log lines can
+    // also contain a 'C', so accept it only at the start of a line.
+    link.setRaw(true);
+    let prev = 10, start = false;
+    const end = Date.now() + 40000;
+    while (Date.now() < end) {
+      const c = await link.byte(end - Date.now());
+      if (c < 0) break;
+      if (c === 0x43 && (prev === 10 || prev === 13 || prev === 0x43)) { start = true; break; }
+      if (c === CAN) throw new Error("The board refused the file (cannot open it).");
+      prev = c;
+    }
+    if (!start) throw new Error("The board did not start receiving.");
+
+    const blocks = Math.ceil(data.length / 1024);
+    const pkt = new Uint8Array(1029);
+    for (let n = 0; n < blocks; n++) {
+      pkt[0] = STX;
+      pkt[1] = (n + 1) & 0xff;
+      pkt[2] = 0xff - pkt[1];
+      const chunk = data.subarray(n * 1024, n * 1024 + 1024);
+      pkt.fill(CTRLZ, 3, 1027);
+      pkt.set(chunk, 3);
+      const crc = crc16(pkt, 3, 1024);
+      pkt[1027] = crc >> 8;
+      pkt[1028] = crc & 0xff;
+      let sent = false;
+      for (let tries = 0; tries < 10 && !sent; tries++) {
+        await link.write(pkt);
+        for (;;) {
+          const r = await link.byte(5000);
+          if (r === ACK) { sent = true; break; }
+          if (r === NAK || r < 0) break;            // send again
+          if (r === CAN) {
+            const r2 = await link.byte(1000);
+            if (r2 === CAN) throw new Error("The board cancelled the transfer (not enough space?).");
+          }
+          // anything else (a stray 'C', log text) is ignored
+        }
+      }
+      if (!sent) throw new Error("Transfer failed at block " + (n + 1) + " of " + blocks + ".");
+      progress && progress((n + 1) / blocks);
+    }
+    for (let tries = 0; tries < 10; tries++) {
+      await link.write(new Uint8Array([EOT]));
+      const r = await link.byte(5000);
+      if (r === ACK) { link.setRaw(false); return; }
+      if (r === CAN) throw new Error("The board cancelled the transfer (not enough space?).");
+    }
+    throw new Error("The board did not confirm the end of the transfer.");
+  }
+
+  /** The whole install. `api` = {fetchFile(boardId) -> {bytes, sha256, version}}, `ui` = callbacks. */
+  async function install(port, api, ui) {
+    const log = ui.log;
+    const link = Link(port, log);
+    // The board may print its startup log when the port opens.
+    await new Promise((r) => setTimeout(r, 600));
+    link.drain();
+
+    ui.step("Reading the board");
+    // Wait for the ID line itself (an "ok" left over from earlier input must
+    // not count as the answer); ask twice in case the board was still starting.
+    let idm = null;
+    for (let i = 0; i < 2 && !idm; i++) {
+      link.drain();
+      await link.send("$Board/ID");
+      idm = await link.line(/\[MSG:BoardID:([0-9A-F]{12}):api=(\d+)\]/, 3000);
+    }
+    // Newer firmware adds [MSG:BoardMem:psram=<KB>:ok|bad:<why>] before the ok.
+    let mem = null;
+    if (idm) {
+      const m = await link.line(/\[MSG:BoardMem:psram=(\d+):(ok|bad)(?::([^\]]*))?\]|^ok$/, 1000);
+      if (m && m[2]) { mem = m; await link.line(/^ok$/, 1000); }
+    }
+    if (!idm) {
+      throw new Error("This board's firmware does not report its ID. Update the controller firmware first " +
+        "(Controller firmware tab), then install the WebUI.");
+    }
+    if (mem && mem[2] === "bad") {
+      // Not installed, and no licence slot used: the board would run out of
+      // memory during jobs.
+      throw new Error("This board's ESP32-S3 module is not supported: " + (mem[3] || "no PSRAM found.") +
+        " The WebUI was not installed and none of your board licences was used.");
+    }
+    const board = idm[1];
+    ui.board(board);
+
+    link.drain();
+    await link.write(new Uint8Array([0x3f]));   // '?': status report
+    const st = await link.line(/^<([A-Za-z]+)/, 3000);
+    if (st && !/^(Idle|Alarm)$/.test(st[1])) throw new Error("The machine is " + st[1] + ". Stop the job and try again when it is Idle.");
+
+    ui.step("Getting the WebUI licensed to this board");
+    const file = await api.fetchFile(board);
+    const bytes = file.bytes;
+    if (bytes[bytes.length - 1] === CTRLZ) throw new Error("Unexpected file from the shop, please try again.");
+
+    // free space check is done by the board while receiving
+    ui.step("Sending the WebUI to the board");
+    const list0 = await command(link, "$LocalFS/List", 5000);
+    const names = (list0.lines || []).map((l) => (/\[FILE:\s*([^|\]]+)\|SIZE:(\d+)/.exec(l) || [])[1]).filter(Boolean).map((s) => s.trim());
+    if (names.includes("webui.tmp")) await command(link, "$LocalFS/Delete=" + TMP, 4000);
+
+    link.drain();
+    await link.send("$Xmodem/Receive=" + TMP);
+    await xmodemSend(link, bytes, ui.progress);
+    const done = await link.line(/Received (\d+) bytes|Reception failed.*|^error:.*/, 8000);
+    if (!done || !done[1]) throw new Error("The board did not store the file" + (done ? ": " + done[0] : "."));
+    if (+done[1] !== bytes.length) {
+      await command(link, "$LocalFS/Delete=" + TMP, 4000);
+      throw new Error("The board stored " + done[1] + " of " + bytes.length + " bytes. Nothing was changed; please try again.");
+    }
+    await link.line(/^ok$/, 2000);
+
+    ui.step("Switching the board to the new WebUI");
+    // Keep the stock FluidNC page as the Classic UI once; then replace index.
+    if (names.includes("index.html.gz")) {
+      if (!names.includes("legacy.html.gz")) {
+        const r = await command(link, "$LocalFS/Rename=" + INDEX + ">" + LEGACY, 5000);
+        if (!r.ok) throw new Error("Could not keep the Classic UI (" + (r.error || "") + "). The new WebUI is on the board as webui.tmp.");
+      } else {
+        const r = await command(link, "$LocalFS/Delete=" + INDEX, 5000);
+        if (!r.ok) throw new Error("Could not remove the old WebUI (" + (r.error || "") + ").");
+      }
+    }
+    const r = await command(link, "$LocalFS/Rename=" + TMP + ">" + INDEX, 5000);
+    if (!r.ok) throw new Error("Could not activate the new WebUI (" + (r.error || "") + "). Try the install again.");
+
+    const list1 = await command(link, "$LocalFS/List", 5000);
+    const size = (list1.lines || []).map((l) => /\[FILE:\s*index\.html\.gz\|SIZE:(\d+)/.exec(l)).find(Boolean);
+    if (!size || +size[1] !== bytes.length) throw new Error("The new WebUI could not be checked on the board. Try the install again.");
+    return { board, version: file.version, size: bytes.length };
+  }
+
+  /** Web Serial port adapter. */
+  async function openSerial() {
+    const sp = await navigator.serial.requestPort();
+    await sp.open({ baudRate: 115200, bufferSize: 65536 });
+    const reader = sp.readable.getReader();
+    const writer = sp.writable.getWriter();
+    return {
+      read: async () => { const { value, done } = await reader.read(); return done ? null : value; },
+      write: (b) => writer.write(b),
+      close: async () => {
+        try { await reader.cancel(); } catch (e) {}
+        try { reader.releaseLock(); writer.releaseLock(); } catch (e) {}
+        try { await sp.close(); } catch (e) {}
+      },
+    };
+  }
+
+  /** Shop API (same origin, logged-in session). */
+  const shop = {
+    access: () => fetch("/webui.php?f=access", { credentials: "same-origin" }).then((r) => r.json()),
+    version: () => fetch("/webui.php?f=version").then((r) => r.json()),
+    async fetchFile(board) {
+      const r = await fetch("/webui.php?f=install", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-DPC-Installer": "1" },
+        body: JSON.stringify({ board }),
+      });
+      if (!r.ok) {
+        let j = {};
+        try { j = await r.json(); } catch (e) {}
+        const why = {
+          login_required: "Log in to your dpcreator.eu account first.",
+          licence_required: "Your account has no WebUI licence yet.",
+          board_limit: "Your licence already covers " + (j.max_boards || 2) + " boards. Remove one below to use this board.",
+          too_many_installs: "Too many installs in the last hour. Please try again later.",
+          not_available: "The WebUI is not available right now. Please try again in a few minutes.",
+        }[j.error] || "The shop could not prepare the WebUI (" + (j.error || r.status) + ").";
+        const e = new Error(why); e.code = j.error; e.state = j; throw e;
+      }
+      const bytes = new Uint8Array(await r.arrayBuffer());
+      const want = r.headers.get("X-DPC-Sha256");
+      if (want && root.crypto && root.crypto.subtle) {
+        const h = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))).map((b) => b.toString(16).padStart(2, "0")).join("");
+        if (h !== want) throw new Error("The download was damaged. Please try again.");
+      }
+      return { bytes, version: r.headers.get("X-DPC-Version") || "" };
+    },
+    release: (board) => fetch("/webui.php?f=release", {
+      method: "POST", credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-DPC-Installer": "1" },
+      body: JSON.stringify({ board }),
+    }).then((r) => r.json()),
+  };
+
+  const api = { install, xmodemSend, Link, command, crc16, openSerial, shop };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.DPCWebUiInstaller = api;
+})(typeof window !== "undefined" ? window : globalThis);
+
+(function () {
+  var W = window.DPCWebUiInstaller;
+  var BUY = "index.php?route=product/product&product_id=383";
+  var LOGIN = "index.php?route=account/login&return=index.php%3Froute%3Dinformation%2Finformation%26information_id%3D8";
+  var $ = function (id) { return document.getElementById(id); };
+  var state = null;
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  function render(a) {
+    state = a;
+    var st = $("dpcw-state");
+    if (!a.logged_in) { st.innerHTML = '<a href="' + LOGIN + '">Log in</a> to install the WebUI on your board.'; return; }
+    if (!a.entitled) { st.innerHTML = 'Your account has no WebUI licence yet. <a href="' + BUY + '">Get the dpCREATOR WebUI</a> (€19.99), or buy an R3 controller or the R3 + SmartTabUI combo: the WebUI is included.'; return; }
+    st.innerHTML = a.via === "hardware" ? "WebUI licence included with your dpCREATOR R3." : "WebUI licence active.";
+    $("dpcw-boards").style.display = "";
+    $("dpcw-go").style.display = "";
+    $("dpcw-count").textContent = "(" + a.boards.length + " of " + a.max_boards + ")";
+    var ul = $("dpcw-list");
+    ul.innerHTML = a.boards.length ? "" : "<li>None yet. A board is added when you install the WebUI on it.</li>";
+    a.boards.forEach(function (b) {
+      var li = document.createElement("li");
+      li.innerHTML = "Board …" + esc(b.board) + " <span style='color:#999'>added " + esc(b.added) + ", last install " + esc(b.last_install) + "</span> ";
+      if (a.can_release) {
+        var btn = document.createElement("button");
+        btn.type = "button"; btn.className = "dpc-fw-btn dpc-fw-btn-lock"; btn.style.cssText = "cursor:pointer;color:#666;padding:3px 8px";
+        btn.textContent = "Remove";
+        btn.onclick = function () {
+          if (!confirm("Remove board …" + b.board + " from your licence? This frees a place for another board. You can remove one board every 30 days.")) return;
+          W.shop.release(b.board).then(function (r) { if (r.ok) refresh(); else alert("Could not remove it (" + (r.error || "") + ")."); });
+        };
+        li.appendChild(btn);
+      }
+      ul.appendChild(li);
+    });
+    var note = $("dpcw-release-note");
+    if (!a.can_release && a.boards.length) { note.style.display = ""; note.textContent = "You removed a board recently. The next one can be removed from " + a.next_release + ". Need help sooner? Contact us."; }
+    else note.style.display = "none";
+    if (!("serial" in navigator)) {
+      $("dpcw-install").disabled = true;
+      $("dpcw-install").className = "dpc-fw-btn dpc-fw-btn-lock";
+      $("dpcw-install").textContent = "Needs Chrome or Edge on a computer";
+    }
+  }
+
+  function refresh() { W.shop.access().then(render).catch(function () { $("dpcw-state").textContent = "Could not check your licence. Reload the page to try again."; }); }
+
+  function result(ok, html) {
+    var r = $("dpcw-result");
+    r.style.display = ""; r.style.background = ok ? "#E1F5EE" : "#FCEBEB"; r.style.color = ok ? "#085041" : "#791F1F";
+    r.innerHTML = html;
+  }
+
+  $("dpcw-install").onclick = async function () {
+    var btn = this, port = null, logEl = $("dpcw-log");
+    logEl.textContent = ""; $("dpcw-result").style.display = "none";
+    try { port = await W.openSerial(); } catch (e) { if (e && e.name !== "NotFoundError") result(false, "Could not open the port: " + esc(e.message || e) + ". Close other programs that use it and try again."); return; }
+    btn.disabled = true;
+    $("dpcw-progress").style.display = ""; $("dpcw-bar").style.width = "0";
+    try {
+      var r = await W.install(port, W.shop, {
+        log: function (l) { logEl.textContent += l + "\n"; },
+        step: function (s) { $("dpcw-step").textContent = s + "…"; },
+        board: function (b) { $("dpcw-step").textContent = "Board …" + b.slice(-6); },
+        progress: function (p) { $("dpcw-bar").style.width = Math.round(p * 100) + "%"; },
+      });
+      $("dpcw-bar").style.width = "100%"; $("dpcw-step").textContent = "Done";
+      result(true, "<strong>The dpCREATOR WebUI is installed on board …" + esc(r.board.slice(-6)) + ".</strong> Open the board's address in your browser (for example <code>http://fluidnc.local</code>) and reload with Ctrl+F5.");
+    } catch (e) {
+      $("dpcw-step").textContent = "Stopped";
+      result(false, esc(e.message || e));
+      if (e && e.state) render(Object.assign({ logged_in: true, entitled: true }, e.state));
+    } finally {
+      btn.disabled = false;
+      if (port) port.close();
+      refresh();
+    }
+  };
+
+  W.shop.version().then(function (v) { $("dpcw-ver").textContent = v.version ? "build " + v.version.split(" ")[0] + (v.updated ? " · " + v.updated.slice(0, 10) : "") : ""; }).catch(function () { $("dpcw-ver").textContent = ""; });
+  refresh();
+})();
+</script>
+
+<script>
+/* dpCREATOR Studio installer (Flash Firmware page, Studio tab): puts Studio (one
+ * gzipped page, signed for this account by dpcreator.eu) into the controller's
+ * flash over USB: /localfs/studio.html.gz. Any FluidNC 4.x with room for it:
+ *   - dpCREATOR firmware (reports a board ID): opens at /studio.html
+ *   - stock FluidNC 4.x: opens at /flash/studio.html (FluidNC's WebDAV serves the
+ *     flash as pages; other addresses are sent as downloads)
+ * Checks before writing anything: firmware, machine idle, free space. */
+(function (root) {
+  var TMP = "/localfs/studio.tmp", PAGE = "/localfs/studio.html.gz";
+  var MARGIN = 24 * 1024;   // file system overhead
+  function kb(n) { return Math.round(n / 1024) + " KB"; }
+  // "[/localfs Free:812.25 KB Used:1.10 MB Total:1.94 MB"
+  function bytes(v, unit) { return parseFloat(v) * ({ B: 1, KB: 1024, MB: 1048576, GB: 1073741824 }[unit] || 1); }
+
+  /** The whole install. W = DPCWebUiInstaller (Link, command, xmodemSend),
+   *  fetchFile(boardId) -> {bytes, version}, ui = {log, step, progress}. */
+  async function install(W, port, fetchFile, ui, opts) {
+    var SD = !!(opts && opts.sd), FS = SD ? "$SD" : "$LocalFS", TMP = SD ? "/sd/studio.tmp" : "/localfs/studio.tmp", PAGE = SD ? "/sd/studio.html.gz" : "/localfs/studio.html.gz";
+    var link = W.Link(port, ui.log);
+    await new Promise(function (r) { setTimeout(r, 600); });   // the board may print its startup log
+    link.drain();
+
+    ui.step("Checking the controller");
+    // dpCREATOR firmware answers $Board/ID; stock FluidNC answers error. Wait for
+    // the ID line itself (a leftover "ok" is not the answer); ask twice in case
+    // the board was still starting.
+    var board = "";
+    for (var i = 0; i < 2 && !board; i++) {
+      link.drain();
+      await link.send("$Board/ID");
+      var m = await link.line(/\[MSG:BoardID:([0-9A-F]{12}):api=\d+\]|^error:/, 3000);
+      if (m && m[1]) board = m[1];
+      else if (m) break;                          // error: not dpCREATOR firmware
+    }
+    if (board) await link.line(/^ok$/, 1500);     // (a BoardMem line may come first)
+    link.drain();
+    var info = await W.command(link, "$I", 4000);
+    var ver = null;
+    (info.lines || []).forEach(function (l) { var v = /\[VER:[^\]]*?FluidNC v(\d+)\.(\d+)(?:\.(\d+))?/.exec(l); if (v) ver = v; });
+    if (!board) {
+      if (!ver && !info.ok) throw new Error("The controller does not answer. Check the port and that FluidNC is running.");
+      if (!ver) throw new Error("This controller does not report a FluidNC version. Studio needs FluidNC 4.0 or newer – use Studio on dpcreator.eu instead.");
+      if (+ver[1] < 4) throw new Error("This controller runs FluidNC v" + ver[1] + "." + ver[2] + (ver[3] ? "." + ver[3] : "") + ". Studio on the controller needs FluidNC 4.0 or newer – update the firmware, or use Studio on dpcreator.eu.");
+    }
+
+    link.drain();
+    await link.write(new Uint8Array([0x3f]));
+    var st = await link.line(/^<([A-Za-z]+)/, 3000);
+    if (!st) throw new Error("The controller does not answer. Check the port and that FluidNC is running.");
+    if (!/^(Idle|Alarm)$/.test(st[1])) throw new Error("The machine is " + st[1] + ". Try again when it is Idle.");
+
+    var list0 = await W.command(link, FS + "/List", 5000);
+    var lines = list0.lines || [];
+    var sizes = {};
+    lines.forEach(function (l) { var x = /\[FILE:\s*([^|\]]+)\|SIZE:(\d+)/.exec(l); if (x) sizes[x[1].trim()] = +x[2]; });
+    var free = null;
+    lines.forEach(function (l) { var x = /Free:\s*([\d.]+)\s*(B|KB|MB|GB)/.exec(l); if (x) free = bytes(x[1], x[2]); });
+
+    ui.step("Getting Studio from dpcreator.eu");
+    var file = await fetchFile(board);
+
+    var old = sizes["studio.html.gz"] || 0, tmpOld = sizes["studio.tmp"] || 0;
+    var need = file.bytes.length + MARGIN;
+    var replaceFirst = false;
+    if (free !== null) {
+      var avail = free + tmpOld;
+      if (avail < need) {
+        if (avail + old >= need) replaceFirst = true;   // room only after removing the old copy
+        else throw new Error("Not enough room in the controller's flash: Studio needs " + kb(need) + ", " + kb(avail + old) + " is free. Delete unused files from the flash, or use Studio on dpcreator.eu.");
+      }
+    }
+
+    ui.step("Sending Studio to the controller");
+    if (sizes["studio.tmp"] !== undefined) await W.command(link, FS + "/Delete=" + TMP, 4000);
+    if (replaceFirst) await W.command(link, FS + "/Delete=" + PAGE, 5000);
+    link.drain();
+    await link.send("$Xmodem/Receive=" + TMP);
+    try {
+      await W.xmodemSend(link, file.bytes, ui.progress);
+    } catch (e) {
+      await W.command(link, FS + "/Delete=" + TMP, 4000).catch(function () {});
+      throw new Error(e.message + " Try again; if it keeps failing, use Studio on dpcreator.eu.");
+    }
+    var done = await link.line(/Received (\d+) bytes|Reception failed.*|^error:.*/, 8000);
+    if (!done || !done[1] || +done[1] !== file.bytes.length) {
+      await W.command(link, FS + "/Delete=" + TMP, 4000);
+      throw new Error("The controller did not store Studio" + (done && !done[1] ? ": " + done[0] : "") + ". Its flash may be full – delete unused files there, or use Studio on dpcreator.eu.");
+    }
+    await link.line(/^ok$/, 2000);
+
+    ui.step("Switching to the new Studio");
+    if (old && !replaceFirst) await W.command(link, FS + "/Delete=" + PAGE, 5000);
+    var r = await W.command(link, FS + "/Rename=" + TMP + ">" + PAGE, 5000);
+    if (!r.ok) throw new Error("Could not activate Studio (" + (r.error || "") + "). Try the install again.");
+    return { board: board, version: file.version, path: SD ? "/sd/studio.html" : board ? "/studio.html" : "/flash/studio.html",
+             fluidnc: ver ? ver[1] + "." + ver[2] + (ver[3] ? "." + ver[3] : "") : "" };
+  }
+
+  if (typeof module !== "undefined" && module.exports) { module.exports = { install: install }; return; }
+
+  // ---- the card on the page ----
+  var W = root.DPCWebUiInstaller;
+  var $ = function (id) { return document.getElementById(id); };
+  var LOGIN = "index.php?route=account/login";
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  if (!W || !$("dpcs-card")) return;
+
+  var shop = {
+    access: function () { return Promise.all([fetch("/studio.php?f=access", { credentials: "same-origin" }).then(function (r) { return r.json(); }), fetch("/studio-pro.php?f=access", { credentials: "same-origin", cache: "no-store" }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })]).then(function (x) { var a = x[0] || {}; a.pro = !!(x[1] && x[1].pro && !x[1].trial); a.proExpires = (x[1] && x[1].expires) || ""; shop.pro = a.pro; return a; }); },
+    version: function () { return fetch("/studio.php?f=version").then(function (r) { return r.json(); }); },
+    fetchFile: async function (board) {
+      var r = await fetch(shop.pro ? "/studio-pro.php?f=install" : "/studio.php?f=install", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-DPC-Installer": "1" },
+        body: JSON.stringify({ board: board || "" }),
+      });
+      if (!r.ok) {
+        var j = {}; try { j = await r.json(); } catch (e) {}
+        throw new Error({
+          login_required: "Log in to your dpcreator.eu account first (free).",
+          too_many_installs: "Too many installs in the last hour. Please try again later.",
+          not_available: "Studio is not available right now. Please try again in a few minutes.",
+        }[j.error] || "The shop could not prepare Studio (" + (j.error || r.status) + ").");
+      }
+      var data = new Uint8Array(await r.arrayBuffer());
+      var want = r.headers.get("X-DPC-Sha256");
+      if (want && root.crypto && crypto.subtle) {
+        var h = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", data))).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+        if (h !== want) throw new Error("The download was damaged. Please try again.");
+      }
+      return { bytes: data, version: r.headers.get("X-DPC-Version") || "" };
+    },
+  };
+
+  root.DPCStudioInstaller = { install: install, shop: shop };
+
+  function result(ok, html) {
+    var r = $("dpcs-result");
+    r.style.display = ""; r.style.background = ok ? "#E1F5EE" : "#FCEBEB"; r.style.color = ok ? "#085041" : "#791F1F";
+    r.innerHTML = html;
+  }
+
+  function render(a) {
+    if (!a.logged_in) { $("dpcs-state").innerHTML = '<a href="' + LOGIN + '">Log in</a> or create a free account to install Studio on your controller.'; return; }
+    $("dpcs-state").textContent = a.pro ? "Studio Pro, licensed to your account" + (a.proExpires ? " until " + a.proExpires : "") + ". The installer puts Pro on your controller." : "Studio Basic, free with your dpcreator.eu account. Have Studio Pro? It installs here automatically.";
+    $("dpcs-go").style.display = "";
+    if (!("serial" in navigator)) {
+      $("dpcs-install").disabled = true; $("dpcs-install").className = "dpc-fw-btn dpc-fw-btn-lock";
+      $("dpcs-install").textContent = "Needs Chrome or Edge on a computer";
+    }
+  }
+
+  $("dpcs-install").onclick = async function () {
+    var btn = this, port = null, logEl = $("dpcs-log");
+    logEl.textContent = ""; $("dpcs-result").style.display = "none";
+    try { port = await W.openSerial(); } catch (e) { if (e && e.name !== "NotFoundError") result(false, "Could not open the port: " + esc(e.message || e) + ". Close other programs that use it and try again."); return; }
+    btn.disabled = true;
+    $("dpcs-progress").style.display = ""; $("dpcs-bar").style.width = "0";
+    try {
+      var r = await install(W, port, shop.fetchFile, {
+        log: function (l) { logEl.textContent += l + "\n"; },
+        step: function (s) { $("dpcs-step").textContent = s + "…"; },
+        progress: function (p) { $("dpcs-bar").style.width = Math.round(p * 100) + "%"; },
+      });
+      $("dpcs-bar").style.width = "100%"; $("dpcs-step").textContent = "Done";
+      result(true, "<strong>dpCREATOR Studio is on your controller" + (r.board ? " (board …" + esc(r.board.slice(-6)) + ")" : r.fluidnc ? " (FluidNC " + esc(r.fluidnc) + ")" : "") + ".</strong> Open <code>http://&lt;your board&gt;" + r.path + "</code> (for example <code>http://fluidnc.local" + r.path + "</code>)" +
+        (r.board ? ", or use the Studio button in the dpCREATOR WebUI. If the browser downloads the page instead of opening it, open <code>/flash/studio.html</code> or update the controller firmware." : ". With the dpCREATOR firmware it opens at /studio.html and Send also prepares the job in the WebUI and on the pendant."));
+    } catch (e) {
+      $("dpcs-step").textContent = "Stopped";
+      result(false, esc(e.message || e));
+    } finally {
+      btn.disabled = false;
+      if (port) port.close();
+    }
+  };
+
+  shop.version().then(function (v) {
+    var t = v.version ? "build " + v.version.split(" ")[0] : "";
+    document.querySelectorAll(".dpcs-ver").forEach(function (e) { e.textContent = t; e.style.display = t ? "" : "none"; });
+  }).catch(function () {});
+  shop.access().then(render).catch(function () { $("dpcs-state").textContent = "Could not check your account. Reload the page to try again."; });
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+
+  <!-- MOTION -->
+  <div id="dpc-motion" class="dpc-fw-panel">
+  <div class="dpc-fw-card">
+    <p class="dpc-fw-title">dpCREATOR Motion – jedes Projekt mit FluidNC automatisieren</p>
+    <div class="dpc-fw-meta">
+      <span class="dpc-fw-badge dpc-fw-badge-free">Kostenlos beim R3</span>
+      <span class="dpc-fw-badge dpc-fw-badge-paid">Beta</span>
+      <span class="dpc-fw-badge dpc-fw-badge-chip">Jedes FluidNC 4.x</span>
+      <span class="dpc-fw-badge dpc-fw-badge-ver dpcm-ver"></span>
+    </div>
+    <p class="dpc-fw-changelog">Bauen Sie Ihre eigene Maschine Teil für Teil: Fügen Sie jeden Motor, Sensor und Ausgang hinzu, sobald Sie ihn verdrahten, testen Sie ihn, teachen Sie dann die Positionen und führen Sie die Sequenz vom Controller aus. Motion schreibt die Controller-Konfiguration und den G-Code für Sie.</p>
+    <p class="dpc-fw-changelog">Der <strong>Simulator</strong> auf dpcreator.eu führt die Beispielmaschinen in Ihrem Browser aus, ohne Platine und ohne Konto. Um eine echte Maschine zu bewegen, installieren Sie Motion unten auf dem Controller.</p>
+    <p style="margin:10px 0 0"><a class="dpc-fw-btn dpc-fw-btn-flash" href="/motion/" target="_blank" rel="noopener" style="text-decoration:none">Simulator öffnen</a>
+      &nbsp; <a href="/docs/dpcreator-motion" style="font-size:13px">So funktioniert Motion</a></p>
+  </div>
+
+  <div class="dpc-fw-card" id="dpcm-card">
+    <p class="dpc-fw-title">Motion auf Ihrem Controller installieren</p>
+    <div class="dpc-fw-meta">
+      <span class="dpc-fw-badge dpc-fw-badge-free">Kostenlos beim R3</span>
+      <span class="dpc-fw-badge dpc-fw-badge-paid">€39 für andere Platinen</span>
+      <span class="dpc-fw-badge dpc-fw-badge-chip">Jedes FluidNC 4.x</span>
+    </div>
+    <p class="dpc-fw-changelog">
+      Motion wird neben die WebUI in den Flash des Controllers kopiert. Danach funktioniert es ohne Internet, liest die Konfiguration des Controllers und führt Ihre Sequenzen direkt auf dem Controller aus.
+    </p>
+    <ul class="dpc-fw-changelog" style="margin:0 0 8px;padding-left:18px">
+      <li><strong>dpCREATOR-Firmware:</strong> öffnet sich unter <code>http://&lt;your board&gt;/motion.html</code>, mit Live-Ein- und -Ausgängen, schnellem Warten auf Sensoren und den Schrittnamen auf dem SmartTabUI-Handbediengerät.</li>
+      <li><strong>Standard-FluidNC 4.x:</strong> öffnet sich unter <code>http://&lt;your board&gt;/flash/motion.html</code>. Sequenzen laufen genauso; Endschalter und Taster werden live angezeigt.</li>
+    </ul>
+    <p class="dpc-fw-changelog" style="font-size:12px;color:#888">
+      Erfordert FluidNC 4.0 oder neuer (Standard oder dpCREATOR) und etwa <strong>400 KB freien Platz</strong> im Flash. Der Installer prüft die Firmware, den Ruhezustand der Maschine und den freien Platz, bevor er etwas schreibt.
+    </p>
+    <div id="dpcm-state" class="dpc-fw-notice">Ihr Konto wird geprüft…</div>
+    <div id="dpcm-go" style="margin-top:12px;display:none">
+      <ol style="font-size:13px;margin:0 0 10px;padding-left:18px">
+        <li>Verbinden Sie den Controller per USB-Kabel mit diesem Computer. Die Maschine muss im Ruhezustand (Idle) sein.</li>
+        <li>Klicken Sie auf die Schaltfläche und wählen Sie den seriellen Port des Controllers.</li>
+      </ol>
+      <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" id="dpcm-install">⚡&nbsp; Motion auf meinem Controller installieren</button>
+      <div id="dpcm-progress" style="display:none;margin-top:12px">
+        <div id="dpcm-step" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
+        <div style="height:6px;background:#eee;border-radius:3px;overflow:hidden"><div id="dpcm-bar" style="height:6px;width:0;background:#0F6E56;transition:width .2s"></div></div>
+      </div>
+      <div id="dpcm-result" class="dpc-fw-notice" style="display:none"></div>
+      <details style="margin-top:8px;font-size:12px;color:#888"><summary>Details</summary><pre id="dpcm-log" style="max-height:200px;overflow:auto;font-size:11px;white-space:pre-wrap"></pre></details>
+    </div>
+  </div>
+  </div>
+
+<script>
+/* dpCREATOR Motion installer (Flash Firmware page, Motion tab): puts Motion (one gzipped
+ * page, licensed by dpcreator.eu) into the controller's flash over USB as
+ * /localfs/motion.html.gz. Same steps and checks as the Studio installer: firmware,
+ * machine idle, free space; nothing is removed before the new copy is safely stored.
+ *   - dpCREATOR firmware (reports a board ID): opens at /motion.html
+ *   - stock FluidNC 4.x: opens at /flash/motion.html */
+(function (root) {
+  var TMP = "/localfs/motion.tmp", PAGE = "/localfs/motion.html.gz";
+  var MARGIN = 24 * 1024;
+  var BUY = "index.php?route=product/product&product_id=391";
+  var R3 = "index.php?route=product/product&product_id=381";
+  var LOGIN = "index.php?route=account/login";
+  function kb(n) { return Math.round(n / 1024) + " KB"; }
+  function bytes(v, unit) { return parseFloat(v) * ({ B: 1, KB: 1024, MB: 1048576, GB: 1073741824 }[unit] || 1); }
+
+  async function install(W, port, fetchFile, ui, opts) {
+    var SD = !!(opts && opts.sd), FS = SD ? "$SD" : "$LocalFS", TMP = SD ? "/sd/motion.tmp" : "/localfs/motion.tmp", PAGE = SD ? "/sd/motion.html.gz" : "/localfs/motion.html.gz";
+    var link = W.Link(port, ui.log);
+    await new Promise(function (r) { setTimeout(r, 600); });
+    link.drain();
+
+    ui.step("Checking the controller");
+    var board = "";
+    for (var i = 0; i < 2 && !board; i++) {
+      link.drain();
+      await link.send("$Board/ID");
+      var m = await link.line(/\[MSG:BoardID:([0-9A-F]{12}):api=\d+\]|^error:/, 3000);
+      if (m && m[1]) board = m[1];
+      else if (m) break;
+    }
+    if (board) await link.line(/^ok$/, 1500);
+    link.drain();
+    var info = await W.command(link, "$I", 4000);
+    var ver = null;
+    (info.lines || []).forEach(function (l) { var v = /\[VER:[^\]]*?FluidNC v(\d+)\.(\d+)(?:\.(\d+))?/.exec(l); if (v) ver = v; });
+    if (!board) {
+      if (!ver && !info.ok) throw new Error("The controller does not answer. Check the port and that FluidNC is running.");
+      if (!ver) throw new Error("This controller does not report a FluidNC version. Motion needs FluidNC 4.0 or newer.");
+      if (+ver[1] < 4) throw new Error("This controller runs FluidNC v" + ver[1] + "." + ver[2] + (ver[3] ? "." + ver[3] : "") + ". Motion on the controller needs FluidNC 4.0 or newer: update the firmware first.");
+    }
+
+    link.drain();
+    await link.write(new Uint8Array([0x3f]));
+    var st = await link.line(/^<([A-Za-z]+)/, 3000);
+    if (!st) throw new Error("The controller does not answer. Check the port and that FluidNC is running.");
+    if (!/^(Idle|Alarm)$/.test(st[1])) throw new Error("The machine is " + st[1] + ". Try again when it is Idle.");
+
+    var list0 = await W.command(link, FS + "/List", 5000);
+    var lines = list0.lines || [];
+    var sizes = {};
+    lines.forEach(function (l) { var x = /\[FILE:\s*([^|\]]+)\|SIZE:(\d+)/.exec(l); if (x) sizes[x[1].trim()] = +x[2]; });
+    var free = null;
+    lines.forEach(function (l) { var x = /Free:\s*([\d.]+)\s*(B|KB|MB|GB)/.exec(l); if (x) free = bytes(x[1], x[2]); });
+
+    ui.step("Getting Motion from dpcreator.eu");
+    var file = await fetchFile(board);
+
+    var old = sizes["motion.html.gz"] || 0, tmpOld = sizes["motion.tmp"] || 0;
+    var need = file.bytes.length + MARGIN;
+    var replaceFirst = false;
+    if (free !== null) {
+      var avail = free + tmpOld;
+      if (avail < need) {
+        if (avail + old >= need) replaceFirst = true;
+        else throw new Error("Not enough room in the controller's flash: Motion needs " + kb(need) + ", " + kb(avail + old) + " is free. Delete unused files from the flash and try again.");
+      }
+    }
+
+    ui.step("Sending Motion to the controller");
+    if (sizes["motion.tmp"] !== undefined) await W.command(link, FS + "/Delete=" + TMP, 4000);
+    if (replaceFirst) await W.command(link, FS + "/Delete=" + PAGE, 5000);
+    link.drain();
+    await link.send("$Xmodem/Receive=" + TMP);
+    try {
+      await W.xmodemSend(link, file.bytes, ui.progress);
+    } catch (e) {
+      await W.command(link, FS + "/Delete=" + TMP, 4000).catch(function () {});
+      throw new Error(e.message + " Try again.");
+    }
+    var done = await link.line(/Received (\d+) bytes|Reception failed.*|^error:.*/, 8000);
+    if (!done || !done[1] || +done[1] !== file.bytes.length) {
+      await W.command(link, FS + "/Delete=" + TMP, 4000);
+      throw new Error("The controller did not store Motion" + (done && !done[1] ? ": " + done[0] : "") + ". Its flash may be full: delete unused files there and try again.");
+    }
+    await link.line(/^ok$/, 2000);
+
+    ui.step("Switching to the new Motion");
+    if (old && !replaceFirst) await W.command(link, FS + "/Delete=" + PAGE, 5000);
+    var r = await W.command(link, FS + "/Rename=" + TMP + ">" + PAGE, 5000);
+    if (!r.ok) throw new Error("Could not activate Motion (" + (r.error || "") + "). Try the install again.");
+    return { board: board, version: file.version, path: SD ? "/sd/motion.html" : board ? "/motion.html" : "/flash/motion.html",
+             fluidnc: ver ? ver[1] + "." + ver[2] + (ver[3] ? "." + ver[3] : "") : "" };
+  }
+
+  var W = root.DPCWebUiInstaller;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  if (!W || !$("dpcm-card")) return;
+
+  var shop = {
+    access: function () { return fetch("/motion.php?f=access", { credentials: "same-origin", cache: "no-store" }).then(function (r) { return r.json(); }); },
+    version: function () { return fetch("/motion.php?f=version").then(function (r) { return r.json(); }); },
+    fetchFile: async function (board) {
+      var r = await fetch("/motion.php?f=install", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-DPC-Installer": "1" },
+        body: JSON.stringify({ board: board || "" }),
+      });
+      if (!r.ok) {
+        var j = {}; try { j = await r.json(); } catch (e) {}
+        throw new Error({
+          login_required: "Log in to your dpcreator.eu account first.",
+          licence_required: "Your account has no Motion licence yet.",
+          too_many_installs: "Too many installs in the last hour. Please try again later.",
+          not_available: "Motion is not available right now. Please try again in a few minutes.",
+        }[j.error] || "The shop could not prepare Motion (" + (j.error || r.status) + ").");
+      }
+      var data = new Uint8Array(await r.arrayBuffer());
+      var want = r.headers.get("X-DPC-Sha256");
+      if (want && root.crypto && crypto.subtle) {
+        var h = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", data))).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+        if (h !== want) throw new Error("The download was damaged. Please try again.");
+      }
+      return { bytes: data, version: r.headers.get("X-DPC-Version") || "" };
+    },
+  };
+
+  root.DPCMotionInstaller = { install: install, shop: shop };
+
+  function result(ok, html) {
+    var r = $("dpcm-result");
+    r.style.display = ""; r.style.background = ok ? "#E1F5EE" : "#FCEBEB"; r.style.color = ok ? "#085041" : "#791F1F";
+    r.innerHTML = html;
+  }
+
+  function render(a) {
+    var st = $("dpcm-state");
+    if (!a.logged_in) { st.innerHTML = '<a href="' + LOGIN + '">Log in</a> to install Motion on your controller. Just trying it? The <a href="/motion/" target="_blank" rel="noopener">simulator</a> needs no account.'; return; }
+    if (!a.entitled) {
+      st.innerHTML = 'Your account has no Motion licence yet. Motion is free with the <a href="' + R3 + '">dpCREATOR R3</a>; for another FluidNC board <a href="' + BUY + '">get dpCREATOR Motion</a>. In the R&amp;D Club? <a href="index.php?route=information/contact">Ask us</a> to add your account to the beta.';
+      return;
+    }
+    st.textContent = { hardware: "Motion licence included with your dpCREATOR R3.", bought: "Motion licence active.", beta: "Motion beta, licensed to your account (R&D Club).", admin: "Shop admin: installs licensed to dpCREATOR." }[a.via] || "Motion licence active.";
+    $("dpcm-go").style.display = "";
+    if (!("serial" in navigator)) {
+      $("dpcm-install").disabled = true; $("dpcm-install").className = "dpc-fw-btn dpc-fw-btn-lock";
+      $("dpcm-install").textContent = "Needs Chrome or Edge on a computer";
+    }
+  }
+
+  $("dpcm-install").onclick = async function () {
+    var btn = this, port = null, logEl = $("dpcm-log");
+    logEl.textContent = ""; $("dpcm-result").style.display = "none";
+    try { port = await W.openSerial(); } catch (e) { if (e && e.name !== "NotFoundError") result(false, "Could not open the port: " + esc(e.message || e) + ". Close other programs that use it and try again."); return; }
+    btn.disabled = true;
+    $("dpcm-progress").style.display = ""; $("dpcm-bar").style.width = "0";
+    try {
+      var r = await install(W, port, shop.fetchFile, {
+        log: function (l) { logEl.textContent += l + "\n"; },
+        step: function (s) { $("dpcm-step").textContent = s + "…"; },
+        progress: function (p) { $("dpcm-bar").style.width = Math.round(p * 100) + "%"; },
+      });
+      $("dpcm-bar").style.width = "100%"; $("dpcm-step").textContent = "Done";
+      result(true, "<strong>dpCREATOR Motion is on your controller" + (r.board ? " (board …" + esc(r.board.slice(-6)) + ")" : r.fluidnc ? " (FluidNC " + esc(r.fluidnc) + ")" : "") + ".</strong> Open <code>http://&lt;your board&gt;" + r.path + "</code> (for example <code>http://fluidnc.local" + r.path + "</code>). It connects to the controller by itself." +
+        (r.board ? " If the browser downloads the page instead of opening it, open <code>/flash/motion.html</code> or update the controller firmware." : ""));
+    } catch (e) {
+      $("dpcm-step").textContent = "Stopped";
+      result(false, esc(e.message || e));
+    } finally {
+      btn.disabled = false;
+      if (port) port.close();
+    }
+  };
+
+  shop.version().then(function (v) {
+    var t = v.version ? "build " + v.version.split(" ")[0] : "";
+    document.querySelectorAll(".dpcm-ver").forEach(function (e) { e.textContent = t; e.style.display = t ? "" : "none"; });
+  }).catch(function () {});
+  shop.access().then(render).catch(function () { $("dpcm-state").innerHTML = 'Motion installs from here once the shop is set up for it. Meanwhile, try the <a href="/motion/" target="_blank" rel="noopener">simulator</a>.'; });
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+
+<!-- 3D PRINT FILES -->
+  <div id="dpc-3d" class="dpc-fw-panel">
+    <div class="dpc-fw-card">
+      <p class="dpc-fw-title">SmartTabUI-Gehäuse DPC-TC1 — 3D-Druckdateien</p>
+      <div class="dpc-fw-meta">
+        <span class="dpc-fw-badge dpc-fw-badge-free">Kostenlos</span>
+        <span class="dpc-fw-badge dpc-fw-badge-ver">v1.0</span>
+      </div>
+      <p class="dpc-fw-changelog">
+        3MF-Dateien für das PETG-Gehäuse: Gehäusekörper, Deckplatte (geschlossen oder mit 2-mm-Frontplatte), die Frontplatte und der Clip für den IO-Expander, mit Rendering und README.
+      </p>
+      <div class="dpc-fw-actions">
+        <a href="/image/catalog/dpc-site/files/SmartTabUI-pendant-case-v1.zip" class="dpc-fw-btn dpc-fw-btn-buy" download>Gehäusedateien herunterladen</a> <a href="index.php?route=product/product&amp;product_id=377" class="dpc-fw-btn dpc-fw-btn-ghost">Pendant-Firmware holen</a>
+      </div>
+      <p class="dpc-fw-notice">
+        Für alle kostenlos, ohne Konto (ZIP, 1 MB, Lizenz CC BY-NC-SA 4.0: drucken, ändern und weitergeben, aber nicht verkaufen). Auf dem Handbediengerät läuft die SmartTabUI-Firmware. Teile und Verdrahtung: <a href="/docs/build-tabui-pendant">Das Handbediengerät bauen</a>.
+      </p>
+    </div>
+  </div>
+
+  <!-- BOARD TOOLS -->
+<div id="dpc-tools" class="dpc-fw-panel">
+  <div class="dpc-fw-card">
+    <p class="dpc-fw-title">USB-Terminal, Dateien und Netzwerk</p>
+    <div class="dpc-fw-meta"><span class="dpc-fw-badge dpc-fw-badge-free">Kostenlos</span><span class="dpc-fw-badge dpc-fw-badge-ver">Jede FluidNC-Platine</span></div>
+    <p class="dpc-fw-changelog">Kommunizieren Sie per USB mit dem Controller: Befehle senden und sein Log lesen, <code>config.yaml</code> öffnen und bearbeiten, Dateien zwischen Computer und Flash bzw. SD-Karte der Platine kopieren und WLAN oder Ethernet einrichten. Nichts zu installieren; verwenden Sie Chrome oder Edge auf einem Computer.</p>
+
+    <div class="dpct-bar">
+      <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" id="dpct-connect">Mit der Platine verbinden</button>
+      <button type="button" class="dpc-fw-btn dpct-quiet" id="dpct-disconnect" hidden="">Trennen</button>
+      <button type="button" class="dpc-fw-btn dpct-quiet" id="dpct-restart" hidden="" title="Startet den Controller neu (wie ein Druck auf seine Reset-Taste)">Platine neu starten</button>
+      <span id="dpct-status" class="dpct-status">Nicht verbunden</span>
+    </div>
+    <div id="dpct-mem" class="dpc-fw-notice dpct-warn" hidden=""></div>
+
+    <div id="dpct-main" hidden="">
+      <div class="dpct-tabs" role="tablist">
+        <button type="button" role="tab" class="dpct-tab" data-tab="term" aria-selected="true">Terminal</button>
+        <button type="button" role="tab" class="dpct-tab" data-tab="files" aria-selected="false">Dateien</button>
+        <button type="button" role="tab" class="dpct-tab" data-tab="net" aria-selected="false">Netzwerk</button>
+      </div>
+
+      <section id="dpct-term" class="dpct-pane">
+        <pre id="dpct-out" class="dpct-out" aria-live="polite"></pre>
+        <form id="dpct-form" class="dpct-row">
+          <input id="dpct-in" class="dpct-input" autocomplete="off" spellcheck="false" placeholder="Befehl, zum Beispiel $I oder $SS (Enter sendet, ↑ ↓ Verlauf)">
+          <button type="submit" class="dpc-fw-btn dpc-fw-btn-flash">Senden</button>
+        </form>
+        <div class="dpct-row dpct-small">
+          <button type="button" class="dpct-chip" data-cmd="$I" title="Firmware-Version und Build">Version</button>
+          <button type="button" class="dpct-chip" data-cmd="$SS" title="Das Log vom letzten Start">Start-Log</button>
+          <button type="button" class="dpct-chip" data-cmd="$CD" title="Die Konfiguration, mit der die Platine läuft">Aktive Konfiguration</button>
+          <button type="button" class="dpct-chip" data-cmd="$S" title="Alle Einstellungen">Einstellungen</button>
+          <button type="button" class="dpct-chip" data-cmd="$Heap/Show" title="Speicher">Speicher</button>
+          <button type="button" class="dpct-chip" data-cmd="$X" title="Einen Alarm löschen">Entsperren ($X)</button>
+          <button type="button" class="dpct-chip" data-rt="63" title="Statusbericht">Status ?</button>
+          <button type="button" class="dpct-chip" data-rt="33" title="Vorschub anhalten (Feed Hold)">Hold !</button>
+          <button type="button" class="dpct-chip" data-rt="126" title="Fortsetzen">Resume ~</button>
+          <button type="button" class="dpct-chip dpct-danger" data-rt="24" title="Soft-Reset: stoppt die Bewegung">Reset Ctrl‑X</button>
+          <span class="dpct-grow"></span>
+          <label><input type="checkbox" id="dpct-hidestatus" checked=""> Statusberichte ausblenden</label>
+          <button type="button" class="dpct-chip" id="dpct-save">Log speichern</button>
+          <button type="button" class="dpct-chip" id="dpct-clear">Leeren</button>
+        </div>
+      </section>
+
+      <section id="dpct-files" class="dpct-pane" hidden="">
+        <div class="dpct-row">
+          <select id="dpct-fs" class="dpct-input dpct-narrow" aria-label="Speicherort">
+            <option value="localfs">Flash der Platine</option>
+            <option value="sd">SD-Karte</option>
+          </select>
+          <span id="dpct-path" class="dpct-path"></span>
+          <span class="dpct-grow"></span>
+          <span id="dpct-space" class="dpct-small dpct-muted"></span>
+          <button type="button" class="dpc-fw-btn dpct-quiet" id="dpct-refresh">Aktualisieren</button>
+          <label class="dpc-fw-btn dpc-fw-btn-flash dpct-upload">Datei hochladen<input type="file" id="dpct-file" multiple="" hidden=""></label>
+        </div>
+        <div id="dpct-fprog" class="dpct-prog" hidden=""><div id="dpct-fbar"></div><span id="dpct-ftext"></span></div>
+        <table class="dpct-table"><thead><tr><th>Name</th><th class="dpct-num">Größe</th><th></th></tr></thead><tbody id="dpct-list"></tbody></table>
+        <p class="dpct-small dpct-muted">Im Flash der Platine liegen <code>config.yaml</code> und die WebUI. Wenn <code>config.yaml</code> gelöscht oder beschädigt wird, funktioniert die Maschine nicht mehr, bis die Datei repariert ist: Laden Sie zuerst eine Kopie herunter.</p>
+        <div id="dpct-editor" class="dpct-editor" hidden="">
+          <div class="dpct-row"><strong id="dpct-ename"></strong><span class="dpct-grow"></span>
+            <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" id="dpct-esave">Auf der Platine speichern</button>
+            <button type="button" class="dpc-fw-btn dpct-quiet" id="dpct-eclose">Schließen</button></div>
+          <textarea id="dpct-etext" class="dpct-etext" spellcheck="false"></textarea>
+          <p class="dpct-small dpct-muted">Änderungen an <code>config.yaml</code> werden nach einem Neustart der Platine wirksam.</p>
+        </div>
+      </section>
+
+      <section id="dpct-net" class="dpct-pane" hidden="">
+        <p id="dpct-netinfo" class="dpct-small"></p>
+        <div id="dpct-netform"></div>
+        <div class="dpct-row">
+          <button type="button" class="dpc-fw-btn dpc-fw-btn-flash" id="dpct-netsave">Netzwerkeinstellungen speichern</button>
+          <button type="button" class="dpc-fw-btn dpct-quiet" id="dpct-netreload">Neu laden</button>
+          <span id="dpct-netmsg" class="dpct-small"></span>
+        </div>
+      </section>
+    </div>
+    <p id="dpct-noserial" class="dpc-fw-notice" hidden="">Die Platinen-Tools brauchen Chrome oder Edge auf einem Computer (Web Serial). Auf Smartphones, Tablets, Firefox oder Safari funktionieren sie nicht.</p>
+
+    <div class="dpc-fw-notice dpct-req">
+      <strong>Anforderungen an die Platine.</strong> Diese Firmware braucht einen <strong>ESP32‑S3 mit 8 MB Octal-PSRAM</strong>: ein Modul ESP32‑S3‑WROOM‑1 <strong>N8R8</strong>, <strong>N16R8</strong> oder <strong>N32R8V</strong> (die Teilenummer auf dem Metallschirm des Moduls endet auf <strong>R8</strong>). Module mit 2 MB PSRAM (N8R2, N16R2) oder ohne PSRAM (N4, N8, N16) werden nicht unterstützt: Ihnen geht während der Jobs der Speicher aus, und sie starten neu. Klassische ESP32-Platinen (ESP32‑WROOM‑32) werden von dieser Firmware nicht unterstützt. Verbinden Sie eine Platine, und die Tools oben zeigen Ihnen, was sie hat.
+    </div>
+  </div>
+</div>
+
+<style>
+#dpc-tools [hidden]{display:none!important}
+#dpc-tools .dpct-bar,#dpc-tools .dpct-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0}
+#dpc-tools .dpct-grow{flex:1}
+#dpc-tools .dpct-status{font-size:13px;color:#555}
+#dpc-tools .dpct-quiet{background:#fff;color:#333;border:1px solid #ccc}
+#dpc-tools .dpct-warn{background:#FCEBEB;color:#791F1F}
+#dpc-tools .dpct-req{margin-top:14px}
+#dpc-tools .dpct-tabs{display:flex;gap:2px;border-bottom:1px solid #ddd;margin-top:6px}
+#dpc-tools .dpct-tab{background:none;border:0;border-bottom:2px solid transparent;padding:8px 14px;font-size:14px;cursor:pointer;color:#555}
+#dpc-tools .dpct-tab[aria-selected=true]{border-bottom-color:#0F6E56;color:#0F6E56;font-weight:600}
+#dpc-tools .dpct-out{height:340px;overflow:auto;background:#10201b;color:#d6efe6;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;padding:8px 10px;margin:10px 0 0;border-radius:4px;white-space:pre-wrap;word-break:break-all}
+#dpc-tools .dpct-out .o{color:#8fd3ff}
+#dpc-tools .dpct-out .e{color:#ff9d9d}
+#dpc-tools .dpct-out .i{color:#9aa}
+#dpc-tools .dpct-input{flex:1;min-width:180px;padding:7px 9px;border:1px solid #ccc;border-radius:4px;font:13px ui-monospace,Menlo,Consolas,monospace}
+#dpc-tools .dpct-narrow{flex:0 0 auto;min-width:0;font-family:inherit}
+#dpc-tools .dpct-small{font-size:12px}
+#dpc-tools .dpct-muted{color:#888}
+#dpc-tools .dpct-chip{background:#f3f5f4;border:1px solid #d9dfdc;border-radius:12px;padding:3px 10px;font-size:12px;cursor:pointer}
+#dpc-tools .dpct-chip:hover{background:#e6ece9}
+#dpc-tools .dpct-danger{color:#9b1c1c;border-color:#e8c4c4}
+#dpc-tools .dpct-path{font:13px ui-monospace,Menlo,Consolas,monospace}
+#dpc-tools .dpct-path a{cursor:pointer}
+#dpc-tools .dpct-table{width:100%;border-collapse:collapse;font-size:13px}
+#dpc-tools .dpct-table td,#dpc-tools .dpct-table th{padding:6px 6px;border-bottom:1px solid #eee;text-align:left}
+#dpc-tools .dpct-table th{font-weight:600;color:#666;font-size:12px}
+#dpc-tools .dpct-num{text-align:right!important;white-space:nowrap}
+#dpc-tools .dpct-acts{text-align:right;white-space:nowrap}
+#dpc-tools .dpct-acts button{background:none;border:0;color:#0F6E56;cursor:pointer;font-size:12px;padding:2px 6px}
+#dpc-tools .dpct-acts button.del{color:#9b1c1c}
+#dpc-tools .dpct-name{cursor:pointer;color:#0F6E56}
+#dpc-tools .dpct-prog{position:relative;height:18px;background:#eee;border-radius:3px;overflow:hidden;margin:6px 0}
+#dpc-tools .dpct-prog div{height:18px;width:0;background:#9fd8c6;transition:width .2s}
+#dpc-tools .dpct-prog span{position:absolute;left:8px;top:1px;font-size:12px}
+#dpc-tools .dpct-editor{border:1px solid #ddd;border-radius:4px;padding:8px 10px;margin-top:10px}
+#dpc-tools .dpct-etext{width:100%;height:380px;box-sizing:border-box;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid #ccc;border-radius:4px;padding:8px}
+#dpc-tools .dpct-upload{cursor:pointer}
+#dpc-tools fieldset{border:1px solid #e3e3e3;border-radius:4px;margin:10px 0;padding:6px 12px 10px}
+#dpc-tools legend{font-weight:600;font-size:13px;padding:0 4px}
+#dpc-tools .dpct-field{display:grid;grid-template-columns:170px 1fr;gap:8px;align-items:center;margin:6px 0;font-size:13px}
+#dpc-tools .dpct-field input,#dpc-tools .dpct-field select{padding:6px 8px;border:1px solid #ccc;border-radius:4px;font-size:13px;max-width:320px}
+@media (max-width:600px){#dpc-tools .dpct-field{grid-template-columns:1fr}}
+</style>
+
+<script>
+/* dpCREATOR board tools: a USB terminal, the board's files and its network
+ * settings, from the dpcreator.eu Flash Firmware page (Chrome or Edge on a
+ * computer: Web Serial). Works with any FluidNC board, not only dpCREATOR.
+ *
+ *   Session(port, {onLine, onSent})   one open USB serial port
+ *     .send(text)                     a line typed in the terminal
+ *     .realtime(byte)                 ?, !, ~, Ctrl-X
+ *     .cmd(text, ms)                  -> {ok, lines, error}   (one at a time)
+ *     .listFiles(fs, dir)             -> {files:[{name,size,dir}], total, used}
+ *     .download(fs, path, size)       -> Uint8Array            (XModem-1K)
+ *     .upload(fs, path, bytes)        -> bytes stored          (XModem-1K)
+ *     .remove(fs, path) / .rename(fs, from, to)
+ *     .getSetting(name) / .setSetting(name, value)
+ *     .network()                      -> what the board has (WiFi / Ethernet) and its settings
+ *     .scanWifi()                     -> [{ssid, signal, secure}]
+ *     .close()
+ *
+ * fs is "localfs" (the board's flash: config.yaml, the WebUI) or "sd".
+ */
+(function (root) {
+  "use strict";
+
+  const SOH = 0x01, STX = 0x02, EOT = 0x04, ACK = 0x06, NAK = 0x15, CAN = 0x18, CTRLZ = 0x1a;
+
+  function crc16(buf, off, len) {
+    let crc = 0;
+    for (let i = off; i < off + len; i++) {
+      crc ^= buf[i] << 8;
+      for (let j = 0; j < 8; j++) crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+    }
+    return crc;
+  }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  function fsPath(fs, path) {
+    const p = String(path || "").replace(/^\/+/, "");
+    return "/" + (fs === "sd" ? "sd" : "localfs") + "/" + p;
+  }
+
+  function Session(port, opts) {
+    opts = opts || {};
+    const onLine = opts.onLine || (() => {});
+    const q = [];            // raw bytes (raw mode)
+    const lines = [];        // text lines waiting for a reader (only while one waits)
+    let waiters = [];
+    let lineBuf = "";
+    let raw = false;
+    let closed = false;
+    let listening = 0;       // >0: an operation collects lines
+    let busy = Promise.resolve();
+
+    function wake() { const w = waiters; waiters = []; w.forEach((f) => f()); }
+    function textByte(b) {
+      if (b === 10) {
+        const l = lineBuf.replace(/\r$/, "");
+        lineBuf = "";
+        onLine(l, "in");
+        if (listening) lines.push(l);
+      } else if (b !== 13 || lineBuf.length) {
+        lineBuf += String.fromCharCode(b);
+      }
+    }
+
+    (async () => {
+      try {
+        for (;;) {
+          const chunk = await port.read();
+          if (!chunk) break;
+          for (const b of chunk) { if (raw) q.push(b); else textByte(b); }
+          wake();
+        }
+      } catch (e) { /* closed */ }
+      closed = true;
+      onLine("(port closed)", "info");
+      wake();
+    })();
+
+    function wait(ms) {
+      return new Promise((res) => {
+        const t = setTimeout(() => { waiters = waiters.filter((x) => x !== done); res(false); }, ms);
+        function done() { clearTimeout(t); res(true); }
+        waiters.push(done);
+      });
+    }
+    async function byte(ms) {
+      const end = Date.now() + ms;
+      while (!q.length) {
+        if (closed) return -1;
+        const left = end - Date.now();
+        if (left <= 0) return -1;
+        await wait(left);
+      }
+      return q.shift();
+    }
+    async function nextLine(ms) {
+      const end = Date.now() + ms;
+      while (!lines.length) {
+        if (closed) return null;
+        const left = end - Date.now();
+        if (left <= 0) return null;
+        await wait(left);
+      }
+      return lines.shift();
+    }
+    function setRaw(on) {
+      raw = on;
+      if (on) { q.length = 0; for (const c of lineBuf) q.push(c.charCodeAt(0)); lineBuf = ""; }
+      else { const rest = q.splice(0); rest.forEach(textByte); }
+    }
+    const write = (bytes) => port.write(bytes);
+    async function sendLine(text) {
+      onLine(text, "out");
+      await write(new TextEncoder().encode(text + "\n"));
+    }
+
+    // One operation at a time (a typed line waits for a running transfer).
+    function exclusive(fn) {
+      const run = busy.then(fn, fn);
+      busy = run.catch(() => {});
+      return run;
+    }
+
+    async function cmdNow(text, ms) {
+      listening++;
+      lines.length = 0;
+      try {
+        await sendLine(text);
+        const got = [];
+        const end = Date.now() + (ms || 5000);
+        for (;;) {
+          const l = await nextLine(Math.max(1, end - Date.now()));
+          if (l === null) return { ok: false, lines: got, error: closed ? "port closed" : "timeout" };
+          if (l === "ok") return { ok: true, lines: got };
+          if (/^error:/.test(l)) return { ok: false, lines: got, error: l };
+          if (l.startsWith("<") && l.endsWith(">")) continue;   // status report
+          got.push(l);
+        }
+      } finally {
+        listening--;
+      }
+    }
+
+    // ---- XModem-1K / CRC-16, both directions (FluidNC xmodem.cpp) --------
+    async function xmodemSend(data, progress) {
+      // The board waits 1 s, then sends 'C' every 2 s. Log lines can contain a
+      // 'C' too, so accept it only at the start of a line.
+      setRaw(true);
+      try {
+        let prev = 10, start = false;
+        const end = Date.now() + 40000;
+        while (Date.now() < end) {
+          const c = await byte(end - Date.now());
+          if (c < 0) break;
+          if (c === 0x43 && (prev === 10 || prev === 13 || prev === 0x43)) { start = true; break; }
+          if (c === CAN) throw new Error("The board refused the file (cannot open it for writing).");
+          prev = c;
+        }
+        if (!start) throw new Error("The board did not start the transfer.");
+        const blocks = Math.max(1, Math.ceil(data.length / 1024));
+        for (let n = 0; n < blocks; n++) {
+          const pkt = new Uint8Array(1029);
+          pkt[0] = STX; pkt[1] = (n + 1) & 0xff; pkt[2] = ~(n + 1) & 0xff;
+          pkt.fill(CTRLZ, 3, 1027);
+          pkt.set(data.subarray(n * 1024, Math.min(data.length, (n + 1) * 1024)), 3);
+          const crc = crc16(pkt, 3, 1024);
+          pkt[1027] = crc >> 8; pkt[1028] = crc & 0xff;
+          let sent = false;
+          for (let tries = 0; tries < 10 && !sent; tries++) {
+            await write(pkt);
+            for (;;) {
+              const r = await byte(5000);
+              if (r === ACK) { sent = true; break; }
+              if (r === NAK || r < 0) break;
+              if (r === CAN) {
+                if ((await byte(1000)) === CAN) throw new Error("The board cancelled the transfer (not enough space?).");
+              }
+            }
+          }
+          if (!sent) throw new Error("Transfer failed at block " + (n + 1) + " of " + blocks + ".");
+          progress && progress((n + 1) / blocks);
+        }
+        for (let tries = 0; tries < 10; tries++) {
+          await write(new Uint8Array([EOT]));
+          const r = await byte(5000);
+          if (r === ACK) return;
+          if (r === CAN) throw new Error("The board cancelled the transfer (not enough space?).");
+        }
+        throw new Error("The board did not confirm the end of the transfer.");
+      } finally {
+        setRaw(false);
+      }
+    }
+
+    async function quiet(ms) {   // drop bytes until the line is quiet for ms
+      for (;;) {
+        const c = await byte(ms);
+        if (c < 0) return;
+      }
+    }
+
+    async function xmodemReceive(expect, progress) {
+      // FluidNC's sender waits (2 s, 16 times) for 'C'. A log line ("Sending
+      // ... via XModem") can arrive around the first packet: bytes before a
+      // packet start are skipped, a damaged packet is asked for again.
+      setRaw(true);
+      try {
+        const out = [];
+        let got = 0, packetno = 1, started = false, tries = 0;
+        for (;;) {
+          // One 'C' per 3 s: the sender reads one byte after each packet, so
+          // a spare 'C' would make it send a packet twice and shift the ACKs.
+          if (!started) await write(new Uint8Array([0x43]));
+          let c = await byte(3000);
+          // skip text until a packet header / end
+          while (c >= 0 && c !== STX && c !== SOH && c !== EOT && c !== CAN) c = await byte(3000);
+          if (c < 0) {
+            if (++tries > 5) throw new Error(started ? "The transfer stopped." : "The board did not start sending (does the file exist?).");
+            if (started) await write(new Uint8Array([NAK]));
+            continue;
+          }
+          if (c === CAN) {
+            if ((await byte(1000)) === CAN) throw new Error("The board cancelled the transfer.");
+            continue;
+          }
+          if (c === EOT) {
+            await write(new Uint8Array([ACK]));
+            break;
+          }
+          started = true;
+          const size = c === STX ? 1024 : 128;
+          const pkt = new Uint8Array(size + 4);
+          let ok = true;
+          for (let i = 0; i < pkt.length; i++) {
+            const b = await byte(1000);
+            if (b < 0) { ok = false; break; }
+            pkt[i] = b;
+          }
+          ok = ok && pkt[0] === ((~pkt[1]) & 0xff) && crc16(pkt, 2, size) === ((pkt[size + 2] << 8) | pkt[size + 3]);
+          if (!ok) {
+            await quiet(150);
+            if (++tries > 20) throw new Error("Too many damaged packets.");
+            await write(new Uint8Array([NAK]));
+            continue;
+          }
+          tries = 0;
+          if (pkt[0] === (packetno & 0xff)) {
+            out.push(pkt.slice(2, 2 + size));
+            got += size;
+            packetno++;
+            progress && expect && progress(Math.min(1, got / expect));
+          }   // else: a repeat of the last packet (our ACK was lost)
+          await write(new Uint8Array([ACK]));
+        }
+        const all = new Uint8Array(got);
+        let p = 0;
+        for (const b of out) { all.set(b, p); p += b.length; }
+        // The last packet is padded with Ctrl-Z: cut to the listed size, or
+        // (size unknown) strip the padding.
+        if (expect != null && expect <= all.length) return all.subarray(0, expect);
+        let n = all.length;
+        while (n > 0 && all[n - 1] === CTRLZ) n--;
+        return all.subarray(0, n);
+      } finally {
+        setRaw(false);
+      }
+    }
+
+    // ---- files -------------------------------------------------------------
+    function parseList(lines) {
+      // $LocalFS/ListJSON / $SD/ListJSON: {"files":[{"name":..,"size":..}],"path":..,"total":..,"used":..}
+      const text = lines.filter((l) => !/^\[MSG:/.test(l)).join("");
+      const a = text.indexOf("{"), b = text.lastIndexOf("}");
+      if (a >= 0 && b > a) {
+        try {
+          const j = JSON.parse(text.slice(a, b + 1));
+          return {
+            files: (j.files || []).map((f) => ({ name: f.name, size: +f.size, dir: +f.size < 0 })),
+            total: j.total || "", used: j.used || "",
+          };
+        } catch (e) { /* fall through */ }
+      }
+      // $LocalFS/List: [FILE: name|SIZE:n] / [DIR:name], recursive (indented)
+      const files = [];
+      let total = "", used = "";
+      for (const l of lines) {
+        let m;
+        if ((m = /^\[FILE: (\S[^|]*)\|SIZE:(\d+)/.exec(l))) files.push({ name: m[1], size: +m[2], dir: false });
+        else if ((m = /^\[DIR:(\S.*)\]?$/.exec(l))) files.push({ name: m[1].replace(/\]$/, ""), size: -1, dir: true });
+        else if ((m = /Used:([^ \]]+) Total:([^ \]]+)/.exec(l))) { used = m[1]; total = m[2]; }
+      }
+      return { files, total, used };
+    }
+
+    const FS = (fs) => (fs === "sd" ? "SD" : "LocalFS");
+
+    async function listFiles(fs, dir) {
+      const r = await cmdNow("$" + FS(fs) + "/ListJSON=" + (dir || "/"), 20000);
+      if (!r.ok) {
+        const msg = (r.lines.find((l) => /error|fail|mount/i.test(l)) || r.error || "").replace(/^\[MSG:(ERR|INFO): ?/, "").replace(/\]$/, "");
+        throw new Error(fs === "sd" ? "Could not read the SD card (" + msg + "). Is a card inserted?" : "Could not list the files (" + msg + ").");
+      }
+      const list = parseList(r.lines);
+      list.files.sort((x, y) => (x.dir !== y.dir ? (x.dir ? -1 : 1) : x.name.localeCompare(y.name)));
+      return list;
+    }
+
+    async function download(fs, path, size, progress) {
+      listening++;
+      lines.length = 0;
+      try {
+        await sendLine("$Xmodem/Send=" + fsPath(fs, path));
+        await sleep(200);   // let "Sending ... via XModem" / "Cannot open" arrive as text
+        const early = lines.splice(0);
+        if (early.some((l) => /Cannot open/.test(l))) throw new Error("The board cannot open " + path + ".");
+        const data = await xmodemReceive(size, progress);
+        const end = Date.now() + 3000;
+        for (;;) {   // "Sent N bytes" / ok
+          const l = await nextLine(Math.max(1, end - Date.now()));
+          if (l === null || l === "ok" || /^error:/.test(l)) break;
+        }
+        return data;
+      } finally {
+        listening--;
+      }
+    }
+
+    async function upload(fs, path, bytes, progress) {
+      if (bytes.length && bytes[bytes.length - 1] === CTRLZ) {
+        // XModem pads with Ctrl-Z and the board strips trailing Ctrl-Z bytes.
+        throw new Error("This file ends with a Ctrl-Z byte, which XModem cannot carry. Add a newline at the end and try again.");
+      }
+      listening++;
+      lines.length = 0;
+      try {
+        await sendLine("$Xmodem/Receive=" + fsPath(fs, path));
+        await xmodemSend(bytes, progress);
+        const end = Date.now() + 8000;
+        let stored = null, failed = null;
+        for (;;) {
+          const l = await nextLine(Math.max(1, end - Date.now()));
+          if (l === null) break;
+          let m;
+          if ((m = /Received (\d+) bytes/.exec(l))) stored = +m[1];
+          if (/Reception failed(.*)/.test(l)) failed = l.replace(/^\[MSG:INFO: ?/, "").replace(/\]$/, "");
+          if (l === "ok" || /^error:/.test(l)) break;
+        }
+        if (failed) throw new Error(failed);
+        if (stored !== bytes.length) throw new Error("The board stored " + stored + " of " + bytes.length + " bytes.");
+        return stored;
+      } finally {
+        listening--;
+      }
+    }
+
+    // ---- settings / network ------------------------------------------------
+    async function getSetting(name) {
+      const r = await cmdNow("$" + name, 4000);
+      if (!r.ok) return null;
+      const re = new RegExp("^\\$" + name.replace(/[/]/g, "\\/") + "=(.*)$", "i");
+      for (const l of r.lines) { const m = re.exec(l); if (m) return m[1]; }
+      return null;
+    }
+    async function setSetting(name, value) {
+      if (/[\r\n]/.test(value)) throw new Error("Line breaks are not allowed in " + name + ".");
+      const r = await cmdNow("$" + name + "=" + value, 6000);
+      if (!r.ok) throw new Error(name + ": " + (r.lines.find((l) => /ERR|error/i.test(l)) || r.error));
+    }
+
+    const NET = {
+      common: ["Hostname", "network/type"],
+      wifi: ["WiFi/Mode", "Sta/SSID", "Sta/IPMode", "Sta/IP", "Sta/Gateway", "Sta/Netmask", "AP/SSID", "AP/Channel", "AP/IP"],
+      eth: ["Ethernet/IPMode", "Ethernet/IP", "Ethernet/Gateway", "Ethernet/Netmask"],
+    };
+    async function network() {
+      const v = {};
+      for (const n of NET.common) v[n] = await getSetting(n);
+      const wifi = (v["WiFi/Mode"] = await getSetting("WiFi/Mode")) !== null;
+      if (wifi) for (const n of NET.wifi.slice(1)) v[n] = await getSetting(n);
+      const eth = (v["Ethernet/IPMode"] = await getSetting("Ethernet/IPMode")) !== null;
+      if (eth) for (const n of NET.eth.slice(1)) v[n] = await getSetting(n);
+      const ip = await cmdNow("$System/IP", 3000);
+      const ipl = ip.ok && ip.lines.map((l) => /(\d+\.\d+\.\d+\.\d+)/.exec(l)).find(Boolean);
+      return { wifi, eth, values: v, ip: ipl ? ipl[1] : "" };
+    }
+    async function scanWifi() {
+      const r = await cmdNow("$WiFi/ListAPs", 20000);
+      const text = r.lines.filter((l) => !/^\[MSG:/.test(l)).join("");
+      const a = text.indexOf("{"), b = text.lastIndexOf("}");
+      if (!r.ok || a < 0) throw new Error("The board could not scan for networks" + (r.error ? " (" + r.error + ")" : "") + ".");
+      const j = JSON.parse(text.slice(a, b + 1));
+      const seen = new Map();
+      for (const ap of j.AP_LIST || j.data || []) {
+        if (!ap.SSID) continue;
+        const prev = seen.get(ap.SSID);
+        if (!prev || +ap.SIGNAL > prev.signal) seen.set(ap.SSID, { ssid: ap.SSID, signal: +ap.SIGNAL, secure: ap.IS_PROTECTED === true || ap.IS_PROTECTED === "1" || ap.IS_PROTECTED === 1 });
+      }
+      return [...seen.values()].sort((x, y) => y.signal - x.signal);
+    }
+
+    return {
+      get closed() { return closed; },
+      send: (text) => exclusive(() => sendLine(text)),
+      realtime: (b) => { onLine({ 0x3f: "?", 0x21: "! (feed hold)", 0x7e: "~ (resume)", 0x18: "Ctrl-X (reset)" }[b] || "0x" + b.toString(16), "out"); return write(new Uint8Array([b])); },
+      cmd: (text, ms) => exclusive(() => cmdNow(text, ms)),
+      listFiles: (fs, dir) => exclusive(() => listFiles(fs, dir)),
+      download: (fs, path, size, progress) => exclusive(() => download(fs, path, size, progress)),
+      upload: (fs, path, bytes, progress) => exclusive(() => upload(fs, path, bytes, progress)),
+      remove: (fs, path) => exclusive(async () => {
+        const r = await cmdNow("$" + FS(fs) + "/Delete=" + fsPath(fs, path), 8000);
+        if (!r.ok) throw new Error("Could not delete " + path + " (" + (r.lines.find((l) => /ERR/.test(l)) || r.error) + ").");
+      }),
+      rename: (fs, from, to) => exclusive(async () => {
+        const r = await cmdNow("$" + FS(fs) + "/Rename=" + fsPath(fs, from) + ">" + fsPath(fs, to), 8000);
+        if (!r.ok) throw new Error("Could not rename " + from + " (" + (r.lines.find((l) => /ERR/.test(l)) || r.error) + ").");
+      }),
+      getSetting: (n) => exclusive(() => getSetting(n)),
+      setSetting: (n, v) => exclusive(() => setSetting(n, v)),
+      network: () => exclusive(network),
+      scanWifi: () => exclusive(scanWifi),
+      close: () => port.close && port.close(),
+    };
+  }
+
+  /** Web Serial port adapter (115200 baud, FluidNC's USB console). */
+  async function openSerial() {
+    const sp = await navigator.serial.requestPort();
+    await sp.open({ baudRate: 115200, bufferSize: 65536 });
+    const reader = sp.readable.getReader();
+    const writer = sp.writable.getWriter();
+    return {
+      read: async () => { const { value, done } = await reader.read(); return done ? null : value; },
+      write: (b) => writer.write(b),
+      // Restart the board the way esptool does (EN low via RTS), staying out of the bootloader.
+      reset: async () => {
+        try { await sp.setSignals({ dataTerminalReady: false, requestToSend: true }); await sleep(120); await sp.setSignals({ dataTerminalReady: false, requestToSend: false }); } catch (e) {}
+      },
+      close: async () => {
+        try { await reader.cancel(); } catch (e) {}
+        try { reader.releaseLock(); writer.releaseLock(); } catch (e) {}
+        try { await sp.close(); } catch (e) {}
+      },
+    };
+  }
+
+  const api = { Session, openSerial, crc16, fsPath };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.DPCBoardTools = api;
+})(typeof window !== "undefined" ? window : globalThis);
+
+(function () {
+  var T = window.DPCBoardTools;
+  var $ = function (id) { return document.getElementById(id); };
+  var session = null, port = null;
+  var cwd = { localfs: "/", sd: "/" };
+  var history = [], hpos = 0, logText = "", psramNote = "";
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function size(n) { return n < 0 ? "" : n < 1024 ? n + " B" : n < 1048576 ? (n / 1024).toFixed(1) + " KB" : (n / 1048576).toFixed(2) + " MB"; }
+
+  if (!("serial" in navigator)) {
+    $("dpct-connect").disabled = true;
+    $("dpct-connect").className = "dpc-fw-btn dpc-fw-btn-lock";
+    $("dpct-noserial").hidden = false;
+  }
+
+  // ---------------------------------------------------------------- terminal
+  var out = $("dpct-out"), pending = [], flushQueued = false;
+  function show(text, dir) {
+    if (dir === "in" && $("dpct-hidestatus").checked && /^<.*>$/.test(text)) return;
+    logText += (dir === "out" ? "> " : "") + text + "\n";
+    pending.push([text, dir]);
+    if (!flushQueued) { flushQueued = true; requestAnimationFrame(flush); }
+  }
+  function flush() {
+    flushQueued = false;
+    var stick = out.scrollTop + out.clientHeight >= out.scrollHeight - 30;
+    var frag = document.createDocumentFragment();
+    pending.splice(0).forEach(function (p) {
+      var el = document.createElement("span");
+      if (p[1] === "out") el.className = "o";
+      else if (p[1] === "info") el.className = "i";
+      else if (/^error:|\[MSG:ERR/.test(p[0])) el.className = "e";
+      el.textContent = (p[1] === "out" ? "> " : "") + p[0] + "\n";
+      frag.appendChild(el);
+    });
+    out.appendChild(frag);
+    while (out.childNodes.length > 4000) out.removeChild(out.firstChild);
+    if (stick) out.scrollTop = out.scrollHeight;
+  }
+
+  function memCheck(line) {
+    var m = /^\[MSG:BoardMem:psram=(\d+):(ok|bad)(?::([^\]]*))?\]/.exec(line);
+    if (!m) return;
+    var w = $("dpct-mem");
+    if (m[2] === "bad") { w.hidden = false; w.textContent = "This board is not supported: " + m[3]; }
+    else { w.hidden = true; psramNote = " · PSRAM " + Math.round(+m[1] / 1024) + " MB"; }
+  }
+
+  $("dpct-connect").onclick = async function () {
+    try { port = await T.openSerial(); } catch (e) {
+      if (e && e.name !== "NotFoundError") $("dpct-status").textContent = "Could not open the port: " + (e.message || e) + ". Close other programs that use it (gSender, a terminal, another tab).";
+      return;
+    }
+    session = T.Session(port, { onLine: function (l, dir) {
+      show(l, dir);
+      if (dir === "in") memCheck(l);
+      if (dir === "info" && l === "(port closed)") disconnect();
+    } });
+    $("dpct-connect").hidden = true; $("dpct-disconnect").hidden = false; $("dpct-restart").hidden = false;
+    $("dpct-main").hidden = false;
+    $("dpct-status").textContent = "Connected";
+    show("Connected. Type $I for the firmware version, $SS for the startup log.", "info");
+    setTimeout(async function () {
+      var r = await session.cmd("$Board/ID", 3000);
+      var id = r.ok && r.lines.map(function (l) { return /BoardID:([0-9A-F]{12})/.exec(l); }).find(Boolean);
+      if (id) $("dpct-status").textContent = "Connected to board …" + id[1].slice(-6) + psramNote;
+      else if (!r.ok) $("dpct-status").textContent = "Connected (the board did not answer $Board/ID: older or other firmware)";
+    }, 600);
+  };
+  async function disconnect() {
+    if (port) { try { await port.close(); } catch (e) {} }
+    port = null; session = null;
+    $("dpct-connect").hidden = false; $("dpct-disconnect").hidden = true; $("dpct-restart").hidden = true;
+    $("dpct-status").textContent = "Not connected";
+  }
+  $("dpct-disconnect").onclick = disconnect;
+  $("dpct-restart").onclick = async function () {
+    if (!port) return;
+    show("Restarting the board… (if the terminal stays quiet, click Disconnect and Connect again)", "info");
+    session.send("$Bye");
+  };
+
+  $("dpct-form").onsubmit = function (ev) {
+    ev.preventDefault();
+    var v = $("dpct-in").value;
+    if (!session || !v.trim()) return;
+    history.push(v); if (history.length > 100) history.shift(); hpos = history.length;
+    $("dpct-in").value = "";
+    session.send(v);
+  };
+  $("dpct-in").onkeydown = function (ev) {
+    if (ev.key === "ArrowUp" && hpos > 0) { hpos--; this.value = history[hpos]; ev.preventDefault(); }
+    else if (ev.key === "ArrowDown") { hpos = Math.min(history.length, hpos + 1); this.value = history[hpos] || ""; ev.preventDefault(); }
+  };
+  Array.prototype.forEach.call(document.querySelectorAll("#dpc-tools .dpct-chip[data-cmd]"), function (b) {
+    b.onclick = function () { if (session) session.send(b.getAttribute("data-cmd")); };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("#dpc-tools .dpct-chip[data-rt]"), function (b) {
+    b.onclick = function () { if (session) session.realtime(+b.getAttribute("data-rt")); };
+  });
+  $("dpct-clear").onclick = function () { out.textContent = ""; logText = ""; };
+  $("dpct-save").onclick = function () { saveFile("fluidnc-log.txt", new TextEncoder().encode(logText)); };
+
+  function saveFile(name, bytes) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([bytes]));
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+  }
+
+  // ---------------------------------------------------------------- tabs
+  Array.prototype.forEach.call(document.querySelectorAll("#dpc-tools .dpct-tab"), function (t) {
+    t.onclick = function () {
+      Array.prototype.forEach.call(document.querySelectorAll("#dpc-tools .dpct-tab"), function (x) { x.setAttribute("aria-selected", x === t ? "true" : "false"); });
+      ["term", "files", "net"].forEach(function (n) { $("dpct-" + n).hidden = n !== t.getAttribute("data-tab"); });
+      if (t.getAttribute("data-tab") === "files") listFiles();
+      if (t.getAttribute("data-tab") === "net") loadNet();
+    };
+  });
+
+  // ---------------------------------------------------------------- files
+  function fs() { return $("dpct-fs").value; }
+  function join(dir, name) { return (dir.replace(/\/+$/, "") + "/" + name).replace(/^\/+/, ""); }
+  function progress(text, p) {
+    $("dpct-fprog").hidden = p === null;
+    $("dpct-ftext").textContent = text || "";
+    $("dpct-fbar").style.width = Math.round((p || 0) * 100) + "%";
+  }
+  function crumbs() {
+    var d = cwd[fs()], parts = d.split("/").filter(Boolean), html = '<a data-p="/">' + (fs() === "sd" ? "SD" : "flash") + "</a>", acc = "";
+    parts.forEach(function (p) { acc += "/" + p; html += ' / <a data-p="' + esc(acc) + '">' + esc(p) + "</a>"; });
+    $("dpct-path").innerHTML = html;
+    Array.prototype.forEach.call($("dpct-path").querySelectorAll("a"), function (a) { a.onclick = function () { cwd[fs()] = a.getAttribute("data-p"); listFiles(); }; });
+  }
+  async function listFiles() {
+    if (!session) return;
+    crumbs();
+    var tb = $("dpct-list");
+    tb.innerHTML = '<tr><td colspan="3" class="dpct-muted">Reading…</td></tr>';
+    try {
+      var r = await session.listFiles(fs(), cwd[fs()]);
+      $("dpct-space").textContent = r.used && r.total ? r.used + " of " + r.total + " used" : "";
+      tb.innerHTML = "";
+      if (!r.files.length) tb.innerHTML = '<tr><td colspan="3" class="dpct-muted">No files here.</td></tr>';
+      r.files.forEach(function (f) {
+        var tr = document.createElement("tr");
+        var path = join(cwd[fs()], f.name);
+        tr.innerHTML = '<td><span class="dpct-name">' + (f.dir ? "\uD83D\uDCC1 " : "") + esc(f.name) + '</span></td><td class="dpct-num">' + size(f.size) + '</td><td class="dpct-acts"></td>';
+        var acts = tr.lastChild;
+        function btn(label, fn, cls) { var b = document.createElement("button"); b.type = "button"; b.textContent = label; if (cls) b.className = cls; b.onclick = fn; acts.appendChild(b); }
+        if (f.dir) {
+          tr.querySelector(".dpct-name").onclick = function () { cwd[fs()] = "/" + path; listFiles(); };
+        } else {
+          var editable = f.size < 200000 && /\.(ya?ml|txt|json|nc|gcode|gc|ngc|tap|cnc|g|md|csv|cfg|ini|macro)$/i.test(f.name);
+          tr.querySelector(".dpct-name").onclick = editable ? function () { openEditor(path, f.size); } : function () { download(path, f.size); };
+          if (editable) btn("Edit", function () { openEditor(path, f.size); });
+          btn("Download", function () { download(path, f.size); });
+          btn("Rename", function () { rename(path, f.name); });
+          btn("Delete", function () { remove(path, f.name); }, "del");
+        }
+        tb.appendChild(tr);
+      });
+    } catch (e) {
+      tb.innerHTML = '<tr><td colspan="3" class="dpct-warn">' + esc(e.message) + "</td></tr>";
+    }
+  }
+  $("dpct-fs").onchange = listFiles;
+  $("dpct-refresh").onclick = listFiles;
+
+  async function fetchFile(path, n) {
+    progress("Downloading " + path + "…", 0);
+    try { return await session.download(fs(), path, n, function (p) { progress("Downloading " + path + "…", p); }); }
+    finally { progress("", null); }
+  }
+  async function download(path, n) {
+    try { saveFile(path.split("/").pop(), await fetchFile(path, n)); }
+    catch (e) { alert(e.message); }
+  }
+  async function rename(path, name) {
+    var to = prompt("New name for " + name + ":", name);
+    if (!to || to === name) return;
+    if (/[\/>]/.test(to)) { alert("The name cannot contain / or >."); return; }
+    try { await session.rename(fs(), path, join(cwd[fs()], to)); } catch (e) { alert(e.message); }
+    listFiles();
+  }
+  async function remove(path, name) {
+    var warn = fs() === "localfs" && /^config\.yaml$|^index\.html\.gz$/i.test(name)
+      ? "\n\n" + (name === "config.yaml" ? "Without config.yaml the machine does not work until a config is uploaded again." : "This is the board's web page (WebUI).")
+      : "";
+    if (!confirm("Delete " + name + " from the " + (fs() === "sd" ? "SD card" : "board flash") + "?" + warn)) return;
+    try { await session.remove(fs(), path); } catch (e) { alert(e.message); }
+    listFiles();
+  }
+  $("dpct-file").onchange = async function () {
+    var files = Array.prototype.slice.call(this.files);
+    this.value = "";
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i], path = join(cwd[fs()], f.name);
+      if (/[>]/.test(f.name)) { alert(f.name + ": the name cannot contain >."); continue; }
+      try {
+        var bytes = new Uint8Array(await f.arrayBuffer());
+        progress("Uploading " + f.name + "…", 0);
+        await session.upload(fs(), path, bytes, function (p) { progress("Uploading " + f.name + "…", p); });
+      } catch (e) { alert(f.name + ": " + e.message); }
+    }
+    progress("", null);
+    listFiles();
+  };
+
+  var editing = null;
+  async function openEditor(path, n) {
+    try {
+      var bytes = await fetchFile(path, n);
+      editing = path;
+      $("dpct-ename").textContent = (fs() === "sd" ? "SD: " : "Flash: ") + path;
+      $("dpct-etext").value = new TextDecoder().decode(bytes);
+      $("dpct-editor").hidden = false;
+      $("dpct-etext").focus();
+    } catch (e) { alert(e.message); }
+  }
+  $("dpct-eclose").onclick = function () { $("dpct-editor").hidden = true; editing = null; };
+  $("dpct-esave").onclick = async function () {
+    if (!editing) return;
+    var text = $("dpct-etext").value;
+    if (!/\n$/.test(text)) text += "\n";
+    try {
+      progress("Saving " + editing + "…", 0);
+      await session.upload(fs(), editing, new TextEncoder().encode(text), function (p) { progress("Saving " + editing + "…", p); });
+      progress("", null);
+      show("Saved " + editing + (/config\.ya?ml$/i.test(editing) ? " — restart the board to use it." : "."), "info");
+      $("dpct-ename").textContent = (fs() === "sd" ? "SD: " : "Flash: ") + editing + " (saved)";
+      listFiles();
+    } catch (e) { progress("", null); alert(e.message); }
+  };
+
+  // ---------------------------------------------------------------- network
+  var net = null;
+  function field(label, name, value, kind, opts) {
+    var id = "dpct-n-" + name.replace(/\W/g, "_");
+    var input;
+    if (kind === "select") input = '<select id="' + id + '" data-n="' + name + '">' + opts.map(function (o) { return "<option" + (o === value ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("") + "</select>";
+    else input = '<input id="' + id + '" data-n="' + name + '" type="' + (kind || "text") + '" value="' + esc(value == null ? "" : value) + '"' + (kind === "password" ? ' placeholder="unchanged" autocomplete="new-password"' : "") + ">";
+    return '<label class="dpct-field" for="' + id + '"><span>' + label + "</span>" + input + "</label>";
+  }
+  async function loadNet() {
+    if (!session) return;
+    $("dpct-netform").innerHTML = '<p class="dpct-muted dpct-small">Reading the board\'s settings…</p>';
+    $("dpct-netmsg").textContent = "";
+    try {
+      net = await session.network();
+      var v = net.values, h = "";
+      $("dpct-netinfo").innerHTML = net.ip && net.ip !== "0.0.0.0" ? "The board is on the network at <strong>http://" + esc(net.ip) + "</strong>" + (v.Hostname ? " (or http://" + esc(v.Hostname) + ".local)" : "") + "." : "The board is not on a network right now.";
+      h += "<fieldset><legend>General</legend>" + field("Board name (hostname)", "Hostname", v.Hostname);
+      if (net.wifi && net.eth) h += field("Connect by", "network/type", v["network/type"], "select", ["Ethernet", "WiFi"]);
+      h += "</fieldset>";
+      if (net.eth) {
+        h += "<fieldset><legend>Ethernet</legend>" + field("IP address", "Ethernet/IPMode", v["Ethernet/IPMode"], "select", ["DHCP", "Static"]);
+        h += '<div data-static="Ethernet">' + field("Static IP", "Ethernet/IP", v["Ethernet/IP"]) + field("Gateway", "Ethernet/Gateway", v["Ethernet/Gateway"]) + field("Netmask", "Ethernet/Netmask", v["Ethernet/Netmask"]) + "</div></fieldset>";
+      }
+      if (net.wifi) {
+        h += "<fieldset><legend>WiFi</legend>" + field("WiFi mode", "WiFi/Mode", v["WiFi/Mode"], "select", ["STA>AP", "STA", "AP", "Off"]);
+        h += '<p class="dpct-small dpct-muted">STA joins your network; STA&gt;AP joins it and opens its own access point when that fails; AP only opens its own access point.</p>';
+        h += field("Network (SSID)", "Sta/SSID", v["Sta/SSID"]) + '<div class="dpct-row"><button type="button" class="dpct-chip" id="dpct-scan">Find networks</button><select id="dpct-aps" class="dpct-input dpct-narrow" hidden></select></div>';
+        h += field("Password", "Sta/Password", "", "password");
+        h += field("IP address", "Sta/IPMode", v["Sta/IPMode"], "select", ["DHCP", "Static"]);
+        h += '<div data-static="Sta">' + field("Static IP", "Sta/IP", v["Sta/IP"]) + field("Gateway", "Sta/Gateway", v["Sta/Gateway"]) + field("Netmask", "Sta/Netmask", v["Sta/Netmask"]) + "</div>";
+        h += "</fieldset><fieldset><legend>Board's own access point</legend>" + field("Access point name", "AP/SSID", v["AP/SSID"]) + field("Access point password", "AP/Password", "", "password") + field("Channel", "AP/Channel", v["AP/Channel"], "number") + "</fieldset>";
+      } else {
+        h += '<p class="dpct-small dpct-muted">This firmware has no WiFi settings.</p>';
+      }
+      $("dpct-netform").innerHTML = h;
+      ["Ethernet", "Sta"].forEach(function (k) {
+        var sel = $("dpct-n-" + k + "_IPMode"), box = document.querySelector('#dpc-tools [data-static="' + k + '"]');
+        if (!sel || !box) return;
+        var upd = function () { box.hidden = sel.value !== "Static"; };
+        sel.onchange = upd; upd();
+      });
+      if ($("dpct-scan")) $("dpct-scan").onclick = scan;
+    } catch (e) {
+      $("dpct-netform").innerHTML = '<p class="dpct-warn">' + esc(e.message) + "</p>";
+    }
+  }
+  async function scan() {
+    var b = $("dpct-scan"), sel = $("dpct-aps");
+    b.disabled = true; b.textContent = "Searching…";
+    try {
+      var aps = await session.scanWifi();
+      sel.innerHTML = "<option value=''>Pick a network (" + aps.length + " found)</option>" + aps.map(function (a) { return '<option value="' + esc(a.ssid) + '">' + esc(a.ssid) + " · " + a.signal + "%" + (a.secure ? " \uD83D\uDD12" : "") + "</option>"; }).join("");
+      sel.hidden = false;
+      sel.onchange = function () { if (sel.value) $("dpct-n-Sta_SSID").value = sel.value; };
+    } catch (e) { alert(e.message); }
+    b.disabled = false; b.textContent = "Find networks";
+  }
+  $("dpct-netreload").onclick = loadNet;
+  $("dpct-netsave").onclick = async function () {
+    if (!session || !net) return;
+    var changed = [];
+    Array.prototype.forEach.call(document.querySelectorAll("#dpct-netform [data-n]"), function (el) {
+      var n = el.getAttribute("data-n"), val = el.value;
+      if (el.type === "password") { if (val) changed.push([n, val]); return; }
+      if (val !== (net.values[n] == null ? "" : String(net.values[n]))) changed.push([n, val]);
+    });
+    var msg = $("dpct-netmsg");
+    if (!changed.length) { msg.textContent = "Nothing changed."; return; }
+    var pw = changed.find(function (c) { return /Password/.test(c[0]); });
+    if (pw && pw[0] === "AP/Password" && pw[1].length < 8) { msg.textContent = "The access point password needs at least 8 characters."; return; }
+    try {
+      for (var i = 0; i < changed.length; i++) await session.setSetting(changed[i][0], changed[i][1]);
+      msg.innerHTML = "Saved (" + changed.map(function (c) { return esc(c[0]); }).join(", ") + "). <button type='button' class='dpct-chip' id='dpct-netrestart'>Restart the board to use them</button>";
+      $("dpct-netrestart").onclick = function () { $("dpct-restart").click(); };
+      changed.forEach(function (c) { if (!/Password/.test(c[0])) net.values[c[0]] = c[1]; });
+    } catch (e) { msg.textContent = e.message; }
+  };
+})();
+</script>
+
+</div>
+</div></section></div>
+
+<!-- Flash modal -->
+<div class="dpc-modal-overlay" id="dpc-flash-modal">
+  <div class="dpc-modal">
+    <button class="dpc-modal-close" onclick="dpcCloseModal('dpc-flash-modal')">×</button>
+    <h4 id="dpc-flash-title">Firmware flashen</h4>
+    <p class="dpc-modal-sub">Installiert Firmware per USB auf Ihrer Platine — keine Software nötig</p>
+    <div class="dpc-step">
+      <div class="dpc-step-n">1</div>
+      <div>Verbinden Sie Ihre Controller-Platine per USB-Kabel mit diesem Computer.</div>
+    </div>
+    <div class="dpc-step">
+      <div class="dpc-step-n">2</div>
+      <div>Verwenden Sie <strong>Chrome</strong> oder <strong>Edge</strong> — Firefox unterstützt Web Serial nicht.</div>
+    </div>
+    <div class="dpc-step">
+      <div class="dpc-step-n ok">3</div>
+      <div>Klicken Sie unten, wählen Sie Ihren COM-Port, und der Installer erledigt alles automatisch.</div>
+    </div>
+    <div id="dpc-flash-container"></div>
+    <p class="dpc-modal-notice">
+      <strong>Tipp:</strong> Wenn Ihre Platine nicht aufgeführt ist, halten Sie beim Einstecken des USB-Kabels die BOOT-Taste gedrückt, um in den Bootloader-Modus zu wechseln.
+    </p>
+  </div>
+</div>
+
+<!-- WebUI upload modal -->
+<div class="dpc-modal-overlay" id="dpc-webui-modal">
+  <div class="dpc-modal">
+    <button class="dpc-modal-close" onclick="dpcCloseModal('dpc-webui-modal')">×</button>
+    <h4 id="dpc-webui-title">WebUI auf den ESP hochladen</h4>
+    <p class="dpc-modal-sub">Die .gz-Datei wird aus dem internen Dateisystem des ESP (LittleFS) ausgeliefert</p>
+    <div class="dpc-step">
+      <div class="dpc-step-n">1</div>
+      <div>Laden Sie die WebUI-Datei aus dem Firmware-Release herunter.</div>
+    </div>
+    <div class="dpc-step">
+      <div class="dpc-step-n">2</div>
+      <div>Schalten Sie Ihren Controller ein und verbinden Sie ihn mit Ihrem WLAN oder verbinden Sie sich direkt mit seinem Access Point.</div>
+    </div>
+    <div class="dpc-step">
+      <div class="dpc-step-n">3</div>
+      <div>Öffnen Sie die Weboberfläche von FluidNC: <strong>http://&lt;controller-ip&gt;</strong></div>
+    </div>
+    <div class="dpc-step">
+      <div class="dpc-step-n">4</div>
+      <div>Gehen Sie zu <strong>Files</strong>, klicken Sie auf <strong>Upload</strong> und wählen Sie die Datei. Der Controller startet automatisch neu.</div>
+    </div>
+    <div class="dpc-step">
+      <div class="dpc-step-n ok">5</div>
+      <div>Aktualisieren Sie Ihren Browser — die neue WebUI ist jetzt aktiv.</div>
+    </div>
+    <p class="dpc-modal-notice">
+      <strong>Hilfe nötig?</strong> Ausführliche Einrichtungsanleitungen finden Sie in der FluidNC-Dokumentation.
+    </p>
+  </div>
+</div>
+
+<script>
+function dpcTab(btn, panelId) {
+  document.querySelectorAll('.dpc-fw-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.dpc-fw-panel').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+function dpcFlash(btn) {
+  var manifest = btn.getAttribute('data-manifest');
+  var name     = btn.getAttribute('data-name');
+  document.getElementById('dpc-flash-title').textContent = 'Flash: ' + name;
+  var container = document.getElementById('dpc-flash-container');
+  container.innerHTML = '';
+  var el = document.createElement('esp-web-install-button');
+  el.setAttribute('manifest', manifest);
+  el.innerHTML = '<button slot="activate">&#9889;&nbsp; Connect &amp; flash firmware</button>';
+  container.appendChild(el);
+  document.getElementById('dpc-flash-modal').classList.add('active');
+}
+
+function dpcWebUi(name) {
+  document.getElementById('dpc-webui-title').textContent = 'Upload WebUI: ' + name;
+  document.getElementById('dpc-webui-modal').classList.add('active');
+}
+
+function dpcCloseModal(id) {
+  document.getElementById(id).classList.remove('active');
+  if (id === 'dpc-flash-modal') {
+    document.getElementById('dpc-flash-container').innerHTML = '';
+  }
+}
+
+document.querySelectorAll('.dpc-modal-overlay').forEach(function(el) {
+  el.addEventListener('click', function(e) {
+    if (e.target === el) dpcCloseModal(el.id);
+  });
+});
+</script>
+<script>(function(){
+var LOGIN='index.php?route=account/login&return=index.php%3Froute%3Dinformation%2Finformation%26information_id%3D8',BUY={pendant:'index.php?route=product/product&product_id=377'};
+document.querySelectorAll('.dpc-fw-ver').forEach(function(el){var k=el.dataset.fw;
+ fetch('/fw.php?fw='+k+'&f=version').then(function(r){return r.json()}).then(function(j){el.textContent='build '+j.version.split(' ')[0]+(j.updated?' · '+j.updated.slice(0,10):'');}).catch(function(){el.textContent='';});
+ fetch('/fw.php?fw='+k+'&f=access',{credentials:'same-origin'}).then(function(r){return r.json()}).then(function(a){if(a.entitled)return;
+  var card=el.closest('.dpc-fw-card');if(!card)return;
+  var btn=card.querySelector('[data-manifest]'),dl=card.querySelector('a[href*="f=bin"]');
+  if(dl)dl.style.display='none';
+  if(!btn)return;
+  if(!a.logged_in){btn.innerHTML='&#128274; Log in to flash';btn.onclick=function(){location.href=LOGIN;};}
+  else{btn.innerHTML='&#128274; Buy to unlock';btn.onclick=function(){location.href=BUY[k]||LOGIN;};}
+ }).catch(function(){});
+});})();</script>
+<script id="dpc-install-log">(function(){var seen=[];setInterval(function(){var d=document.querySelector('ewt-install-dialog');if(!d||seen.indexOf(d)>=0)return;var s=d._installState;if(!s||s.state!=='finished')return;seen.push(d);var m=String(d.manifestPath||'').match(/[?&]fw=([a-z]+)/);if(m)fetch('/fw.php?fw='+m[1]+'&f=done',{method:'POST',credentials:'same-origin'}).catch(function(){});},1000);})();</script>
+<script src="/catalog/view/javascript/dpc-setup/dpc-setup-core.js?v=3"></script>
+<script src="/catalog/view/javascript/dpc-setup/dpc-setup-svg.js?v=2"></script>
+<script src="/catalog/view/javascript/dpc-setup/dpc-webui-lite.js?v=2"></script><script src="/catalog/view/javascript/dpc-setup/dpc-setup-ui.js?v=9"></script>

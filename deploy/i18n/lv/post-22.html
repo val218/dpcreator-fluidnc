@@ -1,0 +1,15 @@
+<h3>Z korekcija darba laikā</h3>
+<p>Mainiet griešanas dziļumu, kamēr darbs izpildās — piemēram, ja pirmā gājienā redzat, ka materiāls ir biezāks, nekā gaidīts.</p>
+<ul><li><strong>+ paceļ instrumentu (seklāk), − nolaiž to (dziļāk).</strong></li>
+<li>Pēc noklusējuma ne vairāk kā 0.5 mm vienā solī un kopā ±1 mm (<code>$Job/ZAdjust/Limit=&lt;mm&gt;</code>, 0.05–5 mm).</li>
+<li>Uz laiku: beidzas kopā ar darbu. DRO turpina rādīt faila Z.</li>
+<li>Darbojas griešanas laikā un Hold stāvoklī (Hold laikā tiek piemērota pie Resume).</li></ul>
+<p><strong>WebUI:</strong> josla <em>Z ADJUST</em> zem 3D skata. <strong>Pults:</strong> pieskarieties <em>Z adj</em>, turiet enable pogu, tad pieskarieties soļiem vai grieziet rokratu (pulksteņrādītāja virzienā — paceļ).</p>
+<p>Ja darbs beidzas ar nobīdi, jums jautā, vai pārvietot darba Z nulli par to, lai nākamā reizē griezums būtu tāds pats — <strong>Apply</strong> vai <strong>No</strong>.</p>
+<figure class="dpc-shot" style="margin:18px 0 22px"><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/pendant-zadjust.png" alt="Z korekcija darba laikā pultī" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/webui-viewer-zadjust.jpg" alt="Z ADJUST josla WebUI" loading="lazy" style="flex:1 1 280px;max-width:520px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Z korekcija darba laikā pultī (turiet ENABLE, tad pieskarieties vai grieziet rokratu) un Z ADJUST josla zem WebUI 3D skata.</figcaption></figure><h3>Atritināšana ar rokratu</h3>
+<p>Kamēr darbs ir stāvoklī <strong>Hold</strong>, pārvietojiet instrumentu atpakaļ pa jau izgriezto ceļu, mainiet augstumu un pārgrieziet līdz vietai, kur tas apstājās.</p>
+<ol><li><strong>Hold</strong>, tad <strong>Rewind</strong>. Pultī korekciju lodziņi kļūst par <em>Z ADJ | REWIND</em>: pieskarieties REWIND vai, turot ENABLE, grieziet rokratu pulksteņrādītāja virzienā. WebUI izmantojiet joslu Rewind.</li>
+<li>Grieziet rokratu pretēji pulksteņrādītājam, lai ietu atpakaļ pa ceļu, pulksteņrādītāja virzienā — lai ietu uz priekšu (0.1 / 1 / 5 mm uz klikšķi pie x1 / x10 / x100), vai izmantojiet WebUI pogas. Pults rāda, cik tālu atpakaļ esat, un josla to salīdzina ar maksimumu, ko kontrolieris spēj atritināt. Aiz apturēšanas punkta iet nevar.</li>
+<li>Ja vajag, koriģējiet <strong>Z</strong> šajā vietā (Z−0.1 … Z+0.1).</li>
+<li><strong>Continue</strong> (pieskarieties divreiz) pārgriež līdz apturēšanas punktam jaunajā augstumā, tad darbs turpinās. <strong>Cancel</strong> atgriežas apturēšanas punktā vecajā augstumā. Pultī panelis paliek atvērts, kamēr notiek pārgriešana vai atgriešanās, tad aizveras pats, un atkal parādās rīka ceļa skats.</li></ol>
+<p>Atritināšana apstājas pie instrumenta maiņām un vārpstas apgriezienu maiņām, un lāzera režīmā tā nav pieejama.</p>

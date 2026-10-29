@@ -1,0 +1,109 @@
+<p><strong>dpCREATOR Motion</strong> palīdz jums uzbūvēt savu mašīnu un panākt, lai tā strādā, pat ja tā ir jūsu pirmā. Robota roka, konveijers, rotācijas pozicionētājs, pick-and-place portāls, kameras slīdnis, testa stends vai kaut kas, ko vēl neviens nav uzbūvējis: jūs pievienojat motorus, sensorus un izejas, kamēr tos pieslēdzat, pārbaudāt katru no tiem, tad iemācāt mašīnai tās pozīcijas un izpildāt tās FluidNC kontrolierī. Motion liek lietā katru jūsu kontroliera asi, ieeju, releju un izeju. Jums nav jāzina G-kods vai FluidNC konfigurācijas fails: Motion uzraksta abus.</p>
+<p><a class="btn btn-primary" href="/motion/" target="_blank" rel="noopener">Izmēģiniet bezmaksas simulatoru</a></p>
+
+<div class="alert alert-info"><strong>Bez maksas ar dpCREATOR R3.</strong> Citām platēm ar FluidNC 3.8 vai jaunāku <a href="index.php?route=product/product&product_id=391">Motion maksā €39</a> (€29 agrīnā cena līdz palaišanai), viena licence 2 platēm jūsu kontā. Motion ir viena lapa, kas atrodas pašā kontroliera atmiņā, tāpat kā WebUI: bez instalēšanas, bez interneta. Tas ir beta versijā un tiks instalēts no lapas <a href="/firmware">Flash Firmware</a>. <a href="/rnd-club">R&D kluba</a> biedri beta laikā to saņem bez maksas.</div>
+
+<p><img src="image/catalog/dpc-site/shots/motion-d-arm.jpg" alt="dpCREATOR Motion: 4 locītavu robota roka ar iemācītajām pozīcijām, soļu secību un laika skalu" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<h3>Kā tas darbojas</h3>
+<p>Motion seko tam, kā mašīnu būvē patiesībā: <strong>pa vienam motoram vai sensoram</strong>. Pievienojiet daļu, pārbaudiet to, un tikai tad pievienojiet nākamo. Kad mašīna strādā, iemāciet tai kustības un izpildiet tās. Trīs posmi vienmēr redzami ekrāna augšā:</p>
+<ol>
+  <li><strong>Uzbūvējiet mašīnu:</strong> pievienojiet katru motoru, sensoru un izeju un pārbaudiet to.</li>
+  <li><strong>Iemāciet kustības:</strong> pārvietojiet mašīnu uz katru pieturu, saglabājiet to, pievienojiet gaidīšanu un pārslēgšanu.</li>
+  <li><strong>Palaidiet:</strong> simulatorā vai uz mašīnas no pašas kontroliera atmiņas.</li>
+</ol>
+<p><em>Simple</em> (pēc noklusējuma) rāda tikai to, kas vajadzīgs iesācējam. <em>All features</em> pievieno detaļu bibliotēku, 2D skatu, konsoli, laika skalu, pilnu soļu sarakstu, G-kodu un konfigurāciju.</p>
+
+<h3>Sākums: ko jūs būvējat?</h3>
+<p><img src="image/catalog/dpc-site/shots/motion-start.jpg" alt="Pirmais ekrāns: izvēlieties mašīnas veidu un kontrolieri" style="max-width:360px;width:100%;height:auto;border-radius:6px;float:right;margin:0 0 12px 18px"></p>
+<p>Pirmais ekrāns jautā, kāds jums ir kontrolieris (<em>dpCREATOR R3</em> vai <em>Another FluidNC board</em>) un kādu mašīnu jūs būvējat: portālu, lineāro slīdni, konveijeru, rotācijas pozicionētāju, robota roku vai ko citu. Veids nosaka tikai to, kur Motion novieto katru daļu 3D telpā (portālam X brauc pa Y, Z pa X; rokai locītavas sakrājas viena uz otras). Tas nekad neierobežo, ko varat pievienot.</p>
+<p>Motion jums ir jauns? <strong>New here? Try it first</strong> ir 2 minūšu iepazīšanās simulatorā, plate nav vajadzīga. <em>Or open a finished example</em> ielādē pilnu mašīnu ar tās kustībām: robota roka, konveijers ar stūmēju, rotācijas pozicionētājs, XY pick and place, kameras slīdnis vai servo roka ar četriem hobija servo.</p>
+<div style="clear:both"></div>
+
+<h3>1. posms: uzbūvējiet mašīnu</h3>
+<p><img src="image/catalog/dpc-site/shots/motion-builder.jpg" alt="Mašīnas būvēšana: detaļu bibliotēka, 3D mašīna, izvēlētā rokas locītava un tās pozīcijas kartīte" style="max-width:100%;height:auto;border-radius:6px"></p>
+<p>Kartīte <strong>Build it step by step</strong> uzskaita daļas, kas parasti ir jūsu mašīnas veidam, ar <strong>+ Add</strong> blakus katrai, kā arī <strong>+ Motor</strong>, <strong>+ Sensor / switch</strong> un <strong>+ Output / tool</strong> jebkam citam. Režīmā <em>All features</em> detaļu bibliotēkā pa kreisi ir visas daļas (lineārā ass, rotējošs galds, rokas locītava, hobija servo, konveijers, satvērējs, vakuuma piesūceknis, vārpsta, pielāgoti instrumenti, gala slēdži, sensori, signāllampas, vārsti). Ievelciet daļu 3D skatā, un tā piestiprinās pie karietes, profila, galda vai rokas locītavas gala un kustas kopā ar to.</p>
+
+<p><img src="image/catalog/dpc-site/shots/motion-add-motor.jpg" alt="Motora pievienošana: kā tas kustas, kurām spailēm tas pieslēgts, un pieslēguma attēls" style="max-width:300px;width:100%;height:auto;border-radius:6px;float:right;margin:0 0 12px 18px"></p>
+<p><strong>Motora pievienošana:</strong></p>
+<ol>
+  <li>Nosauciet to (<em>Y: front – back</em>).</li>
+  <li>Izvēlieties, kā tas kustas: <em>Straight</em> (mm), <em>Turning</em> (grādi), <em>Conveyor belt</em> (nekad neapstājas, skaita lentes mm) vai <em>Hobby servo</em> (3 vadi, 0–180°).</li>
+  <li><strong>Plugged into:</strong> R3 tās ir X, Y, Z un A ass spailes. Hobija servo var izmantot jebkuru brīvu STEP 5V vai DIR 5V spaili. Citā platē jūs ierakstāt STEP un DIR izvadus, un Motion tos pārbauda rakstīšanas laikā.</li>
+  <li>Cik tālu tas var aiziet.</li>
+  <li>Pieslēguma attēls rāda, kurš vads kur iet. Nospiediet <strong>Add</strong>.</li>
+</ol>
+<p><strong>Sensori un slēdži:</strong> sensors (redz detaļu vai pozīciju), poga (start, next, OK) vai gala / homing slēdzis uz sliedes. Ar pieslēgtu plati <em>Find it</em> atrod ieeju, kas mainās, kamēr jūs aktivizējat sensoru. Gala slēdzis arī iestata homing šai asij.</p>
+<p><strong>Izejas un instrumenti:</strong> satvērējs, vakuuma piesūceknis, vārsts vai relejs, lampa, vārpsta vai pielāgots instruments, piemēram, skavotājs vai līmes pistole (ieslēgts darba laikā vai viens impulss uz soli).</p>
+<div style="clear:both"></div>
+
+<h3>Tikai tas, ko jūsu kontrolieris spēj vadīt</h3>
+<p>Motion nolasa kontroliera <code>config.yaml</code>. Daļa, kurai vajag kaut ko, kā konfigurācijā nav (motora asi, brīvu ieeju vai izeju, Modbus moduli uz RS485), ir pelēka; noklikšķiniet uz tās, lai redzētu iemeslu, un ar <strong>Add to config</strong> pievienojiet rindas, kas to nodrošina. R3 tas ietver releju, 0–10 V un PWM izejas, brīvas LIMIT ieejas, ko izmanto kā sensorus, un Modbus I/O moduli uz RS485.</p>
+<p>Motion rediģē savu konfigurācijas kopiju, atzīmē katru mainīto rindu un pārbauda, vai kāds izvads nav izmantots divreiz. <strong>Apply to board</strong> augšupielādē to kā <code>motion-config.yaml</code> un pārstartē kontrolieri; jūsu vecais <code>config.yaml</code> paliek platē, tāpēc atgriešanās ir viena komanda.</p>
+<p style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/motion-board-map.jpg" alt="R3 plates karte: katra spaile un kas to izmanto" style="flex:1 1 440px;max-width:100%;height:auto;border-radius:6px"><img src="image/catalog/dpc-site/shots/motion-config.jpg" alt="Kontroliera konfigurācijas kartīte ar YAML, pēc kura Motion veido mašīnu" style="flex:0 1 280px;max-width:280px;height:auto;border-radius:6px"></p>
+<p><strong>Board map</strong> rāda katru R3 spaili un to, kam jūsu mašīna to izmanto; ja plate pieslēgta, ieejas un izejas iedegas reāllaikā. Citai platei tas ir konfigurācijas izvadu saraksts.</p>
+
+<h3>Pārbaudiet katru daļu pirms nākamās</h3>
+<p>Pēc <strong>Add</strong> Motion ievieto daļu 3D mašīnā un atver tās testu:</p>
+<ul>
+  <li><strong>Motors:</strong> pārvietojiet to −10 / +10. Vai + gāja pareizajā virzienā? <em>No, flip it</em> invertē virzienu. <em>Calibrate</em>: pārvietojiet par 100, izmēriet faktisko attālumu, ierakstiet to, un Motion izlabo soļus uz mm.</li>
+  <li><strong>Sensors vai poga:</strong> aktivizējiet to un vērojiet, kā iedegas punkts.</li>
+  <li><strong>Gala slēdzis:</strong> veiciet asij homing un vērojiet, kā tā apstājas pie slēdža.</li>
+  <li><strong>Izeja:</strong> On / Off: tai jānoklikšķ, jāiedegas vai jāpakustas.</li>
+</ul>
+<p>Ja plate pieslēgta, tests vispirms piedāvā <strong>Send and restart</strong>, lai plate saņemtu jauno konfigurāciju. Kad viss strādā, nospiediet <strong>It works</strong>: Motion atceras šo konfigurāciju kā pēdējo strādājošo.</p>
+<p><img src="image/catalog/dpc-site/shots/motion-not-working.jpg" alt="Nedarbojas? Motion pārbauda, ko var, un jautā, kas notiek" style="max-width:520px;width:100%;height:auto;border-radius:6px"></p>
+<p><strong>Not working?</strong> pie katras daļas vispirms pārbauda to, ko Motion var redzēt pats: vai plate pieslēgta, vai tā ir trauksmes stāvoklī, vai jaunā konfigurācija nosūtīta, vai daļa ir konfigurācijā, vai nav nospiests gala slēdzis, vai konfigurācija mainījusies kopš pēdējās reizes, kad strādāja (ar <em>Go back to the last working config</em>). Tad tas jautā, kas notiek (nekustas, nepareizs virziens, nepareizs attālums, sensors nekad vai vienmēr ieslēgts…) un beigās piedāvā risinājumu: konfigurācijas izmaiņu ar vienu klikšķi vai to, ko pārbaudīt mašīnā.</p>
+
+<h3>2. posms: iemāciet kustības</h3>
+<p><img src="image/catalog/dpc-site/shots/motion-timeline.jpg" alt="Kustību mācīšana: robota roka, visi soļi sarakstā ar sākuma laikiem un laika skala" style="max-width:100%;height:auto;border-radius:6px"></p>
+<ol>
+  <li>Pārvietojiet mašīnu tur, kur tai jāiet: ar pārvietošanas joslu zem 3D skata, bulttaustiņiem, velkot 3D skatā vai ar pults rokratu.</li>
+  <li>Nospiediet <strong>+ Position here</strong>. Tiek pievienots solis <em>Go to</em>.</li>
+  <li>Pārvietojieties uz nākamo vietu un atkārtojiet. Starplaikos pievienojiet <strong>+ Wait</strong> vai pārslēdziet instrumentu no pārvietošanas joslas.</li>
+</ol>
+<p>Vai arī nospiediet <strong>Record</strong> un vadiet mašīnu ar roku: Motion ieraksta soli pirms katras izejas pārslēgšanas un katras pievienotās gaidīšanas. Katra soļa kartīte rāda tā skaitļus (kur tas iet, lēni / normāli / ātri vai laiks sekundēs), ar <em>Go there</em> un <em>Update to here</em> pozīcijas precizēšanai. Velciet kartītes, lai mainītu to secību.</p>
+<p><strong>Citi soļu veidi:</strong> pakustēties nedaudz, gaidīt, pārslēgt izeju (ieslēgt, izslēgt vai viens impulss), gaidīt sensoru (ar noildzi), darbināt līdz sensoram (lenti, līdz detaļa pienāk), atkārtot (n reizes vai līdz apturēšanai), ja sensors…, pauze operatoram, parādīt ziņojumu, sekot iemācītam ceļam, un gaidīt vai pārbaudīt izmērītu vērtību (Modbus vai plates ADC). Kustībai norāda ātrumu vai laiku („pārvietoties uz turieni 1.2 s laikā”); visas tās asis pienāk vienlaicīgi.</p>
+<p>Mašīnai var būt vairākas <strong>secības</strong> (<em>Pick and place</em>, <em>Park</em>…), katra sava programma. <strong>Play</strong> izpilda secību simulatorā; <strong>Step by step</strong> apstājas pirms katra soļa. Režīmā <em>All features</em> <strong>Time</strong> rāda laika skalu: josla katram solim, līnija katrai asij, rinda katrai izejai un cikla laiks.</p>
+
+<h3>3. posms: palaidiet</h3>
+<p><img src="image/catalog/dpc-site/shots/motion-run.jpg" alt="Palaišana: robota roka paceļ detaļu, satvērējs ieslēgts, ar Pause, Stop un ātruma slīdni" style="max-width:100%;height:auto;border-radius:6px"></p>
+<p>Izvēlieties secību, tad <strong>Simulation</strong> vai <strong>Machine</strong>. Uz mašīnas Motion augšupielādē programmu kontroliera SD kartē (vai tā flash atmiņā, ja kartes nav) un palaiž to tur, tāpēc programma izpildās kontrolierī, nevis pārlūkā: lapas aizvēršana to neaptur. Izpildes laikā:</p>
+<ul>
+  <li>izpildāmais solis ir izcelts un nosaukts;</li>
+  <li><strong>Pause</strong>, <strong>Resume</strong>, <strong>Stop</strong>;</li>
+  <li><strong>ātruma</strong> slīdnis (10–200 %) maina katru kustību reāllaikā;</li>
+  <li>žurnāls uzskaita, kas notika.</li>
+</ul>
+<p><strong>Send to machine</strong> nokopē katru secību uz kontrolieri kopā ar soļu nosaukumiem. Tad SmartTabUI pults var tās parādīt sarakstā un palaist jebkuru no tām patstāvīgi, bez datora.</p>
+
+<h3>Piemēri</h3>
+<p style="display:flex;flex-wrap:wrap;gap:12px"><img src="image/catalog/dpc-site/shots/motion-conveyor.jpg" alt="Konveijers ar detaļas sensoru, stūmēju un darbības lampu" style="flex:1 1 300px;max-width:100%;height:auto;border-radius:6px"><img src="image/catalog/dpc-site/shots/motion-gantry.jpg" alt="XY pick and place portāls ar vakuuma piesūcekni" style="flex:1 1 300px;max-width:100%;height:auto;border-radius:6px"></p>
+<ul>
+  <li><strong>Konveijers:</strong> darbina lenti, līdz detaļas sensors ierauga detaļu, nostumj to, gaida, līdz tās vairs nav, atkārto bezgalīgi.</li>
+  <li><strong>XY pick and place:</strong> X, Y un pacēlājs ar vakuuma piesūcekni, no paplātes uz kasti.</li>
+  <li><strong>Rotācijas pozicionētājs:</strong> gaida operatora pogu, tad pagriežas par 45° katrā stacijā ar skavu.</li>
+  <li><strong>Robota roka:</strong> pamatne, plecs, elkonis, plauksta un satvērējs, piecas reizes paceļ detaļu.</li>
+  <li><strong>Kameras slīdnis</strong> un <strong>servo roka</strong> (četri hobija servo uz R3 STEP izejām).</li>
+</ul>
+
+<h3>Uz dpCREATOR R3</h3>
+<ul>
+  <li>Katras ass spaiļu bloks (STEP 5V, DIR 5V, GND, LIMIT, LIMIT COM) vada ārēju soļu motora draiveri. Brīvas ass spailes var vadīt hobija servo vai darboties kā 5 V signāla izejas.</li>
+  <li>LIMIT ieejas ir izolētas: slēdži un NPN sensori pieslēdzas tieši; PNP sensoriem vajadzīgs pārveidotājs.</li>
+  <li>Relejs, 0–10 V un PWM izejas, kā arī Modbus I/O modulis uz RS485 tiek piedāvāti, ja tie ir konfigurācijā.</li>
+  <li>Ar dpCREATOR programmaparatūru Motion rāda ieejas un izejas reāllaikā, ātrāk gaida sensorus un nodod pultij soļu nosaukumus.</li>
+</ul>
+
+<h3>Uz citām FluidNC platēm</h3>
+<p>Motion darbojas uz jebkuras plates ar FluidNC 3.8 vai jaunāku. Tas nezina citas plates spailes, tāpēc jūs ierakstāt izvadus, un Motion pārbauda katru (formātu, vai jau izmantots, flash un tikai ieejas izvadus klasiskajā ESP32). Secības izpildās tāpat. Lietotāja ieejām un izejām reāllaikā vajadzīga dpCREATOR programmaparatūra; standarta FluidNC rāda gala slēdžus un zondi.</p>
+
+<h3>Ierobežojumi (beta)</h3>
+<ul>
+  <li>Vienlaikus izpildās viena programma, un tās soļi izpildās viens pēc otra (lente nevar turpināt darboties, kamēr kustas roka).</li>
+  <li>Rokām kustības māca pa locītavai: instrumenta kustību pa taisnu līniju nav.</li>
+  <li>Simulatorā nav paātrinājuma; reālas kustības aizņem nedaudz ilgāk.</li>
+  <li>Līdz 6 asīm, 8 ieejām un 8 izejām (FluidNC ierobežojumi); R3 Modbus I/O modulis pievieno vairāk.</li>
+  <li>Pagaidām tikai angļu valodā.</li>
+</ul>
+

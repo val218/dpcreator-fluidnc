@@ -1,0 +1,40 @@
+<div class="alert alert-warning"><strong>dpCREATOR PnP ist eine Beta.</strong> Behandeln Sie jeden ersten Lauf als Test und teilen Sie uns mit, was passiert: Jedes gemeldete Problem wird so schnell wie möglich behoben.</div>
+
+<h3>Sicherheit</h3>
+<ul>
+<li><strong>Verdrahten Sie einen Not-Halt.</strong> Die Stop-Taste im Browser ist keiner: Eine Seite oder eine WLAN-Verbindung kann einfrieren.</li>
+<li>Für den ersten Lauf jedes neuen Aufbaus: Maschine referenzieren, keine Gurte auf das Bett legen, Geschwindigkeit auf 25 % stellen und eine Hand in der Nähe des Not-Halts halten. Dann einen Gurt mit 0805-Bauteilen ausprobieren.</li>
+<li><strong>Vor jedem Job referenzieren.</strong> Die Drehachse der Düse (A) wird nicht referenziert, drehen Sie die Düse also vor der Referenzfahrt gerade.</li>
+<li>PnP prüft Höhen nur anhand der Zahlen, die Sie eingeben. Eine falsche Aufnahme-, Platinen- oder Bauteilhöhe kann die Düse beschädigen.</li>
+<li>Ein Pastendispenser am Kopf ragt unter die Düse. Nehmen Sie ihn ab oder heben Sie ihn an, bevor Sie bestücken.</li>
+<li>Stop lässt das Bauteil an der Düse fallen. Prüfen Sie die Platine nach einem Stopp.</li>
+<li><strong>Schließen Sie niemals eine Magnetventilspule direkt an die PWM-Klemme des R3 an</strong>; verwenden Sie ein MOSFET-Modul oder ein Halbleiterrelais.</li>
+<li>Wenn Sie mit der unteren Kamera arbeiten, lassen Sie die Seite geöffnet, bis der Job endet.</li>
+</ul>
+
+<h3>Noch nicht unterstützt</h3>
+<ul>
+<li>Nur geschnittene Gurte und Trays: keine motorischen Feeder und eine Düse (kein Düsenwechsler).</li>
+<li>Ohne untere Kamera sind passive Bauteile ab 0805, SOT-23 und SOIC realistisch. Kleinere Bauteile und solche mit feinem Raster sind noch zu bestätigen.</li>
+<li>Prüfen Sie das erste gepolte Bauteil jedes Gurts. Platinen-Unterseiten sind noch zu bestätigen.</li>
+</ul>
+
+<h3>Kameras</h3>
+<ul>
+<li>USB-Kameras brauchen eine Chrome-Einstellung, wenn PnP vom Board aus geöffnet wird.</li>
+<li>IP-Kameras (ESP32-CAM) funktionieren, sind aber ungenauer als USB-Kameras.</li>
+<li>Kameras brauchen gleichmäßige Beleuchtung. Kalibrieren Sie neu, nachdem Sie eine Kamera bewegt haben.</li>
+</ul>
+
+<h3>Paste</h3>
+<ul>
+<li>Stimmen Sie die Pastenmengen an einer Ersatzplatine ab. Beim R3 braucht ein Dispenser einen zusätzlichen Ausgang, zum Beispiel ein Relaismodul am RS485-Anschluss.</li>
+<li>Ein motorischer Extruder braucht eine fünfte Achse, die beim R3 nicht frei ist.</li>
+<li>Für die meisten Platinen ist eine Schablone einfacher.</li>
+</ul>
+
+<h3>Firmware</h3>
+<p>PnP ist für die dpCREATOR-FluidNC-Firmware mit der PnP-Konfiguration gemacht. Standard-FluidNC führt die SD-Karten-Jobs aus, mit weniger Prüfungen.</p>
+
+<h3>Teilen Sie es uns mit</h3>
+<p>Ihre Platine und Maschine, was funktioniert hat, welche Bauteile verdreht oder versetzt herauskamen, jede Meldung, die der Job angezeigt hat, und ein Foto. Schreiben Sie uns über die <a href="index.php?route=information/contact">Kontaktseite</a>.</p>

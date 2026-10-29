@@ -1,0 +1,54 @@
+<p>dpCREATOR Studio kann auch auf Ihrem Controller liegen, neben der WebUI. Es öffnet sich dann unter der eigenen Adresse der Maschine, funktioniert ohne Internet und sendet den G-Code direkt auf die SD-Karte. Die Installation ist mit einem dpcreator.eu-Konto kostenlos und dauert über USB etwa eine Minute. Sie funktioniert auf jedem FluidNC-4.x-Controller; mit der dpCREATOR-Firmware erhalten Sie zusätzlich die Studio-Taste in der WebUI und Jobs, die bereits vorbereitet ankommen.</p>
+
+<div class="alert alert-info"><strong>Voraussetzungen:</strong> FluidNC <strong>4.0 oder neuer</strong> auf dem Controller – Standard-FluidNC oder die kostenlose dpCREATOR-Firmware – mit etwa 500 KB freiem Flash-Speicher (der Installer prüft das), ein USB-Kabel und Chrome oder Edge auf einem Computer. Um Studio ohne Installation zu nutzen, öffnen Sie stattdessen <a href="/studio/" target="_blank" rel="noopener">dpcreator.eu/studio</a> (<a href="index.php?route=journal3/blog/post&journal_blog_post_id=34">so funktioniert Studio</a>).</div>
+
+<h3>Installieren</h3>
+<ol>
+  <li>Melden Sie sich bei Ihrem dpcreator.eu-Konto an (kostenlos erstellbar).</li>
+  <li>Öffnen Sie <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>, Reiter <strong>Studio</strong>, Karte <strong>Install Studio on your controller</strong>.</li>
+  <li>Verbinden Sie den Controller per USB-Kabel mit dem Computer. Die Maschine muss im Zustand <strong>Idle</strong> (oder Alarm) sein, nicht mitten in einem Job. Schließen Sie alle anderen Programme, die ihren seriellen Port nutzen.</li>
+  <li>Klicken Sie auf <strong>Install Studio on my controller</strong> und wählen Sie den Port des Controllers.</li>
+  <li>Warten Sie auf <strong>Done</strong>. Der Controller startet nicht neu, und Ihre Einstellungen, die WebUI und die Dateien auf der SD-Karte bleiben unberührt.</li>
+</ol>
+
+<h3>Öffnen</h3>
+<ul>
+  <li><strong>dpCREATOR-Firmware:</strong> <code>http://&lt;your board&gt;/studio.html</code>, zum Beispiel <code>http://fluidnc.local/studio.html</code>, oder klicken Sie oben rechts in der dpCREATOR WebUI auf <strong>Studio</strong>.</li>
+  <li><strong>Standard-FluidNC 4.x:</strong> <code>http://&lt;your board&gt;/flash/studio.html</code>, zum Beispiel <code>http://192.168.1.50/flash/studio.html</code>. Legen Sie ein Lesezeichen an.</li>
+</ul>
+
+<h3>Einen Job an die Maschine senden</h3>
+<ol>
+  <li>Erstellen Sie Ihr Design und drücken Sie <strong>Make g-code</strong>. Wenn Studio vom Controller aus geöffnet wurde, kennt es die Adresse der Maschine bereits (bei anderen Kopien tragen Sie sie in <strong>Setup</strong> ein).</li>
+  <li>Drücken Sie <strong>Send</strong>. Die Datei landet im Hauptverzeichnis der SD-Karte und wird sofort <strong>vorbereitet</strong> (Prepare): Jede geöffnete dpCREATOR WebUI zeigt ihre Vorschau mit einer Leiste <strong>Run</strong> / <strong>Cancel</strong>, und das SmartTabUI-Handbediengerät zeigt sie ebenfalls. Noch bewegt sich nichts.</li>
+  <li>Setzen Sie den Werkstück-Nullpunkt und drücken Sie dann <strong>Run</strong> in der WebUI oder am Handbediengerät. Keine WebUI geöffnet? Die blaue Taste <strong>WebUI</strong> oben rechts in Studio öffnet sie, mit dem Job startbereit. Ist die WebUI bereits in einem anderen Tab geöffnet, wechselt sie zu diesem Tab, statt einen neuen zu öffnen; die Studio-Taste der WebUI macht dasselbe in der Gegenrichtung.</li>
+</ol>
+<p>Auf einem Controller mit Standard-FluidNC wird die Datei auf die SD-Karte gesendet, aber nicht vorbereitet (dafür ist die dpCREATOR-Firmware nötig): Starten Sie sie aus der SD-Kartenliste der WebUI.</p>
+<p><img src="image/catalog/dpc-site/shots/studio-machine-v2.jpg" alt="dpCREATOR Studio: 3D-Ansicht der Maschine beim Ausführen des Jobs" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<h3>Aktualisieren und entfernen</h3>
+<ul>
+  <li><strong>Aktualisieren:</strong> Installieren Sie erneut über die Seite Flash Firmware. Die neue Kopie ersetzt die alte. Ihre Designs bleiben erhalten: Sie werden in Ihrem Browser gespeichert, nicht auf dem Controller.</li>
+  <li><strong>Entfernen:</strong> Löschen Sie <code>studio.html.gz</code> aus den Flash-Dateien des Controllers (Classic UI → flash files) oder senden Sie <code>$LocalFS/Delete=/localfs/studio.html.gz</code> in der Konsole.</li>
+  <li>Das Flashen der vollständigen Controller-Firmware (Merged Image) löscht die Flash-Dateien: Installieren Sie Studio danach erneut, wie bei der WebUI.</li>
+</ul>
+
+<h3>Designs in der Controller-Kopie</h3>
+<p>Browser speichern Daten pro Adresse, daher sind Designs aus der Controller-Kopie getrennt von denen auf dpcreator.eu, und eine Änderung der Board-Adresse (zum Beispiel von <code>fluidnc.local</code> auf die IP) zeigt eine andere Liste. Verwenden Sie <strong>Save</strong> (Projektdatei) und <strong>Open</strong>, um ein Design zu übertragen.</p>
+
+<h3>Wenn es nicht funktioniert</h3>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><em>Needs Chrome or Edge on a computer</em></td><td>Web Serial ist in diesem Browser nicht verfügbar. Verwenden Sie Chrome oder Edge unter Windows, macOS oder Linux.</td></tr>
+    <tr><td><em>The controller does not answer</em></td><td>Prüfen Sie das Kabel (ein Datenkabel) und den Port. Schließen Sie serielle Monitore, andere per USB verbundene WebUI-Tabs oder Programme wie LaserGRBL oder UGS.</td></tr>
+    <tr><td><em>The machine is Run / Hold / Jog …</em></td><td>Warten Sie, bis der Job endet, oder stoppen Sie ihn und versuchen Sie es erneut.</td></tr>
+    <tr><td><em>needs FluidNC 4.0 or newer</em></td><td>Auf dem Controller läuft FluidNC 3.x oder älter. Aktualisieren Sie ihn (die kostenlose dpCREATOR-Firmware oder Standard-FluidNC 4.x) oder verwenden Sie Studio auf dpcreator.eu.</td></tr>
+    <tr><td><em>Not enough room in the controller's flash</em></td><td>Löschen Sie ungenutzte Dateien aus dem Flash (Classic UI → flash files) oder verwenden Sie Studio auf dpcreator.eu.</td></tr>
+    <tr><td>Der Browser lädt studio.html herunter, statt es zu öffnen</td><td>Das tun Standard-FluidNC und ältere dpCREATOR-Builds. Öffnen Sie stattdessen <code>/flash/studio.html</code> oder aktualisieren Sie auf die neueste dpCREATOR-Firmware.</td></tr>
+    <tr><td><em>Too many installs in the last hour</em></td><td>Warten Sie eine Stunde und versuchen Sie es erneut.</td></tr>
+    <tr><td>Send meldet, dass der Browser die Verbindung blockiert hat</td><td>Sie verwenden die https-Kopie auf dpcreator.eu. Öffnen Sie die Kopie auf dem Controller (http) oder verwenden Sie Download .nc.</td></tr>
+  </tbody>
+</table>
+
+<h3>Fragen</h3>
+<p>Nutzen Sie die Seite <a href="index.php?route=extension/module/dpc_support">Support</a> (zuerst anmelden). Nennen Sie uns den Studio-Build (die Taste <strong>i</strong> in Studio), Ihren Controller und dessen Firmware-Version, und kopieren Sie den Text unter <strong>Details</strong> auf der Installationskarte, falls die Installation fehlgeschlagen ist.</p>

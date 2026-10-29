@@ -1,0 +1,148 @@
+<p>dpCREATOR R2/R3 vada jebkuru mašīnu, kas kustas pēc soļa un virziena (step/dir) signāliem: CNC frēzes, lāzerus, plotterus un velkamos nažus, kā arī plazmas galdus. Izmantojiet to jaunai būvei vai veca kontroliera nomaiņai, saglabājot savus draiverus, motorus un slēdžus. Mašīnas tipu iestata failā <code>config.yaml</code>, un SmartTabUI pults iestatījumos ir CNC, lāzera un plottera režīmi.</p>
+
+<h2>Esošas mašīnas modernizācija</h2>
+<p>Četras ass izejas ir 5&nbsp;V step, direction un enable signāli. Tie der lielākajai daļai ārējo soļu motoru draiveru (DM542 / DM556 tipa, TB6600 tipa, slēgtās cilpas soļu motoriem) un AC servo draiveriem step/dir režīmā. Tipiski tiek nomainīta Mach3 paralēlā porta pieslēguma plate, veca GRBL plate vai slēgts kontrolieris, kas vairs netiek atbalstīts.</p>
+<h3>Draiveru ar optoieejām pieslēgšana</h3>
+<table class="table table-bordered">
+<thead><tr><th>Draivera ieeja</th><th>R2/R3</th></tr></thead>
+<tbody>
+<tr><td>PUL+ (STEP+)</td><td>Ass step izeja</td></tr>
+<tr><td>DIR+</td><td>Ass virziena izeja</td></tr>
+<tr><td>ENA+</td><td>Kopīgais enable (GPIO8)</td></tr>
+<tr><td>PUL−, DIR−, ENA−</td><td>GND</td></tr>
+</tbody>
+</table>
+<p>Katras ass izvadu numuri ir <a href="index.php?route=journal3/blog/post&journal_blog_post_id=15">izvadu shēmas lapā</a>.</p>
+<h3>Laiki draiveriem ar optoieejām</h3>
+<p>Tādiem draiveriem kā DM542 virziena signālam jābūt iestatītam dažas mikrosekundes pirms soļa impulsa. Dodiet tiem vairāk laika, nekā paredz parauga konfigurācija:</p>
+<pre><code>stepping:
+  engine: RMT
+  pulse_us: 4
+  dir_delay_us: 5</code></pre>
+<h3>Pārbaudes saraksts</h3>
+<ul>
+<li><strong>Enable:</strong> ja motori ir brīvi, kad tiem jātur, vai tur, kad ir atslēgti, invertējiet enable ar <code>shared_stepper_disable_pin: gpio.8:low</code>.</li>
+<li><strong>Virziens:</strong> ja ass kustas nepareizā virzienā, pievienojiet <code>:low</code> tās <code>direction_pin</code>.</li>
+<li><strong>Soļi uz mm:</strong> iestatiet <code>steps_per_mm</code> pēc draivera mikrosoļu iestatījuma un mehānikas. Parauga vērtības ir tikai aizpildītāji.</li>
+<li><strong>Slēdži:</strong> gala slēdžu ieejas ir optoizolētas. Pievienojiet vai noņemiet <code>:low</code> atbilstoši normāli atvērtiem vai normāli slēgtiem slēdžiem.</li>
+<li><strong>Pirmais tests:</strong> darbiniet ar atlaistām siksnām vai sajūgiem, mazā ātrumā, ar E-stop pa rokai.</li>
+</ul>
+
+<h2>CNC frēze</h2>
+<p>Tā ir parauga konfigurācija: četras asis, vārpsta uz PWM izejas ar releju kā ieslēgšanu/izslēgšanu, vai VFD caur RS485. Skatiet <a href="index.php?route=journal3/blog/post&journal_blog_post_id=17">Vārpsta un VFD</a>. Pultī lodziņi FEED, RAPID un SPND iestata korekcijas.</p>
+
+<h2>Lāzers</h2>
+<p>Aizstājiet sadaļu <code>PWM:</code> ar sadaļu <code>Laser:</code>. Lāzera jauda nāk no PWM izejas, un relejs pārslēdz lāzera enable:</p>
+<pre><code>Laser:
+  pwm_hz: 5000
+  output_pin: gpio.21
+  enable_pin: gpio.39
+  tool_num: 0
+  speed_map: 0=0.000% 1000=100.000%</code></pre>
+<p>Savā CAM vai LightBurn izmantojiet M4 (lāzera režīms), iestatot kā GRBL ierīci ar S max 1000. M4 režīmā jauda seko faktiskajam ātrumam, tāpēc stūri un lēnas kustības nesadeg tumšāk. Iestatiet pulti lāzera režīmā, un tās trešais lodziņš rādīs lāzera jaudu.</p>
+<p><strong>M4 vajadzīga sadaļa <code>Laser:</code>.</strong> Ja ir tikai frēzes vārpsta (<code>PWM:</code>, <code>10V:</code> vai VFD), M4 aptur darbu ar <em>error 20 (Unsupported GCode command)</em>: izmantojiet M3 vai pievienojiet lāzeru, kā aprakstīts zemāk sadaļā <a href="#router-and-laser">Frēze un lāzers vienā mašīnā</a>. Lāzera darbi WebUI detaļas skatā (Part) un pults PART skatā redzami kā apdegums, un WebUI izpildes josla rāda lāzera jaudu.</p>
+<p><strong>Drošība:</strong> darbiniet lāzerus slēgtā korpusā un ar piemērotām aizsargbrillēm. Pieslēdziet korpusa bloķētāju pie brīvas ieejas kā <code>control: safety_door_pin</code>.</p>
+
+<h2 id="router-and-laser">Frēze un lāzers vienā mašīnā</h2>
+<p>Lāzera modulis blakus frēzei var būt otra vārpsta ar savu instrumenta numuru: <strong>M6 T2</strong> izvēlas lāzeru, <strong>M6 T1</strong> (vai jebkurš frēzes instruments) — frēzi. Instrumentu mainītājs nav vajadzīgs. Kontrolieris aptur to, kas darbojās, un piemēro lāzera nobīdi attiecībā pret frēzes asmeni, tāpēc <strong>viena darba nulle der abiem</strong>: pēc pārslēgšanas darba pozīcija rāda, kur atrodas lāzera punkts.</p>
+<p>Tam vajadzīga dpCREATOR programmaparatūra, sākot ar būvējumu 13cbee6e, un jaunākā WebUI un SmartTabUI programmaparatūra.</p>
+
+<h3>Kāds pieslēgums R3</h3>
+<p>R3 nav brīvu GPIO, tāpēc frēzes ātruma signāls nosaka, kur pieslēgt lāzeru:</p>
+<table class="table table-bordered">
+  <thead><tr><th></th><th>Frēze</th><th>Lāzers</th><th>A ass</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Ieteicams</strong></td><td>Frekvences pārveidotājs (VFD) caur RS485</td><td>PWM izeja (gpio.21) jaudai, relejs (gpio.39) lāzera enable vai gaisa padevei</td><td>Brīvi izmantojama</td></tr>
+    <tr><td><strong>Iespējams</strong></td><td>Pārveidotājs uz 0-10V izejas (gpio.21), relejs (gpio.39) uz tā FWD/run ieeju</td><td>A ass STEP izeja (gpio.17), 5&nbsp;V loģika</td><td>Nav pieejama</td></tr>
+  </tbody>
+</table>
+<p>Ar 0-10V pārveidotāju un A asi (piemēram, rotācijas asi) lāzeram neatliek neviena izeja: frēzei izmantojiet RS485. Divas vārpstas nevar dalīt vienu izeju, un R3 vienīgais relejs vajadzīgs pārveidotāja run ieejai, tāpēc relejs nevar pārslēgt vienu signālu starp pārveidotāju un lāzeru.</p>
+
+<h3>Ieteicams: RS485 pārveidotājs + lāzers uz PWM</h3>
+<pre><code>Huanyang:                 # RS485 wiring and uart1: see the Spindle and VFD page
+  uart_num: 1
+  modbus_id: 1
+  tool_num: 0             # every tool not listed elsewhere: T1, T3, T4...
+  speed_map: 0=0% 24000=100%
+
+Laser:
+  pwm_hz: 5000
+  output_pin: gpio.21
+  enable_pin: gpio.39
+  tools: 2                # M6 T2 selects the laser
+  offset_mm: 42.5 18 0    # laser spot from the router bit: X Y Z (mm)
+  speed_map: 0=0% 1000=100%</code></pre>
+<p>Izmantojiet sava pārveidotāja sadaļu (Huanyang, H2A, YL620, ModbusVFD...), kā lapā <a href="index.php?route=journal3/blog/post&journal_blog_post_id=17">Vārpsta un VFD</a>.</p>
+
+<h3>Iespējams: 0-10V pārveidotājs + lāzers uz A ass STEP izejas</h3>
+<p>Tikai mašīnām bez A ass. Izņemiet asi <code>a:</code> no config.yaml, tad:</p>
+<pre><code>10V:
+  output_pin: gpio.21     # 0-10V speed signal
+  forward_pin: gpio.39    # relay: inverter FWD / run
+  tool_num: 0
+  spinup_ms: 3000
+  spindown_ms: 3000
+  speed_map: 0=0% 24000=100%
+
+Laser:
+  pwm_hz: 5000
+  output_pin: gpio.17     # A-axis STEP output
+  tools: 2
+  offset_mm: 42.5 18 0
+  speed_map: 0=0% 1000=100%</code></pre>
+<p>STEP izeja ir 5&nbsp;V loģika, kas der lielākajai daļai diodes lāzeru TTL/PWM ieeju. Tā iet caur plates 3.3&nbsp;V → 5&nbsp;V līmeņa pārveidotāju: ja šis posms signālu invertē, rakstiet <code>gpio.17:low</code>, lai S0 nozīmētu izslēgtu lāzeru. <strong>Pirms lāzera pieslēgšanas pārbaudiet ar multimetru vai osciloskopu.</strong></p>
+
+<h3>Divi jaunie iestatījumi</h3>
+<ul>
+  <li><code>tools:</code> precīzi instrumentu numuri, kas izvēlas šo vārpstu, piem., <code>2</code> vai <code>2 9</code>. Pārējie instrumenti paliek frēzei.</li>
+  <li><code>offset_mm:</code> kur atrodas lāzera punkts attiecībā pret frēzes asmeni, X Y Z milimetros. <code>42.5 18 0</code> nozīmē 42.5&nbsp;mm pa labi (+X) un 18&nbsp;mm aizmugurē (+Y). Z ir tas, cik augstu lāzera fokusa punkts ir virs asmens gala (negatīvs, ja zemāk).</li>
+</ul>
+
+<h3>Nobīdes mērīšana</h3>
+<ol>
+  <li>Ar frēzi iestatiet darba nulli un izgrieziet mazu krustu, piem., 0.5&nbsp;mm dziļu pie X50 Y50.</li>
+  <li>Novietojiet asmeni tieši virs krusta centra un pierakstiet <strong>Machine</strong> X un Y WebUI.</li>
+  <li>Pārslēdzieties uz lāzeru (M6 T2 vai <em>T2 laser</em> WebUI instrumentu kolonnā). Pārvietojiet, līdz lāzera punkts (maza jauda vai tēmēklis) ir krusta centrā, un pierakstiet mašīnas X un Y.</li>
+  <li>Nobīde X = asmens X − lāzera X, nobīde Y = asmens Y − lāzera Y. Z: nobīde Z = mašīnas Z, kad asmens pieskaras virsmai − mašīnas Z, kad lāzers ir fokusēts uz tās.</li>
+  <li>Ierakstiet vērtības <code>offset_mm:</code>, pārstartējiet kontrolieri, pārslēdzieties uz T2 un pārbaudiet, vai X50 Y50 novieto lāzera punktu uz krusta.</li>
+</ol>
+
+<h3>Lietošana</h3>
+<ul>
+  <li><strong>Pārslēgšana:</strong> M6 T2 failā vai konsolē, vai <em>T2 laser</em> WebUI instrumentu kolonnā. Frēze apstājas, nekas netiek mērīts, un darba pozīcija pārlec par nobīdi. M6 T1 pārslēdz atpakaļ. Ar instrumenta garuma mērītāju frēzes instrumenti tiek mērīti kā parasti.</li>
+  <li><strong>Darbi:</strong> sāciet lāzera failus ar <code>M6 T2</code> (pievienojiet to kā galveni LightBurn vai savā CAM) un frēzes failus ar <code>M6 T1</code>.</li>
+  <li><strong>WebUI:</strong> izpildes josla rāda <em>Laser</em> ar jaudu % un S vērtību. 3D skats rāda lāzera moduli, un detaļas skats (Part) rāda apdegumu.</li>
+  <li><strong>Pults:</strong> trešais korekciju lodziņš rāda <strong>LASER</strong>, kamēr izvēlēts lāzers. PART skats rāda apdegumu.</li>
+  <li>G49 notīra instrumenta garumu, bet saglabā lāzera nobīdi. Pēc atiestatīšanas izvēlētās vārpstas nobīde tiek piemērota no jauna.</li>
+</ul>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/webui-position-laser.jpg" alt="WebUI pozīcijas panelis ar izvēlētu T2 Laser" loading="lazy" style="flex:1 1 280px;max-width:360px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-laser-running.png" alt="Pults izpilda lāzera darbu, korekciju lodziņā LASER" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Kad izvēlēts T2, WebUI rāda <em>T2 Laser</em> un lāzera punkta darba pozīciju; pultī redzams LASER.</p>
+<h2>Plotteris vai velkamais nazis</h2>
+<p>Uzstādiet pildspalvu vai nazi uz Z ass: dziļums tad ir parasta Z kustība no jūsu CAM. Plottera režīmā pults trešajā lodziņā rāda Z dziļumu, tāpēc uzreiz redzat, vai pildspalva ir pacelta vai nazis griež.</p>
+<p>Vieglai pildspalvas pacelšanai der arī hobija servo. Šis piemērs to vada no A ass step izejas, tāpēc A ass netiek izmantota:</p>
+<pre><code>  z:
+    steps_per_mm: 100
+    max_rate_mm_per_min: 5000
+    acceleration_mm_per_sec2: 500
+    max_travel_mm: 5
+    motor0:
+      rc_servo:
+        output_pin: gpio.17
+        pwm_hz: 50
+        min_pulse_us: 1000
+        max_pulse_us: 2000</code></pre>
+<p>Pielāgojiet impulsu diapazonu savam servo.</p>
+
+<h2>Plazmas galds</h2>
+<p>FluidNC <code>PlasmaSpindle</code> aizdedzina degli no releja izejas un pirms mašīnas kustības gaida griezēja arc-OK signālu. Ja loks laikus neaizdegas, tas apstājas ar trauksmi.</p>
+<pre><code>PlasmaSpindle:
+  enable_pin: gpio.39
+  arc_ok_pin: gpio.38:low
+  arc_wait_ms: 1500
+  tool_num: 0</code></pre>
+<p>Šis piemērs ņem arc OK no A gala slēdža ieejas, kas ir optoizolēta, tāpēc iestatiet A ass gala slēdzi uz <code>NO_PIN</code> vai izņemiet A asi. Pieslēdziet to pie plazmas griezēja CNC porta sausā arc-OK kontakta.</p>
+<ul>
+<li><strong>Degļa augstums:</strong> iebūvētas degļa augstuma kontroles (THC) nav. Ja jūsu galdam tā vajadzīga, izmantojiet atsevišķu THC ierīci.</li>
+<li><strong>Traucējumi:</strong> plazma rada daudz elektrisko traucējumu. Izmantojiet ekranētus soļu un slēdžu kabeļus, labi iezemējiet galdu un turiet degļa kabeli tālāk no signālu kabeļiem.</li>
+<li><strong>E-stop:</strong> pults E-stop pārtrauc soļu impulsus platē. Uzstādiet arī E-stop, kas atslēdz plazmas griezēja barošanu.</li>
+</ul>

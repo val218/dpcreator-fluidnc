@@ -1,0 +1,14 @@
+<p>Das Board gibt seine SD-Karte in Ihrem Netzwerk unter <code>http://&lt;board-ip&gt;/sd</code> frei. Binden Sie sie einmal ein und kopieren Sie G-Code darauf wie auf einen USB-Stick. Vorschauen für das Handbediengerät (<code>.viz</code>) werden für jede kopierte G-Code-Datei automatisch erstellt.</p>
+<figure class="dpc-shot" style="margin:18px 0 22px"><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/webui-files-console.jpg" alt="Dateien der SD-Karte in der WebUI" loading="lazy" style="flex:1 1 280px;max-width:420px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Die SD-Karte in der Dateiliste der WebUI. Das Netzlaufwerk zeigt dieselben Dateien.</figcaption></figure><h3>Windows: der einfache Weg</h3>
+<ol><li>Klicken Sie im Bereich Files der WebUI auf <strong>PC drive</strong>. Es wird ein Einrichtungsskript heruntergeladen, in dem die IP Ihres Boards bereits eingetragen ist.</li>
+<li>Doppelklicken Sie darauf (nicht „Als Administrator ausführen“ verwenden). Wenn Windows warnt, klicken Sie auf <strong>Weitere Informationen → Trotzdem ausführen</strong>.</li>
+<li>Bestätigen Sie die einzige Administrator-Abfrage mit <strong>Ja</strong>. Die SD-Karte erscheint als Laufwerk <strong>S:</strong> mit dem Namen <em>dpCREATOR SD</em> und wird bei jeder Anmeldung neu verbunden.</li></ol>
+<p>Führen Sie das Skript erneut aus, wenn sich die IP des Boards ändert. Um alles zu entfernen: <code>dpcreator-sd-drive.cmd remove</code>.</p>
+<h3>macOS und Linux</h3>
+<ul><li>macOS: Finder → Gehe zu → Mit Server verbinden → <code>http://&lt;board-ip&gt;/sd</code></li>
+<li>Linux: Ihr Dateimanager mit <code>dav://&lt;board-ip&gt;/sd</code> oder davfs2</li></ul>
+<h3>Tipps</h3>
+<ul><li>Geben Sie dem Board eine feste IP, damit das Laufwerk auch nach einem Neustart funktioniert.</li>
+<li>Die Eingabe von <code>\\&lt;board-ip&gt;</code> im Explorer führt zu einem Fehler — das Board hat keine Windows-Dateifreigabe (SMB). Verwenden Sie das Laufwerk S:.</li>
+<li>Kopieren Sie keine großen Dateien, während ein Job von der SD-Karte läuft; der Job hat Vorrang.</li>
+<li>Lassen Sie die <code>.viz</code>-Dateien neben Ihrem G-Code liegen — das Handbediengerät verwendet sie.</li></ul>

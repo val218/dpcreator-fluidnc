@@ -1,0 +1,54 @@
+<p>dpCREATOR Studio var atrasties arī jūsu kontrolierī, blakus WebUI. Tad tas atveras no pašas mašīnas adreses, darbojas bez interneta un sūta G-kodu tieši uz SD karti. Instalēšana ar dpcreator.eu kontu ir bez maksas un caur USB aizņem apmēram minūti. Tā darbojas ar jebkuru FluidNC 4.x kontrolieri; ar dpCREATOR programmaparatūru jūs saņemat arī Studio pogu WebUI un darbus, kas pienāk jau sagatavoti.</p>
+
+<div class="alert alert-info"><strong>Prasības:</strong> kontrolierī FluidNC <strong>4.0 vai jaunāks</strong> – standarta FluidNC vai bezmaksas dpCREATOR programmaparatūra – ar aptuveni 500 KB brīvas vietas flash atmiņā (instalētājs to pārbauda), USB kabelis un Chrome vai Edge datorā. Lai izmantotu Studio bez instalēšanas, tā vietā atveriet <a href="/studio/" target="_blank" rel="noopener">dpcreator.eu/studio</a> (<a href="index.php?route=journal3/blog/post&journal_blog_post_id=34">kā darbojas Studio</a>).</div>
+
+<h3>Instalēšana</h3>
+<ol>
+  <li>Piesakieties savā dpcreator.eu kontā (izveide ir bez maksas).</li>
+  <li>Atveriet <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>, cilni <strong>Studio</strong>, kartīti <strong>Install Studio on your controller</strong>.</li>
+  <li>Pievienojiet kontrolieri datoram ar USB kabeli. Mašīnai jābūt stāvoklī <strong>Idle</strong> (vai Alarm), nevis jāizpilda darbs. Aizveriet citas programmas, kas izmanto tās seriālo portu.</li>
+  <li>Noklikšķiniet <strong>Install Studio on my controller</strong> un izvēlieties kontroliera portu.</li>
+  <li>Pagaidiet, līdz parādās <strong>Done</strong>. Kontrolieris netiek pārstartēts, un jūsu iestatījumi, WebUI un faili SD kartē netiek skarti.</li>
+</ol>
+
+<h3>Atvēršana</h3>
+<ul>
+  <li><strong>dpCREATOR programmaparatūra:</strong> <code>http://&lt;your board&gt;/studio.html</code>, piemēram, <code>http://fluidnc.local/studio.html</code>, vai noklikšķiniet <strong>Studio</strong> dpCREATOR WebUI augšējā labajā stūrī.</li>
+  <li><strong>Standarta FluidNC 4.x:</strong> <code>http://&lt;your board&gt;/flash/studio.html</code>, piemēram, <code>http://192.168.1.50/flash/studio.html</code>. Saglabājiet to grāmatzīmēs.</li>
+</ul>
+
+<h3>Darba nosūtīšana uz mašīnu</h3>
+<ol>
+  <li>Izveidojiet dizainu un nospiediet <strong>Make g-code</strong>. Ja Studio atvērts no kontroliera, tas jau zina mašīnas adresi (citās kopijās ievadiet to sadaļā <strong>Setup</strong>).</li>
+  <li>Nospiediet <strong>Send</strong>. Fails nonāk SD kartes saknē un uzreiz tiek <strong>sagatavots</strong>: jebkurš atvērtais dpCREATOR WebUI rāda tā priekšskatījumu ar joslu <strong>Run</strong> / <strong>Cancel</strong>, un to rāda arī SmartTabUI pults. Pagaidām nekas nekustas.</li>
+  <li>Iestatiet darba nulli, tad nospiediet <strong>Run</strong> WebUI vai pultī. WebUI nav atvērts? Zilā poga <strong>WebUI</strong> Studio augšējā labajā stūrī to atver ar gatavu darbu. Ja WebUI jau ir atvērts citā cilnē, tā pārslēdzas uz šo cilni, nevis atver jaunu; WebUI poga Studio dara to pašu pretējā virzienā.</li>
+</ol>
+<p>Kontrolierī ar standarta FluidNC fails tiek nosūtīts uz SD karti, bet netiek sagatavots (tam vajadzīga dpCREATOR programmaparatūra): palaidiet to no WebUI SD kartes saraksta.</p>
+<p><img src="image/catalog/dpc-site/shots/studio-machine-v2.jpg" alt="dpCREATOR Studio: mašīnas 3D skats darba izpildes laikā" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<h3>Atjaunināšana un noņemšana</h3>
+<ul>
+  <li><strong>Atjaunināšana:</strong> instalējiet vēlreiz no lapas Flash Firmware. Jaunā kopija aizstāj veco. Jūsu dizaini saglabājas: tie glabājas jūsu pārlūkā, nevis kontrolierī.</li>
+  <li><strong>Noņemšana:</strong> izdzēsiet <code>studio.html.gz</code> no kontroliera flash failiem (Classic UI → flash files) vai konsolē nosūtiet <code>$LocalFS/Delete=/localfs/studio.html.gz</code>.</li>
+  <li>Ierakstot pilno kontroliera programmaparatūru (apvienoto attēlu), flash faili tiek notīrīti: pēc tam instalējiet Studio vēlreiz, tāpat kā WebUI.</li>
+</ul>
+
+<h3>Dizaini kontroliera kopijā</h3>
+<p>Pārlūki glabā datus atsevišķi katrai adresei, tāpēc kontroliera kopijā veidotie dizaini ir atsevišķi no dpcreator.eu veidotajiem, un, mainot plates adresi (piemēram, no <code>fluidnc.local</code> uz tās IP), redzams cits saraksts. Lai pārnestu dizainu, izmantojiet <strong>Save</strong> (projekta fails) un <strong>Open</strong>.</p>
+
+<h3>Ja nedarbojas</h3>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><em>Needs Chrome or Edge on a computer</em></td><td>Šajā pārlūkā Web Serial nav pieejams. Izmantojiet Chrome vai Edge operētājsistēmā Windows, macOS vai Linux.</td></tr>
+    <tr><td><em>The controller does not answer</em></td><td>Pārbaudiet kabeli (datu kabeli) un portu. Aizveriet seriālos monitorus, citas WebUI cilnes, kas savienotas caur USB, vai tādas programmas kā LaserGRBL vai UGS.</td></tr>
+    <tr><td><em>The machine is Run / Hold / Jog …</em></td><td>Pagaidiet, līdz darbs beidzas, vai apturiet to, tad mēģiniet vēlreiz.</td></tr>
+    <tr><td><em>needs FluidNC 4.0 or newer</em></td><td>Kontrolierī ir FluidNC 3.x vai vecāks. Atjauniniet to (bezmaksas dpCREATOR programmaparatūra vai standarta FluidNC 4.x) vai izmantojiet Studio vietnē dpcreator.eu.</td></tr>
+    <tr><td><em>Not enough room in the controller's flash</em></td><td>Izdzēsiet neizmantotus failus no flash atmiņas (Classic UI → flash files) vai izmantojiet Studio vietnē dpcreator.eu.</td></tr>
+    <tr><td>Pārlūks lejupielādē studio.html, nevis to atver</td><td>Tā dara standarta FluidNC un vecāki dpCREATOR būvējumi. Tā vietā atveriet <code>/flash/studio.html</code> vai atjauniniet uz jaunāko dpCREATOR programmaparatūru.</td></tr>
+    <tr><td><em>Too many installs in the last hour</em></td><td>Pagaidiet stundu un mēģiniet vēlreiz.</td></tr>
+    <tr><td>Send ziņo, ka pārlūks bloķēja savienojumu</td><td>Jūs izmantojat https kopiju vietnē dpcreator.eu. Atveriet kopiju kontrolierī (http) vai izmantojiet Download .nc.</td></tr>
+  </tbody>
+</table>
+
+<h3>Jautājumi</h3>
+<p>Izmantojiet lapu <a href="index.php?route=extension/module/dpc_support">Atbalsts</a> (vispirms piesakieties). Norādiet Studio būvējumu (poga <strong>i</strong> Studio), savu kontrolieri un tā programmaparatūras versiju, un, ja instalēšana neizdevās, nokopējiet tekstu zem <strong>Details</strong> instalēšanas kartītē.</p>

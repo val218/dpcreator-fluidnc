@@ -1,0 +1,30 @@
+<p>SmartTabUI pults savienojas ar kontrolieri pa <strong>vadu seriālo savienojumu</strong> (UART1), nevis caur tīklu. Tā turpina strādāt arī tad, ja Wi-Fi vai Ethernet pazūd.</p>
+<figure class="dpc-shot dpc-photo" style="margin:18px 0 22px"><img src="image/catalog/dpc-site/products/tabui-pendant-photo-1.jpg" alt="Salikta SmartTabUI pults vienā rokā" loading="lazy" style="max-width:480px;width:100%;height:auto;border-radius:6px;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Salikta pults: rokrats augšpusē, E-stop kreisajā sānā, enable poga labajā, un zem displeja STEP (x1, x10, x100) un AXIS (OFF, X, Y, Z, A) pārslēgi.</figcaption></figure>
+<h3>Aparatūra</h3>
+<ul><li>JC2432W328C plate: ESP32, 2.8" 320×240 skārienekrāns</li>
+<li>MPG rokrats (kvadratūras enkoders) uz GPIO16 / GPIO4</li>
+<li>E-stop poga uz GPIO17 (aktīva zemā līmenī)</li>
+<li>Pēc izvēles ass un soļa pārslēgi caur PCF8574 I/O paplašinātāju</li></ul>
+<h3>Pieslēgšana</h3>
+<p>Pults pieslēdzas ar <strong>GX12 5 kontaktu</strong> savienotāju un piecu dzīslu kabeli, viss uz kontroliera pults porta:</p><ul><li><strong>TX / RX</strong> — seriālais savienojums (kontroliera GPIO1 / GPIO2), sakrustots</li><li><strong>5V / GND</strong> — pults barošana</li><li><strong>E-STOP</strong> — pults E-stop poga savieno šo līniju ar GND; tad kontrolieris aparatūras līmenī atslēdz soļu impulsus</li></ul><p>Kabelim jābūt īsam un ekranētam; trokšņains kabelis izpaužas kā pazaudēti baiti (skatiet sadaļu Problēmu novēršana). Būvējat pulti paši? Skatiet <em><a href="index.php?route=journal3/blog/post&journal_blog_post_id=26">Uzbūvējiet savu SmartTabUI pulti: salikšana un pieslēgšana</a></em>.</p>
+<h3>config.yaml</h3>
+<p>Parauga konfigurācijā tas jau ir. Abās pusēs jābūt vienādam datu pārraides ātrumam (1 000 000).</p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>uart1:
+  txd_pin: gpio.1
+  rxd_pin: gpio.2
+  rts_pin: NO_PIN
+  cts_pin: NO_PIN
+  baud: 1000000
+  mode: 8N1
+
+uart_channel1:
+  uart_num: 1
+  report_interval_ms: 75
+  message_level: Info</code></pre>
+<h3>Pārbaudiet savienojumu</h3>
+<ul><li>Kad pults ir pieslēgta, WebUI galvenē redzama <strong>pults zīme</strong>.</li>
+<li><code>$Pendant/Status</code> atbild <code>connected</code>, <code>disconnected</code> vai <code>none</code> (konfigurācijā nav <code>uart_channel1</code>).</li>
+<li>Atvienotu pulti kontrolieris pamana aptuveni 3 sekunžu laikā, kamēr mašīna ir dīkstāvē.</li></ul>
+<figure class="dpc-shot" style="margin:18px 0 22px"><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/pendant-dro-idle.png" alt="SmartTabUI DRO ekrāns, savienots" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Savienots: augšējā labajā stūrī mirgo TX un RX, un DRO rāda mašīnas pozīciju. Šeit izvēlēta X ass ar soli x10.</figcaption></figure><h3>Pults iestatījumi</h3>
+<p>Startēšanas laikā, kamēr rit 5 sekunžu josla, turiet nospiestu EN pogu, lai atvērtu pults iestatījumus: tēma, EN pogas režīms, DRO asis, fona apgaismojums, skaļruņa skaļums, apkopes atgādinājums un licence ar pults mikroshēmas ID. Mašīnas iestatījumi (darba laukums, sākuma stūris) nāk no kontroliera <code>config.yaml</code>. Skatiet <a href="index.php?route=journal3/blog/post&journal_blog_post_id=30">SmartTabUI pults: ekrāni, pārvietošana un iestatījumi</a>.</p>
+<p><strong>Ierakstiet abās:</strong> pults un kontroliera programmaparatūra tiek izstrādātas kopā. Pēc vienas atjaunināšanas atjauniniet arī otru — skatiet <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>.</p>

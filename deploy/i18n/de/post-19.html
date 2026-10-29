@@ -1,0 +1,30 @@
+<p>Das SmartTabUI-Handbediengerät ist mit dem Controller über eine <strong>kabelgebundene serielle Verbindung</strong> (UART1) verbunden, nicht über das Netzwerk. Es funktioniert weiter, wenn WLAN oder Ethernet ausfällt.</p>
+<figure class="dpc-shot dpc-photo" style="margin:18px 0 22px"><img src="image/catalog/dpc-site/products/tabui-pendant-photo-1.jpg" alt="Montiertes SmartTabUI-Handbediengerät in einer Hand" loading="lazy" style="max-width:480px;width:100%;height:auto;border-radius:6px;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Das montierte Handbediengerät: Handrad oben, Not-Halt links, Zustimmtaster rechts und die Wahlschalter STEP (x1, x10, x100) und AXIS (OFF, X, Y, Z, A) unter dem Display.</figcaption></figure>
+<h3>Hardware</h3>
+<ul><li>JC2432W328C-Board: ESP32, 2,8"-Touchscreen mit 320×240</li>
+<li>MPG-Handrad (Quadratur-Encoder) an GPIO16 / GPIO4</li>
+<li>Not-Halt-Taster an GPIO17 (active low)</li>
+<li>Optionale Achs- und Schrittwahlschalter über einen PCF8574-I/O-Expander</li></ul>
+<h3>Verdrahtung</h3>
+<p>Das Handbediengerät wird mit einem <strong>5-poligen GX12</strong>-Stecker und einem fünfadrigen Kabel angeschlossen, alles am Pendant-Anschluss des Controllers:</p><ul><li><strong>TX / RX</strong> — serielle Verbindung (Controller GPIO1 / GPIO2), gekreuzt</li><li><strong>5V / GND</strong> — Versorgung des Handbediengeräts</li><li><strong>E-STOP</strong> — der Not-Halt-Taster des Handbediengeräts zieht diese Leitung auf GND; der Controller sperrt dann die Step-Impulse in Hardware</li></ul><p>Halten Sie das Kabel kurz und geschirmt; ein gestörtes Kabel zeigt sich durch verlorene Bytes (siehe Fehlerbehebung). Sie bauen Ihr eigenes Handbediengerät? Siehe <em><a href="index.php?route=journal3/blog/post&journal_blog_post_id=26">SmartTabUI-Handbediengerät selbst bauen: Montage und Verdrahtung</a></em>.</p>
+<h3>config.yaml</h3>
+<p>Die Beispielkonfiguration enthält dies bereits. Beide Seiten müssen dieselbe Baudrate verwenden (1.000.000).</p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>uart1:
+  txd_pin: gpio.1
+  rxd_pin: gpio.2
+  rts_pin: NO_PIN
+  cts_pin: NO_PIN
+  baud: 1000000
+  mode: 8N1
+
+uart_channel1:
+  uart_num: 1
+  report_interval_ms: 75
+  message_level: Info</code></pre>
+<h3>Verbindung prüfen</h3>
+<ul><li>Die Kopfzeile der WebUI zeigt ein <strong>Pendant-Symbol</strong>, wenn es verbunden ist.</li>
+<li><code>$Pendant/Status</code> antwortet mit <code>connected</code>, <code>disconnected</code> oder <code>none</code> (kein <code>uart_channel1</code> in der Konfiguration).</li>
+<li>Ein abgestecktes Handbediengerät wird im Leerlauf der Maschine innerhalb von etwa 3 Sekunden erkannt.</li></ul>
+<figure class="dpc-shot" style="margin:18px 0 22px"><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/pendant-dro-idle.png" alt="SmartTabUI-DRO-Bildschirm, verbunden" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Verbunden: TX und RX blinken oben rechts und die DRO zeigt die Maschinenposition. Hier ist Achse X mit Schritt x10 gewählt.</figcaption></figure><h3>Einstellungen des Handbediengeräts</h3>
+<p>Halten Sie die EN-Taste gedrückt, während beim Start der 5-Sekunden-Balken läuft, um die Einstellungen des Handbediengeräts zu öffnen: Theme, Modus der EN-Taste, DRO-Achsen, Hintergrundbeleuchtung, Lautstärke, Wartungserinnerung und die Lizenz mit der Chip-ID des Handbediengeräts. Maschineneinstellungen (Arbeitsbereich, Home-Ecke) kommen aus der <code>config.yaml</code> des Controllers. Siehe <a href="index.php?route=journal3/blog/post&journal_blog_post_id=30">SmartTabUI-Handbediengerät: Bildschirme, Joggen und Einstellungen</a>.</p>
+<p><strong>Beide flashen:</strong> Die Firmware für Handbediengerät und Controller wird gemeinsam entwickelt. Wenn Sie eine aktualisieren, aktualisieren Sie auch die andere — siehe <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>.</p>

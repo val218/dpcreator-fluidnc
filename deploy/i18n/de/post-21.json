@@ -1,0 +1,5 @@
+{
+ "name": "Job-Wiederaufnahme nach Stopp oder Stromausfall",
+ "meta_title": "Job-Wiederaufnahme nach Stopp oder Stromausfall — dpCREATOR Doku",
+ "meta_description": "Unterbrochenen CNC-Job nach Not-Halt, Alarm, Stop oder Stromausfall ab einer sicheren Zeile neu starten – in WebUI oder Handbediengerät."
+}

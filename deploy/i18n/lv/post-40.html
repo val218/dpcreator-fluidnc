@@ -1,0 +1,40 @@
+<div class="alert alert-warning"><strong>dpCREATOR PnP ir beta versija.</strong> Uzskatiet katru pirmo palaišanu par testu un pastāstiet mums, kas notiek: jebkura problēma, ko paziņojat, tiks novērsta, cik ātri vien iespējams.</div>
+
+<h3>Drošība</h3>
+<ul>
+<li><strong>Pieslēdziet avārijas apturēšanas pogu.</strong> Stop poga pārlūkā tāda nav: lapa vai Wi-Fi savienojums var uzkārties.</li>
+<li>Katras jaunas konfigurācijas pirmajai palaišanai: veiciet mašīnai homing, nelieciet uz galda lentes, iestatiet ātrumu uz 25 % un turiet roku pie E-stop. Tad izmēģiniet vienu 0805 detaļu lenti.</li>
+<li><strong>Veiciet homing pirms katra darba.</strong> Sprauslas pagriešanas asij (A) homing netiek veikts, tāpēc pirms homing pagrieziet sprauslu taisni.</li>
+<li>PnP pārbauda augstumus tikai pēc jūsu ievadītajiem skaitļiem. Nepareizs paņemšanas, plates vai detaļas augstums var ietriekt sprauslu.</li>
+<li>Pastas dozators uz galvas izvirzās zem sprauslas. Pirms novietošanas noņemiet to vai paceliet.</li>
+<li>Stop nomet detaļu, kas ir uz sprauslas. Pēc apturēšanas pārbaudiet plati.</li>
+<li><strong>Nekad nepieslēdziet solenoīda spoli tieši pie R3 PWM spailes</strong>; izmantojiet MOSFET moduli vai cietvielu releju.</li>
+<li>Strādājot ar apakšējo kameru, turiet lapu atvērtu, līdz darbs beidzas.</li>
+</ul>
+
+<h3>Vēl netiek atbalstīts</h3>
+<ul>
+<li>Tikai sagrieztas lentes un paplātes: nav motorizētu padevēju, un viena sprausla (nav sprauslu mainītāja).</li>
+<li>Bez apakšējās kameras reāli iespējami 0805 un lielāki pasīvie komponenti, SOT-23 un SOIC. Mazākas detaļas un detaļas ar smalku izvadu soli vēl jāapstiprina.</li>
+<li>Pārbaudiet katras lentes pirmo polarizēto detaļu. Plates apakšpuses montāža vēl jāapstiprina.</li>
+</ul>
+
+<h3>Kameras</h3>
+<ul>
+<li>USB kamerām vajadzīgs Chrome iestatījums, ja PnP atvērts no plates.</li>
+<li>IP kameras (ESP32-CAM) darbojas, bet ir mazāk precīzas nekā USB kameras.</li>
+<li>Kamerām vajadzīgs vienmērīgs apgaismojums. Pēc kameras pārvietošanas kalibrējiet no jauna.</li>
+</ul>
+
+<h3>Pasta</h3>
+<ul>
+<li>Pastas daudzumu noregulējiet uz rezerves plates. R3 dozatoram vajadzīga papildu izeja, piemēram, releja modulis uz RS485 porta.</li>
+<li>Motorizētam ekstruderim vajadzīga piektā ass, kas R3 nav brīva.</li>
+<li>Lielākajai daļai plašu trafarets ir vienkāršāks.</li>
+</ul>
+
+<h3>Programmaparatūra</h3>
+<p>PnP ir veidots dpCREATOR FluidNC programmaparatūrai ar PnP konfigurāciju. Standarta FluidNC izpilda SD kartes darbus ar mazāk pārbaudēm.</p>
+
+<h3>Pastāstiet mums</h3>
+<p>Jūsu plate un mašīna, kas strādāja, kuras detaļas tika novietotas pagrieztas vai nobīdītas, jebkurš ziņojums, ko parādīja darbs, un fotogrāfija. Rakstiet mums no <a href="index.php?route=information/contact">saziņas lapas</a>.</p>

@@ -1,0 +1,187 @@
+<div class="dpx"><div class="dph"><style>
+.dpx > .dph{width:100vw;margin-left:calc(50% - 50vw)}
+.dph{background:#0d1014;color:#eef2f5;font-family:Barlow,Arial,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.dph *{box-sizing:border-box}
+.dph a{text-decoration:none}
+.dph .w{max-width:1240px;margin:0 auto;padding:0 32px}
+.dph h1,.dph h2,.dph h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;margin:0;line-height:1.04;color:#fff;text-transform:none;letter-spacing:0}
+.dph h2{font-size:46px}
+.dph h3{font-family:Barlow,Arial,sans-serif;font-weight:600;font-size:22px;line-height:1.25}
+.dph .lead{margin:12px 0 36px;color:#a9b4bf;font-size:18px;max-width:720px}
+.dph .sec{padding:88px 0}
+.dph .alt{background:#121820;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.dph .btn{display:inline-block;background:#2b8fe0;color:#fff;padding:14px 24px;border-radius:4px;font-weight:600;font-size:16px;line-height:1.2}
+.dph .btn:hover{background:#3a9cec;color:#fff}
+.dph .btn-line{background:transparent;border:1px solid rgba(255,255,255,.3);padding:13px 22px}
+.dph .btn-line:hover{background:rgba(255,255,255,.06)}
+.dph .btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.dph .muted{color:#a9b4bf}
+.dph .uses{margin:4px 0 0;font-size:14px;color:#7fd8b9}
+.dph .beta{font-family:Barlow,Arial,sans-serif;font-size:13px;font-weight:600;color:#8cc4f2;background:rgba(43,143,224,.16);padding:2px 8px;border-radius:3px;vertical-align:middle}
+.dph-hero{padding:72px 0 44px}
+.dph-hero .g{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:center}
+.dph-hero .kick{margin:0 0 14px;color:#8fd8fa;font-size:16px;font-weight:500}
+.dph-hero h1{font-size:62px;line-height:1.0}
+.dph-hero .sub{margin:22px 0 0;font-size:19px;color:#b6c1cb;max-width:560px}
+.dph-hero img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid rgba(255,255,255,.1)}
+.dph-chips{list-style:none;margin:44px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.dph-chips li{padding:8px 14px;border:1px solid rgba(255,255,255,.14);border-radius:999px;font-size:15px;color:#dfe5ea}
+.dph-chips li.new{border-style:dashed;border-color:rgba(79,195,247,.5);color:#8fd8fa}
+.dph-flow{display:flex;align-items:stretch}
+.dph-flow .st{flex:1 1 0;min-width:0;background:#0d1014;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:20px;color:inherit;display:flex;flex-direction:column;gap:10px;transition:border-color .15s}
+.dph-flow .st:hover{border-color:rgba(79,195,247,.55)}
+.dph-flow .n{color:#8fd8fa;font-size:14px;font-weight:600}
+.dph-flow .pic{height:120px;display:flex;align-items:center;justify-content:center}
+.dph-flow .pic img{max-width:100%;max-height:120px;object-fit:contain}
+.dph-flow b{font-size:20px;color:#fff}
+.dph-flow .d{font-size:15px;color:#a9b4bf}
+.dph-flow .ar{flex:0 0 36px;display:flex;align-items:center;justify-content:center;color:#4fc3f7}
+.dph-log{font-family:ui-monospace,monospace;font-size:13px;color:#7fd8b9;display:flex;flex-direction:column;gap:8px;justify-content:center;align-items:flex-start;width:100%}
+.dph-log span:nth-child(2){color:#93a1ae}
+.dph-appchips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+.dph-appchips span{background:#1a222c;border-radius:6px;padding:10px;font-weight:600;font-size:14px}
+.dph-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.dph-card{background:#121820;border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;color:inherit}
+.dph-card.own{border-style:dashed;border-color:rgba(79,195,247,.4)}
+.dph-card .im{height:200px;background:#0f1419;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.dph-card .im img{width:100%;height:100%;object-fit:cover}
+.dph-card .im img.top{object-position:top}
+.dph-card .im img.fit{width:80%;height:160px;object-fit:contain}
+.dph-card .tx{padding:20px;display:flex;flex-direction:column;gap:8px}
+.dph-card p{margin:0;color:#a9b4bf;font-size:15px}
+.dph-apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.dph-app{background:#0d1014;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:20px;color:inherit;display:flex;flex-direction:column;gap:8px;transition:border-color .15s}
+.dph-app:hover{border-color:rgba(79,195,247,.55)}
+.dph-app b{font-size:20px;color:#fff}
+.dph-app .d{font-size:15px;color:#a9b4bf}
+.dph-app .p{margin-top:auto;padding-top:10px;font-size:14px;color:#7fd8b9}
+.dph-app .p.b{color:#8cc4f2}
+.dph-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:48px;align-items:center}
+.dph-split img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid rgba(255,255,255,.1)}
+.dph-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:stretch}
+.dph-panel{background:#0d1014;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:28px;display:flex;flex-direction:column;gap:14px}
+.dph-panel h2{font-size:36px}
+.dph-panel p{margin:0;color:#a9b4bf}
+.dph-panel .shot{width:100%;height:320px;object-fit:cover;object-position:top;border-radius:6px;border:1px solid rgba(255,255,255,.08)}
+.dph-panel iframe{width:100%;height:560px;border:0;border-radius:6px;background:#0c1014}
+.dph-panel .btn{align-self:flex-start}
+.dph-docs{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:17px}
+.dph-docs a,.dph .lk{color:#4fc3f7}
+.dph-docs a:hover,.dph .lk:hover{color:#8fd8fa}
+.dph #shop{background:#0d1014}
+@media (max-width:980px){.dph-flow{flex-direction:column}.dph-flow .ar{transform:rotate(90deg);height:32px;flex-basis:32px}.dph-hero .g,.dph-split,.dph-two{grid-template-columns:1fr}.dph-hero h1{font-size:52px}.dph h2{font-size:38px}}
+@media (max-width:600px){.dph .w{padding:0 16px}.dph .sec{padding:60px 0}.dph-hero{padding:44px 0 32px}.dph-hero h1{font-size:42px}.dph-cards{grid-template-columns:1fr}.dph-panel{padding:20px}.dph-panel iframe{height:520px}}
+</style>
+
+<section class="dph-hero" id="top"><div class="w">
+<div class="g">
+<div>
+<p class="kick">FluidNC kontrolieris, pults un lietotnes no viena meistara</p>
+<h1>Viens kontrolieris.<br>Jebkura mašīna, ko jūs būvējat.</h1>
+<p class="sub">Vadiet frēzi vai lāzeru no pārlūka, sagatavojiet darbu, automatizējiet robota roku vai konveijeru vai izvietojiet komponentus uz shēmas plates. dpCREATOR R3 un SmartTabUI pults to visu paveic, un katrs darbs pēc strāvas pārrāvuma turpinās no vietas, kur apstājās.</p>
+<div class="btns"><a class="btn" href="#shop">Iegādāties R3 un pulti</a><a class="btn btn-line" href="/firmware">Man jau ir plate</a></div>
+</div>
+<img src="image/catalog/dpc-site/photo-r2-tabui-combo.jpg" alt="dpCREATOR kontrolieris un SmartTabUI pults blakus" width="1445" height="1088">
+</div>
+<ul class="dph-chips" aria-label="Mašīnas, ko tas vada"><li>CNC frēze</li><li>Lāzers</li><li>Ploteris</li><li>Robota roka</li><li>Konveijers un testa stends</li><li>Pick and place</li><li class="new">Kaut kas, ko vēl neviens nav uzbūvējis</li></ul>
+</div></section>
+
+<section class="sec alt" id="system"><div class="w">
+<h2>Kā tas viss savienojas</h2>
+<p class="lead">Četri slāņi. Sāciet ar plati un pievienojiet to, kas vajadzīgs jūsu mašīnai; katrs no tiem darbojas arī atsevišķi.</p>
+<div class="dph-flow">
+<a class="st" href="index.php?route=product/product&product_id=381"><span class="n">1 · Plate</span><span class="pic"><img src="image/catalog/dpc-site/hero2/hov-board.png" alt="dpCREATOR R3 kontroliera plate" loading="lazy"></span><b>dpCREATOR R3</b><span class="d">Ethernet, optiski izolētas ieejas, RS485 vārpstai un SD karte. Vai izmantojiet savu: sarakstā ir 21 ESP32 plate.</span></a>
+<span class="ar" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+<a class="st" href="/firmware"><span class="n">2 · Programmaparatūra</span><span class="pic"><span class="dph-log" aria-hidden="true"><span>[MSG:Recovery:interrupted]</span><span>Resume from line 18 240?</span><span>ok</span></span></span><b>dpCREATOR FluidNC</b><span class="d">FluidNC 4.1 ar darba atjaunošanu pēc strāvas pārrāvuma, vadu Ethernet un pieteikšanos. Bez maksas, ierakstāma no pārlūka.</span></a>
+<span class="ar" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+<a class="st" href="#apps"><span class="n">3 · Lietotnes platē</span><span class="pic"><span class="dph-appchips" aria-hidden="true"><span>WebUI</span><span>Studio</span><span>Motion</span><span>PnP</span></span></span><b>Atveras jebkurā pārlūkā</b><span class="d">Tās dzīvo paša kontroliera atmiņā: nekas nav jāinstalē datorā, nav mākoņa. Izvēlieties tās ierakstīšanas laikā.</span></a>
+<span class="ar" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+<a class="st" href="index.php?route=product/product&product_id=382"><span class="n">4 · Pie mašīnas</span><span class="pic"><img src="image/catalog/dpc-site/hero2/hov-pendant.png" alt="SmartTabUI pults" loading="lazy"></span><b>SmartTabUI pults</b><span class="d">Īsts rokrats, aparatūras avārijas apturēšana (E-stop) un skārienekrāns. Darbojas ar R3 un WROOM-32 platēm.</span></a>
+</div>
+</div></section>
+
+<section class="sec" id="build"><div class="w">
+<h2>Ko jūs būvējat?</h2>
+<p class="lead">Katru reizi tas pats kontrolieris. Mainās tikai lietotnes.</p>
+<div class="dph-cards">
+<a class="dph-card" href="index.php?route=product/product&product_id=383"><span class="im"><img class="top" src="image/catalog/dpc-site/shots/webui-running.jpg" alt="WebUI izpilda frēzes darbu ar 3D trajektoriju" loading="lazy"></span><span class="tx"><h3>CNC frēze</h3><p>Veidojiet dizainu Studio, palaidiet to WebUI ar 3D trajektoriju reāllaikā, pārvietojiet asis un nullējiet no pults.</p><p class="uses">WebUI · Studio · Pults</p></span></a>
+<a class="dph-card" href="index.php?route=product/product&product_id=386"><span class="im"><img src="image/catalog/dpc-site/shots/studio-preview.jpg" alt="Studio darba priekšskatījums uz materiāla" loading="lazy"></span><span class="tx"><h3>Lāzers vai ploteris</h3><p>Importējiet Studio SVG, DXF, PDF vai attēlu un nosūtiet to uz SD karti. Studio Basic ir bez maksas.</p><p class="uses">Studio · WebUI</p></span></a>
+<a class="dph-card" href="/docs/dpcreator-motion"><span class="im"><img src="image/catalog/dpc-site/shots/motion-d-arm.jpg" alt="Motion ar 4 locītavu robota roku un iemācītām pozīcijām" loading="lazy"></span><span class="tx"><h3>Robota roka</h3><p>Pievienojiet katru locītavu, pārbaudiet to, iemāciet pozīcijas un palaidiet secību no kontroliera vai sāciet to no pults.</p><p class="uses">Motion · Pults</p></span></a>
+<a class="dph-card" href="/docs/dpcreator-motion"><span class="im"><img src="image/catalog/dpc-site/shots/motion-d-conveyor.jpg" alt="Motion ar konveijeru, detaļas sensoru un stūmēju" loading="lazy"></span><span class="tx"><h3>Konveijers vai testa stends</h3><p>Motori, sensori, releji un izejas strādā bez G-koda vai konfigurācijas failiem. Motion uzraksta abus.</p><p class="uses">Motion</p></span></a>
+<a class="dph-card" href="/docs/dpcreator-pnp-beta"><span class="im" aria-hidden="true"><svg width="300" height="180" viewBox="0 0 400 240" fill="none"><rect x="40" y="20" width="320" height="200" rx="8" fill="#123524" stroke="#2c6b4a"/><g fill="#c9a24a"><circle cx="64" cy="44" r="6"/><circle cx="336" cy="196" r="6"/><circle cx="336" cy="44" r="6"/></g><g fill="#b8bec4"><rect x="100" y="80" width="14" height="22" rx="2"/><rect x="124" y="80" width="14" height="22" rx="2"/><rect x="100" y="150" width="22" height="14" rx="2"/><rect x="280" y="140" width="14" height="22" rx="2"/></g><rect x="190" y="74" width="60" height="44" rx="3" fill="#1b1f24" stroke="#5d6977"/><g stroke="#ff6a3d" stroke-width="2"><path d="M272 122V194M232 158H312"/><circle cx="272" cy="158" r="14"/></g></svg></span><span class="tx"><h3>Pick and place <span class="beta">Beta</span></h3><p>Augšējā un apakšējā kamera atrod plati un pārbauda katru komponentu; vakuuma sprausla tos izvieto no lentes gabaliem un paliktņiem.</p><p class="uses">PnP · WebUI</p></span></a>
+<a class="dph-card own" href="/docs/dpcreator-motion"><span class="im"><img class="fit" src="image/catalog/dpc-site/hero2/hov-board.png" alt="" loading="lazy"></span><span class="tx"><h3>Jūsu pašu mašīna</h3><p>Katra kontroliera ass, ieeja, relejs un izeja liktas lietā. Pievienojiet vienu daļu, pārbaudiet to, tad pievienojiet nākamo.</p><p class="uses">Motion · WebUI · Pults</p></span></a>
+</div>
+</div></section>
+
+<section class="sec alt" id="apps"><div class="w">
+<h2>Lietotnes</h2>
+<p class="lead">Atzīmējiet tās ierakstīšanas laikā, tās tiek instalētas platē caur USB un atveras no jebkura pārlūka jūsu tīklā.</p>
+<div class="dph-apps">
+<a class="dph-app" href="index.php?route=product/product&product_id=383"><b>WebUI</b><span class="d">Palaidiet un vērojiet darbus: DRO, 3D trajektorija reāllaikā, Z korekcija darba laikā, darba atjaunošana, galvas kamera.</span><span class="p">Bez maksas ar R3 · €19.99 citām platēm</span></a>
+<a class="dph-app" href="/docs/install-any-esp32-board"><b>WebUI Lite</b><span class="d">Tas pats WebUI WROOM-32 platēm, kurā izslēgtas funkcijas, ko šī mikroshēma nespēj darbināt.</span><span class="p">Bez maksas</span></a>
+<a class="dph-app" href="index.php?route=product/product&product_id=386"><b>Studio</b><span class="d">Veidojiet dizainu pārlūkā un izveidojiet G-kodu: V-griešana (V-carve), lāzers, SVG, DXF, PDF vai attēla imports.</span><span class="p">Studio Basic bez maksas</span></a>
+<a class="dph-app" href="/docs/dpcreator-motion"><b>Motion</b><span class="d">Būvējiet savu mašīnu pa daļai, iemāciet pozīcijas un palaidiet secības. Izmēģiniet simulatorā.</span><span class="p">Bez maksas ar R3 · €39 citām platēm</span></a>
+<a class="dph-app" href="/docs/dpcreator-pnp-beta"><b>PnP</b><span class="d">Pick and place ar kamerām, lentes gabaliem un paliktņiem. Pirms pirmās palaišanas izlasiet beta piezīmes.</span><span class="p b">Beta · vispirms R&D klubam</span></a>
+</div>
+</div></section>
+
+<section class="sec" id="recovery"><div class="w dph-split">
+<div>
+<h2>Strāvas pārrāvums 18 240. rindā? Turpiniet no turienes.</h2>
+<p class="muted" style="margin:16px 0 0;font-size:18px">Plate darba izpildes laikā to pieraksta. Pēc strāvas pārrāvuma vai avārijas apturēšanas tā iesaka drošāko vietu, no kuras atsākt, ļauj līdz tai veikt izmēģinājuma gājienu (dry run) un turpina darbu. No WebUI vai pults.</p>
+<div class="btns"><a class="btn btn-line" href="/demo/">Izmēģināt demo</a></div>
+</div>
+<img src="image/catalog/dpc-site/shots/webui-recovery.jpg" alt="WebUI darba atjaunošanas panelis pēc avārijas apturēšanas" loading="lazy">
+</div></section>
+
+<section class="dpx-sec dpx-light" id="shop"><div class="dpx-wrap">
+ <div class="dpx-head"><h2>Gatavs darbam</h2><p>Samontēts, ar ierakstītu programmaparatūru un pārbaudīts. Pievienojiet un konfigurējiet savu mašīnu.</p></div>
+ <div class="dpx-plates">
+  <a class="dpx-plate dpx-plate-key" href="index.php?route=product/product&product_id=380"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><img src="image/catalog/dpc-site/photo-r2-tabui-combo.jpg" alt="dpCREATOR R2 kontrolieris un SmartTabUI pults blakus" loading="lazy"><span class="dpx-flag">Ietaupiet €40.98</span></div><div class="dpx-plate-body"><div class="dpx-model">DPC-R3-TABUI</div><h3>R3 kontrolieris + SmartTabUI pults</h3><p>Kontrolieris un samontēta pults ar saskaņotu programmaparatūru, pārbaudīti kopā. Pults un WebUI licences iekļautas.</p><div class="dpx-price">€529 <s>€569.98</s><span class="dpx-soon">Drīzumā</span></div></div></a>
+  <a class="dpx-plate" href="index.php?route=product/product&product_id=381"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><img src="image/catalog/dpc-site/photo-r2-controller-top.jpg" alt="dpCREATOR kontroliera plate, skats no augšas" loading="lazy"></div><div class="dpx-plate-body"><div class="dpx-model">DPC-R3</div><h3>dpCREATOR R3 kontrolieris</h3><p>4 asu FluidNC kontrolieris ar W5500 Ethernet, RS485 frekvences pārveidotājiem (VFD), SD karti un pults portu ar aparatūras E-stop. dpCREATOR WebUI iekļauts.</p><div class="dpx-price">€349.99<span class="dpx-soon">Drīzumā</span></div></div></a>
+  <a class="dpx-plate" href="index.php?route=product/product&product_id=382"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><img src="image/catalog/dpc-site/photo-tabui-pendant.jpg" alt="Samontēta SmartTabUI pults ar rokratu, E-stop un skārienekrānu" loading="lazy"></div><div class="dpx-plate-body"><div class="dpx-model">DPC-TABUI</div><h3>SmartTabUI pults, samontēta</h3><p>2.8″ skārienekrāns, rokrats, E-stop un pārslēgi PETG korpusā. Ar ierakstītu programmaparatūru, SmartTabUI licence iekļauta.</p><div class="dpx-price">€219.99<span class="dpx-soon">Drīzumā</span></div></div></a>
+ </div>
+ <div class="dpx-head dpx-head-sub"><h2>Būvējiet paši</h2><p>Programmaparatūra un drukas faili jūsu pašu pultij un bezmaksas programmaparatūra kontrolierim.</p></div>
+ <div class="dpx-plates">
+  <a class="dpx-plate" href="index.php?route=product/product&product_id=377"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><img src="image/catalog/dpc-site/tabui-card.jpg" alt="" loading="lazy"></div><div class="dpx-plate-body"><div class="dpx-model">DPC-TC1</div><h3>SmartTabUI pults programmaparatūra</h3><p>Licencēta programmaparatūra JC2432W328C displejam, ierakstāma no šīs vietnes, ar bezmaksas atjauninājumiem.</p><div class="dpx-price">€49.99</div></div></a>
+  <a class="dpx-plate" href="/firmware"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><img src="image/catalog/dpc-site/tabui-render-connector.jpg" alt="" loading="lazy"></div><div class="dpx-plate-body"><div class="dpx-model">DPC-TC1-3MF</div><h3>SmartTabUI korpuss, PETG drukas faili</h3><p>3MF faili korpusam: displejs, rokrats, E-stop, pārslēgi un GX12 savienotājs.</p><div class="dpx-price">Bezmaksas lejupielāde</div></div></a>
+  <a class="dpx-plate" href="index.php?route=information/information&information_id=8"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><div class="dpx-icomedia"><svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"></path></svg></div></div><div class="dpx-plate-body"><div class="dpx-model">FLUIDNC 4.1.1</div><h3>Kontroliera programmaparatūra</h3><p>FluidNC ar Ethernet dpCREATOR R2 un R3, jaunākā versija, ierakstāma no jūsu pārlūka.</p><div class="dpx-price">Bez maksas</div></div></a>
+ </div>
+</div></section>
+
+<section class="sec alt" id="try"><div class="w dph-two">
+<div class="dph-panel" id="setup">
+<h2>Iestatiet jebkuru ESP32 plati vienā lapā</h2>
+<p>Izvēlieties savu plati no 21, izvēlieties gatavu konfigurāciju, atzīmējiet lietotnes, ievadiet savu Wi-Fi un pieteikšanās datus. Lapa caur USB visu ieraksta un pārbauda, un pēc tam parāda plates adresi.</p>
+<img class="shot" src="image/catalog/dpc-site/shots/install-any-board.jpg" alt="Instalēšanas lapa: plate, konfigurācija, lietotnes, tīkls un pieteikšanās" loading="lazy">
+<a class="btn" href="/firmware">Iestatīt manu plati</a>
+</div>
+<div class="dph-panel">
+<h2>Izmēģiniet pulti šeit</h2>
+<p>SmartTabUI pults jūsu pārlūkā vada simulētu mašīnu. Darbojas pārslēgi, rokrats, skārienekrāns un E-stop.</p>
+<iframe src="/demo/?embed=1" title="SmartTabUI pults, tiešsaistes demo" loading="lazy"></iframe>
+<a class="btn btn-line" href="/demo/">Pilns demo ar WebUI</a>
+</div>
+</div></section>
+
+<section class="sec" id="rnd-club"><div class="w" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:40px">
+<div>
+<h2 style="font-size:40px">Būvējiet pirmie: R&D klubs</h2>
+<p class="muted" style="margin:14px 0 0;font-size:17px">Pirms izlaišanas 10 meistari bez maksas saņem SmartTabUI programmaparatūru un WebUI, lai tos būvētu un testētu uz savām mašīnām, un pirmie izmēģina jaunas lietotnes, piemēram, PnP. 3 labākie projekti saņem dpCREATOR R3 kontrolieri.</p>
+<div class="btns"><a class="btn" href="index.php?route=information/information&information_id=9">Pieteikties</a><a class="btn btn-line" href="rnd-members">Iepazīt dalībniekus</a></div>
+</div>
+<div id="docs">
+<h2 style="font-size:40px">Dokumentācija</h2>
+<ul class="dph-docs">
+<li><a href="index.php?route=journal3/blog&journal_blog_category_id=6">Darba sākšana</a></li>
+<li><a href="/docs/install-any-esp32-board">Jebkuras ESP32 FluidNC plates iestatīšana</a></li>
+<li><a href="index.php?route=journal3/blog&journal_blog_category_id=7">Kontrolieris</a> · <a href="index.php?route=journal3/blog&journal_blog_category_id=8">pults</a> · <a href="index.php?route=journal3/blog&journal_blog_category_id=9">programmaparatūra</a></li>
+<li><a href="/docs/dpcreator-motion">Automatizējiet jebkuru projektu ar Motion</a></li>
+<li><a href="/docs/dpcreator-pnp-beta">PnP beta: izlasiet pirms sākšanas</a></li>
+<li><a href="index.php?route=journal3/blog&journal_blog_category_id=10">Problēmu novēršana</a></li>
+</ul>
+<p class="muted" style="margin:18px 0 0;font-size:15px">Izstrādājis un uzbūvējis CNC inženieris. Agrākās plates: <a class="lk" href="legacy-boards">no kurienes cēlušās R2 un R3</a>.</p>
+</div>
+</div></section>
+
+</div></div>

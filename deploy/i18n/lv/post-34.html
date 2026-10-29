@@ -1,0 +1,52 @@
+<p><strong>dpCREATOR Studio</strong> ir bezmaksas projektēšanas un CAM programma, kas darbojas jūsu tīmekļa pārlūkā. Uzzīmējiet vai importējiet savu dizainu, izvēlieties, kā griezt katru formu, pārbaudiet rezultātu uz virtuāla materiāla un izveidojiet G-kodu savai CNC frēzei vai lāzeram. Nekas nav jāinstalē, lietošanai konts nav vajadzīgs, un jūsu dizaini paliek jūsu datorā.</p>
+<p><a class="btn btn-primary" href="/studio/" target="_blank" rel="noopener">Atvērt dpCREATOR Studio</a></p>
+
+<div class="alert alert-info"><strong>Darbojas ar jebkuru FluidNC kontrolieri.</strong> Studio izveido standarta <code>.nc</code> failu (tikai taisnas līnijas, tāpēc to var izpildīt jebkurš kontrolieris). To var palaist ar dpCREATOR WebUI, standarta FluidNC WebUI vai jebkuru citu sūtītāju. Studio ir bez maksas; to instalē tikai no dpcreator.eu, lūdzu, neizplatiet tā kopijas.</div>
+
+<p><img src="image/catalog/dpc-site/shots/studio-design-v2.jpg" alt="dpCREATOR Studio: kabata, apļa izgriezums un teksts uz materiāla" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<h3>Ko var darīt</h3>
+<ul>
+  <li><strong>Zīmēt:</strong> taisnstūrus, elipses un tekstu (5 fonti, pārvērsti kontūrās). Pārvietot, mainīt izmēru, dublēt un ievadīt precīzus izmērus un pozīcijas. Atsaukt un atcelt atsaukšanu.</li>
+  <li><strong>Importēt:</strong> SVG, DXF (līnijas, loki, apļi, polilīnijas, splaini, bloki, reālā izmērā), PDF (vektorzīmējumi, pirmā lapa) un attēlus (PNG, JPG, WebP). Attēlus var pārvērst kontūrās griešanai vai, ar lāzeru, gravēt punktu pa punktam.</li>
+  <li><strong>Griezt katru formu</strong> no ārpuses, no iekšpuses, pa līniju, kā kabatu, kā virsmu (nolīdzināšana), kā V-griezumu vai negriezt nemaz (palīglīnija). Iestatiet dziļumu katrai formai, griešanas virzienu (līdzfrēzēšana vai pretfrēzēšana) un turēšanas tiltiņus.</li>
+  <li><strong>Materiāls un frēze:</strong> izvēlieties materiālu (skujkoks, lapkoks, saplāksnis/MDF, akrils, putuplasts, alumīnijs) un frēzi no frēžu bibliotēkas (plakanā, lodveida, V-frēzes; saglabājiet savējās). Studio iesaka padevi, apgriezienus un dziļumu vienā gājienā. Tās ir piesardzīgas sākuma vērtības: vispirms izmēģiniet tās uz atgriezuma. Visu var iestatīt arī ar roku.</li>
+  <li><strong>Formu rīki:</strong> cilnē Shape <em>Join</em>, <em>Cut out</em> un <em>Overlap</em> apvieno izvēlēto formu ar citu, un <em>Grow</em> un <em>Shrink</em> izveido nobīdītu kontūru. Tie izveido jaunu formu un saglabā oriģinālus. <em>Arrange</em> (kreisā josla) izkārto visas formas uz materiāla bez pārklāšanās, sekojot atgriezuma kontūrai; formas netiek pagrieztas.</li>
+  <li><strong>Atgriezums:</strong> izmantojiet uz mašīnas izmērītu atgriezumu (DXF SD kartē) kā materiālu, izvietojiet dizainu uz tā un grieziet ar jau sakrītošu darba nulli.</li>
+  <li><strong>4. ass (beta):</strong> cilnē Material ieslēdziet <em>Round bar</em> un ievadiet tā diametru. Dizaina X iet gar stieni, un Y — ap to; programma pārvērš Y par A asi. Iestatiet X0 stieņa kreisajā galā, A0 tur, kur frēze pieskaras augšai, un Z0 uz stieņa virsmas. Priekšskatījums rāda dizainu atritinātu plaknē. Vispirms veiciet seklu griezumu uz atgriezuma un pārbaudiet A0 un griešanās virzienu.</li>
+  <li><strong>Lāzers:</strong> jauda, ātrums un gājieni katrai formai, līnijām, aizpildījumiem vai attēliem (FluidNC lāzera režīms, M4). <em>Engrave the picture</em> piedāvā Dither (Floyd–Steinberg vai Atkinson), Threshold un Grayscale ar spilgtumu, kontrastu un invertēšanu; punkta izmērs ir Line spacing cilnē Laser (0.1 mm ir smalka detalizācija, 0.15–0.2 mm ir ātrāk un dod daudz mazāku failu). Kā arī: aizpildījuma leņķis, krustojošas līnijas, dedzināšana vienā vai abos virzienos, ieskrējiens, lai galva būtu sasniegusi ātrumu, kad stars ieslēdzas, gaisa padeve (M8/M9) un <strong>sagataves</strong> (saglabājiet jaudu, ātrumu un gājienus, kas strādāja, un piemērojiet tos ar vienu klikšķi).</li>
+  <li><strong>Lāzera testa režģis un Frame:</strong> <em>Test grid</em> (kreisā josla) uz jūsu materiāla atgriezuma izdedzina numurētus kvadrātus, kur jauda pieaug pa rindām un ātrums pa kolonnām, lai varat izvēlēties labāko iestatījumu. <em>Frame</em> (augšējā josla) apvada galvu ap darba kontūru ar izslēgtu lāzeru, lai pārbaudītu pozīciju pirms dedzināšanas.</li>
+  <li><strong>Pārbaude pirms griešanas:</strong> cilne Check brīdina par formām ārpus materiāla vai mašīnas gājiena, griezumiem, kas dziļāki, nekā frēze sniedz, ātrām kustībām materiālā, kabatu detaļām, kas frēzei par mazu, un riskantiem ātrumiem.</li>
+  <li><strong>Priekšskatījums:</strong> vērojiet, kā frēze rindu pa rindai izgriež virtuālu materiālu, blakus redzams G-kods, un aplūkojiet darbu uz 3D mašīnas; lāzeram redzama lāzera galva, stars un apdegums, kas veidojas uz materiāla. Formas priekšskatījumā joprojām var vilkt un mainīt to izmēru; griezums un G-kods atjaunojas uzreiz. Apstrādes laiks tiek novērtēts.</li>
+</ul>
+
+<p><img src="image/catalog/dpc-site/shots/studio-preview-v2.jpg" alt="Priekšskatījums: G-kods izgriezts virtuālā materiālā" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/studio-machine-v2.jpg" alt="Studio: darbs uz 3D mašīnas" loading="lazy" style="flex:1 1 280px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/studio-laser-engrave.jpg" alt="Studio: attēla gravēšana ar lāzeru" loading="lazy" style="flex:1 1 280px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/studio-laser-preview.jpg" alt="Studio: lāzera priekšskatījums ar apdegumu uz materiāla" loading="lazy" style="flex:1 1 280px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Augšā: darbs uz 3D mašīnas. Apakšā: attēla gravēšana ar lāzeru (dither) un lāzera priekšskatījums ar galvu, staru un apdegumu.</p>
+<h3>No dizaina līdz mašīnai</h3>
+<ol>
+  <li>Atveriet <a href="/studio/" target="_blank" rel="noopener">dpcreator.eu/studio</a>. Pirmajā reizē <strong>Setup</strong> jautā par jūsu mašīnu (frēze vai lāzers, darba laukums, sākuma stūris) un materiālu (veids, izmērs, biezums). Abus vēlāk var mainīt ar pogu Setup.</li>
+  <li>Uzzīmējiet vai importējiet savu dizainu, tad izvēlieties katru formu un cilnē <strong>Shape</strong> norādiet, kā to griezt.</li>
+  <li>Izvēlieties frēzi cilnē <strong>Bit</strong> un apskatiet cilni <strong>Check</strong>.</li>
+  <li>Nospiediet <strong>Make g-code</strong>. Priekšskatījums rāda, kas tiks izgriezts.</li>
+  <li>Nospiediet <strong>Download .nc</strong> un augšupielādējiet failu kontroliera SD kartē ar savu WebUI (dpCREATOR WebUI: Files → Upload).</li>
+  <li>Iestatiet darba nulli <strong>materiāla augšējās virsmas apakšējā kreisajā stūrī</strong>, kā to rāda Studio, un palaidiet darbu.</li>
+</ol>
+<p>Ja Studio ir <a href="index.php?route=journal3/blog/post&journal_blog_post_id=35">instalēts jūsu kontrolierī</a>, 5. solis kļūst par vienu klikšķi: <strong>Send</strong> ievieto failu SD kartē un sagatavo to, tāpēc dpCREATOR WebUI un pults rāda to gatavu izpildei – jums tikai jānospiež <strong>Run</strong>.</p>
+
+<h3>Instalējiet kā lietotni</h3>
+<p>Chrome vai Edge pārlūkā lapā <a href="/studio/" target="_blank" rel="noopener">dpcreator.eu/studio</a> noklikšķiniet uz instalēšanas ikonas adreses joslā. Tad Studio atveras savā logā, darbojas bez interneta un atjauninās pats, kad iznāk jauna versija.</p>
+
+<h3>Jūsu dizaini</h3>
+<ul>
+  <li>Studio automātiski saglabā jūsu darbu pārlūkā. <strong>My designs</strong> parāda visus tur saglabātos dizainus.</li>
+  <li><strong>Save</strong> lejupielādē dizainu kā projekta failu (.json), un <strong>Open</strong> to ielādē: izmantojiet to rezerves kopijām vai lai pārnestu dizainu uz citu datoru vai pārlūku.</li>
+  <li>Dizaini tiek glabāti atsevišķi katram pārlūkam un katrai adresei: kopijai dpcreator.eu un kopijai jūsu kontrolierī katrai ir savs saraksts. Lai pārnestu dizainu starp tām, izmantojiet projekta failu.</li>
+</ul>
+
+<h3>Sūtīšana no dpcreator.eu</h3>
+<p>Pārlūki neļauj drošai (https) lapai sūtīt failus ierīcei jūsu tīklā pa vienkāršu http, tāpēc dpcreator.eu poga <strong>Send</strong> parasti ir bloķēta. Izmantojiet <strong>Download .nc</strong> vai <a href="index.php?route=journal3/blog/post&journal_blog_post_id=35">instalējiet Studio kontrolierī</a>, kur Send darbojas.</p>
+
+<h3>Jautājumi</h3>
+<p>Izmantojiet lapu <a href="index.php?route=extension/module/dpc_support">Atbalsts</a> (vispirms piesakieties). Norādiet Studio būvējumu (poga <strong>i</strong> augšējā labajā stūrī) un pievienojiet projekta failu, ja dizains dod nepareizu rezultātu.</p>
+

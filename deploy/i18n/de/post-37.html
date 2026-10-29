@@ -1,0 +1,68 @@
+<p>Der <a href="/machine-builder">Machine builder</a> schreibt die <code>config.yaml</code> für Ihre Maschine und zeichnet die beschriebene Maschine maßstabsgetreu. Wählen Sie das Board, die Achsen, die Spindeln und Laser und was an jedem Eingang und Ausgang hängt. Jede Änderung wird gegen die Einstellungsliste der Firmware selbst und die Pin-Regeln des Chips geprüft, sodass die erzeugte Datei fehlerfrei geladen wird.</p>
+<p>Er ist für den <strong>dpCREATOR R3</strong> gemacht und funktioniert auch mit <strong>jedem ESP32- oder ESP32-S3-Board</strong>, bei dem Sie die Pins selbst festlegen, für <strong>dpCREATOR FluidNC</strong> oder <strong>Standard-FluidNC</strong>. Er läuft in Ihrem Browser: Es wird nichts irgendwohin gesendet.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-overview.jpg" alt="Der Machine builder mit einer 1300 × 2500-Fräse: Einstellungen links, Draufsicht in der Mitte, DRO und Jog-Feld rechts" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>Mit einer Maschine beginnen</h3>
+<p>Wählen Sie das Beispiel, das Ihrer Maschine am nächsten kommt, und passen Sie es an: eine 1300 × 2500-Fräse mit doppeltem Y und Frequenzumrichter, eine 600 × 900-Fräse mit Frequenzumrichter und Laser, ein 1500 × 3000-Plasmatisch oder ein CO2-Laser mit Türverriegelung. Die Zusammenfassung in jeder Abschnittsüberschrift zeigt, was eingestellt ist, ohne den Abschnitt zu öffnen.</p>
+
+<h3>1. Board und Gestell</h3>
+<ul>
+<li><strong>Board:</strong> dpCREATOR R3, R2 oder <em>Other ESP32 / ESP32-S3 board</em> (siehe Abschnitt 8).</li>
+<li><strong>Firmware:</strong> <em>dpCREATOR FluidNC 4.1.1</em> oder <em>Mainstream FluidNC</em>. Beide lesen dieselben Einstellungen, nur hat ausschließlich die dpCREATOR-Firmware <code>tools:</code> und <code>offset_mm:</code> für ein zweites Werkzeug neben der Spindel. Im Mainstream-Modus werden zusätzliche Werkzeuge trotzdem per M6 über die Werkzeugnummer gewechselt; ihr Versatz wird als Kommentar geschrieben, damit Sie ihn in Ihrem Sender einstellen.</li>
+<li><strong>Schrittmotortreiber:</strong> legt das Impuls-Timing und die höchste Schrittrate fest. Geschwindigkeiten über dem, was der Treiber verkraftet, werden begrenzt, und der Builder weist Sie darauf hin.</li>
+<li><strong>Was sich auf Y bewegt</strong> (das Portal oder das Bett), <strong>Endschalter</strong> NC oder NO (NC ist sicherer: ein Kabelbruch stoppt die Maschine) und ob die Motoren im Leerlauf bestromt bleiben.</li>
+</ul>
+
+<h3>2. Achsen und Motorblöcke</h3>
+<p>Oben in <em>Axes and motors</em> wählen Sie, was jeder Achsblock antreibt. <strong>Jeder Block kann jede Achse sein.</strong> Der häufigste Fall ist ein zweiter Y-Motor (Y2) auf dem A-Block, um ein Portal auszurichten: Jeder Y-Motor fährt auf seinen eigenen Schalter, sodass jede Referenzfahrt das Portal rechtwinklig ausrichtet. X2 und Z2 funktionieren genauso. Ein Block, den Sie auf <em>not used</em> stellen, gibt seine STEP- und DIR-Pins als Ausgänge frei.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-axes.jpg" alt="Achsen und Motoren: die Blockzuordnung mit Y2 auf dem A-Block und die Einstellungen der X-Achse" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>Stellen Sie für jede Achse Verfahrweg, Schritte pro mm, Geschwindigkeit und Beschleunigung ein. <em>Work out steps per mm</em> berechnet den Wert für Kugelgewindetrieb, Riemen, Zahnstange und Ritzel oder Drehachse, mit Mikroschritten und Getriebe. <em>Homing switch</em> gibt an, an welchem Ende der Schalter sitzt; Sie können auch in der Zeichnung auf einen Schalter klicken, um ihn ans andere Ende zu verschieben. Die A-Achse ist eine Drehachse in Grad und wird als Futter auf dem Bett gezeichnet.</p>
+
+<h3>3. Spindeln, Laser und Brenner</h3>
+<p>Das Hauptwerkzeug kann ein <strong>Frequenzumrichter über RS485</strong> sein (Huanyang, H2A, H100, YL620, NowForever, Siemens V20, Danfoss VLT2800, Delta MS300, Folinn BD600, Mollom G70), eine <strong>PWM</strong>- oder <strong>0-10-V</strong>-Spindel, eine <strong>Relais</strong>-Spindel, ein <strong>Laser</strong> oder ein <strong>Plasmabrenner</strong> (Zündausgang, Arc-OK-Eingang und Lichtbogen-Wartezeit). Fügen Sie bis zu zwei weitere Werkzeuge daneben hinzu, zum Beispiel einen Laser neben der Frässpindel: Geben Sie jedem eine Werkzeugnummer und seinen X/Y/Z-Versatz zur Spindel, und M6 T2 schaltet darauf um.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-tools.jpg" alt="Ein Huanyang-Frequenzumrichter als Hauptwerkzeug und ein Laser als Werkzeug 2; die Zeichnung zeigt den Laser neben der Spindel und die A-Drehachse auf dem Bett" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>Mit einem unter Inputs eingestellten Werkzeuglängensensor fügt <strong>Manual tool change</strong> <code>atc_manual</code> hinzu: M6 fährt zur Wechselposition, wartet auf das neue Werkzeug und vermisst es dann am Werkzeuglängensensor. Beim R3 ist die empfohlene Kombination aus Fräse und Laser der Frequenzumrichter an RS485 und der Laser am PWM-Ausgang; siehe <a href="/docs/spindle-vfd-rs485">Spindel und Frequenzumrichter</a>.</p>
+
+<h3>4. Eingänge</h3>
+<p>Jeder Eingang ist eine Liste der Klemmen des Boards: Taster und Werkzeuglängensensor; Schutztür, Not-Halt und Treiberfehler; Tasten für Reset, Vorschub-Halt, Zyklusstart, Home und Einzelsatz; vier Makrotasten; vier Benutzereingänge (M66). Eine bereits belegte Klemme ist ausgegraut, mit Angabe, wofür sie genutzt wird. Beim R3 kann der Endschalter-Eingang eines nicht genutzten Achsblocks ebenfalls einen Schalter oder eine Taste aufnehmen.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-inputs.jpg" alt="Eingänge gruppiert nach Antasten, Sicherheit, Tasten, Makrotasten und Benutzereingängen" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>Mit einer Schutztür können Sie <strong>Parking</strong> einschalten: Das Öffnen der Tür hebt Z auf eine eingestellte Höhe an. Der Not-Halt-Eingang stoppt den Controller; er ersetzt keinen fest verdrahteten Not-Halt, der die Stromversorgung der Treiber abschaltet.</p>
+
+<h3>5. Ausgänge und Statusleuchten</h3>
+<p>Flutkühlung (M8) und Nebel oder Luft (M7), vier Benutzerausgänge (M62/M63) und ein PWM-Ausgang (M67), Statusleuchten für Leerlauf, Betrieb, Hold, Alarm und Tür sowie eine WS2812-RGB-Status-LED, deren Farbe dem Maschinenzustand folgt. Beim R3 sind STEP und DIR eines nicht genutzten Blocks (meist A) 5-V-Logikausgänge: Sie steuern ein Relaismodul, einen SSR-Eingang oder eine Statusleuchte.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-outputs.jpg" alt="Ausgänge: Kühlung, Benutzerausgänge und Statusleuchten" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>6. Display und Makros</h3>
+<p><strong>OLED-Display:</strong> ein SSD1306-Statusbildschirm über I2C (128 × 64, 128 × 32 oder 64 × 48). Er braucht zwei normale GPIO-Pins; beim R3 ist das der Stecker J7 (GPIO43/44). Wenn Sie J7 für das Display verwenden, entfällt dort die serielle UART0-Konsole; USB und Netzwerk funktionieren weiterhin.</p>
+<p><strong>Makros:</strong> eine Startzeile, Makros 0-3 (über eine Makrotaste oder <code>$Macros/Run=0</code> gestartet) sowie Zeilen, die nach der Referenzfahrt und nach dem Entsperren ausgeführt werden. Verbinden Sie Befehle mit <code>&</code>, zum Beispiel <code>G0 Z-5&G0 X0 Y0</code>.</p>
+
+<h3>7. Handbediengerät, Ethernet und SD-Karte</h3>
+<p>Das SmartTabUI-Handbediengerät am PENDANT-Anschluss, das W5500-Ethernet (SPI-Takt und ob die INT-Leitung genutzt wird) oder nur WLAN sowie die SD-Karte mit ihrem Takt. W5500 und SD-Karte teilen sich den SPI-Bus. Die IP-Einstellungen finden Sie unter <a href="/docs/ethernet-w5500-setup">Ethernet (W5500) einrichten</a>.</p>
+
+<h3>8. Andere ESP32- und ESP32-S3-Boards</h3>
+<p>Wählen Sie <em>Other ESP32 / ESP32-S3 board</em>, und der Abschnitt <em>Your board's pins</em> öffnet sich. Wählen Sie den Chip und dann den GPIO hinter jeder Klemme: STEP, DIR und Endschalter für jeden Block, das Treiber-Enable (active high oder low), Ihre eigenen benannten Eingänge, Ausgänge und I/O-Pins, die Pendant-UART, RS485, SPI, SD-Karte und W5500. Alles andere im Builder verwendet dann diese Klemmen.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-custom.jpg" alt="Your board's pins: Chip, Motor-Pins, Enable, Eingänge und Ausgänge, Anschlüsse" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>Die Pin-Listen richten sich nach dem Chip:</p>
+<table class="table table-bordered"><thead><tr><th></th><th>ESP32-S3</th><th>ESP32</th></tr></thead><tbody>
+<tr><td>Nicht nutzbar</td><td>GPIO 26-32 (Flash), 19/20 (USB), 35-37 bei Modulen mit Octal-PSRAM (N8R8, N16R8)</td><td>GPIO 6-11 (Flash)</td></tr>
+<tr><td>Nur Eingang</td><td>keine</td><td>GPIO 34-39, ohne internen Pull-up</td></tr>
+<tr><td>Strapping-Pins (markiert)</td><td>0, 3, 45, 46</td><td>0, 2, 5, 12, 15</td></tr>
+</tbody></table>
+<p>Jeder Pin kann einmal verwendet werden; die SPI-Bus-Pins werden bewusst von SD-Karte und W5500 gemeinsam genutzt.</p>
+
+<h3>9. Konfiguration und Verdrahtung prüfen</h3>
+<p>Das Kennzeichen neben den Reitern zeigt, ob die Konfiguration gültig ist, und für welchen Chip. <strong>Wiring</strong> listet jede Klemme des Boards mit der Funktion auf, die die Konfiguration ihr zuweist, markiert freie Klemmen und zeigt doppelt verwendete Pins in Rot. Klicken Sie auf eine Funktion, um zu ihrer Zeile zu springen.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-wiring.jpg" alt="Die Verdrahtungsansicht: jeder Achsblock, jede I/O-Klemme, jeder Anschluss und SPI-Pin mit seiner Funktion" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>Der Reiter <strong>config.yaml</strong> zeigt die Datei mit einem Kommentar an jedem Pin. Sie können sie dort bearbeiten oder Ihre eigene Konfiguration einfügen: Zeichnung, Verdrahtung und Prüfungen folgen ihr. <em>Load into the builder</em> wandelt eine eingefügte Konfiguration wieder in Builder-Einstellungen um. Konfigurationen mit Dingen, die der Builder nicht bearbeiten kann (I2S-Schieberegister-Pins wie beim 6-Pack oder MKS DLC32, über UART oder SPI eingestellte TMC-Treiber, CoreXY und andere Kinematiken, Servos, Pin-Erweiterungen), bleiben in der Textansicht, sodass nichts verloren geht.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-yaml.jpg" alt="Der Reiter config.yaml mit der erzeugten Datei und dem Prüfergebnis" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>10. Ausprobieren, bevor Sie verdrahten</h3>
+<p>Das Jog-Feld und die Pfeiltasten bewegen das Werkzeug in der Zeichnung. <strong>$H home</strong> führt die Referenzfahrten der Reihe nach aus und zeigt den Maschinen-Nullpunkt. Fahren Sie bei aktiven Hard-Limits in einen Schalter, erhalten Sie den Alarm, den auch die echte Maschine auslösen würde. <em>Zero XY here</em> setzt den Werkstück-Nullpunkt, und M6 wechselt zwischen Werkzeugen, sodass Sie den angewendeten Versatz sehen.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-laser-light.jpg" alt="Das CO2-Laser-Beispiel im hellen Theme, mit Türgehäuse" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>11. Auf das Board bringen</h3>
+<ol>
+<li>Kopieren oder speichern Sie <code>config.yaml</code> aus dem Reiter config.yaml.</li>
+<li>Laden Sie sie auf den Controller: im Dateimanager der WebUI oder auf der Seite <a href="/firmware">Flash Firmware</a> mit <em>I have a config.yaml</em>, das sie nach dem Flashen schreibt. Siehe <a href="/docs/flashing-firmware-browser">Firmware im Browser flashen</a>.</li>
+<li>Starten Sie mit <code>$bye</code> neu und führen Sie die ersten Prüfungen durch: Jede Achse ein kurzes Stück verfahren, die Richtungen prüfen, dann referenzieren.</li>
+</ol>

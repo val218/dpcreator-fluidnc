@@ -1,0 +1,5 @@
+{
+ "name": "Firmware aktualisieren und Konfiguration behalten",
+ "meta_title": "Firmware aktualisieren und Konfiguration behalten — dpCREATOR Doku",
+ "meta_description": "dpCREATOR Controller-Firmware aktualisieren, ohne das Maschinen-Setup zu verlieren: config.yaml sichern, Nur-Firmware-Updates, WebUI-Updates."
+}

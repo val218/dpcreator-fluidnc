@@ -1,0 +1,14 @@
+<p>Plate koplieto savu SD karti jūsu tīklā adresē <code>http://&lt;board-ip&gt;/sd</code>. Pievienojiet to vienreiz un kopējiet G-kodu uz tās kā uz USB zibatmiņu. Pults priekšskatījumi (<code>.viz</code>) tiek izveidoti automātiski katram nokopētajam G-koda failam.</p>
+<figure class="dpc-shot" style="margin:18px 0 22px"><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/webui-files-console.jpg" alt="SD kartes faili WebUI" loading="lazy" style="flex:1 1 280px;max-width:420px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">SD karte WebUI failu sarakstā. Tīkla diskā redzami tie paši faili.</figcaption></figure><h3>Windows: vienkāršākais veids</h3>
+<ol><li>WebUI panelī Files noklikšķiniet <strong>PC drive</strong>. Tiek lejupielādēts iestatīšanas skripts ar jau ierakstītu jūsu plates IP adresi.</li>
+<li>Veiciet uz tā dubultklikšķi (neizmantojiet "Run as administrator"). Ja Windows brīdina, noklikšķiniet <strong>More info → Run anyway</strong>.</li>
+<li>Vienīgajā administratora pieprasījumā atbildiet <strong>Yes</strong>. SD karte parādās kā disks <strong>S:</strong> ar nosaukumu <em>dpCREATOR SD</em> un pievienojas no jauna pie katras pieteikšanās.</li></ol>
+<p>Ja plates IP adrese mainās, palaidiet skriptu vēlreiz. Lai visu noņemtu: <code>dpcreator-sd-drive.cmd remove</code>.</p>
+<h3>macOS un Linux</h3>
+<ul><li>macOS: Finder → Go → Connect to Server → <code>http://&lt;board-ip&gt;/sd</code></li>
+<li>Linux: jūsu failu pārvaldnieks ar <code>dav://&lt;board-ip&gt;/sd</code> vai davfs2</li></ul>
+<h3>Padomi</h3>
+<ul><li>Piešķiriet platei fiksētu IP adresi, lai disks darbotos arī pēc pārstartēšanas.</li>
+<li>Ierakstot <code>\\&lt;board-ip&gt;</code> Explorer logā, rodas kļūda — platei nav Windows failu koplietošanas (SMB). Izmantojiet disku S:.</li>
+<li>Nekopējiet lielus failus, kamēr no SD kartes izpildās darbs; darbam ir prioritāte.</li>
+<li>Atstājiet <code>.viz</code> failus blakus savam G-kodam — pults tos izmanto.</li></ul>

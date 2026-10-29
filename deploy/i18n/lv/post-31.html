@@ -1,0 +1,40 @@
+<p>Divkāršs pults ENABLE pogas spiediens dīkstāvē atver divus rīkus, kas strādā kopā ar WebUI: <strong>Measure part</strong> nosaka sagataves izmēru un centru pēc tās stūriem, un <strong>Record waypoints</strong> savāc pozīcijas urbšanas vai kabatu frēzēšanas darbam (Record & Retrace).</p>
+<p>Kamēr mašīna ir dīkstāvē, divreiz nospiediet ENABLE (divi ātri spiedieni). Pults jautā <em>What do you want to do?</em> – pieskarieties <strong>Measure part</strong> vai <strong>Record waypoints</strong>. Kamēr neizvēlaties, nekas netiek ierakstīts.</p>
+
+<h3>Measure part</h3>
+<ol>
+  <li>Pārvietojiet instrumentu uz detaļas <strong>apakšējo kreiso</strong> stūri un divreiz nospiediet ENABLE.</li>
+  <li>To pašu dariet pie <strong>augšējā labā</strong>, <strong>apakšējā labā</strong> un <strong>augšējā kreisā</strong> stūra. Josla zem skata parāda, kurš stūris ir nākamais. Pietiek ar diviem pretējiem stūriem.</li>
+  <li>Skatā tiek uzzīmēti stūri, detaļas kontūra un tās centrs; josla rāda izmēru un centra pozīciju.</li>
+</ol>
+<p>Pēc tam apakšējā joslā:</p>
+<ul>
+  <li><strong>Go ctr</strong> (pieskarieties divreiz): Z paceļas līdz augšai, tad instruments pārvietojas virs detaļas centra.</li>
+  <li><strong>XY0 ctr</strong> / <strong>XY0 BL</strong> (pieskarieties divreiz): darba nulle X0 Y0 tiek iestatīta centrā vai apakšējā kreisajā stūrī. Mašīna nekustas.</li>
+  <li><strong>Clear</strong>: sākt no jauna. <strong>Finish</strong>: aizvērt Measure.</li>
+</ul>
+<p><strong>WebUI</strong> automātiski atveras Centre Finder un saņem tos pašus stūrus, kopā ar materiāla augstuma zondēšanu un virsmas nolīdzināšanas ģeneratoru. Notīrot vienā pusē, notīrās abās. Ja vispirms atverat Centre Finder WebUI, nākamais dubultspiediens pultī uzreiz sāk Measure.</p>
+
+<h3>Record waypoints (Record & Retrace)</h3>
+<p>Ja sarakstā jau ir punkti, pults jautā, vai tiem <strong>Add</strong> (pievienot) vai sākt <strong>New list</strong> (jaunu sarakstu).</p>
+<ol>
+  <li>Pārvietojieties uz pirmo atzīmēto punktu un divreiz nospiediet ENABLE: tas kļūst par punktu. Atkārtojiet katram punktam.</li>
+  <li>Skatā katrs punkts tiek uzzīmēts mērogā secīgi: krusts urbtam caurumam, aplis apaļai kabatai, kontūra taisnstūrim, punkts kustībai. Izvēlētais punkts ir dzeltens, instruments — oranžs punkts.</li>
+  <li>Pieskarieties punktam, lai to izvēlētos (vai izmantojiet <strong>Prev</strong> / <strong>Next</strong>), tad iestatiet to joslā:
+    <ul>
+      <li><strong>Drill / Round / Rect / Move</strong> – ko tur darīt.</li>
+      <li>Izmēri – <em>Dia</em> un <em>Depth</em> apaļām kabatām, <em>W</em>, <em>H</em>, <em>Depth</em> un <em>Ref</em> (kurš stūris ir atzīme) taisnstūriem. Pieskarieties izmēram, tad grieziet rokratu: x1 = 0.01, x10 = 0.1, x100 = 1 mm. Turot ENABLE, rokrats tā vietā pārvieto asi.</li>
+      <li><strong>Jog size</strong> – pārvietojieties no atzīmes līdz malai (apaļai) vai pretējam stūrim (taisnstūrim) un divreiz nospiediet: izmērs tiek izmērīts jūsu vietā.</li>
+    </ul>
+  </li>
+  <li><strong>Delete</strong> izdzēš izvēlēto punktu (pieskarieties divreiz). <strong>Finish</strong> beidz ierakstīšanu.</li>
+</ol>
+<p><strong>WebUI</strong> Record & Retrace atveras automātiski, kad ierakstāt pultī, un rāda to pašu punktu karti, sarakstu un redaktoru; izmaiņas vienā pusē uzreiz redzamas otrā. Tur iestatiet instrumenta diametru, drošo Z, padeves un vārpstas apgriezienus, pārbaudiet G-koda priekšskatījumu un ar <strong>Save & Prepare</strong> izveidojiet darbu – tad palaidiet to kā jebkuru citu darbu.</p>
+
+<h3>Der zināt</h3>
+<ul>
+  <li>Punktu saraksts glabājas kontroliera SD kartē, tāpēc tas saglabājas pēc pārstartēšanas un ir vienāds pultī un katrā WebUI.</li>
+  <li>Kamēr WebUI ir atvērts rīks Offcuts, dubultspiediens pultī tā vietā fiksē Offcuts punktu.</li>
+  <li>Measure un Record vajadzīga dpCREATOR kontroliera programmaparatūra no 2026. gada oktobra vai jaunāka (lapa Flash Firmware).</li>
+</ul>
+

@@ -1,0 +1,46 @@
+<p>SmartTabUI instalē un atjaunina tikai no lapas <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>, tieši no pārlūka. Lejupielādējama faila nav. Šajā lapā aprakstīta instalēšana, atjauninājumi, reģistrācija un atbalsts.</p>
+<div class="alert alert-info"><strong>Prasības:</strong> SmartTabUI pults un dpCREATOR WebUI darbojas ar <strong>dpCREATOR FluidNC programmaparatūru</strong> kontrolierī (bez maksas, instalē no <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Tās balstās uz komandām, ko pievieno šī programmaparatūra &ndash; priekšskatījumi, Prepare, Rewind, Z korekcija, darba atjaunošana, makro, Measure un Record &ndash; tāpēc standarta FluidNC netiek atbalstīts.</div>
+
+<h3>Kas jums vajadzīgs</h3>
+<ul>
+  <li>Chrome vai Edge datorā (Windows, macOS, Linux). Firefox un tālruņi nevar sazināties ar USB ierīcēm.</li>
+  <li>USB datu kabelis (daži kabeļi paredzēti tikai uzlādei).</li>
+  <li>dpcreator.eu konts. Lai reģistrētu jaunu pulti, kontam vajadzīga SmartTabUI licence (pirkta atsevišķi vai kopā ar saliktu pulti; tajā iekļauts dpCREATOR WebUI).</li>
+</ul>
+
+<h3>Instalēšana vai atjaunināšana</h3>
+<ol>
+  <li>Piesakieties savā dpcreator.eu kontā un atveriet <strong>Flash Firmware → Pendant firmware</strong>.</li>
+  <li>Atvienojiet kontroliera kabeli no pults un pievienojiet pulti datoram ar USB.</li>
+  <li>Noklikšķiniet <strong>Connect and install</strong> un izvēlieties pults seriālo portu.</li>
+  <li>Lapa nolasa pults mikroshēmas ID, pārbauda tās reģistrāciju un instalē jaunāko būvējumu. Neatvienojiet to, kamēr rit josla.</li>
+  <li>Kad parādās <strong>Done</strong>, pults pārstartējas pati. Iespraudiet atpakaļ kontroliera kabeli.</li>
+</ol>
+<p>Jūsu pults iestatījumi (tēma, ENABLE režīms, zondes iestatījumi…) saglabājas. Pēc pults atjaunināšanas atjauniniet arī kontroliera programmaparatūru – tās tiek izstrādātas kopā.</p>
+
+<h3>Reģistrācija</h3>
+<ul>
+  <li>Katra pults tiek reģistrēta pēc tās <strong>mikroshēmas ID</strong> pirmajā reizē, kad to instalē ar licenci. Viena licence reģistrē vienu pulti.</li>
+  <li>Reģistrētu pulti var atjaunināt no jebkura dpcreator.eu konta, cik bieži vien vēlaties – arī pēc pilnīgas dzēšanas vai pēc īpašnieka maiņas.</li>
+  <li>dpCREATOR pārdotās saliktās pultis tiek reģistrētas pirms nosūtīšanas.</li>
+  <li>Pultī Settings → LICENCE rāda <em>Registered</em> un mikroshēmas ID.</li>
+</ul>
+
+<h3>Nekas netiek bloķēts</h3>
+<p>Pults bez licences darbojas pilnībā; tā tikai sāknēšanas ekrānā un iestatījumos rāda <em>Not registered</em>. Licence tiek pārbaudīta pašā pultī, bez interneta, un tai nav termiņa. Licence apmaksā SmartTabUI, WebUI un bezmaksas dpCREATOR kontroliera programmaparatūras izstrādi un nodrošina atjauninājumus un atbalstu.</p>
+
+<h3>Paziņojumi par atjauninājumiem</h3>
+<p>Aptuveni reizi dienā dpCREATOR WebUI jautā dpcreator.eu, vai ir jaunāki būvējumi, un kājenē rāda <em>update available</em>. Tas sūta tikai plates ID, pults mikroshēmas ID un būvējumu numurus. Izslēdziet to ar <em>update check: on</em> WebUI kājenē.</p>
+
+<h3>Atbalsts</h3>
+<p>Atveriet pieteikumu lapā <a href="index.php?route=extension/module/dpc_support">Atbalsts</a> (vispirms piesakieties savā kontā). Norādiet pults <strong>mikroshēmas ID</strong> (Settings → LICENCE) vai kontroliera <strong>plates ID</strong> un būvējumu numurus (pults sāknēšanas ekrāns, WebUI kājene); varat pievienot fotogrāfiju, savu <code>config.yaml</code> vai žurnālu. Mēs atbildam pieteikuma lapā un pa e-pastu. Atbalsts attiecas uz dpCREATOR kontrolieriem ar dpCREATOR FluidNC programmaparatūru, ar reģistrētām pultīm un WebUI.</p>
+
+<h3>Ja nedarbojas</h3>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><em>This browser cannot talk to USB devices</em></td><td>Izmantojiet Chrome vai Edge datorā.</td></tr>
+    <tr><td>Sarakstā nav porta, vai neizdodas pieslēgties</td><td>Mēģiniet citu kabeli (datu kabeli) un USB portu; aizveriet seriālo monitoru vai citu lapu, kas izmanto portu; klikšķinot turiet nospiestu pogu BOOT.</td></tr>
+    <tr><td><em>Not registered yet … licence</em></td><td>Šai pultij nav reģistrācijas, un jūsu kontā nav brīvas licences. Iegādājieties licenci vai, ja pults saņemta salikta vai lietota, sazinieties ar mums, norādot tās mikroshēmas ID.</td></tr>
+    <tr><td><em>Firmware not available right now</em></td><td>Mēģiniet vēlreiz pēc dažām minūtēm.</td></tr>
+  </tbody>
+</table>

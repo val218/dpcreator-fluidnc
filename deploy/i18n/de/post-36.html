@@ -1,0 +1,60 @@
+<p>Die dpCREATOR WebUI ist die Steuerseite, die der Controller selbst bereitstellt. Öffnen Sie die Adresse des Boards in einem Browser auf PC, Tablet oder Smartphone (zum Beispiel <code>http://fluidnc.local</code>). Sie zeigt, wo die Maschine steht, den laufenden Job in 3D, das entstehende Teil und die Brandspur des Lasers. Diese Seite erklärt das Positionsfeld, die 3D-Ansicht und die Laserfunktionen. Dateien, Job-Wiederaufnahme, Z-Anpassung und das Handbediengerät haben eigene Artikel.</p>
+<div class="alert alert-info"><strong>Voraussetzungen:</strong> Die dpCREATOR WebUI funktioniert mit der <strong>dpCREATOR-FluidNC-Firmware</strong> auf dem Controller (kostenlos, über <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Aktualisieren Sie WebUI, Controller-Firmware und SmartTabUI-Handbediengerät gemeinsam.</div>
+
+<figure class="dpc-shot" style="margin:18px 0 22px"><img src="image/catalog/dpc-site/shots/webui-live-job.jpg" alt="dpCREATOR WebUI während ein 3D-Relief-Job läuft" loading="lazy" style="max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Ein laufendes 3D-Relief: links die Position, in der Mitte die Spindel über dem Job, rechts Maschinenfeld, Dateien und Konsole, unter der Ansicht die Run-Leiste.</figcaption></figure>
+
+<h2>Position</h2>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+<img src="image/catalog/dpc-site/shots/webui-position-laser.jpg" alt="Positionsfeld mit den Spalten Work und Machine" loading="lazy" style="flex:0 1 360px;max-width:360px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a">
+<ul style="flex:1 1 300px;margin:0">
+  <li><strong>Work und Machine:</strong> Die großen Zahlen sind die Werkstückposition, die Koordinaten Ihres Jobs. Die kleinen sind die Maschinenposition, gezählt ab der Referenzposition.</li>
+  <li><strong>Not homed · Home:</strong> Dieses Kennzeichen erscheint, solange eine Achse mit Referenzschaltern seit dem Einschalten oder einem Reset nicht referenziert wurde. Klicken Sie darauf, um die Referenzfahrt zu starten. Maschinenpositionen bedeuten erst nach der Referenzfahrt <em>wo auf dem Bett</em>; Werkstückpositionen stimmen immer. Unlock zählt nicht als Referenzfahrt.</li>
+  <li><strong>Achse durch Halten nullen:</strong> Halten Sie eine Achszeile oder ihre Taste X0 / Y0 / Z0 etwa eine Sekunde lang. Kurzes Antippen bewirkt nichts, sodass ein versehentlicher Klick Ihren Werkstück-Nullpunkt nicht verschieben kann. <strong>Zero all</strong> funktioniert genauso.</li>
+  <li><strong>Tool:</strong> der Fräser in der Spindel (aus der Werkzeugtabelle) oder <em>T2 Laser</em>, wenn der Laser gewählt ist (siehe <a href="index.php?route=journal3/blog/post&journal_blog_post_id=28#router-and-laser">Fräse und Laser an einer Maschine</a>).</li>
+</ul>
+</div>
+
+<h3>Probe Z0</h3>
+<p><strong>Probe Z0</strong> (unter der Position) setzt den Werkstück-Z-Nullpunkt mit einer Antastplatte oder einem 3D-Taster:</p>
+<figure class="dpc-shot" style="margin:12px 0 18px"><img src="image/catalog/dpc-site/shots/webui-probe-z0.jpg" alt="Dialog Probe Z0" loading="lazy" style="max-width:640px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a;display:block"></figure>
+<ol>
+  <li>Bringen Sie den Taster einige Millimeter über das Teil.</li>
+  <li>Testen Sie ihn: Drücken Sie den Taststift an oder berühren Sie mit der Platte den Fräser. Die Anzeige wird grün.</li>
+  <li>Geben Sie die Plattendicke ein (und bei Bedarf einen Z-Versatz) und klicken Sie auf <strong>Start probe</strong>. Das Werkzeug fährt nach unten bis zur Berührung, setzt Z0 auf die Oberseite der Platte (bzw. auf die angetastete Fläche beim 3D-Taster) und hebt 5&nbsp;mm ab.</li>
+</ol>
+
+<h2>Die 3D-Ansicht während eines Jobs</h2>
+<ul>
+  <li>Die Spindel (oder das Lasermodul) bewegt sich über den Job. Die fertigen Schnitte sind nach Tiefe eingefärbt, und eine Karte zeigt Datei, Restzeit, erledigte % und Zeile.</li>
+  <li><strong>Follow</strong> hält das Werkzeug im Blick. <strong>Auto-fit</strong> zeigt den ganzen Job, wenn er geladen wird oder sich der Werkstück-Nullpunkt verschiebt. <strong>Spindle view</strong> zeigt den Spindelkörper oder nur den Fräser. <strong>Stock</strong> zeigt den Materialblock (Größe über <em>Stock</em> oberhalb der Ansicht einstellen).</li>
+  <li><strong>G-code</strong> zeigt die Datei als Text unter der Ansicht und folgt der laufenden Zeile.</li>
+  <li><strong>Maschinenbett und Verfahrweg:</strong> Wenn X und Y Referenzschalter haben, in config.yaml <code>soft_limits: true</code> gesetzt ist und die Maschine referenziert ist, werden Bett und Verfahrweg gezeichnet, und ein Hinweis warnt, wenn der Job den Verfahrweg überschreitet. Sonst zeigt die Ansicht ein einfaches Raster unter dem Werkstück.</li>
+  <li><strong>Werkzeugspalte</strong> (links neben der Ansicht): die Werkzeuge aus der Werkzeugtabelle. Klicken Sie auf eines, um es einzuwechseln (M6). Ein Laser mit eigener Werkzeugnummer erscheint als <em>T2 laser</em>.</li>
+</ul>
+
+<h3>Teileansicht</h3>
+<p><strong>Part</strong> (neben den Ansichtstasten) zeigt das Teil, das der Job erzeugt: den aus dem Block herausgearbeiteten Werkzeugweg, mit der Form des in der Werkzeugspalte gewählten Fräsers (Schaftfräser, Kugelfräser, V-Fräser…). Wählen Sie den Fräser, für den die Datei erstellt wurde. Während der Job läuft, wird das Teil mitgefräst. Der Schalter <strong>Path</strong> zeichnet den Werkzeugweg blass über das Teil.</p>
+<figure class="dpc-shot" style="margin:12px 0 18px"><img src="image/catalog/dpc-site/shots/webui-part-view.jpg" alt="Teileansicht: das aus dem Block gearbeitete Relief" loading="lazy" style="max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Teileansicht mit 3-mm-Kugelfräser: Das Relief entsteht im Holz, während der Fräser arbeitet.</figcaption></figure>
+
+<h3>Run-Leiste</h3>
+<p>Unter der Ansicht: <strong>Cycle start</strong>, <strong>Pause</strong>, <strong>Stop</strong> und <strong>Probe</strong>, Nebel- und Flutkühlung sowie die Overrides für Vorschub und Spindel als Schieberegler (ziehen oder die Tasten im Feld Overrides verwenden).</p>
+
+<h2>Laser-Jobs</h2>
+<p>Eine Datei ist ein <strong>Laser-Job</strong>, wenn sie M4 verwendet oder wenn alle Schnitte auf einer Z-Höhe liegen und sie mehr als zwei Leistungsstufen nutzt (eine Graustufengravur). Bei einem Laser-Job:</p>
+<ul>
+  <li>Die 3D-Ansicht zeigt das Lasermodul und, während er feuert, den Strahl. Mit eingeschaltetem <strong>Part</strong> sehen Sie, wie die Brandspur auf dem Material entsteht: je dunkler, desto mehr Leistung.</li>
+  <li>Die Run-Leiste zeigt <strong>Laser</strong> und die Leistung in % des höchsten S-Werts des Lasers aus config.yaml, mit dem S-Wert (zum Beispiel <em>42% S420</em>).</li>
+  <li>Das SmartTabUI-Handbediengerät zeigt die Brandspur in seiner PART-Ansicht, und sein drittes Override-Feld zeigt <strong>LASER</strong>.</li>
+</ul>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start">
+<img src="image/catalog/dpc-site/shots/webui-laser-job.jpg" alt="Laufender Laser-Job in der WebUI" loading="lazy" style="flex:2 1 420px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a">
+<img src="image/catalog/dpc-site/shots/webui-laser-burn-top.jpg" alt="Laser-Brandspur von oben" loading="lazy" style="flex:1 1 260px;max-width:440px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a">
+</div>
+<p style="font-size:13px;color:#8a97a3">Eine Graustufen-Lasergravur bei 30 %: der Laser auf T2 mit verrechnetem Versatz, die Leistung in der Run-Leiste und die Brandspur von oben (Spindle view aus).</p>
+<p>M4 braucht eine <code>Laser:</code>-Spindel in config.yaml. Auf einer Maschine mit nur einer Frässpindel stoppt M4 den Job mit <em>error 20</em>: Verwenden Sie M3 oder richten Sie den Laser ein wie unter <a href="index.php?route=journal3/blog/post&journal_blog_post_id=28#router-and-laser">Fräse und Laser an einer Maschine</a> beschrieben.</p>
+
+<h2>Studio</h2>
+<p>Die Taste <strong>Studio</strong> oben rechts öffnet <a href="index.php?route=journal3/blog/post&journal_blog_post_id=34">dpCREATOR Studio</a> in einem eigenen Tab. Ist Studio bereits geöffnet, wechselt sie zu diesem Tab, statt einen weiteren zu öffnen. In Studio wechselt die Taste <strong>WebUI</strong> zurück zum Tab der WebUI, mit dem gesendeten Job startbereit.</p>
+
+<h2>Updates</h2>
+<p>Die Fußzeile zeigt die Builds von WebUI, Controller und Handbediengerät. Wenn ein neuerer Build erschienen ist, wird sie rot: Aktualisieren Sie über die Seite <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>. Was sich geändert hat, steht in den <a href="index.php?route=journal3/blog/post&journal_blog_post_id=33">Versionshinweisen</a>.</p>

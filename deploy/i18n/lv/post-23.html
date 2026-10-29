@@ -1,0 +1,16 @@
+<p>Lapa <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> instalē jaunāko versiju tieši no jūsu pārlūka. Tā vienmēr piedāvā pēdējo versiju, kas automātiski izveidota no pirmkoda.</p>
+<h3>Kas jums vajadzīgs</h3>
+<ul><li><strong>Chrome vai Edge</strong> datorā. Firefox un Safari neatbalsta Web Serial.</li>
+<li><strong>USB datu kabelis</strong>. Kabeļi, kas paredzēti tikai uzlādei, neparādās kā ports.</li></ul>
+<h3>Soļi</h3>
+<ol><li><strong>Kontrolieris: saglabājiet konfigurācijas kopiju.</strong> Vispirms lejupielādējiet <code>config.yaml</code> no WebUI failu pārvaldnieka. Pilnais attēls to aizstāj ar dpCREATOR parauga konfigurāciju. (Pults savus iestatījumus saglabā.)</li>
+<li>Piesakieties savā dpcreator.eu kontā. Pievienojiet plati, kurā vēlaties ierakstīt — kontrolieri <em>vai</em> pulti, pa vienai. Pultij vispirms atvienojiet kontroliera kabeli.</li>
+<li>Atveriet <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> un izvēlieties cilni <em>Controller</em> vai <em>Pendant</em>.</li>
+<li><strong>Kontrolieris:</strong> noklikšķiniet <strong>Flash via browser</strong>, tad <strong>Connect & flash firmware</strong>, izvēlieties seriālo portu un <strong>Install</strong>. Pagaidiet, līdz parādās <em>Installation complete</em>, pārstartējiet plati, vēlreiz augšupielādējiet savu <code>config.yaml</code> un pārstartējiet ar <code>$bye</code>. Ja izmantojat dpCREATOR WebUI, instalējiet to vēlreiz no cilnes <strong>WebUI</strong>: pilnais attēls atjauno standarta FluidNC lapu, un atkārtota instalēšana netiek uzskaitīta kā jauna plate.</li>
+<li><strong>Pults:</strong> noklikšķiniet <strong>Connect and install</strong> un izvēlieties seriālo portu. Lapa nolasa pults mikroshēmas ID, pirmajā reizē reģistrē to jūsu licencē un instalē jaunāko SmartTabUI kopā ar licenci. Kad parādās <em>Done</em>, pults pārstartējas pati. Skatiet <a href="index.php?route=journal3/blog/post&journal_blog_post_id=32">SmartTabUI instalēšana, atjaunināšana un reģistrēšana</a>.</li>
+<li>Ierakstīšanas laikā neatvienojiet.</li></ol>
+<h3>Kura versija kam</h3>
+<table class="table table-bordered"><thead><tr><th>Plate</th><th>Mikroshēma</th><th>Attēls</th></tr></thead><tbody>
+<tr><td>dpCREATOR R2/R3 kontrolieris</td><td>ESP32-S3</td><td>FluidNC 4.1.1 + W5500, pilnais attēls adresē 0x0 (sāknētājs, programmaparatūra un standarta FluidNC lapa). dpCREATOR WebUI tiek instalēts atsevišķi.</td></tr>
+<tr><td>SmartTabUI pults</td><td>ESP32</td><td>SmartTabUI programmaparatūra adresē 0x0, licence adresē 0x310000 (iestatījumi saglabājas)</td></tr></tbody></table>
+<h3>Kas ko var ierakstīt</h3><table class="table table-bordered"><thead><tr><th>Programmaparatūra</th><th>Piekļuve</th><th>Lejupielāde</th></tr></thead><tbody><tr><td>Kontrolieris (FluidNC + W5500)</td><td>Bez maksas — piesakieties savā kontā</td><td>Jā, <code>.bin</code> rīkam esptool (ierakstīt adresē <code>0x0</code>)</td></tr><tr><td>SmartTabUI pults</td><td>Reģistrētas pultis — no jebkura konta. Jauna pults tiek reģistrēta ar licenci pirmajā instalēšanas reizē.</td><td>Nē — instalē tikai no vietnes</td></tr></tbody></table><p>Lapā Flash Firmware redzams katras versijas būvējuma numurs un datums.</p>

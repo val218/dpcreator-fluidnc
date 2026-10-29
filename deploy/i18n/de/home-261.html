@@ -1,0 +1,187 @@
+<div class="dpx"><div class="dph"><style>
+.dpx > .dph{width:100vw;margin-left:calc(50% - 50vw)}
+.dph{background:#0d1014;color:#eef2f5;font-family:Barlow,Arial,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.dph *{box-sizing:border-box}
+.dph a{text-decoration:none}
+.dph .w{max-width:1240px;margin:0 auto;padding:0 32px}
+.dph h1,.dph h2,.dph h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;margin:0;line-height:1.04;color:#fff;text-transform:none;letter-spacing:0}
+.dph h2{font-size:46px}
+.dph h3{font-family:Barlow,Arial,sans-serif;font-weight:600;font-size:22px;line-height:1.25}
+.dph .lead{margin:12px 0 36px;color:#a9b4bf;font-size:18px;max-width:720px}
+.dph .sec{padding:88px 0}
+.dph .alt{background:#121820;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.dph .btn{display:inline-block;background:#2b8fe0;color:#fff;padding:14px 24px;border-radius:4px;font-weight:600;font-size:16px;line-height:1.2}
+.dph .btn:hover{background:#3a9cec;color:#fff}
+.dph .btn-line{background:transparent;border:1px solid rgba(255,255,255,.3);padding:13px 22px}
+.dph .btn-line:hover{background:rgba(255,255,255,.06)}
+.dph .btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.dph .muted{color:#a9b4bf}
+.dph .uses{margin:4px 0 0;font-size:14px;color:#7fd8b9}
+.dph .beta{font-family:Barlow,Arial,sans-serif;font-size:13px;font-weight:600;color:#8cc4f2;background:rgba(43,143,224,.16);padding:2px 8px;border-radius:3px;vertical-align:middle}
+.dph-hero{padding:72px 0 44px}
+.dph-hero .g{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:center}
+.dph-hero .kick{margin:0 0 14px;color:#8fd8fa;font-size:16px;font-weight:500}
+.dph-hero h1{font-size:62px;line-height:1.0}
+.dph-hero .sub{margin:22px 0 0;font-size:19px;color:#b6c1cb;max-width:560px}
+.dph-hero img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid rgba(255,255,255,.1)}
+.dph-chips{list-style:none;margin:44px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.dph-chips li{padding:8px 14px;border:1px solid rgba(255,255,255,.14);border-radius:999px;font-size:15px;color:#dfe5ea}
+.dph-chips li.new{border-style:dashed;border-color:rgba(79,195,247,.5);color:#8fd8fa}
+.dph-flow{display:flex;align-items:stretch}
+.dph-flow .st{flex:1 1 0;min-width:0;background:#0d1014;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:20px;color:inherit;display:flex;flex-direction:column;gap:10px;transition:border-color .15s}
+.dph-flow .st:hover{border-color:rgba(79,195,247,.55)}
+.dph-flow .n{color:#8fd8fa;font-size:14px;font-weight:600}
+.dph-flow .pic{height:120px;display:flex;align-items:center;justify-content:center}
+.dph-flow .pic img{max-width:100%;max-height:120px;object-fit:contain}
+.dph-flow b{font-size:20px;color:#fff}
+.dph-flow .d{font-size:15px;color:#a9b4bf}
+.dph-flow .ar{flex:0 0 36px;display:flex;align-items:center;justify-content:center;color:#4fc3f7}
+.dph-log{font-family:ui-monospace,monospace;font-size:13px;color:#7fd8b9;display:flex;flex-direction:column;gap:8px;justify-content:center;align-items:flex-start;width:100%}
+.dph-log span:nth-child(2){color:#93a1ae}
+.dph-appchips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+.dph-appchips span{background:#1a222c;border-radius:6px;padding:10px;font-weight:600;font-size:14px}
+.dph-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.dph-card{background:#121820;border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;color:inherit}
+.dph-card.own{border-style:dashed;border-color:rgba(79,195,247,.4)}
+.dph-card .im{height:200px;background:#0f1419;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.dph-card .im img{width:100%;height:100%;object-fit:cover}
+.dph-card .im img.top{object-position:top}
+.dph-card .im img.fit{width:80%;height:160px;object-fit:contain}
+.dph-card .tx{padding:20px;display:flex;flex-direction:column;gap:8px}
+.dph-card p{margin:0;color:#a9b4bf;font-size:15px}
+.dph-apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.dph-app{background:#0d1014;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:20px;color:inherit;display:flex;flex-direction:column;gap:8px;transition:border-color .15s}
+.dph-app:hover{border-color:rgba(79,195,247,.55)}
+.dph-app b{font-size:20px;color:#fff}
+.dph-app .d{font-size:15px;color:#a9b4bf}
+.dph-app .p{margin-top:auto;padding-top:10px;font-size:14px;color:#7fd8b9}
+.dph-app .p.b{color:#8cc4f2}
+.dph-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:48px;align-items:center}
+.dph-split img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid rgba(255,255,255,.1)}
+.dph-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:stretch}
+.dph-panel{background:#0d1014;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:28px;display:flex;flex-direction:column;gap:14px}
+.dph-panel h2{font-size:36px}
+.dph-panel p{margin:0;color:#a9b4bf}
+.dph-panel .shot{width:100%;height:320px;object-fit:cover;object-position:top;border-radius:6px;border:1px solid rgba(255,255,255,.08)}
+.dph-panel iframe{width:100%;height:560px;border:0;border-radius:6px;background:#0c1014}
+.dph-panel .btn{align-self:flex-start}
+.dph-docs{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:17px}
+.dph-docs a,.dph .lk{color:#4fc3f7}
+.dph-docs a:hover,.dph .lk:hover{color:#8fd8fa}
+.dph #shop{background:#0d1014}
+@media (max-width:980px){.dph-flow{flex-direction:column}.dph-flow .ar{transform:rotate(90deg);height:32px;flex-basis:32px}.dph-hero .g,.dph-split,.dph-two{grid-template-columns:1fr}.dph-hero h1{font-size:52px}.dph h2{font-size:38px}}
+@media (max-width:600px){.dph .w{padding:0 16px}.dph .sec{padding:60px 0}.dph-hero{padding:44px 0 32px}.dph-hero h1{font-size:42px}.dph-cards{grid-template-columns:1fr}.dph-panel{padding:20px}.dph-panel iframe{height:520px}}
+</style>
+
+<section class="dph-hero" id="top"><div class="w">
+<div class="g">
+<div>
+<p class="kick">FluidNC-Controller, Handbediengerät und Apps von einem Maker</p>
+<h1>Ein Controller.<br>Jede Maschine, die Sie bauen.</h1>
+<p class="sub">Steuern Sie eine CNC-Fräse oder einen Laser aus dem Browser, entwerfen Sie den Job, automatisieren Sie einen Roboterarm oder ein Förderband oder bestücken Sie eine Leiterplatte. Der dpCREATOR R3 und das SmartTabUI-Handbediengerät können all das, und jeder Job geht nach einem Stromausfall dort weiter, wo er gestoppt hat.</p>
+<div class="btns"><a class="btn" href="#shop">R3 und Handbediengerät kaufen</a><a class="btn btn-line" href="/firmware">Ich habe schon eine Platine</a></div>
+</div>
+<img src="image/catalog/dpc-site/photo-r2-tabui-combo.jpg" alt="dpCREATOR Controller und SmartTabUI-Handbediengerät nebeneinander" width="1445" height="1088">
+</div>
+<ul class="dph-chips" aria-label="Maschinen, die er steuert"><li>CNC-Fräse</li><li>Laser</li><li>Plotter</li><li>Roboterarm</li><li>Förderband und Prüfstand</li><li>Pick and Place</li><li class="new">Etwas, das noch niemand gebaut hat</li></ul>
+</div></section>
+
+<section class="sec alt" id="system"><div class="w">
+<h2>Wie alles zusammenpasst</h2>
+<p class="lead">Vier Ebenen. Beginnen Sie mit der Platine und ergänzen Sie, was Ihre Maschine braucht; jede Ebene funktioniert auch für sich.</p>
+<div class="dph-flow">
+<a class="st" href="index.php?route=product/product&product_id=381"><span class="n">1 · Die Platine</span><span class="pic"><img src="image/catalog/dpc-site/hero2/hov-board.png" alt="dpCREATOR R3 Controller-Platine" loading="lazy"></span><b>dpCREATOR R3</b><span class="d">Ethernet, optoisolierte Eingänge, RS485 für die Spindel und eine SD-Karte. Oder bringen Sie Ihre eigene mit: 21 ESP32-Platinen stehen auf der Liste.</span></a>
+<span class="ar" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+<a class="st" href="/firmware"><span class="n">2 · Die Firmware</span><span class="pic"><span class="dph-log" aria-hidden="true"><span>[MSG:Recovery:interrupted]</span><span>Resume from line 18 240?</span><span>ok</span></span></span><b>dpCREATOR FluidNC</b><span class="d">FluidNC 4.1 mit Job-Wiederaufnahme nach einem Stromausfall, kabelgebundenem Ethernet und Anmeldung. Kostenlos, aus dem Browser geflasht.</span></a>
+<span class="ar" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+<a class="st" href="#apps"><span class="n">3 · Die Apps auf der Platine</span><span class="pic"><span class="dph-appchips" aria-hidden="true"><span>WebUI</span><span>Studio</span><span>Motion</span><span>PnP</span></span></span><b>In jedem Browser öffnen</b><span class="d">Sie liegen im eigenen Speicher des Controllers: keine Installation auf Ihrem Computer, keine Cloud. Wählen Sie sie beim Flashen aus.</span></a>
+<span class="ar" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+<a class="st" href="index.php?route=product/product&product_id=382"><span class="n">4 · An der Maschine</span><span class="pic"><img src="image/catalog/dpc-site/hero2/hov-pendant.png" alt="SmartTabUI-Handbediengerät" loading="lazy"></span><b>SmartTabUI-Pendant</b><span class="d">Ein echtes Handrad, ein Hardware-Not-Halt und ein Touchscreen. Funktioniert mit dem R3 und mit WROOM-32-Platinen.</span></a>
+</div>
+</div></section>
+
+<section class="sec" id="build"><div class="w">
+<h2>Was bauen Sie?</h2>
+<p class="lead">Jedes Mal derselbe Controller. Nur die Apps ändern sich.</p>
+<div class="dph-cards">
+<a class="dph-card" href="index.php?route=product/product&product_id=383"><span class="im"><img class="top" src="image/catalog/dpc-site/shots/webui-running.jpg" alt="WebUI führt einen Fräsjob mit 3D-Werkzeugbahn aus" loading="lazy"></span><span class="tx"><h3>CNC-Fräse</h3><p>In Studio entwerfen, in der WebUI mit Live-3D-Werkzeugbahn ausführen, am Handbediengerät verfahren und nullen.</p><p class="uses">WebUI · Studio · Pendant</p></span></a>
+<a class="dph-card" href="index.php?route=product/product&product_id=386"><span class="im"><img src="image/catalog/dpc-site/shots/studio-preview.jpg" alt="Studio-Vorschau eines Jobs auf dem Material" loading="lazy"></span><span class="tx"><h3>Laser oder Plotter</h3><p>SVG, DXF, PDF oder ein Bild in Studio importieren und auf die SD-Karte senden. Studio Basic ist kostenlos.</p><p class="uses">Studio · WebUI</p></span></a>
+<a class="dph-card" href="/docs/dpcreator-motion"><span class="im"><img src="image/catalog/dpc-site/shots/motion-d-arm.jpg" alt="Motion mit einem Roboterarm mit 4 Gelenken und geteachten Positionen" loading="lazy"></span><span class="tx"><h3>Roboterarm</h3><p>Jedes Gelenk hinzufügen, testen, die Positionen teachen und die Sequenz vom Controller ausführen oder am Handbediengerät starten.</p><p class="uses">Motion · Pendant</p></span></a>
+<a class="dph-card" href="/docs/dpcreator-motion"><span class="im"><img src="image/catalog/dpc-site/shots/motion-d-conveyor.jpg" alt="Motion mit einem Förderband, einem Teilesensor und einem Ausschieber" loading="lazy"></span><span class="tx"><h3>Förderband oder Prüfstand</h3><p>Motoren, Sensoren, Relais und Ausgänge im Einsatz, ohne G-Code oder Konfigurationsdateien. Motion schreibt beides.</p><p class="uses">Motion</p></span></a>
+<a class="dph-card" href="/docs/dpcreator-pnp-beta"><span class="im" aria-hidden="true"><svg width="300" height="180" viewBox="0 0 400 240" fill="none"><rect x="40" y="20" width="320" height="200" rx="8" fill="#123524" stroke="#2c6b4a"/><g fill="#c9a24a"><circle cx="64" cy="44" r="6"/><circle cx="336" cy="196" r="6"/><circle cx="336" cy="44" r="6"/></g><g fill="#b8bec4"><rect x="100" y="80" width="14" height="22" rx="2"/><rect x="124" y="80" width="14" height="22" rx="2"/><rect x="100" y="150" width="22" height="14" rx="2"/><rect x="280" y="140" width="14" height="22" rx="2"/></g><rect x="190" y="74" width="60" height="44" rx="3" fill="#1b1f24" stroke="#5d6977"/><g stroke="#ff6a3d" stroke-width="2"><path d="M272 122V194M232 158H312"/><circle cx="272" cy="158" r="14"/></g></svg></span><span class="tx"><h3>Pick and Place <span class="beta">Beta</span></h3><p>Kameras oben und unten finden die Platine und prüfen jedes Bauteil; die Vakuumdüse setzt sie aus Gurtabschnitten und Trays.</p><p class="uses">PnP · WebUI</p></span></a>
+<a class="dph-card own" href="/docs/dpcreator-motion"><span class="im"><img class="fit" src="image/catalog/dpc-site/hero2/hov-board.png" alt="" loading="lazy"></span><span class="tx"><h3>Ihre eigene Maschine</h3><p>Jede Achse, jeder Eingang, jedes Relais und jeder Ausgang des Controllers im Einsatz. Ein Teil verdrahten, testen, dann das nächste hinzufügen.</p><p class="uses">Motion · WebUI · Pendant</p></span></a>
+</div>
+</div></section>
+
+<section class="sec alt" id="apps"><div class="w">
+<h2>Die Apps</h2>
+<p class="lead">Beim Flashen angehakt, per USB auf der Platine installiert, aus jedem Browser in Ihrem Netzwerk geöffnet.</p>
+<div class="dph-apps">
+<a class="dph-app" href="index.php?route=product/product&product_id=383"><b>WebUI</b><span class="d">Jobs ausführen und beobachten: DRO, Live-3D-Werkzeugbahn, Live-Z-Korrektur, Job-Wiederaufnahme, Kopfkamera.</span><span class="p">Kostenlos beim R3 · €19.99 für andere Platinen</span></a>
+<a class="dph-app" href="/docs/install-any-esp32-board"><b>WebUI Lite</b><span class="d">Dieselbe WebUI für WROOM-32-Platinen, mit abgeschalteten Funktionen, die dieser Chip nicht ausführen kann.</span><span class="p">Kostenlos</span></a>
+<a class="dph-app" href="index.php?route=product/product&product_id=386"><b>Studio</b><span class="d">Im Browser entwerfen und den G-Code erzeugen: V-Carve, Laser, Import von SVG, DXF, PDF oder einem Bild.</span><span class="p">Studio Basic kostenlos</span></a>
+<a class="dph-app" href="/docs/dpcreator-motion"><b>Motion</b><span class="d">Bauen Sie Ihre Maschine Teil für Teil, teachen Sie Positionen und führen Sie Sequenzen aus. Probieren Sie es im Simulator aus.</span><span class="p">Kostenlos beim R3 · €39 für andere Platinen</span></a>
+<a class="dph-app" href="/docs/dpcreator-pnp-beta"><b>PnP</b><span class="d">Pick and Place mit Kameras, Gurtabschnitten und Trays. Lesen Sie die Beta-Hinweise vor dem ersten Lauf.</span><span class="p b">Beta · zuerst für den R&D Club</span></a>
+</div>
+</div></section>
+
+<section class="sec" id="recovery"><div class="w dph-split">
+<div>
+<h2>Stromausfall bei Zeile 18 240? Dort weitermachen.</h2>
+<p class="muted" style="margin:16px 0 0;font-size:18px">Die Platine zeichnet den Job während des Laufs auf. Nach einem Stromausfall oder Not-Halt schlägt sie die sicherste Stelle für den Neustart vor, lässt Sie im Probelauf dorthin fahren und setzt fort. Aus der WebUI oder am Handbediengerät.</p>
+<div class="btns"><a class="btn btn-line" href="/demo/">In der Demo ausprobieren</a></div>
+</div>
+<img src="image/catalog/dpc-site/shots/webui-recovery.jpg" alt="Job-Wiederaufnahme in der WebUI nach einem Not-Halt" loading="lazy">
+</div></section>
+
+<section class="dpx-sec dpx-light" id="shop"><div class="dpx-wrap">
+ <div class="dpx-head"><h2>Startklar</h2><p>Montiert, geflasht und getestet. Anschließen, dann Ihre Maschine konfigurieren.</p></div>
+ <div class="dpx-plates">
+  <a class="dpx-plate dpx-plate-key" href="index.php?route=product/product&product_id=380"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><img src="image/catalog/dpc-site/photo-r2-tabui-combo.jpg" alt="dpCREATOR R2 Controller und SmartTabUI-Handbediengerät nebeneinander" loading="lazy"><span class="dpx-flag">€40.98 sparen</span></div><div class="dpx-plate-body"><div class="dpx-model">DPC-R3-TABUI</div><h3>R3 Controller + SmartTabUI-Handbediengerät</h3><p>Controller und montiertes Handbediengerät mit passender Firmware, gemeinsam getestet. Lizenzen für Handbediengerät und WebUI inklusive.</p><div class="dpx-price">€529 <s>€569.98</s><span class="dpx-soon">Demnächst</span></div></div></a>
+  <a class="dpx-plate" href="index.php?route=product/product&product_id=381"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><img src="image/catalog/dpc-site/photo-r2-controller-top.jpg" alt="dpCREATOR Controller-Platine, Draufsicht" loading="lazy"></div><div class="dpx-plate-body"><div class="dpx-model">DPC-R3</div><h3>dpCREATOR R3 Controller</h3><p>4-Achsen-FluidNC-Controller mit W5500-Ethernet, RS485 für VFDs, SD-Karte und Pendant-Anschluss mit Hardware-Not-Halt. dpCREATOR WebUI inklusive.</p><div class="dpx-price">€349.99<span class="dpx-soon">Demnächst</span></div></div></a>
+  <a class="dpx-plate" href="index.php?route=product/product&product_id=382"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><img src="image/catalog/dpc-site/photo-tabui-pendant.jpg" alt="Montiertes SmartTabUI-Handbediengerät mit Handrad, Not-Halt und Touchscreen" loading="lazy"></div><div class="dpx-plate-body"><div class="dpx-model">DPC-TABUI</div><h3>SmartTabUI-Handbediengerät, montiert</h3><p>2,8″-Touchscreen, Handrad, Not-Halt und Wahlschalter im PETG-Gehäuse. Geflasht, SmartTabUI-Lizenz inklusive.</p><div class="dpx-price">€219.99<span class="dpx-soon">Demnächst</span></div></div></a>
+ </div>
+ <div class="dpx-head dpx-head-sub"><h2>Selbst bauen</h2><p>Firmware und Druckdateien für Ihr eigenes Handbediengerät und kostenlose Firmware für den Controller.</p></div>
+ <div class="dpx-plates">
+  <a class="dpx-plate" href="index.php?route=product/product&product_id=377"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><img src="image/catalog/dpc-site/tabui-card.jpg" alt="" loading="lazy"></div><div class="dpx-plate-body"><div class="dpx-model">DPC-TC1</div><h3>SmartTabUI-Firmware für das Handbediengerät</h3><p>Lizenzierte Firmware für das Display JC2432W328C, über diese Website geflasht, mit kostenlosen Updates.</p><div class="dpx-price">€49.99</div></div></a>
+  <a class="dpx-plate" href="/firmware"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><img src="image/catalog/dpc-site/tabui-render-connector.jpg" alt="" loading="lazy"></div><div class="dpx-plate-body"><div class="dpx-model">DPC-TC1-3MF</div><h3>SmartTabUI-Gehäuse, PETG-Druckdateien</h3><p>3MF-Dateien für das Gehäuse: Display, Handrad, Not-Halt, Wahlschalter und GX12-Stecker.</p><div class="dpx-price">Kostenloser Download</div></div></a>
+  <a class="dpx-plate" href="index.php?route=information/information&information_id=8"><i class="dpx-screw dpx-s1"></i><i class="dpx-screw dpx-s2"></i><i class="dpx-screw dpx-s3"></i><i class="dpx-screw dpx-s4"></i><div class="dpx-plate-media"><div class="dpx-icomedia"><svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"></path></svg></div></div><div class="dpx-plate-body"><div class="dpx-model">FLUIDNC 4.1.1</div><h3>Controller-Firmware</h3><p>FluidNC mit Ethernet für dpCREATOR R2 und R3, neuester Build, aus Ihrem Browser geflasht.</p><div class="dpx-price">Kostenlos</div></div></a>
+ </div>
+</div></section>
+
+<section class="sec alt" id="try"><div class="w dph-two">
+<div class="dph-panel" id="setup">
+<h2>Jede ESP32-Platine auf einer Seite einrichten</h2>
+<p>Wählen Sie Ihre Platine aus 21, wählen Sie eine fertige Konfiguration, haken Sie die Apps an, geben Sie Ihr WLAN und eine Anmeldung ein. Die Seite flasht, schreibt und prüft alles per USB und zeigt dann die Adresse der Platine an.</p>
+<img class="shot" src="image/catalog/dpc-site/shots/install-any-board.jpg" alt="Die Installationsseite: Platine, Konfiguration, Apps sowie Netzwerk und Anmeldung" loading="lazy">
+<a class="btn" href="/firmware">Meine Platine einrichten</a>
+</div>
+<div class="dph-panel">
+<h2>Das Handbediengerät hier ausprobieren</h2>
+<p>Das SmartTabUI-Handbediengerät steuert eine simulierte Maschine in Ihrem Browser. Drehschalter, Handrad, Touchscreen und Not-Halt funktionieren alle.</p>
+<iframe src="/demo/?embed=1" title="SmartTabUI-Handbediengerät, Live-Demo" loading="lazy"></iframe>
+<a class="btn btn-line" href="/demo/">Vollständige Demo mit der WebUI</a>
+</div>
+</div></section>
+
+<section class="sec" id="rnd-club"><div class="w" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:40px">
+<div>
+<h2 style="font-size:40px">Als Erster bauen: der R&D Club</h2>
+<p class="muted" style="margin:14px 0 0;font-size:17px">Vor dem Marktstart erhalten 10 Maker die SmartTabUI-Firmware und die WebUI kostenlos, um sie an ihren eigenen Maschinen zu bauen und zu testen, und probieren neue Apps wie PnP als Erste aus. Die 3 besten Aufbauten erhalten einen dpCREATOR R3 Controller.</p>
+<div class="btns"><a class="btn" href="index.php?route=information/information&information_id=9">Um einen Platz bewerben</a><a class="btn btn-line" href="rnd-members">Die Mitglieder kennenlernen</a></div>
+</div>
+<div id="docs">
+<h2 style="font-size:40px">Dokumentation</h2>
+<ul class="dph-docs">
+<li><a href="index.php?route=journal3/blog&journal_blog_category_id=6">Erste Schritte</a></li>
+<li><a href="/docs/install-any-esp32-board">Jede ESP32-FluidNC-Platine einrichten</a></li>
+<li><a href="index.php?route=journal3/blog&journal_blog_category_id=7">Der Controller</a> · <a href="index.php?route=journal3/blog&journal_blog_category_id=8">das Handbediengerät</a> · <a href="index.php?route=journal3/blog&journal_blog_category_id=9">Firmware</a></li>
+<li><a href="/docs/dpcreator-motion">Jedes Projekt mit Motion automatisieren</a></li>
+<li><a href="/docs/dpcreator-pnp-beta">PnP-Beta: vor dem Start lesen</a></li>
+<li><a href="index.php?route=journal3/blog&journal_blog_category_id=10">Fehlerbehebung</a></li>
+</ul>
+<p class="muted" style="margin:18px 0 0;font-size:15px">Entwickelt und gebaut von einem CNC-Ingenieur. Frühere Platinen: <a class="lk" href="legacy-boards">woher R2 und R3 kommen</a>.</p>
+</div>
+</div></section>
+
+</div></div>

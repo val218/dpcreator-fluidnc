@@ -1,0 +1,6 @@
+{
+ "name": "dpCREATOR R3 Controller",
+ "meta_title": "dpCREATOR R3 FluidNC CNC-Controller: ESP32-S3, Ethernet, 4 Achsen",
+ "meta_description": "4-Achsen-FluidNC-CNC-Controller: ESP32-S3 16 MB, W5500-Ethernet, WLAN, RS485-VFD, SD-Karte, Pendant-Port mit Hardware-Not-Halt. Geflasht und getestet.",
+ "tag": "fluidnc, cnc controller, cnc-steuerung, esp32-s3, w5500"
+}

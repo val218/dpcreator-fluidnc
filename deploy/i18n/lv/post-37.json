@@ -1,0 +1,5 @@
+{
+ "name": "Mašīnas konstruktors: izveidojiet config.yaml savai mašīnai",
+ "meta_title": "Mašīnas konstruktors: FluidNC config.yaml jūsu CNC — dpCREATOR Dokumentācija",
+ "meta_description": "Izveidojiet FluidNC config.yaml pārlūkā: asis, dubultmotori, VFD, lāzers, plazma, ieejas, izejas, OLED, makro, W5500 un pults. R3 vai jebkurai ESP32 platei."
+}

@@ -1,0 +1,68 @@
+<p><a href="/machine-builder">Mašīnas konstruktors</a> uzraksta <code>config.yaml</code> jūsu mašīnai un mērogā uzzīmē mašīnu, ko tas apraksta. Izvēlieties plati, asis, vārpstas un lāzerus, un kas pieslēgts katrai ieejai un izejai. Katra izmaiņa tiek pārbaudīta pret pašas programmaparatūras iestatījumu sarakstu un mikroshēmas izvadu noteikumiem, tāpēc iegūtais fails ielādējas bez kļūdām.</p>
+<p>Tas ir veidots <strong>dpCREATOR R3</strong>, un tas darbojas arī ar <strong>jebkuru ESP32 vai ESP32-S3 plati</strong>, kurai izvadus iestatāt paši, gan <strong>dpCREATOR FluidNC</strong>, gan <strong>standarta FluidNC</strong>. Tas darbojas jūsu pārlūkā: nekas netiek nekur sūtīts.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-overview.jpg" alt="Mašīnas konstruktors ar 1300 × 2500 frēzi: iestatījumi pa kreisi, skats no augšas vidū, DRO un pārvietošanas pogas pa labi" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>Sāciet no mašīnas</h3>
+<p>Izvēlieties piemēru, kas ir vistuvāk jūsējai, tad mainiet to: 1300 × 2500 frēze ar dubulto Y un VFD, 600 × 900 frēze ar VFD un lāzeru, 1500 × 3000 plazmas galds vai CO2 lāzers ar durvju bloķētāju. Kopsavilkums katras sadaļas virsrakstā rāda, kas iestatīts, to neatverot.</p>
+
+<h3>1. Plate un rāmis</h3>
+<ul>
+<li><strong>Plate:</strong> dpCREATOR R3, R2 vai <em>Other ESP32 / ESP32-S3 board</em> (skatiet 8. sadaļu).</li>
+<li><strong>Programmaparatūra:</strong> <em>dpCREATOR FluidNC 4.1.1</em> vai <em>Mainstream FluidNC</em>. Abas nolasa tos pašus iestatījumus, izņemot to, ka tikai dpCREATOR programmaparatūrai ir <code>tools:</code> un <code>offset_mm:</code> otram instrumentam blakus vārpstai. Standarta režīmā papildu instrumenti joprojām pārslēdzas ar M6 pēc instrumenta numura; to nobīde tiek ierakstīta kā komentārs, lai jūs to iestatītu savā sūtītājā.</li>
+<li><strong>Soļu motoru draiveri:</strong> iestata impulsu laikus un lielāko soļu frekvenci. Ātrumi virs tā, ko draiveris spēj, tiek ierobežoti, un konstruktors jums to paziņo.</li>
+<li><strong>Kas kustas pa Y</strong> (portāls vai galds), <strong>gala slēdži</strong> NC vai NO (NC ir drošāk: pārrauts vads aptur mašīnu), un vai motori dīkstāvē paliek ar barošanu.</li>
+</ul>
+
+<h3>2. Asis un motoru bloki</h3>
+<p>Sadaļas <em>Axes and motors</em> augšā izvēlaties, ko vada katrs ass bloks. <strong>Jebkurš bloks var būt jebkura ass.</strong> Biežākais gadījums ir otrs Y motors (Y2) uz A bloka portāla izlīdzināšanai: katrs Y motors veic homing pie sava slēdža, tāpēc homing katru reizi izlīdzina portālu. X2 un Z2 darbojas tāpat. Bloks, ko iestatāt kā <em>not used</em>, atbrīvo savus STEP un DIR izmantošanai kā izejas.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-axes.jpg" alt="Asis un motori: bloku karte ar Y2 uz A bloka un X ass iestatījumi" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>Katrai asij iestatiet gājienu, soļus uz mm, ātrumu un paātrinājumu. <em>Work out steps per mm</em> to aprēķina lodskrūvei, siksnai, zobstienim vai rotācijas asij, ar mikrosoļiem un reduktoru. <em>Homing switch</em> norāda, kurā galā ir slēdzis; slēdzi var arī noklikšķināt zīmējumā, lai pārvietotu to uz otru galu. A ass ir rotācijas ass grādos, uzzīmēta kā patrona uz galda.</p>
+
+<h3>3. Vārpstas, lāzeri un degļi</h3>
+<p>Galvenais instruments var būt <strong>VFD caur RS485</strong> (Huanyang, H2A, H100, YL620, NowForever, Siemens V20, Danfoss VLT2800, Delta MS300, Folinn BD600, Mollom G70), <strong>PWM</strong> vai <strong>0-10 V</strong> vārpsta, <strong>releja</strong> vārpsta, <strong>lāzers</strong> vai <strong>plazmas deglis</strong> (aizdedzes izeja, arc-OK ieeja un loka gaidīšana). Blakus tam pievienojiet līdz diviem papildu instrumentiem, piemēram, lāzeru blakus frēzes vārpstai: piešķiriet katram instrumenta numuru un X/Y/Z nobīdi no vārpstas, un M6 T2 pārslēdz uz to.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-tools.jpg" alt="Huanyang VFD kā galvenais instruments un lāzers kā 2. instruments; zīmējumā lāzers blakus vārpstai un A rotācijas ass uz galda" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>Ja sadaļā Inputs iestatīts instrumenta garuma mērītājs, <strong>Manual tool change</strong> pievieno <code>atc_manual</code>: M6 dodas uz maiņas pozīciju, gaida jauno instrumentu un tad izmēra to ar mērītāju. R3 ieteicamā frēzes + lāzera konfigurācija ir VFD uz RS485 un lāzers uz PWM izejas; skatiet <a href="/docs/spindle-vfd-rs485">Vārpsta un VFD</a>.</p>
+
+<h3>4. Ieejas</h3>
+<p>Katra ieeja ir plates spaiļu saraksts: zonde un instrumenta garuma mērītājs; drošības durvis, e-stop un draivera kļūme; reset, feed hold, cycle start, home un single-block pogas; četras makro pogas; četras lietotāja ieejas (M66). Jau aizņemta spaile ir pelēka, un redzams, kas to izmanto. R3 neizmantota ass bloka gala slēdža ieejai arī var pieslēgt slēdzi vai pogu.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-inputs.jpg" alt="Ieejas, grupētas pēc zondēšanas, drošības, pogām, makro pogām un lietotāja ieejām" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>Ar drošības durvīm var ieslēgt <strong>novietošanu (parking)</strong>: atverot durvis, Z paceļas līdz iestatītam augstumam. E-stop ieeja aptur kontrolieri; tā neaizstāj vadu E-stop ķēdi, kas atslēdz draiveru barošanu.</p>
+
+<h3>5. Izejas un statusa indikatori</h3>
+<p>Plūsmas dzesēšana (M8) un smidzināšana vai gaiss (M7), četras lietotāja izejas (M62/M63) un PWM izeja (M67), statusa indikatori stāvokļiem idle, running, hold, alarm un door, un WS2812 RGB statusa LED, kura krāsa seko mašīnas stāvoklim. R3 neizmantota bloka (parasti A) STEP un DIR ir 5 V loģikas izejas: tās var vadīt releja moduli, SSR ieeju vai statusa indikatoru.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-outputs.jpg" alt="Izejas: dzesēšana, lietotāja izejas un statusa indikatori" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>6. Displejs un makro</h3>
+<p><strong>OLED displejs:</strong> SSD1306 statusa ekrāns caur I2C (128 × 64, 128 × 32 vai 64 × 48). Tam vajadzīgi divi parasti GPIO izvadi; R3 tas ir savienotājs J7 (GPIO43/44). Izmantojot J7 displejam, tur zūd UART0 seriālā konsole; USB un tīkls joprojām darbojas.</p>
+<p><strong>Makro:</strong> startēšanas rinda, makro 0-3 (palaiž ar makro pogu vai <code>$Macros/Run=0</code>) un rindas, ko izpildīt pēc homing un pēc atbloķēšanas. Komandas apvienojiet ar <code>&</code>, piemēram, <code>G0 Z-5&G0 X0 Y0</code>.</p>
+
+<h3>7. Pults, Ethernet un SD karte</h3>
+<p>SmartTabUI pults uz porta PENDANT, W5500 Ethernet (SPI takts un vai tiek izmantota INT līnija) vai tikai Wi-Fi, un SD karte ar savu takti. W5500 un SD karte dala SPI kopni. IP iestatījumus skatiet <a href="/docs/ethernet-w5500-setup">Ethernet (W5500) iestatīšana</a>.</p>
+
+<h3>8. Citas ESP32 un ESP32-S3 plates</h3>
+<p>Izvēlieties <em>Other ESP32 / ESP32-S3 board</em>, un atveras sadaļa <em>Your board's pins</em>. Izvēlieties mikroshēmu, tad GPIO katrai spailei: STEP, DIR un gala slēdzi katram blokam, draiveru enable (aktīvs augstā vai zemā līmenī), savas nosauktās ieejas, izejas un I/O izvadus, pults UART, RS485, SPI, SD karti un W5500. Viss pārējais konstruktorā pēc tam izmanto šīs spailes.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-custom.jpg" alt="Jūsu plates izvadi: mikroshēma, motoru izvadi, enable, ieejas un izejas, porti" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>Izvadu saraksti atbilst mikroshēmai:</p>
+<table class="table table-bordered"><thead><tr><th></th><th>ESP32-S3</th><th>ESP32</th></tr></thead><tbody>
+<tr><td>Nav izmantojami</td><td>GPIO 26-32 (flash), 19/20 (USB), 35-37 moduļos ar oktālo PSRAM (N8R8, N16R8)</td><td>GPIO 6-11 (flash)</td></tr>
+<tr><td>Tikai ieejas</td><td>nav</td><td>GPIO 34-39, un tiem nav iekšējā pull-up</td></tr>
+<tr><td>Konfigurācijas (strapping) izvadi (atzīmēti)</td><td>0, 3, 45, 46</td><td>0, 2, 5, 12, 15</td></tr>
+</tbody></table>
+<p>Katru izvadu var izmantot vienreiz; SPI kopnes izvadus SD karte un W5500 dala apzināti.</p>
+
+<h3>9. Pārbaudiet konfigurāciju un pieslēgumus</h3>
+<p>Zīme blakus cilnēm rāda, vai konfigurācija ir derīga un kurai mikroshēmai. <strong>Wiring</strong> uzskaita katru plates spaili ar to, ko konfigurācija tai piešķir, atzīmē brīvās spailes un sarkanā krāsā rāda jebkuru divreiz izmantotu izvadu. Noklikšķiniet uz funkcijas, lai pārietu uz tās rindu.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-wiring.jpg" alt="Pieslēgumu skats: katrs ass bloks, I/O spaile, ports un SPI izvads ar savu funkciju" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+<p>Cilne <strong>config.yaml</strong> rāda failu ar komentāru pie katra izvada. To var rediģēt turpat vai ielīmēt savu konfigurāciju: zīmējums, pieslēgumi un pārbaudes tai seko. <em>Load into the builder</em> pārvērš ielīmētu konfigurāciju atpakaļ konstruktora iestatījumos. Konfigurācijas, kas izmanto lietas, ko konstruktors nevar rediģēt (I2S bīdes reģistra izvadi kā 6-Pack vai MKS DLC32, TMC draiveri, kas iestatīti caur UART vai SPI, CoreXY un cita kinemātika, servo, izvadu paplašinātāji), paliek teksta skatā, tāpēc nekas nezūd.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-yaml.jpg" alt="Cilne config.yaml ar ģenerēto failu un pārbaudes rezultātu" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>10. Izmēģiniet pirms pieslēgšanas</h3>
+<p>Pārvietošanas pogas un bulttaustiņi kustina instrumentu zīmējumā. <strong>$H home</strong> izpilda homing ciklus secībā un rāda mašīnas nulli. Pārvietojot asi uz slēdzi ar ieslēgtām aparatūras robežām, saņemat to pašu trauksmi, ko dotu īstā mašīna. <em>Zero XY here</em> iestata darba nulli, un M6 pārslēdz starp instrumentiem, lai redzētu, kā tiek piemērota nobīde.</p>
+<p><img src="/image/catalog/dpc-site/shots/mb-laser-light.jpg" alt="CO2 lāzera piemērs gaišajā tēmā ar durvju korpusu" width="1400" height="890" loading="lazy" style="max-width:100%;height:auto;border-radius:8px"></p>
+
+<h3>11. Ielieciet to platē</h3>
+<ol>
+<li>Nokopējiet vai saglabājiet <code>config.yaml</code> no cilnes config.yaml.</li>
+<li>Augšupielādējiet to kontrolierī: WebUI failu pārvaldniekā vai lapā <a href="/firmware">Flash Firmware</a> izvēlieties <em>I have a config.yaml</em>, kas to ieraksta pēc programmaparatūras ierakstīšanas. Skatiet <a href="/docs/flashing-firmware-browser">Programmaparatūras ierakstīšana no pārlūka</a>.</li>
+<li>Pārstartējiet ar <code>$bye</code> un veiciet pirmās pārbaudes: pārvietojiet katru asi nelielu attālumu, pārbaudiet virzienus, tad veiciet homing.</li>
+</ol>

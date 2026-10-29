@@ -1,0 +1,5 @@
+{
+ "name": "Programmaparatūras atjaunināšana, saglabājot konfigurāciju",
+ "meta_title": "Programmaparatūras atjaunināšana, saglabājot konfigurāciju — dpCREATOR Dokumentācija",
+ "meta_description": "Atjauniniet dpCREATOR kontroliera programmaparatūru, nezaudējot mašīnas iestatījumus: config.yaml kopija, tikai programmaparatūra, WebUI."
+}

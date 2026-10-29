@@ -1,0 +1,81 @@
+<p>SmartTabUI ist die Firmware des dpCREATOR-Handbediengeräts: ein 2,8"-Touchscreen, ein Handrad mit den Wahlschaltern AXIS und STEP, eine ENABLE-Taste und ein Not-Halt, über ein Kabel mit dem Controller verbunden. Diese Seite erklärt die Bildschirme, das Joggen und die Einstellungen des Handbediengeräts. Jobs ausführen, Wiederaufnahme, Z-Anpassung und Zurückspulen sowie Measure und Record haben eigene Artikel in diesem Bereich.</p>
+<div class="alert alert-info"><strong>Voraussetzungen:</strong> Das SmartTabUI-Handbediengerät und die dpCREATOR WebUI funktionieren mit der <strong>dpCREATOR-FluidNC-Firmware</strong> auf dem Controller (kostenlos, installiert über <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Sie bauen auf den Befehlen auf, die diese Firmware ergänzt &ndash; Vorschauen, Prepare, Rewind, Z-Anpassung, Job-Wiederaufnahme, Makros, Measure und Record &ndash;, daher wird Standard-FluidNC nicht unterstützt.</div>
+
+<h3>Start</h3>
+<ul>
+  <li>Der Startbildschirm zeigt das dpCREATOR-Logo, die Build-Nummer und einen 5-Sekunden-Balken. <strong>Halten Sie ENABLE gedrückt, während der Balken läuft</strong>, um die Einstellungen zu öffnen.</li>
+  <li>Danach verbindet sich das Handbediengerät mit dem Controller. Bis der Controller antwortet, wird <em>No connection</em> angezeigt: Prüfen Sie das Kabel (der Reiter Term zeigt, was ankommt).</li>
+  <li><strong>Handbediengerät neu starten:</strong> Not-Halt drücken und ENABLE 3 Sekunden lang halten.</li>
+</ul>
+
+<h3>Der Bildschirm</h3>
+<ul>
+  <li><strong>Kopfzeile:</strong> Maschinenzustand (Idle, Cycle, Hold, Jog, Alarm, Homing), <em>STP</em> bei gedrücktem Not-Halt, die laufende Jog-Bewegung oder der Job-Fortschritt sowie die Anzeigen EN / TX / RX.</li>
+  <li><strong>DRO (links):</strong> die Werkstückposition jeder Achse. Die mit dem AXIS-Wahlschalter gewählte Achse ist in ihrer Farbe hervorgehoben, darunter ihr Schritt (x1 / x10 / x100).</li>
+  <li><strong>Ansicht (rechts):</strong> der Werkzeugweg des Jobs, mit den Reitern XY / XZ / YZ / 3D / PART (siehe <em>PART-Ansicht</em> unten). Während ein Job läuft, wird der bereits gefräste Teil in Cyan gezeichnet und das Werkzeug markiert. Ohne Job wird der Arbeitsbereich der Maschine angezeigt.</li>
+  <li><strong>FEED / RAPID / SPND:</strong> Tippen Sie auf eines und drehen Sie dann das Handrad, um diesen Override zu ändern (feine Schritte bei x1, grobe bei x10 und x100). Tippen Sie erneut darauf oder lassen Sie ENABLE los, um zum Joggen zurückzukehren. SPND zeigt <strong>LASER</strong>, solange der Laser die gewählte Spindel ist oder ein Laser-Job geladen ist.</li>
+  <li><strong>Untere Leiste:</strong> die Reiter DRO, HOME, FILES, TERM und MACROS. Während ein Job läuft, wird daraus <strong>Hold / Resume · Z adj · Abort</strong>.</li>
+</ul>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-dro-idle-v2.png" alt="DRO-Bildschirm des Handbediengeräts im Leerlauf" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-running-3d.png" alt="Handbediengerät mit laufendem Job in der 3D-Ansicht" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Links: der DRO-Bildschirm in Ruhe. Rechts: ein laufendes 3D-Relief, der bisherige Schnitt in Cyan, der Fortschritt unter der Ansicht.</p>
+<h3>Joggen</h3>
+<ol>
+  <li>Wählen Sie die Achse mit dem AXIS-Wahlschalter (OFF = kein Joggen).</li>
+  <li>Wählen Sie den Schritt: <strong>x1 = 0,01 mm</strong>, <strong>x10 = 0,1 mm</strong>, <strong>x100 = 1 mm</strong> pro Raste.</li>
+  <li>Drehen Sie das Handrad. Schnelleres Drehen fährt schneller; Loslassen stoppt sofort.</li>
+</ol>
+<p>Ob ENABLE gehalten werden muss, hängt von der Einstellung <strong>P6 BTN</strong> ab (siehe unten). Wenn ENABLE nötig ist und nicht gehalten wird, erscheint ein dünner roter Rahmen um den Bildschirm; er verschwindet, solange Sie ENABLE halten.</p>
+
+<h3>PART-Ansicht</h3>
+<p><strong>PART</strong> zeigt das Teil, das der Job erzeugt: den Werkzeugweg, aus einem Block mit einem Kugelfräser herausgearbeitet, beleuchtet und nach Tiefe eingefärbt. Er wird live gefräst, während der Job läuft.</p>
+<ul>
+<li>Mit dem AXIS-Wahlschalter auf <strong>OFF</strong> drehen Sie den Block mit dem Handrad.</li>
+<li><strong>TOP</strong> (in der Ansicht) wechselt zwischen dem geneigten 3D-Block und einer schattierten Ansicht von oben.</li>
+<li><strong>Laser-Jobs</strong> erscheinen stattdessen als Brandspur auf Sperrholz: je dunkler, desto mehr Leistung. Dafür ist die Controller-Firmware ab Build 3bbf865d nötig, die die Laserleistung mit der Vorschau sendet.</li>
+<li>Die Detailtiefe richtet sich nach der Vorschau, die der Controller sendet: Bei einer großen Datei wirken feine Details weicher als in der WebUI.</li>
+</ul>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-part-3d.png" alt="PART-Ansicht: der Job als gefräster Block" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-part-top.png" alt="PART-Ansicht von oben" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-part-running.png" alt="PART-Ansicht fräst live mit, während der Job läuft" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-laser-running.png" alt="Laser-Job: die Brandspur in der PART-Ansicht, LASER im Override-Feld" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Oben: ein 3D-Relief vor dem Start, geneigt und von oben. Unten: live bei 63 % gefräst und eine Lasergravur beim Brennen, mit LASER im dritten Feld.</p>
+<h3>Die Reiter</h3>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><strong>DRO</strong></td><td>Positionen, Overrides und die Werkzeugweg-Ansicht.</td></tr>
+    <tr><td><strong>HOME</strong></td><td>Home All (zuerst Z, dann X und Y) und einzelne Achsen; <strong>Probe</strong> (Z-Oberfläche, X/Y-Kante, Ecke, Bohrung, Zapfen, Werkzeuglänge); Werkstück-Offset G54–G59; Zero X / Y / Z / alle; Go to 0 (Z fährt zuerst hoch); Unlock und Park; Zustände der Endschalter.</td></tr>
+    <tr><td><strong>FILES</strong></td><td>Die SD-Karte: Ordner öffnen, <strong>Text</strong> zum Lesen einer Datei, <strong>View</strong> zum Anzeigen ihres Werkzeugwegs, <strong>Prepare</strong> zum Laden für den Start (siehe <em>Einen Job ausführen</em>).</td></tr>
+    <tr><td><strong>TERM</strong></td><td>Alles, was der Controller meldet (grün), Ihre Befehle (cyan), Soft Reset und Schnellbefehle.</td></tr>
+    <tr><td><strong>MACROS</strong></td><td>Oben Spindel CW / CCW / Stop und Kühlung, darunter die Makros, die in der WebUI mit „on the pendant“ markiert sind. Jede Taste zeigt den G-Code des Makros; Makros mit „ask first“ brauchen zwei Antipper.</td></tr>
+  </tbody>
+</table>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-home.png" alt="Reiter HOME" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-files.png" alt="Reiter FILES" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Die Reiter HOME und FILES.</p>
+<h3>Antasten</h3>
+<ol>
+  <li>HOME → <strong>Probe</strong>, einen Zyklus wählen. Das Bild zeigt, wo das Werkzeug stehen soll, z.&nbsp;B. <em>Werkzeug neben der Kante, unterhalb der Oberseite</em>.</li>
+  <li>Wählen Sie die Seite oder Ecke. Das Handrad verfährt auf dieser Seite, Sie können das Werkzeug also hier positionieren.</li>
+  <li><strong>Start:</strong> ENABLE halten und zweimal tippen. Der Taster tastet zweimal an (schnell, dann langsam), setzt den Werkstück-Nullpunkt im gewählten WCS und fährt zum Ausgangspunkt zurück.</li>
+</ol>
+<p>Die Antast-Einstellungen (Plattendicke, Werkzeugdurchmesser, Wege, Vorschübe, Sicherheitsabstände, WCS, Werkzeuglängensensor) finden Sie im selben Menü.</p>
+
+<h3>Einstellungen</h3>
+<p>Halten Sie ENABLE während des Startbalkens gedrückt. Drehen Sie das Handrad, um eine Zeile zu wählen, und tippen Sie, um sie zu ändern; <strong>Save & Boot</strong> speichert die Einstellungen und startet neu.</p>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><strong>THEME</strong></td><td>Dark, Neutral oder Light.</td></tr>
+    <tr><td><strong>MACHINE</strong></td><td>CNC, Messer / Plotter oder Laser.</td></tr>
+    <tr><td><strong>P6 BTN</strong></td><td>Was ENABLE bewirkt: <strong>Gate</strong> – halten zum Joggen und zur Bedienung des Bildschirms (am sichersten); <strong>Jog</strong> – halten zum Joggen, der Bildschirm funktioniert ohne; <strong>Touch</strong> und <strong>Off</strong> – nicht nötig; <strong>Macro</strong> – ein Druck startet das in P6 MACRO gewählte Makro.</td></tr>
+    <tr><td><strong>DRO AXES</strong></td><td>XYZ, XYZA, XY oder XYYZ (zwei Y-Motoren).</td></tr>
+    <tr><td><strong>BRIGHT / VOL</strong></td><td>Bildschirmhelligkeit, Lautstärke des Piepers (0 = stumm; die Not-Halt-Sirene ist immer laut).</td></tr>
+    <tr><td><strong>MAINT</strong></td><td>Wartungserinnerung nach so vielen Stunden Job-Laufzeit; <em>Reset Maint</em> nach einer Wartung.</td></tr>
+    <tr><td><strong>AREA, HOME</strong></td><td>Arbeitsbereich und Home-Ecke, aus der config.yaml des Controllers gelesen.</td></tr>
+    <tr><td><strong>LICENCE</strong></td><td>Registriert oder nicht, und die <strong>Chip-ID</strong> dieses Handbediengeräts (für den Support nötig).</td></tr>
+  </tbody>
+</table>
+<p><strong>Inputs</strong> (unten in den Einstellungen) zeigt jeden Schalter, das Handrad, den Not-Halt und Berührungen live – die erste Anlaufstelle, wenn ein Schalter nicht zu funktionieren scheint. <strong>UART</strong> zeigt die Verbindung zum Controller. Halten Sie den Not-Halt 2 Sekunden gedrückt, um sie zu verlassen.</p>
+
+<h3>Töne</h3>
+<ul>
+  <li>Kurzes Klicken: eine Bildschirmtaste wurde angetippt. Steigender Piepton: ENABLE gedrückt, tieferer Piepton: losgelassen.</li>
+  <li>Ein Piepton, wenn der AXIS-Wahlschalter einrastet (höher auf einer Achse, tiefer auf OFF), ein kurzer hoher Piepton, wenn sich der STEP-Wahlschalter ändert.</li>
+  <li>Hoher Piepton: ein Punkt wurde übernommen (ENABLE doppelt antippen).</li>
+  <li>Zweitonsirene: 4-mal bei einem Alarm, 3-mal in voller Lautstärke beim Not-Halt.</li>
+</ul>
+<p>Gar kein Piepton bei ENABLE bedeutet, dass der Schalterblock nicht angeschlossen ist – prüfen Sie Einstellungen → Inputs.</p>

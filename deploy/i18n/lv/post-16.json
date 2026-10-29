@@ -1,0 +1,5 @@
+{
+ "name": "Ethernet (W5500) iestatīšana",
+ "meta_title": "Ethernet (W5500) iestatīšana — dpCREATOR Dokumentācija",
+ "meta_description": "Vadu Ethernet ieslēgšana dpCREATOR kontrolierī: config.yaml, DHCP vai statiska IP, savienojuma pārbaude, gSender caur Ethernet."
+}

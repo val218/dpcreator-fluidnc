@@ -1,0 +1,29 @@
+<p>Kontrolieris var vadīt vārpstu divos veidos: <strong>PWM + relejs</strong> (pēc noklusējuma parauga konfigurācijā) vai <strong>VFD caur RS485</strong> (Modbus). Failā <code>config.yaml</code> izmantojiet vienu no tiem.</p>
+<h3>PWM + relejs (pēc noklusējuma)</h3>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>PWM:
+  pwm_hz: 5000
+  output_pin: gpio.21
+  enable_pin: gpio.39     # relay: spindle on/off
+  direction_pin: NO_PIN
+  spinup_ms: 2000
+  spindown_ms: 2000
+  speed_map: 0=0.000% 24000=100.000%</code></pre>
+<p>Iestatiet <code>speed_map</code> atbilstoši savas vārpstas maksimālajiem apgriezieniem (RPM).</p>
+<h3>RS485 VFD</h3>
+<p>RS485 ir uz UART2 (TX GPIO42, RX GPIO41, draivera enable GPIO40). Pieslēdziet A/B pie VFD RS485 spailēm un paša VFD parametros iestatiet Modbus vadību ar 9600 baud, adresi 1. Pēc tam aizstājiet sadaļu <code>PWM:</code> ar savu VFD tipu, piemēram, Huanyang:</p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>uart2:
+  txd_pin: gpio.42
+  rxd_pin: gpio.41
+  rts_pin: gpio.40
+  baud: 9600
+  mode: 8N1
+
+Huanyang:
+  uart_num: 2
+  modbus_id: 1
+  tool_num: 1
+  spinup_ms: 5000
+  spindown_ms: 5000
+  speed_map: 0=0% 24000=100%</code></pre>
+<p>Šajā programmaparatūrā atbalstītie VFD tipi — izmantojiet nosaukumu kā sadaļas virsrakstu <code>Huanyang:</code> vietā:</p><p><code>Huanyang</code> · <code>YL620</code> · <code>H2A</code> · <code>H100</code> · <code>NowForever</code> · <code>SiemensV20</code> · <code>DeltaMS300</code> · <code>FolinnBD600</code> · <code>MollomG70</code> · <code>DanfossVLT2800</code> · <code>ModbusVFD</code> (universāls, reģistrus iestatiet paši)</p><p>Citi vārpstu tipi: <code>PWM</code>, <code>10V</code>, <code>Relay</code>, <code>OnOff</code>, <code>Laser</code>, <code>BESC</code>, <code>DAC</code>, <code>HBridge</code>, <code>PlasmaSpindle</code>. Katram VFD arī pašā pārveidotājā jāiestata savi parametri RS485 vadībai (baud, adrese, palaišanas un frekvences avots) — skatiet sava VFD rokasgrāmatu un <a href="http://wiki.fluidnc.com/" target="_blank" rel="noopener">FluidNC wiki</a>.</p>
+<p><strong>Drošība:</strong> iestatiet un pārbaudiet VFD ar nenoslogotu vārpstu un bez ievietota instrumenta.</p>

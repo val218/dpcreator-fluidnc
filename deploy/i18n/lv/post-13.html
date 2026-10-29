@@ -1,0 +1,19 @@
+<p>dpCREATOR CNC sistēmai ir trīs daļas: <strong>kontroliera plate</strong>, <strong>SmartTabUI pults</strong> un abās ierakstītā <strong>programmaparatūra</strong>. Šajā lapā redzams, kā tās savienojas un ko lasīt tālāk.</p>
+<figure class="dpc-shot dpc-photo" style="margin:18px 0 22px"><img src="image/catalog/dpc-site/products/tabui-pendant-photo-2.jpg" alt="SmartTabUI pults uz darbgalda darba laikā" loading="lazy" style="max-width:480px;width:100%;height:auto;border-radius:6px;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">SmartTabUI pults darba laikā: mašīnas pozīcija, FEED, RAPID un SPND korekcijas, kā arī Hold un Abort.</figcaption></figure>
+<h3>Sastāvdaļas</h3>
+<table class="table table-bordered"><thead><tr><th>Daļa</th><th>Ko tā dara</th><th>Savienojas ar</th></tr></thead><tbody>
+<tr><td><strong>dpCREATOR R2/R3 kontrolieris</strong></td><td>Darbina FluidNC 4.1.1 uz ESP32-S3 (16 MB flash, 8 MB PSRAM). Vada līdz 4 asīm (X, Y, Z, A) ar step/dir izejām, nolasa gala slēdžus un zondi, vada vārpstu.</td><td>Dators caur Ethernet (W5500), Wi-Fi vai USB · pults caur UART1 · VFD caur RS485</td></tr>
+<tr><td><strong>SmartTabUI pults</strong></td><td>Skārienekrāns ar rokratu (MPG) un avārijas apturēšanu (E-stop) pie mašīnas: pārvietošana (jog), nulles iestatīšana, darbu palaišana, pārtrauktu darbu atjaunošana, Z korekcija griešanas laikā.</td><td>Kontroliera UART1, ar vadu, 1 Mbaud</td></tr>
+<tr><td><strong>dpCREATOR WebUI</strong></td><td>Darbojas uz plates, instalē no lapas <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> (iekļauts ar R3): 3D rīka ceļa skats, DRO, pārvietošana, faili, makro, darbu vēsture, konsole, Centre Finder, Record & Retrace un Offcuts → DXF. Bezmaksas programmaparatūrā ir arī standarta FluidNC lapa.</td><td>Jebkurš pārlūks jūsu tīklā: <code>http://fluidnc.local</code> vai plates IP adrese</td></tr>
+</tbody></table>
+<figure class="dpc-shot" style="margin:18px 0 22px"><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/pendant-running-3d.png" alt="SmartTabUI pults izpilda darbu" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/webui-live-job.jpg" alt="dpCREATOR WebUI izpilda to pašu darbu" loading="lazy" style="flex:1 1 280px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">SmartTabUI pults un dpCREATOR WebUI rāda vienu un to pašu darbu: ko palaižat vienā, tas parādās otrā.</figcaption></figure><h3>Kā notiek darbs</h3>
+<ol><li>Nokopējiet G-kodu uz plates SD karti (augšupielāde WebUI vai SD kartes tīkla disks).</li>
+<li>Plate automātiski izveido pultij <code>.viz</code> rīka ceļa priekšskatījumu.</li>
+<li><strong>Sagatavojiet</strong> failu WebUI vai pultī — abās redzama tā pati detaļa.</li>
+<li><strong>Palaidiet</strong> no jebkuras no tām. Hold, Z korekcija darba laikā, atritināšana un Stop darbojas no abām.</li>
+<li>Ja darbs tiek pārtraukts (E-stop, trauksme, strāvas pārrāvums), plate piedāvā to atsākt no drošas rindas.</li></ol>
+<h3>Ko lasīt tālāk</h3>
+<ul><li><a href="index.php?route=journal3/blog&journal_blog_category_id=6">Darba sākšana</a> → Ātrais sākums: pirmā ieslēgšana</li>
+<li><a href="index.php?route=journal3/blog&journal_blog_category_id=9">Programmaparatūra</a> → Programmaparatūras ierakstīšana no pārlūka</li>
+<li><a href="index.php?route=journal3/blog&journal_blog_category_id=7">dpCREATOR kontrolieris</a> → Ethernet (W5500) iestatīšana</li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=36">dpCREATOR WebUI: pozīcija, 3D skats, detaļas skats un lāzers</a></li></ul>

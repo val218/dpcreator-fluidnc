@@ -1,0 +1,63 @@
+<link rel="stylesheet" href="/catalog/view/javascript/dpc-setup/dpc-builder.css?v=1">
+<div class="dpmb">
+<div class="app">
+  <header class="top">
+    
+    <span class="sub">dpCREATOR R3 vai jebkurai ESP32 / ESP32-S3 platei ar jūsu pašu kontaktiem. Izvēlieties asis, vārpstas un lāzerus un to, kas pievienots katrai ieejai un izejai: konstruktors uzraksta <code>config.yaml</code> dpCREATOR vai standarta FluidNC versijai un uzzīmē mašīnu mērogā. Vai arī ielīmējiet savu konfigurāciju, lai to apskatītu.</span>
+  </header>
+
+  <section class="left" aria-label="Konstruktors un config.yaml">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="mb-tab-build" aria-selected="true" aria-controls="mb-pane-build">Būvēt</button>
+      <button type="button" role="tab" id="mb-tab-yaml" aria-selected="false" aria-controls="mb-pane-yaml">config.yaml</button>
+      <span class="grow"></span>
+      <span class="status" id="mb-status" aria-live="polite"></span>
+    </div>
+    <div class="pane" id="mb-pane-build" role="tabpanel" aria-labelledby="mb-tab-build">
+      <div class="banner" id="mb-handnote" hidden><span>config.yaml tika rediģēts ar roku. Jebkuras izmaiņas šeit to izveidos no jauna pēc šiem iestatījumiem.</span><button type="button" class="small" id="mb-import">Ielādēt to šeit</button></div>
+      <div class="scroll" id="mb-build"></div>
+    </div>
+    <div class="pane" id="mb-pane-yaml" role="tabpanel" aria-labelledby="mb-tab-yaml" hidden>
+      <div class="card" style="flex:1;display:flex;flex-direction:column;gap:8px;min-height:0">
+        <div class="row" style="justify-content:space-between">
+          <span class="note">Rediģējiet vai ielīmējiet konfigurāciju. Zīmējums un vadojums tai seko.</span>
+          <span class="row"><button type="button" class="small" id="mb-import2">Ielādēt konstruktorā</button><button type="button" class="small" id="mb-copy">Kopēt</button></span>
+        </div>
+        <textarea id="mb-yaml" spellcheck="false" aria-label="config.yaml teksts"></textarea>
+        <ul class="probs" id="mb-probs"></ul>
+      </div>
+      <div class="card"><div class="kv" id="mb-facts"></div></div>
+    </div>
+  </section>
+
+  <section class="stage" aria-label="Mašīnas zīmējums">
+    <div class="sheet">
+      <div class="views" role="group" aria-label="Zīmējums">
+        <button type="button" id="mb-v-plan" aria-pressed="true">Skats no augšas</button><button type="button" id="mb-v-wire" aria-pressed="false">Vadojums</button>
+      </div>
+      <svg id="mb-plan" role="img" aria-label="Mašīnas skats no augšas"></svg>
+      <div id="mb-wiring" hidden></div>
+      <div class="msg" id="mb-msg" role="status"></div>
+    </div>
+    <div class="side">
+      <div class="dro" id="mb-dro"></div>
+      <div class="zpanel"><svg id="mb-elev" role="img" aria-label="Z ass sānskats"></svg></div>
+      <div class="pad" role="group" aria-label="Pārvietošana un sākumpozīcijas meklēšana">
+        <div class="steps" role="group" aria-label="Pārvietošanas solis">
+          <button type="button" data-step="1" aria-pressed="false">1</button><button type="button" data-step="10" aria-pressed="false">10</button><button type="button" data-step="100" aria-pressed="true">100</button>
+        </div>
+        <span></span><button type="button" data-j="y,1" title="Pārvietot Y+">Y+</button><button type="button" data-j="z,1" title="Pārvietot Z+">Z+</button>
+        <button type="button" data-j="x,-1" title="Pārvietot X-">X−</button><button type="button" data-j="y,-1" title="Pārvietot Y-">Y−</button><button type="button" data-j="x,1" title="Pārvietot X+">X+</button>
+        <button type="button" data-j="a,-1" title="Pagriezt A-" class="ajog">A−</button><button type="button" data-j="a,1" title="Pagriezt A+" class="ajog">A+</button><button type="button" data-j="z,-1" title="Pārvietot Z-">Z−</button>
+        <button type="button" id="mb-home" class="two">$H sākumpozīcija</button><button type="button" id="mb-unlock">$X</button>
+        <button type="button" id="mb-zero" class="two">Nullēt XY šeit</button><button type="button" id="mb-zeroz">Z0</button>
+        <button type="button" id="mb-gozero" class="two">Uz darba nulli</button><button type="button" id="mb-tool" title="M6 instrumenta maiņa">M6</button>
+      </div>
+    </div>
+  </section>
+</div>
+</div>
+
+<p class="dpmb-foot" style="margin:14px 0 0">Kā to lietot: <a href="/docs/machine-builder-guide">Mašīnas konstruktora ceļvedis</a>. Kad konfigurācija ir gatava, <a href="/firmware">ierakstiet programmaparatūru</a> un augšupielādējiet <code>config.yaml</code> platē.</p>
+<script src="/catalog/view/javascript/dpc-setup/dpc-setup-core.js?v=3"></script>
+<script src="/catalog/view/javascript/dpc-setup/dpc-builder.js?v=1"></script>

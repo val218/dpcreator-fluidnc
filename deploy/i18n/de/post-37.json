@@ -1,0 +1,5 @@
+{
+ "name": "Machine builder: config.yaml für Ihre Maschine erstellen",
+ "meta_title": "Machine builder: FluidNC-config.yaml für Ihre CNC — dpCREATOR Doku",
+ "meta_description": "FluidNC-config.yaml im Browser erstellen: Achsen, Doppelmotoren, VFD, Laser, Plasma, I/O, OLED, Makros, W5500 und Pendant. Für R3 oder jedes ESP32-Board."
+}

@@ -1,0 +1,13 @@
+<p>Kontrolieri var atjaunināt divos veidos. Izvēlieties to, kas atbilst jūsu vajadzībām.</p>
+<table class="table table-bordered"><thead><tr><th>Veids</th><th>Vai config.yaml saglabājas?</th><th>dpCREATOR WebUI</th></tr></thead><tbody>
+<tr><td><strong>Pilnais attēls</strong> (ierakstīšana no pārlūka, <code>merged-flash.bin</code> adresē 0x0)</td><td>Nē — tiek aizstāts ar parauga konfigurāciju</td><td>Tiek aizstāts ar standarta FluidNC lapu: instalējiet WebUI vēlreiz</td></tr>
+<tr><td><strong>Tikai programmaparatūra</strong> (<code>firmware.bin</code> ar WebUI augšupielādi vai adresē 0x10000)</td><td>Jā</td><td>Paliek, kā ir</td></tr></tbody></table>
+<h3>Ieteicamā secība</h3>
+<ol><li>Lejupielādējiet <code>config.yaml</code> (un citus mainītos failus) no WebUI failu pārvaldnieka.</li>
+<li>Ierakstiet pilno attēlu no lapas <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>.</li>
+<li>Vēlreiz augšupielādējiet savu <code>config.yaml</code>, tad <code>$bye</code>.</li>
+<li>Vēlreiz instalējiet dpCREATOR WebUI no <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> → <strong>WebUI</strong> (tas netiek uzskaitīts kā jauna plate), tad pārlādējiet lapu ar <strong>Ctrl+F5</strong>.</li>
+<li>Atjauniniet arī pulti — abas tiek izstrādātas kopā.</li></ol>
+<p><strong>Pēc atjaunināšanas trūkst funkciju?</strong> dpCREATOR WebUI instalē atsevišķi, tāpēc programmaparatūras atjauninājums to nemaina. Tās kājenē redzamas WebUI un programmaparatūras versijas, brīdinājums, ja programmaparatūra ir jaunāka par lapu, un <em>update available</em>, ja iznākušas jaunākas versijas (ikdienas atjauninājumu pārbaudi tur var izslēgt). Instalējiet jaunāko WebUI no <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> → <strong>WebUI</strong>.</p>
+<p>Makro, instrumentu tabula un darbu vēsture glabājas SD kartē (<code>/sd/.dpc/</code>) un saglabājas pēc programmaparatūras atjaunināšanas.</p>
+<p>Kas mainījies katrā versijā: <a href="index.php?route=journal3/blog/post&journal_blog_post_id=33">Izmaiņu apraksti un kļūdu labojumi</a>.</p>

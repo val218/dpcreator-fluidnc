@@ -1,0 +1,6 @@
+{
+ "name": "dpCREATOR R3 kontrolieris",
+ "meta_title": "dpCREATOR R3 FluidNC CNC kontrolieris: ESP32-S3, Ethernet, 4 asis",
+ "meta_description": "4 asu FluidNC CNC kontrolieris: ESP32-S3 16 MB, W5500 Ethernet, Wi-Fi, RS485 VFD, SD karte, pults ports ar aparatūras E-stop. Ierakstīts un pārbaudīts.",
+ "tag": "fluidnc, cnc kontrolieris, esp32-s3, w5500"
+}

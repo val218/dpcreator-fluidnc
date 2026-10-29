@@ -1,0 +1,34 @@
+<p>Šajā lapā ir aprakstīts, kā ziņot par drošības problēmu dpCREATOR produktā un cik ilgi katrs produkts saņem drošības atjauninājumus. Tā ir mūsu ievainojamību atklāšanas politika saskaņā ar ES Kibernoturības aktu un Apvienotās Karalistes Produktu drošības un telekomunikāciju infrastruktūras (PSTI) noteikumiem.</p>
+<h2>Ziņot par drošības problēmu</h2>
+<p>Rakstiet uz <a href="mailto:security@dpcreator.eu">security@dpcreator.eu</a>. Mēs atbildam 5 darba dienu laikā un informējam jūs līdz brīdim, kad problēma ir novērsta.</p>
+<p>Tas palīdz, ja jūs norādāt:</p>
+<ul>
+<li>produktu un modeli (piemēram, DPC-R3 v4.0.3 vai DPC-TABUI) un programmaparatūras versiju (redzama WebUI kājenē vai lapā Flash Firmware);</li>
+<li>ko atradāt un kā to atkārtot;</li>
+<li>ko, cik jums zināms, uzbrucējs ar to varētu izdarīt;</li>
+<li>kā mēs varam jūs pieminēt, ja vēlaties tikt nosaukts.</li>
+</ul>
+<p>Lūdzu, dodiet mums saprātīgu laiku problēmas novēršanai, pirms publicējat detaļas, un testēšanas laikā nepiekļūstiet citu cilvēku mašīnām vai datiem. Mēs nevērsīsimies pret nevienu, kurš ziņo godprātīgi un ievēro šo lapu. Kad labojums ir izlaists, mēs to norādām laidiena piezīmēs un, ja ziņotājs vēlas, pieminam viņu.</p>
+<p>Mašīnlasāma kontaktinformācija: <a href="/.well-known/security.txt">/.well-known/security.txt</a>.</p>
+<h2>Atbalstītie produkti un drošības atjauninājumi</h2>
+<table class="table table-bordered">
+<thead><tr><th>Produkts</th><th>Programmatūra</th><th>Drošības atjauninājumi vismaz līdz</th></tr></thead>
+<tbody>
+<tr><td>DPC-R3 kontrolieris (un R3 komplektā DPC-R3-TABUI)</td><td>dpCREATOR FluidNC programmaparatūra un dpCREATOR WebUI</td><td><b>2031. gada 31. decembrim</b></td></tr>
+<tr><td>DPC-TABUI SmartTabUI pults (un pults komplektā)</td><td>SmartTabUI pults programmaparatūra</td><td><b>2031. gada 31. decembrim</b></td></tr>
+</tbody>
+</table>
+<p>Atjauninājumi ir bez maksas, un tos instalē caur USB no <a href="index.php?route=information/information&amp;information_id=8">dpcreator.eu (lapa Flash Firmware)</a>. Kontrolieris nepieņem programmaparatūru pa tīklu.</p>
+<h2>Drošība jau projektēšanā</h2>
+<ul>
+<li><b>Nav noklusējuma paroļu.</b> Pirmo reizi atverot WebUI, jūs iestatāt savu administratora paroli (8 līdz 64 rakstzīmes). Kontroliera paša Wi-Fi piekļuves punkts paliek izslēgts, līdz iestatāt piekļuves punkta paroli.</li>
+<li>Katrs kontroliera tīkla maršruts, tostarp failu pārvaldnieks, prasa pieteikšanos. Pēc atkārtotām nepareizām parolēm attiecīgā adrese uz laiku tiek bloķēta.</li>
+<li>Telnet pēc noklusējuma ir izslēgts, un noklusējuma tīkls ir vadu Ethernet.</li>
+<li>SmartTabUI pults neizmanto Wi-Fi vai Bluetooth; tā sazinās ar kontrolieri tikai pa savu kabeli.</li>
+<li>Lietojiet kontrolieri tikai savā lokālajā tīklā. Nekad nepāradresējiet tā portus uz internetu: WebUI jūsu tīklā izmanto nešifrētu HTTP.</li>
+</ul>
+<p>Aizmirsāt paroli? Pieslēdzieties caur USB (lapa Flash Firmware, terminālis) un nosūtiet <code>$Auth/Set=&lt;new password&gt;</code> vai <code>$Auth/Clear</code>, lai iestatītu jaunu paroli WebUI.</p>
+<h2>Ko WebUI sūta uz dpcreator.eu</h2>
+<p>Aptuveni reizi dienā WebUI jautā dpcreator.eu, vai ir pieejama jaunāka versija. Tas pa HTTPS nosūta plates ID, pults ID un versiju numurus, un neko citu. To var izslēgt ar “update check” WebUI kājenē. Skatiet <a href="index.php?route=information/information&amp;information_id=3">Privātuma politiku</a>.</p>
+<h2>Atbilstības paziņojums</h2>
+<p>DPC-R3 un DPC-TABUI ir izstrādāti tā, lai atbilstu drošības prasībām pieslēdzamiem produktiem Apvienotajā Karalistē (PSTI) un ES (Radioiekārtu direktīva, EN 18031-1): nav universālu noklusējuma paroļu, ir publicēts veids, kā ziņot par drošības problēmām (šī lapa), un ir publicēts minimālais drošības atjauninājumu periods (tabula iepriekš).</p>

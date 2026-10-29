@@ -1,0 +1,43 @@
+<p>Eine frische Firmware-Installation startet bereits mit <strong>aktivem Ethernet und DHCP</strong>: Kabel einstecken und die IP herausfinden. Auf dieser Seite stellen Sie auf eine feste IP um oder wechseln von WLAN zurück.</p>
+<h3>1. config.yaml muss den Ethernet-Abschnitt enthalten</h3>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>spi:
+  miso_pin: gpio.13
+  mosi_pin: gpio.11
+  sck_pin: gpio.12
+
+ethernet:
+  cs_pin: gpio.14
+  int_pin: gpio.9        # NO_PIN if INT is not wired
+  rst_pin: NO_PIN
+  phy_type: w5500
+  phy_addr: 1
+  frequency_hz: 8000000  # safe on a bus shared with the SD card</code></pre>
+<p><strong>Wichtig:</strong> Wenn <code>int_pin</code> gesetzt ist, INT aber nicht tatsächlich angeschlossen ist, kommt der Link zwar hoch, aber es kommen keine Pakete an (DHCP schlägt fehl, Ping läuft in einen Timeout). Setzen Sie in diesem Fall <code>int_pin: NO_PIN</code>.</p>
+<p>Ohne einen <code>ethernet:</code>-Abschnitt weicht das Board auf WLAN aus, damit es erreichbar bleibt — Ihr gespeichertes Netzwerk oder sein eigener Access Point <strong>FluidNC</strong> unter <code>http://192.168.0.1</code>.</p>
+<h3>2. DHCP oder feste IP wählen</h3>
+<p>Senden Sie diese Befehle über USB (serielle Konsole), eine Zeile nach der anderen.</p>
+<p><strong>Automatisch (DHCP):</strong></p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>$network/type=Ethernet
+$Ethernet/IPMode=DHCP
+$bye</code></pre>
+<p><strong>Feste IP</strong> (empfohlen — verwenden Sie eine freie Adresse in Ihrem eigenen Netzwerk):</p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>$network/type=Ethernet
+$Ethernet/IPMode=Static
+$Ethernet/IP=192.168.10.50
+$Ethernet/Netmask=255.255.255.0
+$Ethernet/Gateway=192.168.10.1
+$bye</code></pre>
+<p>Danach ist WLAN aus. Zum Zurückwechseln: <code>$network/type=WiFi</code>, dann <code>$bye</code> über USB.</p>
+<h3>3. Prüfen</h3>
+<p>Nach dem Neustart sollten <code>$Ethernet/Status</code> oder <code>$Startup/Show</code> <em>Ethernet link up</em> und <em>Ethernet IP is …</em> melden. Dann die IP vom PC aus mit <code>ping</code> prüfen und <code>http://&lt;ip&gt;</code> oder <code>http://fluidnc.local</code> öffnen.</p>
+<h3>4. gSender über Ethernet</h3>
+<ol><li>Öffnen Sie in gSender <strong>Config → Ethernet</strong>.</li>
+<li>Geben Sie die IP des Boards und Port <code>23</code> (oder Ihren <code>$Telnet/Port</code>) ein und klicken Sie auf <strong>Apply Settings</strong>.</li>
+<li>Wählen Sie im Verbindungsmenü den Eintrag <strong>Ethernet</strong>, keinen COM-Port.</li></ol>
+<p>Verwenden Sie <strong>nicht</strong> den <em>Remote Mode</em> von gSender — der ist für die eigene Adresse des PCs gedacht und führt zu „Remote mode has been disabled“.</p>
+<h3>Nützliche Befehle</h3>
+<table class="table table-bordered"><tbody>
+<tr><td><code>$Ethernet/Status</code></td><td>Link, IP, Maske, Gateway, MAC</td></tr>
+<tr><td><code>$Ethernet/Init</code></td><td>W5500 von Hand starten (Test)</td></tr>
+<tr><td><code>$network/type</code></td><td>WiFi oder Ethernet</td></tr>
+<tr><td><code>$Telnet/Port</code></td><td>Port, mit dem sich gSender verbindet (Standard 23)</td></tr></tbody></table>

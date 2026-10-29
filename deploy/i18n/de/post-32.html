@@ -1,0 +1,46 @@
+<p>SmartTabUI wird nur über die Seite <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> installiert und aktualisiert, direkt aus dem Browser. Es gibt keine Datei zum Herunterladen. Diese Seite erklärt Installation, Updates, Registrierung und Support.</p>
+<div class="alert alert-info"><strong>Voraussetzungen:</strong> Das SmartTabUI-Handbediengerät und die dpCREATOR WebUI funktionieren mit der <strong>dpCREATOR-FluidNC-Firmware</strong> auf dem Controller (kostenlos, installiert über <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Sie bauen auf den Befehlen auf, die diese Firmware ergänzt &ndash; Vorschauen, Prepare, Rewind, Z-Anpassung, Job-Wiederaufnahme, Makros, Measure und Record &ndash;, daher wird Standard-FluidNC nicht unterstützt.</div>
+
+<h3>Was Sie brauchen</h3>
+<ul>
+  <li>Chrome oder Edge auf einem Computer (Windows, macOS, Linux). Firefox und Smartphones können nicht mit USB-Geräten kommunizieren.</li>
+  <li>Ein USB-Datenkabel (manche Kabel laden nur).</li>
+  <li>Ein dpcreator.eu-Konto. Um ein neues Handbediengerät zu registrieren, braucht das Konto eine SmartTabUI-Lizenz (einzeln gekauft oder mit einem montierten Handbediengerät; sie enthält die dpCREATOR WebUI).</li>
+</ul>
+
+<h3>Installieren oder aktualisieren</h3>
+<ol>
+  <li>Melden Sie sich bei Ihrem dpcreator.eu-Konto an und öffnen Sie <strong>Flash Firmware → Pendant firmware</strong>.</li>
+  <li>Stecken Sie das Controller-Kabel vom Handbediengerät ab und verbinden Sie das Handbediengerät per USB mit dem Computer.</li>
+  <li>Klicken Sie auf <strong>Connect and install</strong> und wählen Sie den seriellen Port des Handbediengeräts.</li>
+  <li>Die Seite liest die Chip-ID des Handbediengeräts, prüft seine Registrierung und installiert den neuesten Build. Nicht abstecken, solange der Balken läuft.</li>
+  <li>Wenn <strong>Done</strong> erscheint, startet das Handbediengerät von selbst neu. Stecken Sie das Controller-Kabel wieder ein.</li>
+</ol>
+<p>Ihre Einstellungen am Handbediengerät (Theme, ENABLE-Modus, Antast-Einstellungen…) bleiben erhalten. Aktualisieren Sie nach dem Handbediengerät auch die Controller-Firmware – beide werden gemeinsam entwickelt.</p>
+
+<h3>Registrierung</h3>
+<ul>
+  <li>Jedes Handbediengerät wird bei der ersten Installation mit einer Lizenz über seine <strong>Chip-ID</strong> registriert. Eine Lizenz registriert ein Handbediengerät.</li>
+  <li>Ein registriertes Handbediengerät kann von jedem dpcreator.eu-Konto aus beliebig oft aktualisiert werden – auch nach einem vollständigen Löschen oder nach einem Besitzerwechsel.</li>
+  <li>Von dpCREATOR montiert verkaufte Handbediengeräte werden vor dem Versand registriert.</li>
+  <li>Einstellungen → LICENCE am Handbediengerät zeigt <em>Registered</em> und die Chip-ID.</li>
+</ul>
+
+<h3>Nichts wird jemals gesperrt</h3>
+<p>Ein Handbediengerät ohne Lizenz funktioniert voll; es zeigt lediglich <em>Not registered</em> auf dem Startbildschirm und in den Einstellungen. Die Lizenz wird am Handbediengerät selbst geprüft, ohne Internet, und sie läuft nicht ab. Eine Lizenz finanziert die Entwicklung von SmartTabUI, der WebUI und der kostenlosen dpCREATOR Controller-Firmware und bringt Updates und Support.</p>
+
+<h3>Update-Hinweise</h3>
+<p>Etwa einmal am Tag fragt die dpCREATOR WebUI bei dpcreator.eu nach, ob es neuere Builds gibt, und zeigt in ihrer Fußzeile <em>update available</em>. Dabei sendet sie nur die Board-ID, die Chip-ID des Handbediengeräts und die Build-Nummern. Abschalten können Sie das mit <em>update check: on</em> in der Fußzeile der WebUI.</p>
+
+<h3>Support</h3>
+<p>Eröffnen Sie ein Ticket auf der Seite <a href="index.php?route=extension/module/dpc_support">Support</a> (melden Sie sich zuerst bei Ihrem Konto an). Geben Sie die <strong>Chip-ID</strong> des Handbediengeräts (Einstellungen → LICENCE) oder die <strong>Board-ID</strong> des Controllers sowie die Build-Nummern an (Startbildschirm des Handbediengeräts, Fußzeile der WebUI); Sie können ein Foto, Ihre <code>config.yaml</code> oder ein Log anhängen. Wir antworten auf der Ticketseite und per E-Mail. Der Support umfasst dpCREATOR Controller mit der dpCREATOR-FluidNC-Firmware, mit registrierten Handbediengeräten und WebUIs.</p>
+
+<h3>Wenn es nicht funktioniert</h3>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><em>This browser cannot talk to USB devices</em></td><td>Verwenden Sie Chrome oder Edge auf einem Computer.</td></tr>
+    <tr><td>Kein Port in der Liste, oder die Verbindung schlägt fehl</td><td>Versuchen Sie ein anderes Kabel (ein Datenkabel) und einen anderen USB-Port; schließen Sie jeden seriellen Monitor oder jede andere Seite, die den Port nutzt; halten Sie beim Klicken die BOOT-Taste gedrückt.</td></tr>
+    <tr><td><em>Not registered yet … licence</em></td><td>Dieses Handbediengerät ist nicht registriert und Ihr Konto hat keine freie Lizenz. Kaufen Sie eine, oder wenn es montiert oder gebraucht gekauft wurde, kontaktieren Sie uns mit seiner Chip-ID.</td></tr>
+    <tr><td><em>Firmware not available right now</em></td><td>Versuchen Sie es in ein paar Minuten erneut.</td></tr>
+  </tbody>
+</table>

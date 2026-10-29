@@ -1,0 +1,160 @@
+<div class="dpc-bg">
+<p>Diese Anleitung führt Sie von den Teilen auf der Werkbank bis zum funktionierenden SmartTabUI-Handbediengerät. Sie brauchen die <a href="index.php?route=product/product&product_id=377">SmartTabUI-Pendant-Firmware</a>. Die <a href="/image/catalog/dpc-site/files/SmartTabUI-pendant-case-v1.zip">Druckdateien für das PETG-Gehäuse</a> sind kostenlos. Lieber fertig aufgebaut? Holen Sie sich das <a href="index.php?route=product/product&product_id=382">montierte Handbediengerät</a>: Jedes wird im eigenen Haus montiert, vom Entwickler selbst oder von erfahrenen Technikern.</p>
+<div class="alert alert-info"><strong>Voraussetzungen:</strong> SmartTabUI funktioniert mit der <strong>dpCREATOR-FluidNC-Firmware</strong> auf dem Controller (kostenlos, installiert über <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Es baut auf den Befehlen auf, die diese Firmware ergänzt &ndash; Vorschauen, Prepare, Rewind, Z-Anpassung, Job-Wiederaufnahme, Makros, Measure und Record &ndash;, daher wird Standard-FluidNC nicht unterstützt.</div>
+<div class="note"><strong>Ein anspruchsvoller Aufbau.</strong> Planen Sie bis zu vier Stunden ein. Sie werden löten, abisolieren und viele feine Drähte auf engem Raum verlegen, Sie brauchen also einen Lötkolben und grundlegendes Elektronikwerkzeug.</div>
+
+<figure><img src="image/catalog/dpc-site/build/front-panel-front.jpg" alt="Montierte SmartTabUI-Frontplatte mit Handrad, Display und den Wahlschaltern STEP und AXIS" loading="lazy"><figcaption>Die fertige Frontplatte, bevor sie auf das Gehäuse kommt.</figcaption></figure>
+
+<h3>Was Sie brauchen</h3>
+<figure><img src="image/catalog/dpc-site/build/parts-kit.jpg" alt="SmartTabUI-Teile ausgelegt: Display-Board, PCF8574-Modul, Lautsprecher, zwei Drehschalter mit Knöpfen, gedrucktes Gehäuse, Handrad, Not-Halt, Zustimmtaster, GX12-Stecker, Kabel und Schrauben" loading="lazy"><figcaption>Alle Teile für ein Handbediengerät.</figcaption></figure>
+<table class="table table-bordered"><thead><tr><th>Anz.</th><th>Teil</th><th>Hinweise</th></tr></thead><tbody>
+<tr><td>1</td><td>JC2432W328C Display-Board</td><td>2,8" kapazitiver Touch, 240×320, ESP32. Die <strong>C</strong>-Version (kapazitiv).</td></tr>
+<tr><td>1</td><td>60-mm-MPG-Handrad</td><td>Typ ZS61, 100 Impulse pro Umdrehung, Ausgänge A und B</td></tr>
+<tr><td>1</td><td>Not-Halt-Taster, 16 mm</td><td>Rastend, mit Wechslerkontakt (C, NO, NC)</td></tr>
+<tr><td>1</td><td>Taster, 12 mm</td><td>Die ENABLE-Taste an der rechten Seite</td></tr>
+<tr><td>1</td><td>Drehschalter, 3 Stellungen</td><td>Typ RS16 oder RS26, für STEP</td></tr>
+<tr><td>1</td><td>Drehschalter, 5 Stellungen</td><td>Typ RS16 oder RS26, für AXIS</td></tr>
+<tr><td>2</td><td>Knöpfe für die Drehschalter</td><td></td></tr>
+<tr><td>1</td><td>PCF8574-I/O-Expander-Modul</td><td>Liest die Wahlschalter und die ENABLE-Taste</td></tr>
+<tr><td>1</td><td>GX12-Stecker, 5-polig, oder eine PG7-Kabelverschraubung</td><td>GX12: steckbares Kabel zum Controller. PG7-Verschraubung: Das Kabel geht stattdessen direkt ins Gehäuse.</td></tr>
+<tr><td>1</td><td>Gedrucktes Gehäuse</td><td>Gehäusekörper, Deckplatte (geschlossen oder mit 2-mm-Frontplatte), Frontplatte und Halteclip für den IO-Expander (Druckdateien DPC-TC1)</td></tr>
+<tr><td>4</td><td>M2,5-Blechschrauben</td><td>Halten das Display in der Frontplatte</td></tr>
+<tr><td>1</td><td>Kleiner Lautsprecher mit JST-Stecker</td><td>Wird in P4 (SPEAK) gesteckt</td></tr>
+<tr><td>7</td><td>M3-Schrauben (schwarz)</td><td>Befestigen die Frontplatte am Gehäuse</td></tr>
+<tr><td>—</td><td>Schaltdraht und JST-Kabel</td><td>Für P1, P6 und CN1 am Display-Board</td></tr>
+<tr><td>—</td><td>Schrumpfschlauch</td><td>Optional, zum Isolieren der Lötstellen</td></tr>
+<tr><td>—</td><td>704-Silikonkautschuk für Elektronik</td><td>Klebt Display, Module und alle Verbindungen fest</td></tr>
+</tbody></table>
+<p><strong>Werkzeug:</strong> Lötkolben und Lötzinn, Seitenschneider, Abisolierzange, Kreuzschlitzschraubendreher, Multimeter, USB-C-Kabel. Optional: Heißluftföhn für den Schrumpfschlauch.</p>
+<div class="note">Wir empfehlen, die Bauteile und alle Verbindungen mit 704-Silikonkautschuk für Elektronik zu verkleben. So können sich Drähte und Stecker nicht lockern.</div>
+
+<h3>1. RGB-LED vom Display-Board entfernen</h3>
+<p>Das JC2432W328C hat vorne neben dem Display eine RGB-LED. Sie ist mit IO4, IO16 und IO17 verbunden: denselben Pins, die das Handbediengerät an Stecker P6 für Handrad und Not-Halt verwendet. Bleibt sie bestückt, belastet sie diese Leitungen und die Eingänge werden nicht zuverlässig gelesen. Löten Sie sie mit Lötkolben oder Heißluft aus.</p>
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/lcd-with-led.jpg" alt="JC2432W328C Display-Board mit bestückter RGB-LED oben rechts" loading="lazy"><figcaption>Vorher: Die RGB-LED sitzt oben rechts.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/lcd-led-removed.jpg" alt="JC2432W328C Display-Board mit entfernter RGB-LED, leere Pads oben rechts" loading="lazy"><figcaption>Nachher: Die LED ist entfernt, nur ihre Pads sind übrig.</figcaption></figure>
+</div>
+
+<h3>2. Frontplatte montieren</h3>
+<figure><img src="image/catalog/dpc-site/build/front-panel-printed.jpg" alt="Rückseite der gedruckten Frontplatte mit Öffnungen für Handrad, Display und zwei Wahlschalter" loading="lazy"><figcaption>Die Rückseite der gedruckten Frontplatte.</figcaption></figure>
+<ol class="steps">
+<li><strong>Display.</strong> Ziehen Sie zuerst die Schutzfolie vom Display ab. Setzen Sie das Board in die Frontplatte und befestigen Sie es mit den vier M2,5-Blechschrauben.
+<div class="warn">Vorsicht mit dem Display-Stecker, wenn das Board in die gedruckte Platte kommt: Dort ist es sehr eng.</div>
+Tragen Sie dann eine Raupe 704-Silikon rund um den Rand des Boards auf, überall dort, wo es das Gehäuse erreicht. Drücken Sie das Display an, während das Silikon trocknet, und achten Sie darauf, dass es vollständig aufliegt.</li>
+<li><strong>Handrad.</strong> Setzen Sie das 60-mm-MPG durch die runde Öffnung und ziehen Sie es an seinen drei Gewindebolzen fest.</li>
+<li><strong>STEP-Wahlschalter.</strong> Setzen Sie den 3-Stellungs-Drehschalter (RS16 oder RS26) in die linke Öffnung.</li>
+<li><strong>AXIS-Wahlschalter.</strong> Setzen Sie den 5-Stellungs-Drehschalter in die rechte Öffnung.</li>
+</ol>
+<div class="note">Wenn Ihre Drehschalter eine verstellbare Anschlagscheibe haben, stellen Sie sie vor dem Anziehen der Mutter auf 3 Stellungen für STEP und 5 für AXIS ein, damit der Knopf bei x1 / x100 und bei OFF / A anschlägt.</div>
+<figure><img src="image/catalog/dpc-site/build/front-panel-back.jpg" alt="Rückseite der Frontplatte mit Display-Board, Handrad und beiden Drehschaltern montiert, noch ohne Drähte" loading="lazy"><figcaption>Frontplatte mit Display, Handrad und beiden Wahlschaltern, bereit zum Verdrahten.</figcaption></figure>
+
+<h3>3. Hauptgehäuse montieren</h3>
+<ol class="steps">
+<li>Schrauben Sie den <strong>Not-Halt-Taster</strong> (16 mm) in die linke Gehäuseseite.</li>
+<li>Schrauben Sie die <strong>ENABLE-Taste</strong> (12 mm) in die rechte Seite.</li>
+<li>Lassen Sie den <strong>GX12-Stecker</strong> vorerst weg. Er kommt nach dem Verdrahten hinein, damit die Drähte gut erreichbar sind. Sie verwenden stattdessen eine <strong>PG7-Kabelverschraubung</strong>? Setzen Sie sie in dieselbe Bohrung und führen Sie das Kabel später hindurch.</li>
+</ol>
+<figure><img src="image/catalog/dpc-site/build/case-faceplate.jpg" alt="Hauptgehäuse mit Blende, Griff und der ENABLE-Taste an der rechten Seite" loading="lazy"><figcaption>Das Hauptgehäuse mit Griff. Die ENABLE-Taste sitzt an der rechten Seite.</figcaption></figure>
+
+<h3>4. Verdrahten</h3>
+<p>Alles wird an die Stecker auf der Rückseite des Display-Boards angeschlossen: <strong>P1</strong> (seriell und Versorgung), <strong>P6</strong> (Handrad und Not-Halt), <strong>CN1</strong> (I²C zum PCF8574) und <strong>P4</strong> (Lautsprecher). Auf das Board selbst wird nichts gelötet.</p>
+<figure class="wide"><a href="image/catalog/dpc-site/build/pendant-wiring-connectors.png" target="_blank" rel="noopener"><img src="image/catalog/dpc-site/build/pendant-wiring-connectors.png" alt="SmartTabUI-Schaltplan: GX12, Not-Halt, Display-Board-Stecker P1, P6 und CN1, MPG-Handrad, PCF8574 und die Wahlschalter" loading="lazy"></a><figcaption>Alle Verbindungen im Handbediengerät (antippen für volle Größe). Drahtfarben wie in den Tabellen unten.</figcaption></figure>
+
+<p><strong>P6 → Handrad und Not-Halt</strong></p>
+<table class="table table-bordered"><thead><tr><th>P6-Pin</th><th>Draht</th><th>Geht an</th></tr></thead><tbody>
+<tr><td>IO17</td><td><span class="sw" style="background:#d22b2b"></span>rot</td><td>Not-Halt-Taster, Kontakt C</td></tr>
+<tr><td>IO4</td><td><span class="sw" style="background:#222"></span>schwarz</td><td>MPG B</td></tr>
+<tr><td>IO16</td><td><span class="sw" style="background:#e3b200"></span>gelb</td><td>MPG A</td></tr>
+<tr><td>GND</td><td><span class="sw" style="background:#2e9b4a"></span>grün</td><td>MPG −</td></tr>
+</tbody></table>
+<p>MPG <strong>+</strong> kommt an <strong>3,3 V</strong>: Nehmen Sie sie vom 3.3V-Pin an CN1, zusammen mit dem VCC-Draht des PCF8574.</p>
+
+<p><strong>CN1 → PCF8574-Modul</strong></p>
+<table class="table table-bordered"><thead><tr><th>CN1-Pin</th><th>PCF8574</th></tr></thead><tbody>
+<tr><td>GND</td><td>GND</td></tr>
+<tr><td>IO22</td><td>SCL</td></tr>
+<tr><td>IO21</td><td>SDA</td></tr>
+<tr><td>3.3V</td><td>VCC</td></tr>
+</tbody></table>
+
+<p><strong>PCF8574-Eingänge → Wahlschalter und ENABLE</strong>. Jeder Eingang schaltet gegen GND: Verbinden Sie den gemeinsamen Anschluss jedes Drehschalters und eine Seite der ENABLE-Taste mit GND.</p>
+<table class="table table-bordered"><thead><tr><th>Eingang</th><th>Funktion</th></tr></thead><tbody>
+<tr><td>P0 · P1 · P2 · P3</td><td>AXIS-Wahlschalter: X · Y · Z · A (OFF = kein Kontakt)</td></tr>
+<tr><td>P4 · P5</td><td>STEP-Wahlschalter: ×10 · ×100 (×1 = kein Kontakt)</td></tr>
+<tr><td>P6</td><td>ENABLE-Taste</td></tr>
+<tr><td>P7</td><td>nicht belegt</td></tr>
+</tbody></table>
+
+<p><strong>P1 → GX12-Stecker</strong> (das Kabel zum Controller). Mit einer PG7-Kabelverschraubung verbinden Sie die fünf Kabeladern mit denselben Signalen.</p>
+<table class="table table-bordered"><thead><tr><th>GX12-Pin</th><th>Signal</th><th>Draht</th><th>Von</th></tr></thead><tbody>
+<tr><td>1</td><td>+5V</td><td><span class="sw" style="background:#d22b2b"></span>rot</td><td>P1 5V</td></tr>
+<tr><td>2</td><td>TXD</td><td><span class="sw" style="background:#222"></span>schwarz</td><td>P1 TX</td></tr>
+<tr><td>3</td><td>E-STOP</td><td><span class="sw" style="background:#e8771a"></span>orange</td><td>Not-Halt-Taster, Kontakt NC</td></tr>
+<tr><td>4</td><td>RXD</td><td><span class="sw" style="background:#e3b200"></span>gelb</td><td>P1 RX</td></tr>
+<tr><td>5</td><td>GND</td><td></td><td>P1 GND</td></tr>
+</tbody></table>
+
+<p><strong>Kontakte des Not-Halt-Tasters</strong></p>
+<table class="table table-bordered"><thead><tr><th>Kontakt</th><th>Geht an</th></tr></thead><tbody>
+<tr><td>C (gemeinsam)</td><td>P6 IO17</td></tr>
+<tr><td>NO</td><td>GND</td></tr>
+<tr><td>NC</td><td>GX12 Pin 3, zum Controller</td></tr>
+</tbody></table>
+
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/front-panel-wired.jpg" alt="Rückseite der Frontplatte mit dem Handrad an P6 und dem PCF8574-Modul an CN1" loading="lazy"><figcaption>Handrad an P6, PCF8574 an CN1, bevor das Modul befestigt wird.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/wiring-overview-photo.jpg" alt="Geöffnetes Handbediengerät: Hauptgehäuse mit Not-Halt, ENABLE-Taste und GX12 links, verdrahtete Frontplatte rechts" loading="lazy"><figcaption>Vollständig verdrahtet, vor dem Schließen: Der PCF8574 ist auf die Rückseite des Display-Boards geklebt.</figcaption></figure>
+</div>
+<ol class="steps">
+<li>Befestigen Sie das PCF8574-Modul mit einem Klecks 704-Silikon auf der Rückseite des Display-Boards, mit Abstand zum ESP32-Modul.</li>
+<li>Stecken Sie den Lautsprecher in <strong>P4 (SPEAK)</strong> und fixieren Sie ihn mit etwas Silikon im Gehäuse.</li>
+<li>Geben Sie etwas Silikon auf die Lötstellen und Steckverbinder, damit sie sich nicht lockern können.</li>
+<li>Setzen Sie den GX12-Stecker unten ins Gehäuse und löten Sie seine fünf Drähte an. Mit PG7-Verschraubung: Führen Sie das Kabel durch die Verschraubung, schließen Sie die fünf Adern an und ziehen Sie die Verschraubung dann fest, damit sie das Kabel hält.</li>
+<li>Isolieren Sie die Lötstellen mit Schrumpfschlauch (optional).</li>
+</ol>
+
+<h3>5. Gehäuse schließen</h3>
+<p>Legen Sie die Drähte flach, damit nichts eingeklemmt wird, setzen Sie die Frontplatte auf das Gehäuse und befestigen Sie sie mit den 7 schwarzen M3-Schrauben. Setzen Sie die Knöpfe so auf die Schalter STEP und AXIS, dass der Zeiger auf x1 und OFF steht.</p>
+
+<h3>6. Flashen und testen</h3>
+<p>Flashen Sie die Pendant-Firmware über USB-C von <a href="index.php?route=information/information&information_id=8">Firmware & Downloads</a>. Stecken Sie beim Flashen das Controller-Kabel ab: Die seriellen Pins werden gemeinsam genutzt.</p>
+<p><strong>Das Testmenü.</strong> Das Handbediengerät hat ein eingebautes Testmenü, mit dem Sie jedes Teil Ihres Aufbaus prüfen können, bevor es überhaupt mit dem Controller spricht. Halten Sie die ENABLE-Taste in der ersten Sekunde des Starts gedrückt, um die Einstellungen des Handbediengeräts zu öffnen, und tippen Sie dann auf <strong>Inputs</strong>, um den <strong>Input Monitor</strong> zu öffnen.</p>
+<p>Der Input Monitor zeigt live:</p>
+<ul>
+<li>den Rohwert des PCF8574 und jeden seiner Eingänge, P0 bis P7, als HIGH oder LOW (aktiv),</li>
+<li>den Not-Halt an IO17 (offen oder gedrückt),</li>
+<li>das <strong>Encoder-Delta</strong> des Handrads, das beim Drehen mitzählt,</li>
+<li>den Touchscreen: wo Sie ihn berühren.</li>
+</ul>
+<ol class="steps">
+<li>Drehen Sie AXIS durch OFF, X, Y, Z und A: P0 bis P3 gehen nacheinander auf LOW, bei OFF keiner.</li>
+<li>Drehen Sie STEP durch x1, x10 und x100: P4, dann P5 gehen auf LOW, bei x1 keiner.</li>
+<li>Drücken Sie ENABLE: P6 geht auf LOW.</li>
+<li>Drücken Sie den Not-Halt und entriegeln Sie ihn: Die Not-Halt-Leitung ändert sich.</li>
+<li>Drehen Sie das Handrad in beide Richtungen: Das Encoder-Delta zählt auf und ab. Zählt es falsch herum, tauschen Sie die Drähte A und B.</li>
+<li>Berühren Sie den Bildschirm an einigen Stellen.</li>
+</ol>
+<p>Halten Sie den Not-Halt 2 Sekunden lang gedrückt, um den Input Monitor zu verlassen.</p>
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/test-settings.jpg" alt="Einstellungsbildschirm des Handbediengeräts mit den Tasten Inputs, UART und Save & Boot" loading="lazy"><figcaption>Einstellungen des Handbediengeräts: <strong>Inputs</strong> öffnet das Testmenü.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/test-input-monitor.jpg" alt="Input-Monitor-Bildschirm mit den PCF8574-Eingängen, dem Not-Halt, dem Encoder und Touch" loading="lazy"><figcaption>Input Monitor: Hier steht STEP auf ×100 (P5 aktiv).</figcaption></figure>
+</div>
+
+<h3>7. Mit dem Controller verbinden</h3>
+<ol class="steps">
+<li>Stecken Sie das Handbediengerät in den Pendant-Anschluss des Controllers und schalten Sie ein. Die config.yaml des Controllers braucht die Abschnitte <code>uart1</code> und <code>uart_channel1</code> mit 1.000.000 Baud: siehe <a href="index.php?route=journal3/blog/post&journal_blog_post_id=19">SmartTabUI-Handbediengerät anschließen</a>.</li>
+<li>Die Kopfzeile der WebUI zeigt das Pendant-Symbol, und <code>$Pendant/Status</code> antwortet mit <code>connected</code>.</li>
+<li>Testen Sie den Not-Halt beim langsamen Verfahren: Die Motoren müssen sofort stoppen und die Maschine muss in den Alarm gehen. Entriegeln Sie ihn und entsperren Sie über das Wiederaufnahme-Menü.</li>
+</ol>
+
+<h3>Sie kennen das CYD-Display schon?</h3>
+<p>SmartTabUI läuft auf dem JC2432W328C-Display (CYD) mit einem 60-mm-Handrad, denselben Teilen, die viele FluidDial-Bastler bereits kennen. Wenn Sie schon mit diesem Display gebaut haben, können Sie auf dieser Erfahrung aufbauen. SmartTabUI hat eine eigene Verdrahtung: Lassen Sie Ihr FluidDial-Handbediengerät also, wie es ist, und verwenden Sie für SmartTabUI ein separates Display, angeschlossen wie in dieser Anleitung. Diese Display-Pins verwendet SmartTabUI:</p>
+<table class="table table-bordered"><thead><tr><th>Display-Pin</th><th>SmartTabUI</th></tr></thead><tbody>
+<tr><td>IO22</td><td>PCF8574 SCL (CN1)</td></tr>
+<tr><td>IO21</td><td>PCF8574 SDA (CN1)</td></tr>
+<tr><td>IO16</td><td>Handrad A (P6)</td></tr>
+<tr><td>IO4</td><td>Handrad B (P6)</td></tr>
+<tr><td>IO17</td><td>Not-Halt (P6)</td></tr>
+<tr><td>TX / RX</td><td>Serielle Verbindung zum Controller, 1 Mbaud (P1)</td></tr>
+</tbody></table>
+</div>

@@ -1,0 +1,29 @@
+<p>Der Controller steuert eine Spindel auf zwei Arten: <strong>PWM + Relais</strong> (Standard in der Beispielkonfiguration) oder einen <strong>Frequenzumrichter (VFD) über RS485</strong> (Modbus). Verwenden Sie eine davon in <code>config.yaml</code>.</p>
+<h3>PWM + Relais (Standard)</h3>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>PWM:
+  pwm_hz: 5000
+  output_pin: gpio.21
+  enable_pin: gpio.39     # relay: spindle on/off
+  direction_pin: NO_PIN
+  spinup_ms: 2000
+  spindown_ms: 2000
+  speed_map: 0=0.000% 24000=100.000%</code></pre>
+<p>Stellen Sie <code>speed_map</code> auf die Maximaldrehzahl Ihrer Spindel ein.</p>
+<h3>RS485-Frequenzumrichter</h3>
+<p>RS485 liegt auf UART2 (TX GPIO42, RX GPIO41, Treiber-Enable GPIO40). Verbinden Sie A/B mit den RS485-Klemmen des Frequenzumrichters und stellen Sie in dessen eigenen Parametern Modbus-Steuerung mit 9600 Baud, Adresse 1 ein. Ersetzen Sie dann den Abschnitt <code>PWM:</code> durch Ihren VFD-Typ, zum Beispiel Huanyang:</p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>uart2:
+  txd_pin: gpio.42
+  rxd_pin: gpio.41
+  rts_pin: gpio.40
+  baud: 9600
+  mode: 8N1
+
+Huanyang:
+  uart_num: 2
+  modbus_id: 1
+  tool_num: 1
+  spinup_ms: 5000
+  spindown_ms: 5000
+  speed_map: 0=0% 24000=100%</code></pre>
+<p>Unterstützte VFD-Typen in dieser Firmware — verwenden Sie den Namen als Abschnittsüberschrift anstelle von <code>Huanyang:</code>:</p><p><code>Huanyang</code> · <code>YL620</code> · <code>H2A</code> · <code>H100</code> · <code>NowForever</code> · <code>SiemensV20</code> · <code>DeltaMS300</code> · <code>FolinnBD600</code> · <code>MollomG70</code> · <code>DanfossVLT2800</code> · <code>ModbusVFD</code> (generisch, Register selbst festlegen)</p><p>Weitere Spindeltypen: <code>PWM</code>, <code>10V</code>, <code>Relay</code>, <code>OnOff</code>, <code>Laser</code>, <code>BESC</code>, <code>DAC</code>, <code>HBridge</code>, <code>PlasmaSpindle</code>. Jeder Frequenzumrichter braucht außerdem eigene Parameter am Gerät für die RS485-Steuerung (Baudrate, Adresse, Start- und Frequenzquelle) — siehe Handbuch Ihres Umrichters und das <a href="http://wiki.fluidnc.com/" target="_blank" rel="noopener">FluidNC-Wiki</a>.</p>
+<p><strong>Sicherheit:</strong> Richten Sie den Frequenzumrichter ohne Last und ohne eingespanntes Werkzeug ein und testen Sie ihn so.</p>

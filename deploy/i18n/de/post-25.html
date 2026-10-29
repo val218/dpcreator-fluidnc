@@ -1,0 +1,22 @@
+<h3>Flashen</h3>
+<table class="table table-bordered"><thead><tr><th>Problem</th><th>Lösung</th></tr></thead><tbody>
+<tr><td>Kein serieller Port zur Auswahl</td><td>Verwenden Sie Chrome oder Edge, ein USB-<em>Daten</em>kabel und einen anderen USB-Port. Schließen Sie alle anderen Programme, die den Port nutzen (gSender, serieller Monitor).</td></tr>
+<tr><td>„Device not supported“ / keine Verbindung</td><td>Halten Sie beim Einstecken des USB-Kabels die Taste <strong>BOOT</strong> gedrückt, um in den Bootloader-Modus zu gelangen, und versuchen Sie es erneut. Prüfen Sie, ob Sie den richtigen Reiter gewählt haben (Controller oder Handbediengerät).</td></tr>
+<tr><td>Browser stuft den Download als gefährlich ein</td><td>Fehlalarm bei einer unbekannten Datei. Wählen Sie <em>Behalten</em> / <em>Trotzdem herunterladen</em>.</td></tr></tbody></table>
+<h3>Netzwerk</h3>
+<table class="table table-bordered"><thead><tr><th>Problem</th><th>Lösung</th></tr></thead><tbody>
+<tr><td><code>Ethernet PHY init failed</code></td><td>Abschnitt <code>spi:</code> oder <code>ethernet:</code> fehlt, falsche Pins oder Verdrahtung.</td></tr>
+<tr><td>Link aktiv, aber IP 0.0.0.0, Ping schlägt fehl</td><td>INT konfiguriert, aber nicht verdrahtet: <code>int_pin: NO_PIN</code> setzen. Oder kein DHCP-Server in diesem Netzwerk.</td></tr>
+<tr><td>Statische IP: „Destination host unreachable“</td><td>Board und PC sind in verschiedenen Subnetzen. Verwenden Sie eine Adresse im Subnetz Ihres PCs.</td></tr>
+<tr><td>gSender: „Remote mode has been disabled“</td><td>Verwenden Sie <strong>Config → Ethernet</strong>, nicht Remote Mode.</td></tr>
+<tr><td>gSender: keine Verbindung möglich</td><td>IP/Port in Config → Ethernet müssen zum Board passen (<code>$Telnet/Port</code>, Standard 23). Klicken Sie auf Apply Settings.</td></tr>
+<tr><td>Board im WLAN-Access-Point „FluidNC“</td><td>config.yaml hat keinen Abschnitt <code>ethernet:</code>, oder das Board ist 3-mal hintereinander abgestürzt. Öffnen Sie <code>http://192.168.0.1</code> und laden Sie die richtige Konfiguration hoch.</td></tr></tbody></table>
+<h3>Handbediengerät</h3>
+<table class="table table-bordered"><thead><tr><th>Problem</th><th>Lösung</th></tr></thead><tbody>
+<tr><td><code>$Pendant/Status</code> meldet <code>none</code></td><td>Kein Abschnitt <code>uart_channel1</code> in config.yaml.</td></tr>
+<tr><td>Kein oder falscher Werkzeugweg am Handbediengerät</td><td>Prüfen Sie die Konsole der WebUI auf <code>VizErr</code>; neu erstellen mit der Taste <strong>.viz</strong> an der Datei.</td></tr>
+<tr><td><code>RX overflow</code> / verstümmelte Meldungen im Terminal des Handbediengeräts</td><td>Bytes gehen auf dem Kabel verloren: Verwenden Sie ein kürzeres oder geschirmtes Kabel oder eine niedrigere Baudrate (auf beiden Seiten gleich). <code>$Pendant/Debug</code> zeigt die Zähler.</td></tr>
+<tr><td>Keine Job-Wiederaufnahme am Handbediengerät</td><td>Die Controller-Firmware ist älter als die des Handbediengeräts. Flashen Sie beide.</td></tr></tbody></table>
+<h3>Abstürze</h3>
+<p>Wenn die WebUI <em>Controller restarted after a crash</em> anzeigt, klicken Sie auf <strong>Copy details</strong> und senden Sie uns den Text über das <a href="index.php?route=information/contact">Kontaktformular</a>.</p>
+<p>Ein Problem ist vielleicht schon in einem neueren Build behoben: Sehen Sie in die <a href="index.php?route=journal3/blog/post&journal_blog_post_id=33">Versionshinweise und Fehlerbehebungen</a> und aktualisieren Sie dann über die Seite <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>.</p>

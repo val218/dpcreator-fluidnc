@@ -1,0 +1,148 @@
+<p>Der dpCREATOR R2/R3 steuert jede Maschine, die sich über Step- und Direction-Signale bewegt: CNC-Fräsen und -Fräsmaschinen, Laser, Plotter und Schleppmesser sowie Plasmatische. Verwenden Sie ihn für einen Neubau oder um einen alten Controller zu ersetzen und Treiber, Motoren und Schalter zu behalten. Der Maschinentyp wird in <code>config.yaml</code> festgelegt, und das SmartTabUI-Handbediengerät hat in seinen Einstellungen die Modi CNC, Laser und Plotter.</p>
+
+<h2>Bestehende Maschine nachrüsten</h2>
+<p>Die vier Achsausgänge liefern 5&nbsp;V Step-, Direction- und Enable-Signale. Sie passen zu den meisten externen Schrittmotortreibern (Typ DM542 / DM556, Typ TB6600, Closed-Loop-Schrittmotoren) und AC-Servoantrieben im Step/Direction-Modus. Typische Upgrades ersetzen ein Mach3-Parallelport-Breakout-Board, ein altes GRBL-Board oder einen geschlossenen Controller, der nicht mehr unterstützt wird.</p>
+<h3>Treiber mit Optokoppler-Eingängen verdrahten</h3>
+<table class="table table-bordered">
+<thead><tr><th>Treibereingang</th><th>R2/R3</th></tr></thead>
+<tbody>
+<tr><td>PUL+ (STEP+)</td><td>Step-Ausgang der Achse</td></tr>
+<tr><td>DIR+</td><td>Direction-Ausgang der Achse</td></tr>
+<tr><td>ENA+</td><td>Gemeinsames Enable (GPIO8)</td></tr>
+<tr><td>PUL−, DIR−, ENA−</td><td>GND</td></tr>
+</tbody>
+</table>
+<p>Die Pinnummern jeder Achse finden Sie auf der <a href="index.php?route=journal3/blog/post&journal_blog_post_id=15">Seite zur Pinbelegung</a>.</p>
+<h3>Timing für Treiber mit Optokoppler-Eingängen</h3>
+<p>Treiber wie der DM542 brauchen das Direction-Signal einige Mikrosekunden vor dem Step-Impuls. Geben Sie ihnen mehr Zeit als die Beispielkonfiguration:</p>
+<pre><code>stepping:
+  engine: RMT
+  pulse_us: 4
+  dir_delay_us: 5</code></pre>
+<h3>Checkliste</h3>
+<ul>
+<li><strong>Enable:</strong> Wenn die Motoren frei drehen, obwohl sie halten sollten, oder halten, obwohl sie deaktiviert sind, invertieren Sie das Enable mit <code>shared_stepper_disable_pin: gpio.8:low</code>.</li>
+<li><strong>Richtung:</strong> Wenn sich eine Achse falsch herum bewegt, ergänzen Sie <code>:low</code> an ihrem <code>direction_pin</code>.</li>
+<li><strong>Schritte pro mm:</strong> Stellen Sie <code>steps_per_mm</code> anhand der Mikroschritt-Einstellung Ihres Treibers und der Mechanik ein. Die Beispielwerte sind Platzhalter.</li>
+<li><strong>Schalter:</strong> Die Endschalter-Eingänge sind optoisoliert. Ergänzen oder entfernen Sie <code>:low</code> passend zu Schließern oder Öffnern.</li>
+<li><strong>Erster Test:</strong> Mit gelösten Riemen oder Kupplungen, bei niedriger Geschwindigkeit und mit dem Not-Halt in Reichweite.</li>
+</ul>
+
+<h2>CNC-Fräse oder Fräsmaschine</h2>
+<p>Das ist die Beispielkonfiguration: vier Achsen, die Spindel am PWM-Ausgang mit dem Relais als Ein/Aus oder ein Frequenzumrichter über RS485. Siehe <a href="index.php?route=journal3/blog/post&journal_blog_post_id=17">Spindel und Frequenzumrichter</a>. Am Handbediengerät stellen die Felder FEED, RAPID und SPND die Overrides ein.</p>
+
+<h2>Laser</h2>
+<p>Ersetzen Sie den Abschnitt <code>PWM:</code> durch einen Abschnitt <code>Laser:</code>. Die Laserleistung kommt vom PWM-Ausgang, und das Relais schaltet das Laser-Enable:</p>
+<pre><code>Laser:
+  pwm_hz: 5000
+  output_pin: gpio.21
+  enable_pin: gpio.39
+  tool_num: 0
+  speed_map: 0=0.000% 1000=100.000%</code></pre>
+<p>Verwenden Sie M4 (Lasermodus) in Ihrem CAM oder in LightBurn, eingerichtet als GRBL-Gerät mit S max 1000. Bei M4 folgt die Leistung der tatsächlichen Geschwindigkeit, sodass Ecken und langsame Bewegungen nicht dunkler brennen. Stellen Sie das Handbediengerät auf den Lasermodus; sein drittes Feld zeigt dann die Laserleistung.</p>
+<p><strong>M4 braucht den Abschnitt <code>Laser:</code>.</strong> Mit nur einer Frässpindel (<code>PWM:</code>, <code>10V:</code> oder ein Frequenzumrichter) stoppt M4 den Job mit <em>error 20 (Unsupported GCode command)</em>: Verwenden Sie M3 oder ergänzen Sie den Laser wie unten unter <a href="#router-and-laser">Fräse und Laser an einer Maschine</a> beschrieben. Laser-Jobs erscheinen in der Teileansicht der WebUI und in der PART-Ansicht des Handbediengeräts als Brandspur, und die Run-Leiste der WebUI zeigt die Laserleistung.</p>
+<p><strong>Sicherheit:</strong> Betreiben Sie Laser in einem Gehäuse und mit geeigneter Schutzbrille. Verdrahten Sie die Gehäuseverriegelung an einem freien Eingang als <code>control: safety_door_pin</code>.</p>
+
+<h2 id="router-and-laser">Fräse und Laser an einer Maschine</h2>
+<p>Ein Lasermodul neben der Fräse kann eine zweite Spindel mit eigener Werkzeugnummer sein: <strong>M6 T2</strong> wählt den Laser, <strong>M6 T1</strong> (oder ein beliebiges Fräswerkzeug) die Fräse. Einen Werkzeugwechsler brauchen Sie nicht. Der Controller stoppt die laufende Spindel und verrechnet den Versatz des Lasers zum Fräser, sodass <strong>ein Werkstück-Nullpunkt für beide gilt</strong>: Nach dem Umschalten zeigt die Werkstückposition, wo der Laserpunkt ist.</p>
+<p>Dafür brauchen Sie die dpCREATOR-Firmware ab Build 13cbee6e sowie die neueste WebUI- und SmartTabUI-Firmware.</p>
+
+<h3>Welche Verdrahtung beim R3</h3>
+<p>Der R3 hat keinen freien GPIO, deshalb entscheidet das Drehzahlsignal der Fräse, wo der Laser angeschlossen wird:</p>
+<table class="table table-bordered">
+  <thead><tr><th></th><th>Fräse</th><th>Laser</th><th>A-Achse</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Empfohlen</strong></td><td>Frequenzumrichter (VFD) über RS485</td><td>PWM-Ausgang (gpio.21) für die Leistung, Relais (gpio.39) für Laser-Enable oder Air Assist</td><td>Frei verfügbar</td></tr>
+    <tr><td><strong>Möglich</strong></td><td>Frequenzumrichter am 0-10V-Ausgang (gpio.21), Relais (gpio.39) an seinem FWD/Run-Eingang</td><td>STEP-Ausgang der A-Achse (gpio.17), 5&nbsp;V Logik</td><td>Nicht verfügbar</td></tr>
+  </tbody>
+</table>
+<p>Mit einem 0-10V-Umrichter und einer A-Achse (zum Beispiel einer Drehachse) bleibt kein Ausgang für den Laser übrig: Verwenden Sie RS485 für die Fräse. Zwei Spindeln können sich keinen Ausgangspin teilen, und das einzige Relais des R3 wird für den Run-Eingang des Umrichters gebraucht, daher kann das Relais kein Signal zwischen Umrichter und Laser umschalten.</p>
+
+<h3>Empfohlen: RS485-Umrichter + Laser an PWM</h3>
+<pre><code>Huanyang:                 # RS485 wiring and uart1: see the Spindle and VFD page
+  uart_num: 1
+  modbus_id: 1
+  tool_num: 0             # every tool not listed elsewhere: T1, T3, T4...
+  speed_map: 0=0% 24000=100%
+
+Laser:
+  pwm_hz: 5000
+  output_pin: gpio.21
+  enable_pin: gpio.39
+  tools: 2                # M6 T2 selects the laser
+  offset_mm: 42.5 18 0    # laser spot from the router bit: X Y Z (mm)
+  speed_map: 0=0% 1000=100%</code></pre>
+<p>Verwenden Sie den Abschnitt für Ihren Umrichter (Huanyang, H2A, YL620, ModbusVFD...) wie auf der Seite <a href="index.php?route=journal3/blog/post&journal_blog_post_id=17">Spindel und Frequenzumrichter</a>.</p>
+
+<h3>Möglich: 0-10V-Umrichter + Laser am STEP-Ausgang der A-Achse</h3>
+<p>Nur für Maschinen ohne A-Achse. Entfernen Sie die Achse <code>a:</code> aus config.yaml, dann:</p>
+<pre><code>10V:
+  output_pin: gpio.21     # 0-10V speed signal
+  forward_pin: gpio.39    # relay: inverter FWD / run
+  tool_num: 0
+  spinup_ms: 3000
+  spindown_ms: 3000
+  speed_map: 0=0% 24000=100%
+
+Laser:
+  pwm_hz: 5000
+  output_pin: gpio.17     # A-axis STEP output
+  tools: 2
+  offset_mm: 42.5 18 0
+  speed_map: 0=0% 1000=100%</code></pre>
+<p>Der STEP-Ausgang ist 5&nbsp;V Logik, passend zum TTL/PWM-Eingang der meisten Diodenlaser. Er läuft über den 3,3&nbsp;V → 5&nbsp;V Pegelwandler des Boards: Falls diese Stufe das Signal invertiert, schreiben Sie <code>gpio.17:low</code>, damit S0 Laser aus bedeutet. <strong>Prüfen Sie dies mit einem Messgerät oder Oszilloskop, bevor Sie den Laser anschließen.</strong></p>
+
+<h3>Die zwei neuen Einstellungen</h3>
+<ul>
+  <li><code>tools:</code> die genauen Werkzeugnummern, die diese Spindel wählen, z.&nbsp;B. <code>2</code> oder <code>2 9</code>. Die übrigen Werkzeuge bleiben bei der Fräse.</li>
+  <li><code>offset_mm:</code> wo der Laserpunkt relativ zum Fräser liegt, X Y Z in mm. <code>42.5 18 0</code> bedeutet 42,5&nbsp;mm nach rechts (+X) und 18&nbsp;mm nach hinten (+Y). Z gibt an, wie weit der Fokuspunkt des Lasers über der Fräserspitze liegt (negativ, wenn darunter).</li>
+</ul>
+
+<h3>Den Versatz messen</h3>
+<ol>
+  <li>Setzen Sie mit der Fräse einen Werkstück-Nullpunkt und fräsen Sie ein kleines Kreuz, z.&nbsp;B. 0,5&nbsp;mm tief bei X50 Y50.</li>
+  <li>Stellen Sie den Fräser genau über die Mitte des Kreuzes und notieren Sie die <strong>Machine</strong>-Werte X und Y in der WebUI.</li>
+  <li>Schalten Sie auf den Laser um (M6 T2 oder <em>T2 laser</em> in der Werkzeugspalte der WebUI). Verfahren Sie, bis der Laserpunkt (niedrige Leistung oder Pointer) auf der Mitte des Kreuzes liegt, und notieren Sie die Maschinenwerte X und Y.</li>
+  <li>Versatz X = Fräser X − Laser X, Versatz Y = Fräser Y − Laser Y. Für Z: Versatz Z = Maschinen-Z mit dem Fräser auf der Oberfläche − Maschinen-Z mit dem auf die Oberfläche fokussierten Laser.</li>
+  <li>Tragen Sie die Werte in <code>offset_mm:</code> ein, starten Sie den Controller neu, schalten Sie auf T2 und prüfen Sie, dass X50 Y50 den Laserpunkt auf das Kreuz setzt.</li>
+</ol>
+
+<h3>Verwendung</h3>
+<ul>
+  <li><strong>Umschalten:</strong> M6 T2 in einer Datei oder in der Konsole oder <em>T2 laser</em> in der Werkzeugspalte der WebUI. Die Fräse stoppt, es wird nichts vermessen, und die Werkstückposition springt um den Versatz. M6 T1 schaltet zurück. Mit einem Werkzeuglängensensor werden Fräswerkzeuge wie gewohnt vermessen.</li>
+  <li><strong>Jobs:</strong> Beginnen Sie Laser-Dateien mit <code>M6 T2</code> (als Header in LightBurn oder Ihrem CAM hinzufügen) und Fräsdateien mit <code>M6 T1</code>.</li>
+  <li><strong>WebUI:</strong> Die Run-Leiste zeigt <em>Laser</em> mit der Leistung in % und dem S-Wert. Die 3D-Ansicht zeigt das Lasermodul, die Teileansicht die Brandspur.</li>
+  <li><strong>Handbediengerät:</strong> Das dritte Override-Feld zeigt <strong>LASER</strong>, solange der Laser gewählt ist. Die PART-Ansicht zeigt die Brandspur.</li>
+  <li>G49 löscht eine Werkzeuglänge, behält aber den Laserversatz. Nach einem Reset wird der Versatz der gewählten Spindel wieder angewendet.</li>
+</ul>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/webui-position-laser.jpg" alt="Positionsfeld der WebUI mit gewähltem T2 Laser" loading="lazy" style="flex:1 1 280px;max-width:360px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-laser-running.png" alt="Handbediengerät mit laufendem Laser-Job und LASER im Override-Feld" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Mit gewähltem T2 zeigt die WebUI <em>T2 Laser</em> und die Werkstückposition des Laserpunkts; das Handbediengerät zeigt LASER.</p>
+<h2>Plotter oder Schleppmesser</h2>
+<p>Montieren Sie Stift oder Messer an der Z-Achse: Die Tiefe ist dann eine normale Z-Bewegung aus Ihrem CAM. Im Plotter-Modus zeigt das Handbediengerät die Z-Tiefe im dritten Feld, sodass Sie auf einen Blick sehen, ob der Stift oben ist oder das Messer schneidet.</p>
+<p>Für ein leichtes Stiftheben eignet sich auch ein Modellbau-Servo. Dieses Beispiel steuert es über den Step-Ausgang der A-Achse, die A-Achse wird also nicht genutzt:</p>
+<pre><code>  z:
+    steps_per_mm: 100
+    max_rate_mm_per_min: 5000
+    acceleration_mm_per_sec2: 500
+    max_travel_mm: 5
+    motor0:
+      rc_servo:
+        output_pin: gpio.17
+        pwm_hz: 50
+        min_pulse_us: 1000
+        max_pulse_us: 2000</code></pre>
+<p>Passen Sie den Impulsbereich an Ihr Servo an.</p>
+
+<h2>Plasmatisch</h2>
+<p>FluidNCs <code>PlasmaSpindle</code> zündet den Brenner über den Relaisausgang und wartet auf das Arc-OK-Signal des Schneidgeräts, bevor sich die Maschine bewegt. Zündet der Lichtbogen nicht rechtzeitig, stoppt sie mit einem Alarm.</p>
+<pre><code>PlasmaSpindle:
+  enable_pin: gpio.39
+  arc_ok_pin: gpio.38:low
+  arc_wait_ms: 1500
+  tool_num: 0</code></pre>
+<p>Dieses Beispiel liest Arc OK über den optoisolierten Endschalter-Eingang der A-Achse ein; setzen Sie daher den Endschalter der A-Achse auf <code>NO_PIN</code> oder entfernen Sie die A-Achse. Schließen Sie ihn an den potentialfreien Arc-OK-Kontakt am CNC-Port Ihres Plasmaschneiders an.</p>
+<ul>
+<li><strong>Brennerhöhe:</strong> Es gibt keine eingebaute Brennerhöhenregelung (THC). Wenn Ihr Tisch eine braucht, verwenden Sie ein eigenständiges THC-Gerät.</li>
+<li><strong>Störungen:</strong> Plasma erzeugt starke elektrische Störungen. Verwenden Sie geschirmte Step- und Schalterkabel, erden Sie den Tisch gut und halten Sie das Brennerkabel von Signalkabeln fern.</li>
+<li><strong>Not-Halt:</strong> Der Not-Halt des Handbediengeräts unterbricht die Step-Impulse auf dem Board. Bauen Sie zusätzlich einen Not-Halt ein, der die Stromversorgung des Plasmaschneiders abschaltet.</li>
+</ul>

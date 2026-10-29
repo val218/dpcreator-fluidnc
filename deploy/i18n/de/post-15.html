@@ -1,0 +1,31 @@
+<p>Der dpCREATOR R2 und R3 haben dieselbe Pinbelegung. Die Tabelle unten entspricht der Beispielkonfiguration <code>dpcreator_r2_r3_w5500.yaml</code>, die mit der Firmware geliefert wird.</p>
+<p><img src="image/catalog/dpc-site/controller-connections.jpg" alt="dpCREATOR R2/R3 Controller mit Beschriftung aller Anschlüsse" style="max-width:100%;height:auto"></p>
+<h3>Hauptmerkmale</h3>
+<ul><li>ESP32-S3-WROOM-1-N16R8: 16 MB Flash, 8 MB PSRAM</li>
+<li>4 Achsen (X, Y, Z, A) — Step/Dir-Ausgänge für externe Schrittmotor- oder Servotreiber, gemeinsames Enable</li>
+<li>Optoisolierte Endschalter-Eingänge, Taster-Eingang</li>
+<li>Spindel: PWM-Ausgang plus Relais (Ein/Aus); RS485 für Modbus-Frequenzumrichter</li>
+<li>W5500 kabelgebundenes Ethernet, WLAN, USB</li>
+<li>SD-Karte, im Netzwerk als Laufwerk freigegeben</li>
+<li>Anschluss für das Handbediengerät (UART1)</li>
+<li><strong>R3 vs. R2:</strong> Der R3 nutzt ein integriertes 5-V-Netzteilmodul und hat einen separaten Taster-Eingang an GPIO3 (beim R2 teilt sich der Taster GPIO45 mit dem Z-Endschalter).</li></ul>
+<h3>Pinbelegung</h3>
+<table class="table table-bordered"><thead><tr><th>Funktion</th><th>Pins (GPIO)</th><th>Hinweise</th></tr></thead><tbody>
+<tr><td>X Step / Dir</td><td>4 / 5</td><td>Endschalter X: 47 (active low)</td></tr>
+<tr><td>Y Step / Dir</td><td>6 / 7</td><td>Endschalter Y: 48</td></tr>
+<tr><td>Z Step / Dir</td><td>15 / 16</td><td>Endschalter Z: 45 (beim R2 mit dem Taster geteilt)</td></tr>
+<tr><td>A Step / Dir</td><td>17 / 18</td><td>Endschalter A: 38. Drehachse: Schritte pro Grad</td></tr>
+<tr><td>Schrittmotor-Enable (alle)</td><td>8</td><td>Ergänzen Sie <code>:low</code>, wenn Ihre Treiber bei Low freigeben</td></tr>
+<tr><td>Taster</td><td>3 (R3)</td><td>R2: GPIO45, anstelle des Z-Endschalters</td></tr>
+<tr><td>Spindel PWM / Relais</td><td>21 / 39</td><td>5 kHz PWM, Relais als Spindel-Enable</td></tr>
+<tr><td>RS485 (UART2) TX / RX / DE</td><td>42 / 41 / 40</td><td>Standard 9600 Baud, für Modbus-Frequenzumrichter</td></tr>
+<tr><td>Handbediengerät (UART1) TX / RX</td><td>1 / 2</td><td>1.000.000 Baud</td></tr>
+<tr><td>SPI SCK / MOSI / MISO</td><td>12 / 11 / 13</td><td>Gemeinsam für SD-Karte und W5500</td></tr>
+<tr><td>SD-Karte CS</td><td>10</td><td></td></tr>
+<tr><td>W5500 CS / INT</td><td>14 / 9</td><td>INT optional — <code>NO_PIN</code> verwenden, wenn nicht verdrahtet</td></tr>
+<tr><td>Konsole (UART0)</td><td>43 / 44</td><td>115200, Stecker J7. USB-Konsole an GPIO19/20</td></tr>
+</tbody></table>
+<p><strong>Vor dem Fräsen:</strong> Stellen Sie <code>steps_per_mm</code> passend zu Ihrer Mechanik ein. Die Beispielwerte (400 für X/Y/Z, 44.444 für A) sind Platzhalter.</p>
+<h3>Verdrahtung im Überblick</h3>
+<p>So wird eine typische CNC-Fräse angeschlossen: Jeder Achstreiber und sein Endschalter teilen sich die Achsklemme; die Spindel läuft über einen Frequenzumrichter per RS485 (oder 0–10 V / PWM), das Relais schaltet ein Schütz oder die Absaugung, und das SmartTabUI-Handbediengerät wird mit seinem GX12-Kabel an PENDANT angeschlossen.</p>
+<p><img src="image/catalog/dpc-site/wiring-overview.jpg" alt="Verdrahtungsübersicht: Motoren und Treiber, Endschalter, Taster, Frequenzumrichter, Relais, Not-Halt, SmartTabUI-Handbediengerät, 24-V-Netzteil, Ethernet und USB" style="max-width:100%;height:auto"></p>

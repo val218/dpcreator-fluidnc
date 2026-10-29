@@ -1,0 +1,39 @@
+<p>Ein doppeltes Antippen der ENABLE-Taste des Handbediengeräts im Leerlauf öffnet zwei Werkzeuge, die mit der WebUI zusammenarbeiten: <strong>Measure part</strong> ermittelt Größe und Mitte eines Werkstücks aus seinen Ecken, und <strong>Record waypoints</strong> sammelt Positionen für einen Bohr- oder Taschenfräs-Job (Record & Retrace).</p>
+<p>Tippen Sie ENABLE doppelt an (zwei schnelle Drücke), während die Maschine im Leerlauf ist. Das Handbediengerät fragt <em>What do you want to do?</em> – tippen Sie auf <strong>Measure part</strong> oder <strong>Record waypoints</strong>. Bis Sie wählen, wird nichts aufgezeichnet.</p>
+
+<h3>Measure part</h3>
+<ol>
+  <li>Verfahren Sie das Werkzeug zur <strong>linken unteren</strong> Ecke des Teils und tippen Sie ENABLE doppelt an.</li>
+  <li>Machen Sie dasselbe an der <strong>rechten oberen</strong>, <strong>rechten unteren</strong> und <strong>linken oberen</strong> Ecke. Die Leiste unter der Ansicht zeigt, welche Ecke als Nächstes kommt. Zwei gegenüberliegende Ecken genügen.</li>
+  <li>Die Ansicht zeichnet die Ecken, den Umriss des Teils und seine Mitte; die Leiste zeigt die Größe und die Position der Mitte.</li>
+</ol>
+<p>Dann in der unteren Leiste:</p>
+<ul>
+  <li><strong>Go ctr</strong> (zweimal tippen): Z fährt ganz nach oben, dann fährt das Werkzeug über die Mitte des Teils.</li>
+  <li><strong>XY0 ctr</strong> / <strong>XY0 BL</strong> (zweimal tippen): Der Werkstück-Nullpunkt X0 Y0 wird in die Mitte oder an die linke untere Ecke gesetzt. Die Maschine bewegt sich nicht.</li>
+  <li><strong>Clear</strong>: neu beginnen. <strong>Finish</strong>: Measure schließen.</li>
+</ul>
+<p><strong>In der WebUI</strong> öffnet sich Centre Finder von selbst und übernimmt dieselben Ecken, mit der Antastung der Materialhöhe und dem Planfräs-Generator. Löschen auf einer Seite löscht auf beiden. Wenn Sie Centre Finder zuerst in der WebUI öffnen, startet das nächste doppelte Antippen am Handbediengerät sofort Measure.</p>
+
+<h3>Record waypoints (Record & Retrace)</h3>
+<p>Wenn bereits Wegpunkte in der Liste sind, fragt das Handbediengerät, ob sie ergänzt werden sollen (<strong>Add</strong>) oder eine neue Liste beginnen soll (<strong>New list</strong>).</p>
+<ol>
+  <li>Verfahren Sie zum ersten markierten Punkt und tippen Sie ENABLE doppelt an: Er wird zum Wegpunkt. Wiederholen Sie das für jeden Punkt.</li>
+  <li>Die Ansicht zeichnet jeden Wegpunkt maßstabsgetreu in Reihenfolge: ein Kreuz für eine Bohrung, einen Kreis für eine runde Tasche, den Umriss für ein Rechteck, einen Punkt für eine Fahrbewegung. Der gewählte Wegpunkt ist gelb, das Werkzeug ein orangefarbener Punkt.</li>
+  <li>Tippen Sie auf einen Wegpunkt, um ihn zu wählen (oder verwenden Sie <strong>Prev</strong> / <strong>Next</strong>), und stellen Sie ihn dann in der Leiste ein:
+    <ul>
+      <li><strong>Drill / Round / Rect / Move</strong> – was dort geschehen soll.</li>
+      <li>Die Maße – <em>Dia</em> und <em>Depth</em> für runde Taschen, <em>W</em>, <em>H</em>, <em>Depth</em> und <em>Ref</em> (welche Ecke die Markierung ist) für Rechtecke. Tippen Sie auf ein Maß und drehen Sie dann das Handrad: x1 = 0,01, x10 = 0,1, x100 = 1 mm. Bei gehaltener ENABLE-Taste verfährt das Handrad stattdessen.</li>
+      <li><strong>Jog size</strong> – verfahren Sie von der Markierung zum Rand (rund) oder zur gegenüberliegenden Ecke (Rechteck) und tippen Sie doppelt: Das Maß wird für Sie gemessen.</li>
+    </ul>
+  </li>
+  <li><strong>Delete</strong> entfernt den gewählten Wegpunkt (zweimal tippen). <strong>Finish</strong> beendet die Aufzeichnung.</li>
+</ol>
+<p><strong>In der WebUI</strong> öffnet sich Record & Retrace von selbst, wenn Sie am Handbediengerät aufzeichnen, und zeigt dieselbe Wegpunktkarte, Liste und denselben Editor; Änderungen auf einer Seite erscheinen sofort auf der anderen. Stellen Sie dort Werkzeugdurchmesser, sichere Z-Höhe, Vorschübe und Spindeldrehzahl ein, prüfen Sie die G-Code-Vorschau und erstellen Sie mit <strong>Save & Prepare</strong> den Job – dann starten Sie ihn wie jeden anderen Job mit Run.</p>
+
+<h3>Gut zu wissen</h3>
+<ul>
+  <li>Die Wegpunktliste wird auf der SD-Karte des Controllers gespeichert, übersteht also Neustarts und ist am Handbediengerät und in jeder WebUI gleich.</li>
+  <li>Solange das Offcuts-Werkzeug der WebUI geöffnet ist, nimmt ein doppeltes Antippen am Handbediengerät stattdessen einen Offcuts-Punkt auf.</li>
+  <li>Measure und Record brauchen die dpCREATOR Controller-Firmware ab Oktober 2026 (Seite Flash Firmware).</li>
+</ul>

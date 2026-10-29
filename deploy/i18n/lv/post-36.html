@@ -1,0 +1,61 @@
+<p>dpCREATOR WebUI ir vadības lapa, ko piedāvā pats kontrolieris. Atveriet plates adresi pārlūkā datorā, planšetē vai tālrunī (piemēram, <code>http://fluidnc.local</code>). Tā rāda, kur atrodas mašīna, darbu 3D skatā tā izpildes laikā, detaļu, ko tas izgatavo, un lāzera apdegumu. Šajā lapā aprakstīts pozīcijas panelis, 3D skats un lāzera funkcijas. Failiem, darba atjaunošanai, Z korekcijai un pultij ir atsevišķi raksti.</p>
+<div class="alert alert-info"><strong>Prasības:</strong> dpCREATOR WebUI darbojas ar <strong>dpCREATOR FluidNC programmaparatūru</strong> kontrolierī (bez maksas, no <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Atjauniniet WebUI, kontroliera programmaparatūru un SmartTabUI pulti kopā.</div>
+
+<figure class="dpc-shot" style="margin:18px 0 22px"><img src="image/catalog/dpc-site/shots/webui-live-job.jpg" alt="dpCREATOR WebUI 3D reljefa darba izpildes laikā" loading="lazy" style="max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Izpildās 3D reljefs: pozīcija pa kreisi, vārpsta kustas pāri darbam vidū, mašīnas panelis, faili un konsole pa labi, izpildes josla zem skata.</figcaption></figure>
+
+<h2>Pozīcija</h2>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+<img src="image/catalog/dpc-site/shots/webui-position-laser.jpg" alt="Pozīcijas panelis ar kolonnām Work un Machine" loading="lazy" style="flex:0 1 360px;max-width:360px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a">
+<ul style="flex:1 1 300px;margin:0">
+  <li><strong>Work un Machine:</strong> lielie skaitļi ir darba pozīcija — jūsu darba koordinātas. Mazie ir mašīnas pozīcija, skaitot no homing pozīcijas.</li>
+  <li><strong>Not homed · Home:</strong> šī zīme redzama, kamēr asij ar homing slēdžiem kopš ieslēgšanas vai atiestatīšanas nav veikts homing. Noklikšķiniet uz tās, lai veiktu homing. Mašīnas pozīcijas nozīmē <em>vietu uz galda</em> tikai pēc homing; darba pozīcijas vienmēr ir pareizas. Unlock netiek uzskatīts par homing.</li>
+  <li><strong>Ass nullēšana ar turēšanu:</strong> turiet ass rindu vai tās pogu X0 / Y0 / Z0 apmēram sekundi. Īss pieskāriens neko nedara, tāpēc nejaušs klikšķis nevar pārvietot jūsu darba nulli. <strong>Zero all</strong> darbojas tāpat.</li>
+  <li><strong>Instruments:</strong> frēze vārpstā (no instrumentu tabulas) vai <em>T2 Laser</em>, kad izvēlēts lāzers (skatiet <a href="index.php?route=journal3/blog/post&journal_blog_post_id=28#router-and-laser">Frēze un lāzers vienā mašīnā</a>).</li>
+</ul>
+</div>
+
+<h3>Probe Z0</h3>
+<p><strong>Probe Z0</strong> (zem pozīcijas) iestata darba Z nulli ar kontaktplāksni vai 3D zondi:</p>
+<figure class="dpc-shot" style="margin:12px 0 18px"><img src="image/catalog/dpc-site/shots/webui-probe-z0.jpg" alt="Probe Z0 dialogs" loading="lazy" style="max-width:640px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a;display:block"></figure>
+<ol>
+  <li>Novietojiet zondi dažus milimetrus virs detaļas.</li>
+  <li>Pārbaudiet to: piespiediet zondes adatu vai pieskarieties ar plāksni frēzei. Indikators kļūst zaļš.</li>
+  <li>Ievadiet plāksnes biezumu (un Z nobīdi, ja vēlaties), tad <strong>Start probe</strong>. Instruments nolaižas, līdz pieskaras, iestata Z0 plāksnes augšpusē (vai uz aizskartās virsmas 3D zondei) un paceļas par 5&nbsp;mm.</li>
+</ol>
+
+<h2>3D skats darba izpildes laikā</h2>
+<ul>
+  <li>Vārpsta (vai lāzera modulis) kustas pāri darbam. Pabeigtie griezumi ir iekrāsoti pēc dziļuma, un kartīte rāda failu, atlikušo laiku, izpildīto % un rindu.</li>
+  <li><strong>Follow</strong> tur instrumentu redzeslokā. <strong>Auto-fit</strong> tur redzeslokā visu darbu, kad tas ielādējas vai darba nulle pārvietojas. <strong>Spindle view</strong> rāda vārpstas korpusu vai tikai frēzi. <strong>Stock</strong> rāda materiāla bloku (tā izmēru iestatiet ar <em>Stock</em> virs skata).</li>
+  <li><strong>G-code</strong> rāda failu kā tekstu zem skata, sekojot izpildāmajai rindai.</li>
+  <li><strong>Mašīnas galds un gājiens:</strong> ja X un Y ir homing un config.yaml ir <code>soft_limits: true</code>, un mašīnai veikts homing, tiek uzzīmēts galds un mašīnas gājiens, un piezīme brīdina, ja darbs iziet ārpus gājiena. Citādi skats zem darba rāda vienkāršu režģi.</li>
+  <li><strong>Instrumentu kolonna</strong> (pa kreisi no skata): instrumenti no instrumentu tabulas. Noklikšķiniet uz kāda, lai to nomainītu (M6). Lāzers ar savu instrumenta numuru redzams kā <em>T2 laser</em>.</li>
+</ul>
+
+<h3>Detaļas skats (Part)</h3>
+<p><strong>Part</strong> (blakus skata pogām) rāda detaļu, ko darbs izgatavo: rīka ceļu, izgrieztu no bloka, ar instrumentu kolonnā izvēlētās frēzes formu (plakanā, lodveida, V-frēze…). Izvēlieties frēzi, kurai fails tika veidots. Darba izpildes laikā detaļa tiek izgriezta līdz ar frēzes kustību. Slēdzis <strong>Path</strong> blāvi uzzīmē rīka ceļu pāri detaļai.</p>
+<figure class="dpc-shot" style="margin:12px 0 18px"><img src="image/catalog/dpc-site/shots/webui-part-view.jpg" alt="Detaļas skats: reljefs izgriezts no bloka" loading="lazy" style="max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Detaļas skats ar 3 mm lodveida frēzi: reljefs parādās kokā līdz ar frēzes kustību.</figcaption></figure>
+
+<h3>Izpildes josla</h3>
+<p>Zem skata: <strong>Cycle start</strong>, <strong>Pause</strong>, <strong>Stop</strong> un <strong>Probe</strong>, smidzināšanas un plūsmas dzesēšana, kā arī padeves un vārpstas korekcijas kā slīdņi (velciet vai izmantojiet pogas panelī Overrides).</p>
+
+<h2>Lāzera darbi</h2>
+<p>Fails ir <strong>lāzera darbs</strong>, ja tas izmanto M4 vai ja visi tā griezumi ir vienā Z augstumā un tas izmanto vairāk nekā divus jaudas līmeņus (pelēktoņu gravējums). Lāzera darbam:</p>
+<ul>
+  <li>3D skats rāda lāzera moduli un staru, kamēr tas deg. Ar ieslēgtu <strong>Part</strong> redzat, kā uz materiāla veidojas apdegums: jo tumšāks, jo lielāka jauda.</li>
+  <li>Izpildes josla rāda <strong>Laser</strong> un jaudu % no lāzera maksimālās S vērtības config.yaml, kopā ar S vērtību (piemēram, <em>42% S420</em>).</li>
+  <li>SmartTabUI pults rāda apdegumu savā PART skatā, un tās trešais korekciju lodziņš rāda <strong>LASER</strong>.</li>
+</ul>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start">
+<img src="image/catalog/dpc-site/shots/webui-laser-job.jpg" alt="Lāzera darbs izpildās WebUI" loading="lazy" style="flex:2 1 420px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a">
+<img src="image/catalog/dpc-site/shots/webui-laser-burn-top.jpg" alt="Lāzera apdegums no augšas" loading="lazy" style="flex:1 1 260px;max-width:440px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a">
+</div>
+<p style="font-size:13px;color:#8a97a3">Pelēktoņu lāzera gravējums pie 30%: lāzers kā T2 ar piemērotu nobīdi, jauda izpildes joslā un apdegums no augšas (Spindle view izslēgts).</p>
+<p>M4 vajadzīga <code>Laser:</code> vārpsta config.yaml. Mašīnā tikai ar frēzes vārpstu M4 aptur darbu ar <em>error 20</em>: izmantojiet M3 vai iestatiet lāzeru, kā aprakstīts sadaļā <a href="index.php?route=journal3/blog/post&journal_blog_post_id=28#router-and-laser">Frēze un lāzers vienā mašīnā</a>.</p>
+
+<h2>Studio</h2>
+<p>Poga <strong>Studio</strong> augšējā labajā stūrī atver <a href="index.php?route=journal3/blog/post&journal_blog_post_id=34">dpCREATOR Studio</a> atsevišķā cilnē. Ja Studio jau ir atvērts, tā pārslēdzas uz šo cilni, nevis atver vēl vienu. Studio poga <strong>WebUI</strong> pārslēdz atpakaļ uz WebUI cilni, kur nosūtītais darbs ir gatavs izpildei.</p>
+
+<h2>Atjauninājumi</h2>
+<p>Kājene rāda WebUI, kontroliera un pults būvējumus. Kad iznācis jaunāks būvējums, tā kļūst sarkana: atjauniniet no lapas <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>. Kas mainījies, skatiet <a href="index.php?route=journal3/blog/post&journal_blog_post_id=33">izmaiņu aprakstos</a>.</p>
+

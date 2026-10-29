@@ -1,0 +1,108 @@
+<p><strong>dpCREATOR Motion</strong> hilft Ihnen, Ihre eigene Maschine zu bauen und zum Laufen zu bringen, auch wenn es Ihre erste ist. Ein Roboterarm, ein Förderband, ein Rundschalttisch, ein Pick-and-Place-Portal, ein Kameraslider, ein Prüfstand oder etwas, das noch niemand gebaut hat: Sie fügen Motoren, Sensoren und Ausgänge hinzu, während Sie sie verdrahten, testen jeden einzeln, bringen der Maschine dann ihre Positionen bei und lassen sie auf einem FluidNC-Controller laufen. Motion nutzt jede Achse, jeden Eingang, jedes Relais und jeden Ausgang Ihres Controllers. Sie müssen weder G-Code noch die Konfigurationsdatei von FluidNC kennen: Motion schreibt beides.</p>
+<p><a class="btn btn-primary" href="/motion/" target="_blank" rel="noopener">Kostenlosen Simulator ausprobieren</a></p>
+
+<div class="alert alert-info"><strong>Kostenlos zum dpCREATOR R3.</strong> Für andere Boards mit FluidNC 3.8 oder neuer kostet <a href="index.php?route=product/product&product_id=391">Motion €39</a> (€29 als Frühbucherpreis bis zum Start), eine Lizenz für 2 Boards in Ihrem Konto. Motion ist eine einzelne Seite, die im eigenen Speicher des Controllers liegt, wie die WebUI: keine Installation, kein Internet. Es ist in der Beta und wird über die Seite <a href="/firmware">Flash Firmware</a> installiert. Mitglieder des <a href="/rnd-club">R&D Club</a> erhalten es während der Beta kostenlos.</div>
+
+<p><img src="image/catalog/dpc-site/shots/motion-d-arm.jpg" alt="dpCREATOR Motion: ein Roboterarm mit 4 Gelenken, seinen gelernten Positionen, der Schrittfolge und der Zeitleiste" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<h3>So funktioniert es</h3>
+<p>Motion folgt der Art, wie eine Maschine tatsächlich gebaut wird: <strong>ein Motor oder Sensor nach dem anderen</strong>. Teil hinzufügen, testen und erst dann das nächste hinzufügen. Wenn die Maschine funktioniert, bringen Sie ihr ihre Bewegungen bei und lassen sie laufen. Die drei Stufen stehen immer oben am Bildschirm:</p>
+<ol>
+  <li><strong>Maschine bauen:</strong> jeden Motor, Sensor und Ausgang hinzufügen und testen.</li>
+  <li><strong>Bewegungen beibringen:</strong> die Maschine zu jedem Halt fahren, speichern, Wartezeiten und Schaltvorgänge hinzufügen.</li>
+  <li><strong>Ausführen:</strong> im Simulator oder auf der Maschine aus dem eigenen Speicher des Controllers.</li>
+</ol>
+<p><em>Simple</em> (Standard) zeigt nur, was ein Einsteiger braucht. <em>All features</em> ergänzt Teilebibliothek, 2D-Ansicht, Konsole, Zeitleiste, die vollständige Schrittliste, den G-Code und die Konfiguration.</p>
+
+<h3>Start: Was bauen Sie?</h3>
+<p><img src="image/catalog/dpc-site/shots/motion-start.jpg" alt="Der erste Bildschirm: Maschinentyp und Controller wählen" style="max-width:360px;width:100%;height:auto;border-radius:6px;float:right;margin:0 0 12px 18px"></p>
+<p>Der erste Bildschirm fragt, welchen Controller Sie haben (<em>dpCREATOR R3</em> oder <em>Another FluidNC board</em>) und welche Art von Maschine Sie bauen: ein Portal, eine Linearachse, ein Förderband, einen Rundschalttisch, einen Roboterarm oder etwas anderes. Die Art bestimmt nur, wo Motion jedes Teil in 3D platziert (bei einem Portal fährt X auf Y und Z auf X; bei einem Arm stapeln sich die Gelenke). Sie schränkt nie ein, was Sie hinzufügen können.</p>
+<p>Neu bei Motion? <strong>New here? Try it first</strong> ist ein 2-minütiger Rundgang im Simulator, ganz ohne Board. <em>Or open a finished example</em> lädt eine komplette Maschine mit ihren Bewegungen: Roboterarm, Förderband mit Schieber, Rundschalttisch, XY-Pick-and-Place, Kameraslider oder ein Servoarm mit vier Modellbau-Servos.</p>
+<div style="clear:both"></div>
+
+<h3>Stufe 1: Maschine bauen</h3>
+<p><img src="image/catalog/dpc-site/shots/motion-builder.jpg" alt="Maschine bauen: die Teilebibliothek, die 3D-Maschine, das gewählte Armgelenk und seine Positionskarte" style="max-width:100%;height:auto;border-radius:6px"></p>
+<p>Die Karte <strong>Build it step by step</strong> listet die Teile auf, die Ihre Maschinenart üblicherweise hat, jeweils mit <strong>+ Add</strong>, dazu <strong>+ Motor</strong>, <strong>+ Sensor / switch</strong> und <strong>+ Output / tool</strong> für alles andere. In <em>All features</em> enthält die Teilebibliothek links jedes Teil (Linearachse, Drehteller, Armgelenk, Modellbau-Servo, Förderband, Greifer, Vakuumsauger, Spindel, eigene Werkzeuge, Endschalter, Sensoren, Signalleuchten, Ventile). Ziehen Sie ein Teil in die 3D-Ansicht, und es rastet auf einem Schlitten, einem Profil, einem Tisch oder dem Ende eines Armgelenks ein und bewegt sich mit.</p>
+
+<p><img src="image/catalog/dpc-site/shots/motion-add-motor.jpg" alt="Motor hinzufügen: wie er sich bewegt, an welchen Klemmen er angeschlossen ist, und das Verdrahtungsbild" style="max-width:300px;width:100%;height:auto;border-radius:6px;float:right;margin:0 0 12px 18px"></p>
+<p><strong>Einen Motor hinzufügen:</strong></p>
+<ol>
+  <li>Geben Sie ihm einen Namen (<em>Y: vorne – hinten</em>).</li>
+  <li>Wählen Sie, wie er sich bewegt: <em>Straight</em> (mm), <em>Turning</em> (Grad), <em>Conveyor belt</em> (hält nie an, zählt mm Band) oder <em>Hobby servo</em> (3 Drähte, 0–180°).</li>
+  <li><strong>Plugged into:</strong> Beim R3 sind das die Achsklemmen X, Y, Z und A. Ein Modellbau-Servo kann jede freie Klemme STEP 5V oder DIR 5V nutzen. Bei einem anderen Board tippen Sie die STEP- und DIR-Pins ein, und Motion prüft sie während der Eingabe.</li>
+  <li>Wie weit er fahren kann.</li>
+  <li>Das Verdrahtungsbild zeigt, welcher Draht wohin gehört. Drücken Sie <strong>Add</strong>.</li>
+</ol>
+<p><strong>Sensoren und Schalter:</strong> ein Sensor (erkennt ein Teil oder eine Position), eine Taste (Start, Weiter, OK) oder ein End-/Referenzschalter an einer Schiene. Bei verbundenem Board wählt <em>Find it</em> den Eingang, der sich ändert, während Sie den Sensor auslösen. Ein Endschalter richtet außerdem die Referenzfahrt für diese Achse ein.</p>
+<p><strong>Ausgänge und Werkzeuge:</strong> Greifer, Vakuumsauger, Ventil oder Relais, eine Leuchte, eine Spindel oder ein eigenes Werkzeug wie ein Tacker oder eine Heißklebepistole (an während der Arbeit oder ein Impuls pro Schritt).</p>
+<div style="clear:both"></div>
+
+<h3>Nur, was Ihr Controller ansteuern kann</h3>
+<p>Motion liest die <code>config.yaml</code> des Controllers. Ein Teil, das etwas braucht, das die Konfiguration nicht hat (eine Motorachse, einen freien Ein- oder Ausgang, ein Modbus-Modul an RS485), ist ausgegraut; klicken Sie darauf, um den Grund zu sehen, und fügen Sie mit <strong>Add to config</strong> die nötigen Zeilen hinzu. Beim R3 gehören dazu das Relais, die 0–10-V- und PWM-Ausgänge, freie LIMIT-Eingänge als Sensoren und ein Modbus-I/O-Modul an RS485.</p>
+<p>Motion bearbeitet seine eigene Kopie der Konfiguration, markiert jede geänderte Zeile und prüft auf doppelt verwendete Pins. <strong>Apply to board</strong> lädt sie als <code>motion-config.yaml</code> hoch und startet den Controller neu; Ihre alte <code>config.yaml</code> bleibt auf dem Board, der Weg zurück ist also ein Befehl.</p>
+<p style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/motion-board-map.jpg" alt="R3-Board-Map: jede Klemme und was sie nutzt" style="flex:1 1 440px;max-width:100%;height:auto;border-radius:6px"><img src="image/catalog/dpc-site/shots/motion-config.jpg" alt="Controller-Konfigurationskarte mit dem YAML, auf dem Motion aufbaut" style="flex:0 1 280px;max-width:280px;height:auto;border-radius:6px"></p>
+<p>Die <strong>Board map</strong> zeigt jede Klemme des R3 und wofür Ihre Maschine sie nutzt; bei bestehender Verbindung leuchten Ein- und Ausgänge live auf. Bei einem anderen Board ist sie eine Liste der Pins aus der Konfiguration.</p>
+
+<h3>Jedes Teil vor dem nächsten testen</h3>
+<p>Nach <strong>Add</strong> setzt Motion das Teil in die 3D-Maschine und öffnet seinen Test:</p>
+<ul>
+  <li><strong>Motor:</strong> um −10 / +10 bewegen. Ist + in die richtige Richtung gefahren? <em>No, flip it</em> kehrt die Richtung um. <em>Calibrate</em>: 100 fahren, die tatsächliche Strecke messen, eintippen, und Motion korrigiert die Schritte pro mm.</li>
+  <li><strong>Sensor oder Taste:</strong> auslösen und zusehen, wie der Punkt aufleuchtet.</li>
+  <li><strong>Endschalter:</strong> die Achse referenzieren und zusehen, wie sie am Schalter stoppt.</li>
+  <li><strong>Ausgang:</strong> On / Off: Es sollte klicken, leuchten oder sich bewegen.</li>
+</ul>
+<p>Bei bestehender Verbindung bietet der Test zuerst <strong>Send and restart</strong> an, damit das Board die neue Konfiguration erhält. Wenn es funktioniert, drücken Sie <strong>It works</strong>: Motion merkt sich diese Konfiguration als letzte funktionierende.</p>
+<p><img src="image/catalog/dpc-site/shots/motion-not-working.jpg" alt="Funktioniert nicht? Motion prüft, was es kann, und fragt, was passiert" style="max-width:520px;width:100%;height:auto;border-radius:6px"></p>
+<p><strong>Not working?</strong> prüft bei jedem Teil zuerst, was Motion selbst sehen kann: Ist das Board verbunden, im Alarm, ist die neue Konfiguration gesendet, ist das Teil in der Konfiguration, ist ein Endschalter gedrückt, hat sich die Konfiguration seit dem letzten Funktionieren geändert (mit <em>Go back to the last working config</em>). Dann fragt es, was passiert (bewegt sich nicht, falsche Richtung, falsche Strecke, Sensor nie oder immer an…) und endet mit einer Lösung: einer Konfigurationsänderung per Klick oder dem, was an der Maschine zu prüfen ist.</p>
+
+<h3>Stufe 2: Bewegungen beibringen</h3>
+<p><img src="image/catalog/dpc-site/shots/motion-timeline.jpg" alt="Bewegungen beibringen: der Roboterarm, alle Schritte als Liste mit Startzeiten und die Zeitleiste" style="max-width:100%;height:auto;border-radius:6px"></p>
+<ol>
+  <li>Fahren Sie die Maschine dorthin, wo sie hin soll: mit der Jog-Leiste unter der 3D-Ansicht, den Pfeiltasten, durch Ziehen in 3D oder mit dem Handrad des Handbediengeräts.</li>
+  <li>Drücken Sie <strong>+ Position here</strong>. Ein Schritt <em>Go to</em> wird hinzugefügt.</li>
+  <li>Fahren Sie zur nächsten Stelle und wiederholen Sie das. Fügen Sie dazwischen <strong>+ Wait</strong> hinzu oder schalten Sie ein Werkzeug über die Jog-Leiste.</li>
+</ol>
+<p>Oder drücken Sie <strong>Record</strong> und bedienen Sie die Maschine von Hand: Motion schreibt einen Schritt vor jedem Ausgang, den Sie schalten, und jeder Wartezeit, die Sie hinzufügen. Jede Schrittkarte zeigt ihre Werte (wohin es geht, langsam / normal / schnell oder eine Zeit in Sekunden), mit <em>Go there</em> und <em>Update to here</em>, um eine Position nachzubessern. Ziehen Sie Karten, um sie umzusortieren.</p>
+<p><strong>Weitere Schrittarten:</strong> ein Stück bewegen, warten, einen Ausgang schalten (an, aus oder ein Impuls), auf einen Sensor warten (mit Timeout), laufen bis zu einem Sensor (ein Band, bis das Teil ankommt), wiederholen (n-mal oder bis zum Stopp), wenn ein Sensor…, Pause für den Bediener, eine Meldung anzeigen, einem gelernten Pfad folgen und auf einen Messwert warten oder ihn prüfen (Modbus oder ein ADC des Boards). Eine Bewegung hat eine Geschwindigkeit oder eine Zeit („in 1,2 s dorthin fahren“); alle ihre Achsen kommen gleichzeitig an.</p>
+<p>Eine Maschine kann mehrere <strong>Abläufe</strong> haben (<em>Pick and place</em>, <em>Park</em>…), jeder ein eigenes Programm. <strong>Play</strong> führt den Ablauf im Simulator aus; <strong>Step by step</strong> hält vor jedem Schritt an. In <em>All features</em> zeigt <strong>Time</strong> die Zeitleiste: einen Balken pro Schritt, eine Linie pro Achse, eine Zeile pro Ausgang und die Zykluszeit.</p>
+
+<h3>Stufe 3: Ausführen</h3>
+<p><img src="image/catalog/dpc-site/shots/motion-run.jpg" alt="Ausführen: der Roboterarm greift, Greifer an, mit Pause, Stop und dem Geschwindigkeitsregler" style="max-width:100%;height:auto;border-radius:6px"></p>
+<p>Wählen Sie den Ablauf, dann <strong>Simulation</strong> oder <strong>Machine</strong>. Auf der Maschine lädt Motion das Programm auf die SD-Karte des Controllers (oder in seinen Flash, wenn keine Karte vorhanden ist) und startet es dort, sodass das Programm auf dem Controller läuft, nicht im Browser: Das Schließen der Seite stoppt es nicht. Während es läuft:</p>
+<ul>
+  <li>Der laufende Schritt ist hervorgehoben und benannt;</li>
+  <li><strong>Pause</strong>, <strong>Resume</strong>, <strong>Stop</strong>;</li>
+  <li>der <strong>Geschwindigkeits</strong>regler (10–200 %) ändert jede Bewegung live;</li>
+  <li>das Protokoll listet auf, was passiert ist.</li>
+</ul>
+<p><strong>Send to machine</strong> kopiert jeden Ablauf mit seinen Schrittnamen auf den Controller. Das SmartTabUI-Handbediengerät kann sie dann auflisten und jeden davon selbstständig starten, ohne Computer.</p>
+
+<h3>Beispiele</h3>
+<p style="display:flex;flex-wrap:wrap;gap:12px"><img src="image/catalog/dpc-site/shots/motion-conveyor.jpg" alt="Förderband mit Teilesensor, Schieber und Betriebsleuchte" style="flex:1 1 300px;max-width:100%;height:auto;border-radius:6px"><img src="image/catalog/dpc-site/shots/motion-gantry.jpg" alt="XY-Pick-and-Place-Portal mit Vakuumsauger" style="flex:1 1 300px;max-width:100%;height:auto;border-radius:6px"></p>
+<ul>
+  <li><strong>Förderband:</strong> Band laufen lassen, bis der Teilesensor ein Teil sieht, es abschieben, warten, bis es weg ist, endlos wiederholen.</li>
+  <li><strong>XY-Pick-and-Place:</strong> X, Y und ein Hub mit Vakuumsauger, von einer Ablage in eine Kiste.</li>
+  <li><strong>Rundschalttisch:</strong> auf die Taste des Bedieners warten, dann 45° pro Station mit einer Spannvorrichtung drehen.</li>
+  <li><strong>Roboterarm:</strong> Basis, Schulter, Ellbogen, Handgelenk und Greifer, der ein Teil fünfmal greift.</li>
+  <li><strong>Kameraslider</strong> und <strong>Servoarm</strong> (vier Modellbau-Servos an den STEP-Ausgängen des R3).</li>
+</ul>
+
+<h3>Auf dem dpCREATOR R3</h3>
+<ul>
+  <li>Jeder Achsklemmenblock (STEP 5V, DIR 5V, GND, LIMIT, LIMIT COM) steuert einen externen Schrittmotortreiber. Freie Achsklemmen können Modellbau-Servos ansteuern oder als 5-V-Signalausgänge dienen.</li>
+  <li>Die LIMIT-Eingänge sind isoliert: Schalter und NPN-Sensoren werden direkt angeschlossen; PNP-Sensoren brauchen einen Wandler.</li>
+  <li>Das Relais, die 0–10-V- und PWM-Ausgänge sowie ein Modbus-I/O-Modul an RS485 werden angeboten, wenn die Konfiguration sie enthält.</li>
+  <li>Mit der dpCREATOR-Firmware zeigt Motion die Ein- und Ausgänge live, wartet schneller auf Sensoren und gibt dem Handbediengerät die Schrittnamen.</li>
+</ul>
+
+<h3>Auf anderen FluidNC-Boards</h3>
+<p>Motion funktioniert auf jedem Board mit FluidNC 3.8 oder neuer. Die Klemmen eines anderen Boards kennt es nicht, daher tippen Sie die Pins ein, und Motion prüft jeden (Format, bereits belegt, Flash- und Nur-Eingangs-Pins beim klassischen ESP32). Abläufe laufen genauso. Live-Anzeige von Benutzerein- und -ausgängen braucht die dpCREATOR-Firmware; Standard-FluidNC zeigt die Endschalter und den Taster.</p>
+
+<h3>Einschränkungen (Beta)</h3>
+<ul>
+  <li>Es läuft immer nur ein Programm, und seine Schritte laufen nacheinander (ein Band kann nicht weiterlaufen, während sich ein Arm bewegt).</li>
+  <li>Arme werden Gelenk für Gelenk geteacht: keine geradlinigen Werkzeugbewegungen.</li>
+  <li>Der Simulator hat keine Beschleunigung; echte Bewegungen dauern etwas länger.</li>
+  <li>Bis zu 6 Achsen, 8 Eingänge und 8 Ausgänge (die Grenzen von FluidNC); ein Modbus-I/O-Modul ergänzt beim R3 weitere.</li>
+  <li>Vorerst nur auf Englisch.</li>
+</ul>

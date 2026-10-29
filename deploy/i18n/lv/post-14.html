@@ -1,0 +1,11 @@
+<p>Izpildiet šos soļus vienreiz ar jaunu plati. Veikalā pirktām platēm programmaparatūra jau ir ierakstīta — sāciet no 2. soļa.</p>
+<ol>
+<li><strong>Ierakstiet jaunāko programmaparatūru</strong> (tikai tukšai platei vai lielam atjauninājumam): lapa <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> → kontrolieris → <em>Flash latest via browser</em>. Izmantojiet Chrome vai Edge.</li>
+<li><strong>Pieslēdziet tīklu.</strong> Iespraudiet platē Ethernet kabeli. Jauna instalācija startē ar ieslēgtu Ethernet un DHCP. IP adresi atradīsiet maršrutētājā vai caur USB ar <code>$Ethernet/Status</code>.</li>
+<li><strong>Atveriet WebUI</strong> adresē <code>http://fluidnc.local</code> vai <code>http://&lt;board-ip&gt;</code>.</li>
+<li><strong>Iestatiet savu mašīnu failā <code>config.yaml</code>.</strong> Programmaparatūra startē ar dpCREATOR R2/R3 parauga konfigurāciju. Katrai asij iestatiet vismaz <code>steps_per_mm</code>, <code>max_travel_mm</code> un homing virzienu, kā arī savu vārpstu. Rediģējiet to WebUI failu pārvaldniekā, pēc tam pārstartējiet ar <code>$bye</code>.</li>
+<li><strong>Pievienojiet pulti</strong> (pēc izvēles). Kad tā ir pieslēgta, WebUI galvenē redzama pults zīme.</li>
+<li><strong>Uzmanīgi pārbaudiet kustību.</strong> Pārvietojiet katru asi nelielu attālumu un pārliecinieties par virzienu. Pirms homing nospiediet katru gala slēdzi ar roku.</li>
+<li><strong>Veiciet homing</strong> ar <code>$H</code> vai pogu Home, pēc tam iestatiet darba nulli.</li>
+</ol>
+<p><strong>Padoms:</strong> piešķiriet platei fiksētu IP adresi (statisku vai DHCP rezervāciju maršrutētājā). Tīkla diskam un gSender vajadzīga adrese, kas nemainās.</p>

@@ -1,0 +1,13 @@
+<p>Es gibt zwei Wege, den Controller zu aktualisieren. Wählen Sie den, der zu Ihrem Bedarf passt.</p>
+<table class="table table-bordered"><thead><tr><th>Methode</th><th>Bleibt config.yaml erhalten?</th><th>dpCREATOR WebUI</th></tr></thead><tbody>
+<tr><td><strong>Vollständiges Image</strong> (Browser-Flasher, <code>merged-flash.bin</code> ab 0x0)</td><td>Nein — wird durch die Beispielkonfiguration ersetzt</td><td>Wird durch die Standard-FluidNC-Seite ersetzt: WebUI erneut installieren</td></tr>
+<tr><td><strong>Nur Firmware</strong> (<code>firmware.bin</code> per Upload in der WebUI oder ab 0x10000)</td><td>Ja</td><td>Bleibt unverändert</td></tr></tbody></table>
+<h3>Empfohlene Vorgehensweise</h3>
+<ol><li>Laden Sie <code>config.yaml</code> (und alle anderen geänderten Dateien) aus dem Dateimanager der WebUI herunter.</li>
+<li>Flashen Sie das vollständige Image über die Seite <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>.</li>
+<li>Laden Sie Ihre <code>config.yaml</code> wieder hoch, dann <code>$bye</code>.</li>
+<li>Installieren Sie die dpCREATOR WebUI erneut über <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> → <strong>WebUI</strong> (das verbraucht kein Board) und laden Sie die Seite dann mit <strong>Strg+F5</strong> neu.</li>
+<li>Aktualisieren Sie auch das Handbediengerät — beide werden gemeinsam entwickelt.</li></ol>
+<p><strong>Fehlen nach einem Update Funktionen?</strong> Die dpCREATOR WebUI wird separat installiert, ein Firmware-Update ändert sie also nicht. Ihre Fußzeile zeigt die Builds von WebUI und Firmware, warnt, wenn die Firmware neuer ist als die Seite, und zeigt <em>update available</em>, wenn neuere Builds erschienen sind (die tägliche Update-Prüfung lässt sich dort abschalten). Installieren Sie die neueste WebUI über <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> → <strong>WebUI</strong>.</p>
+<p>Makros, Werkzeugtabelle und Job-Verlauf liegen auf der SD-Karte (<code>/sd/.dpc/</code>) und überstehen Firmware-Updates.</p>
+<p>Was sich in jedem Build geändert hat: <a href="index.php?route=journal3/blog/post&journal_blog_post_id=33">Versionshinweise und Fehlerbehebungen</a>.</p>

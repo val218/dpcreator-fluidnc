@@ -1,0 +1,51 @@
+<p><strong>dpCREATOR Studio</strong> ist ein kostenloses Design- und CAM-Programm, das in Ihrem Webbrowser läuft. Zeichnen oder importieren Sie Ihr Design, legen Sie fest, wie jede Form bearbeitet wird, prüfen Sie das Ergebnis an virtuellem Material und erzeugen Sie den G-Code für Ihre CNC-Fräse oder Ihren Laser. Nichts zu installieren, kein Konto zur Nutzung nötig, und Ihre Designs bleiben auf Ihrem Computer.</p>
+<p><a class="btn btn-primary" href="/studio/" target="_blank" rel="noopener">dpCREATOR Studio öffnen</a></p>
+
+<div class="alert alert-info"><strong>Funktioniert mit jedem FluidNC-Controller.</strong> Studio erzeugt eine Standard-<code>.nc</code>-Datei (nur gerade Linien, sodass jeder Controller sie ausführen kann). Sie können sie mit der dpCREATOR WebUI, der Standard-FluidNC-WebUI oder jedem anderen Sender ausführen. Studio ist kostenlos; es wird nur über dpcreator.eu installiert – bitte geben Sie keine Kopien weiter.</div>
+
+<p><img src="image/catalog/dpc-site/shots/studio-design-v2.jpg" alt="dpCREATOR Studio: eine Tasche, ein kreisförmiger Ausschnitt und Text auf dem Material" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<h3>Was Sie damit machen können</h3>
+<ul>
+  <li><strong>Zeichnen:</strong> Rechtecke, Ellipsen und Text (5 Schriften, in Umrisse umgewandelt). Verschieben, skalieren, duplizieren und exakte Maße und Positionen eintippen. Rückgängig und Wiederholen.</li>
+  <li><strong>Importieren:</strong> SVG, DXF (Linien, Bögen, Kreise, Polylinien, Splines, Blöcke, in Originalgröße), PDF (Vektorzeichnungen, erste Seite) und Bilder (PNG, JPG, WebP). Bilder lassen sich in Umrisse zum Fräsen umwandeln oder mit einem Laser Punkt für Punkt gravieren.</li>
+  <li><strong>Jede Form bearbeiten:</strong> außen, innen, auf der Linie, als Tasche, als Fläche (Planfräsen), als V-Carve oder gar nicht (Hilfslinie). Tiefe pro Form, Fräsrichtung (Gleichlauf oder Gegenlauf) und Haltestege einstellen.</li>
+  <li><strong>Material und Fräser:</strong> Wählen Sie das Material (Weichholz, Hartholz, Sperrholz/MDF, Acryl, Schaum, Aluminium) und den Fräser aus der Fräserbibliothek (Schaftfräser, Kugelfräser, V-Fräser; eigene speichern). Studio schlägt Vorschub, Drehzahl und Zustellung pro Durchgang vor. Das sind vorsichtige Startwerte: Probieren Sie sie zuerst an einem Reststück aus. Sie können auch alles von Hand einstellen.</li>
+  <li><strong>Formwerkzeuge:</strong> Im Reiter Shape verbinden <em>Join</em>, <em>Cut out</em> und <em>Overlap</em> die gewählte Form mit einer anderen, und <em>Grow</em> und <em>Shrink</em> erzeugen einen versetzten Umriss. Sie erzeugen eine neue Form und behalten die Originale. <em>Arrange</em> (linke Leiste) verteilt alle Formen ohne Überlappung auf dem Material und folgt dabei dem Umriss eines Reststücks; Formen werden nicht gedreht.</li>
+  <li><strong>Reststück:</strong> Verwenden Sie ein an der Maschine vermessenes Reststück (DXF auf der SD-Karte) als Material, platzieren Sie das Design darauf und fräsen Sie mit bereits passendem Werkstück-Nullpunkt.</li>
+  <li><strong>4. Achse (Beta):</strong> Schalten Sie im Reiter Material <em>Round bar</em> ein und geben Sie den Durchmesser ein. Design-X verläuft entlang des Stabs und Y um ihn herum; das Programm wandelt Y in die A-Achse um. Setzen Sie X0 an das linke Ende des Stabs, A0 dort, wo der Fräser oben aufsetzt, und Z0 auf die Oberfläche des Stabs. Die Vorschau zeigt das Design flach abgewickelt. Machen Sie zuerst einen flachen Schnitt an einem Reststück und prüfen Sie A0 und die Drehrichtung.</li>
+  <li><strong>Laser:</strong> Leistung, Geschwindigkeit und Durchgänge pro Form, für Linien, Füllungen oder Bilder (FluidNC-Lasermodus, M4). <em>Engrave the picture</em> bietet Dither (Floyd–Steinberg oder Atkinson), Threshold und Grayscale, mit Helligkeit, Kontrast und Invertieren; die Punktgröße ist der Zeilenabstand (Line spacing) im Reiter Laser (0,1 mm ergibt feine Details, 0,15–0,2 mm ist schneller und ergibt eine viel kleinere Datei). Außerdem: Füllwinkel, Kreuzschraffur, Brennen in einer oder beiden Richtungen, ein Anlauf, damit der Kopf beim Einschalten des Strahls auf Geschwindigkeit ist, Air Assist (M8/M9) und <strong>Presets</strong> (bewährte Leistung, Geschwindigkeit und Durchgänge speichern und mit einem Klick anwenden).</li>
+  <li><strong>Laser-Testraster und Frame:</strong> <em>Test grid</em> (linke Leiste) brennt beschriftete Quadrate auf ein Reststück Ihres Materials, mit steigender Leistung über die Zeilen und Geschwindigkeit über die Spalten, damit Sie die beste Einstellung wählen können. <em>Frame</em> (obere Leiste) fährt den Kopf bei ausgeschaltetem Laser um den Umriss des Jobs, um die Position vor dem Brennen zu prüfen.</li>
+  <li><strong>Prüfen vor dem Fräsen:</strong> Der Reiter Check warnt vor Formen außerhalb des Materials oder des Verfahrwegs der Maschine, vor Schnitten, die tiefer gehen als der Fräser reicht, vor Eilgangbewegungen im Material, vor Taschendetails, die für den Fräser zu klein sind, und vor riskanten Geschwindigkeiten.</li>
+  <li><strong>Vorschau:</strong> Sehen Sie zu, wie der Fräser Zeile für Zeile virtuelles Material bearbeitet, mit dem G-Code daneben, und sehen Sie den Job auf einer 3D-Maschine; bei einem Laser sehen Sie den Laserkopf, den Strahl und die entstehende Brandspur auf dem Material. Sie können Formen auch in der Vorschau noch verschieben und skalieren; Fräsbild und G-Code werden sofort aktualisiert. Die Bearbeitungszeit wird geschätzt.</li>
+</ul>
+
+<p><img src="image/catalog/dpc-site/shots/studio-preview-v2.jpg" alt="Vorschau: der G-Code in virtuelles Material gefräst" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/studio-machine-v2.jpg" alt="Studio: der Job auf einer 3D-Maschine" loading="lazy" style="flex:1 1 280px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/studio-laser-engrave.jpg" alt="Studio: ein Bild mit dem Laser gravieren" loading="lazy" style="flex:1 1 280px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/studio-laser-preview.jpg" alt="Studio: Laser-Vorschau mit der Brandspur auf dem Material" loading="lazy" style="flex:1 1 280px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Oben: der Job auf der 3D-Maschine. Unten: ein Bild mit dem Laser gravieren (Dither) und die Laser-Vorschau mit Kopf, Strahl und Brandspur.</p>
+<h3>Vom Design zur Maschine</h3>
+<ol>
+  <li>Öffnen Sie <a href="/studio/" target="_blank" rel="noopener">dpcreator.eu/studio</a>. Beim ersten Start fragt <strong>Setup</strong> nach Ihrer Maschine (Fräse oder Laser, Arbeitsbereich, Home-Ecke) und dem Material (Art, Größe, Dicke). Beides können Sie später über die Setup-Taste ändern.</li>
+  <li>Zeichnen oder importieren Sie Ihr Design, wählen Sie dann jede Form aus und legen Sie im Reiter <strong>Shape</strong> fest, wie sie bearbeitet wird.</li>
+  <li>Wählen Sie den Fräser im Reiter <strong>Bit</strong> und sehen Sie sich den Reiter <strong>Check</strong> an.</li>
+  <li>Drücken Sie <strong>Make g-code</strong>. Die Vorschau zeigt, was gefräst wird.</li>
+  <li>Drücken Sie <strong>Download .nc</strong> und laden Sie die Datei mit Ihrer WebUI auf die SD-Karte des Controllers (in der dpCREATOR WebUI: Files → Upload).</li>
+  <li>Setzen Sie den Werkstück-Nullpunkt an die <strong>linke untere Ecke der Materialoberseite</strong>, wie Studio es anzeigt, und starten Sie den Job.</li>
+</ol>
+<p>Wenn Studio <a href="index.php?route=journal3/blog/post&journal_blog_post_id=35">auf Ihrem Controller installiert</a> ist, wird Schritt 5 zu einem Klick: <strong>Send</strong> legt die Datei auf die SD-Karte und bereitet sie vor, sodass dpCREATOR WebUI und Handbediengerät sie startbereit anzeigen – Sie drücken nur noch <strong>Run</strong>.</p>
+
+<h3>Als App installieren</h3>
+<p>Klicken Sie in Chrome oder Edge auf <a href="/studio/" target="_blank" rel="noopener">dpcreator.eu/studio</a> auf das Installationssymbol in der Adressleiste. Studio öffnet sich dann in einem eigenen Fenster, funktioniert ohne Internet und aktualisiert sich selbst, wenn eine neue Version erscheint.</p>
+
+<h3>Ihre Designs</h3>
+<ul>
+  <li>Studio speichert Ihre Arbeit automatisch im Browser. <strong>My designs</strong> listet alle dort gespeicherten Designs auf.</li>
+  <li><strong>Save</strong> lädt das Design als Projektdatei (.json) herunter und <strong>Open</strong> lädt eine: Nutzen Sie das für Sicherungen oder um ein Design auf einen anderen Computer oder Browser zu übertragen.</li>
+  <li>Designs werden pro Browser und pro Adresse gespeichert: Die Version auf dpcreator.eu und die auf Ihrem Controller haben jeweils eine eigene Liste. Verwenden Sie eine Projektdatei, um ein Design zwischen ihnen zu übertragen.</li>
+</ul>
+
+<h3>Senden von dpcreator.eu aus</h3>
+<p>Browser erlauben einer sicheren (https-)Seite nicht, Dateien über einfaches http an ein Gerät in Ihrem Netzwerk zu senden, daher ist die Taste <strong>Send</strong> auf dpcreator.eu normalerweise blockiert. Verwenden Sie <strong>Download .nc</strong> oder <a href="index.php?route=journal3/blog/post&journal_blog_post_id=35">installieren Sie Studio auf dem Controller</a>, wo Send funktioniert.</p>
+
+<h3>Fragen</h3>
+<p>Nutzen Sie die Seite <a href="index.php?route=extension/module/dpc_support">Support</a> (zuerst anmelden). Nennen Sie uns den Studio-Build (die Taste <strong>i</strong> oben rechts) und hängen Sie die Projektdatei an, wenn ein Design ein falsches Ergebnis liefert.</p>

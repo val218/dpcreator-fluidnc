@@ -1,0 +1,34 @@
+<p>Die Seite <a href="/firmware">Flash Firmware</a> richtet jetzt mehr ein als nur den dpCREATOR R3. Wählen Sie Ihr Board und eine Konfiguration, haken Sie die Apps an und geben Sie Ihre Netzwerkdaten ein – den Rest erledigt die Seite über USB: Firmware, Konfiguration, Apps, WLAN und Login. Sie brauchen Chrome oder Edge auf einem Computer, ein USB-Kabel und ein kostenloses dpcreator.eu-Konto.</p>
+<p><a class="btn btn-primary" href="/firmware">Mein Board einrichten</a></p>
+<p><img src="image/catalog/dpc-site/shots/install-any-board.jpg" alt="Die Installationsseite: Board, Konfiguration, Apps sowie Netzwerk und Login in einer Liste von Schritten" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<h3>Ihr Board aus einer Liste</h3>
+<p>Wählen Sie aus 21 Boards: dem dpCREATOR R3 und R2, dem Doberman und FluidNC-Boards anderer Hersteller wie dem 6-Pack, dem Jackpot, dem MKS DLC32 und TinyBee, der OpenBuilds BlackBox X32 und dem FYSETC E4. Unter der Liste zeigt die Seite, was dieses Board mit dpCREATOR haben kann: den Firmware-Build, Ethernet, Job-Wiederaufnahme, die Apps und das Handbediengerät.</p>
+<p>Das Board bestimmt, welche Firmware geflasht wird. ESP32-S3-Boards erhalten denselben Build wie der R3. Klassische ESP32-Boards (WROOM-32) erhalten einen Build für diesen Chip: WLAN statt Ethernet, und Funktionen, die den zusätzlichen Speicher des S3 brauchen, laufen in kleineren Versionen.</p>
+
+<h3>Eine fertige Konfiguration</h3>
+<p>Für die meisten Boards gibt es fertige <code>config.yaml</code>-Dateien aus der <a href="https://github.com/bdring/fluidnc-config-files" target="_blank" rel="noopener">Konfigurationssammlung der FluidNC-Community</a> (GPL-3.0). Jede Datei wird gegen die Einstellungsliste der Firmware selbst geprüft, bevor etwas geschrieben wird, und Sie können sie vorher im Editor ändern. Sie können auch die bereits auf dem Board vorhandene Konfiguration behalten, eine eigene Datei wählen oder ein paar Fragen beantworten und sich eine für Ihre Maschine erstellen lassen.</p>
+<div class="alert alert-warning">Community-Konfigurationen stammen von Nutzern und sind nicht von dpCREATOR getestet. Prüfen Sie Pins und Einstellungen anhand Ihres Boards, bevor Sie die Maschine laufen lassen.</div>
+
+<h3>Apps im selben Durchgang</h3>
+<p>Haken Sie die Apps vor dem Flashen an, und sie werden direkt nach der Konfiguration installiert:</p>
+<ul>
+<li><strong>dpCREATOR WebUI:</strong> steuert die Maschine aus jedem Browser. Kostenlos zum dpCREATOR R3 (einzeln oder im Kombipaket); €19.99 für andere Boards.</li>
+<li><strong>WebUI Lite (neu):</strong> für WROOM-32-Boards, dieselbe WebUI, bei der die Funktionen abgeschaltet sind, die dieser Chip nicht schafft. <strong>Kostenlos</strong> mit einem Konto, und sie funktioniert mit Studio Basic.</li>
+<li><strong>dpCREATOR Studio:</strong> G-Code im Browser entwerfen und erzeugen. Studio Basic ist kostenlos.</li>
+<li><strong>dpCREATOR Motion:</strong> die eigene Maschine bauen und automatisieren. Kostenlos zum R3, <a href="index.php?route=product/product&product_id=391">€39</a> für andere Boards.</li>
+</ul>
+<p>Apps, für die Sie eine Lizenz haben, lassen sich anhaken; die anderen sind ausgegraut, mit einem Link, um sie zu erwerben. Auf WROOM-32-Boards kommen Studio und Motion auf die SD-Karte, stecken Sie also zuerst eine FAT32-Karte in das Board.</p>
+
+<h3>Von Anfang an in Ihrem Netzwerk</h3>
+<p>Ein frisch geflashtes Board hat keinen Access Point und kein Passwort, es ist also nur per USB erreichbar. Wählen Sie im Schritt <em>Network and login</em> ein Ethernet-Kabel (R3) oder WLAN, geben Sie dem Board einen Namen und legen Sie ein Login-Passwort fest. Die Seite sendet diese Daten nach dem Flashen über USB, startet das Board neu und zeigt seine Adresse, zum Beispiel <code>http://192.168.1.57/</code> oder <code>http://plasma.local/</code>. Die Passwörter werden nur an das Board gesendet; die Seite speichert sie nicht.</p>
+<p>Schon geflasht? Im selben Schritt gibt es einen Link, um Netzwerk und Login über USB einzustellen, ohne erneut zu flashen.</p>
+
+<h3>Handbediengerät an WROOM-32-Boards</h3>
+<p>Das SmartTabUI-Handbediengerät funktioniert auch mit WROOM-32-Controllern: Wählen Sie dies in den Einstellungen des Handbediengeräts.</p>
+
+<h3>Neu in der Beta: dpCREATOR PnP</h3>
+<p>Eine Pick-and-Place-App für FluidNC-Maschinen: Eine obere Kamera findet die Passermarken der Platine und die Bauteile in den Gurten, eine untere Kamera prüft jedes Bauteil an der Düse, und die Vakuumdüse setzt sie. Sie ist in der Beta: Melden Sie uns jedes Problem, und es wird so schnell wie möglich behoben. <a href="/docs/dpcreator-pnp-beta">Vor dem Start lesen</a>; Mitglieder des <a href="/rnd-club">R&D Club</a> probieren es zuerst aus. Die vollständige WebUI hat bereits eine Kopfkamera mit Fadenkreuz für Wegpunkte und Messungen.</p>
+
+<h3>Fragen</h3>
+<p>Sie sind nicht sicher, welches Board Sie haben, oder die Konfiguration passt nicht zu Ihrer Maschine? Schreiben Sie uns über die <a href="index.php?route=information/contact">Kontaktseite</a> mit einem Foto des Boards.</p>

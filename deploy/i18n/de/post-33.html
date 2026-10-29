@@ -1,0 +1,179 @@
+<p>Was sich in jedem Build der dpCREATOR Controller-Firmware, der SmartTabUI-Pendant-Firmware und der dpCREATOR WebUI geändert hat, das Neueste zuerst. Die Liste der neuesten Änderungen aktualisiert sich von selbst, sobald ein neuer Build veröffentlicht wird. Alle drei werden über die Seite <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> aktualisiert. Sie werden gemeinsam entwickelt, aktualisieren Sie also alle gleichzeitig.</p>
+
+<div class="dpc-callout"><strong>Einen Fehler gefunden?</strong> Schreiben Sie uns, was Sie getan haben, was passiert ist und die Build-Nummern: Die Fußzeile der WebUI zeigt die Builds von WebUI und Controller, das Handbediengerät zeigt seinen Build auf dem Startbildschirm. Wenn der Controller von selbst neu gestartet ist, fügen Sie den Absturzbericht hinzu: <code>$Crash</code> in der Konsole oder <em>Copy details</em> in der WebUI.</div>
+
+<style>
+.dpc-auto{margin:22px 0 34px}
+.dpc-auto[hidden]{display:none}
+.dpc-auto .an-builds{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:0 0 20px}
+.dpc-auto .an-build{border:1px solid rgba(127,127,127,.3);border-radius:4px;padding:12px 14px}
+.dpc-auto .an-build b{display:block;font-size:14px}
+.dpc-auto .an-build span{font:12.5px ui-monospace,Menlo,Consolas,monospace;opacity:.75}
+.dpc-auto .an-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.dpc-auto .an-tabs button{border:1px solid rgba(127,127,127,.35);background:transparent;border-radius:3px;padding:6px 12px;font-size:13px;cursor:pointer;color:inherit}
+.dpc-auto .an-tabs button[aria-selected="true"]{background:#2b8fe0;border-color:#2b8fe0;color:#fff}
+.dpc-auto .an-day{margin:14px 0 4px;font-weight:700;font-size:14px}
+.dpc-auto ul{margin:0 0 6px;padding-left:0;list-style:none}
+.dpc-auto li{padding:4px 0 4px 64px;position:relative;line-height:1.45;font-size:14px}
+.dpc-auto li i{position:absolute;left:0;top:6px;font-style:normal;font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:rgba(43,143,224,.15);color:#1b6fb5}
+.dpc-auto li i.fx{background:rgba(46,155,74,.15);color:#237a3a}
+.dpc-auto .an-more{margin-top:8px;border:0;background:none;color:#2b8fe0;cursor:pointer;padding:0;font-size:14px}
+.dpc-auto .an-foot{font-size:12.5px;opacity:.7;margin-top:12px}
+</style>
+<section class="dpc-auto" id="dpc-auto" hidden>
+<h2>Aktuelle Builds</h2>
+<div class="an-builds" id="an-builds"></div>
+<h2>Neueste Änderungen</h2>
+<p>Automatisch aus jedem veröffentlichten Build aktualisiert, das Neueste zuerst.</p>
+<div class="an-tabs" role="tablist" id="an-tabs"></div>
+<div id="an-list"></div>
+<p class="an-foot" id="an-foot"></p>
+</section>
+<script>
+(function(){
+  var box=document.getElementById("dpc-auto"); if(!box) return;
+  var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
+  var fmt=function(d){var p=d.split("-");var m=["January","February","March","April","May","June","July","August","September","October","November","December"];return p.length===3?(+p[2])+" "+m[+p[1]-1]+" "+p[0]:d;};
+  fetch("/notes.php",{cache:"no-cache"}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
+    var P=(d.products||[]).filter(function(p){return p.entries&&p.entries.length;}); if(!P.length) return;
+    document.getElementById("an-builds").innerHTML=d.products.map(function(p){return '<div class="an-build"><b>'+esc(p.name)+'</b><span>build '+esc(p.build||"-")+(p.date?" · "+esc(fmt(p.date)):"")+'</span></div>';}).join("");
+    var tabs=document.getElementById("an-tabs"), list=document.getElementById("an-list"), cur=0, all=false;
+    function show(i){cur=i;
+      [].forEach.call(tabs.children,function(b,k){b.setAttribute("aria-selected",k===i?"true":"false");});
+      var e=P[i].entries, n=all?e.length:Math.min(15,e.length), h="", day="";
+      for(var k=0;k<n;k++){var x=e[k]; if(x.date!==day){if(day)h+="</ul>"; day=x.date; h+='<div class="an-day">'+esc(fmt(day))+'</div><ul>';}
+        h+='<li><i class="'+(x.type==="fixed"?"fx":"nw")+'">'+(x.type==="fixed"?"Fixed":"New")+'</i>'+esc(x.text)+'</li>';}
+      if(day)h+="</ul>";
+      if(e.length>15) h+='<button type="button" class="an-more">'+(all?"Show fewer":"Show all "+e.length+" changes")+'</button>';
+      list.innerHTML=h; var m=list.querySelector(".an-more"); if(m)m.onclick=function(){all=!all;show(cur);};
+    }
+    tabs.innerHTML=P.map(function(p,i){return '<button type="button" role="tab">'+esc(p.name.replace(/ firmware$/,""))+'</button>';}).join("");
+    [].forEach.call(tabs.children,function(b,i){b.onclick=function(){all=false;show(i);};});
+    document.getElementById("an-foot").textContent="Last checked "+new Date(d.updated).toLocaleString()+".";
+    box.hidden=false; show(0);
+  }).catch(function(){});
+})();
+</script>
+
+<h2>Die wichtigsten Neuerungen erklärt</h2>
+<p>Eine Zusammenfassung der wichtigsten Änderungen bis zum 20. Oktober 2026 in einfachen Worten.</p>
+<h3>dpCREATOR Controller-Firmware</h3>
+<p>FluidNC 4.1.1 mit W5500-Ethernet und den dpCREATOR-Befehlen. Kostenlos für alle Kunden.</p>
+
+<h4>20. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> ein Laser neben der Fräse: Geben Sie der Laserspindel eine eigene Werkzeugnummer (<code>tools: 2</code>) und ihren Versatz zum Fräser (<code>offset_mm:</code>). <code>M6 T2</code> schaltet mit verrechnetem Versatz auf den Laser um, sodass ein Werkstück-Nullpunkt für beide gilt. Siehe <a href="index.php?route=journal3/blog/post&journal_blog_post_id=28#router-and-laser">Fräse und Laser an einer Maschine</a>.</li>
+<li><strong>Neu:</strong> Laser-Jobs übertragen ihre Leistung in der Werkzeugweg-Vorschau, sodass Handbediengerät und WebUI die Brandspur zeigen.</li>
+<li><strong>Neu:</strong> <code>$Homed</code> teilt WebUI und Handbediengerät mit, welche Achsen seit dem Einschalten referenziert wurden.</li>
+<li><strong>Behoben:</strong> Das Handbediengerät konnte endlos auf eine Vorschau warten, wenn die Datei erneut hochgeladen wurde, während ihre Vorschau gesendet wurde.</li>
+</ul>
+
+<h4>17. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Das SmartTabUI-Handbediengerät meldet beim Verbinden seine Chip-ID und seinen Build an den Controller, sodass die WebUI anzeigen kann, welches Handbediengerät angeschlossen ist.</li>
+<li><strong>Geändert:</strong> Die Standard-<code>config.yaml</code> und die Doku nennen das SmartTabUI-Handbediengerät.</li>
+</ul>
+
+<h4>16. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Die Wegpunktliste von Record & Retrace wird auf der SD-Karte des Boards gespeichert. Handbediengerät und WebUI bearbeiten dieselbe Liste, und das Handbediengerät arbeitet damit ohne PC. Beim Speichern wird <code>/retrace.nc</code> mit Bohrungen und runden oder rechteckigen Taschen geschrieben.</li>
+<li><strong>Neu:</strong> Wenn ein WebUI-Werkzeug (Centre Finder, Offcuts) das doppelte Antippen am Handbediengerät übernimmt, wird das Handbediengerät informiert, damit der Punkt an der richtigen Stelle landet.</li>
+</ul>
+
+<h4>15. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Ein doppeltes Antippen der ENABLE-Taste am Handbediengerät sendet einen Punkt an die WebUI-Werkzeuge.</li>
+</ul>
+
+<h4>13. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Das 8 MB PSRAM des Boards wird genutzt. Boards mit einem Modul mit zu wenig PSRAM erhalten eine Warnung in der WebUI und auf der Seite Flash Firmware.</li>
+<li><strong>Neu:</strong> Das Board meldet seine ID, die der WebUI-Installer verwendet. Die dpCREATOR WebUI wird jetzt getrennt von der Firmware installiert.</li>
+<li><strong>Behoben:</strong> Der Controller konnte beim Zugriff auf die SD-Karte abstürzen, wenn sein interner Speicher knapp wurde. Pendant-Vorschauen warten jetzt stattdessen auf freien Speicher.</li>
+</ul>
+
+<h4>12. Oktober 2026</h4>
+<ul>
+<li><strong>Behoben:</strong> Neustarts durch den Task-Watchdog. Das Öffnen der WebUI konnte den Controller blockieren, während er Statusberichte sendete.</li>
+<li><strong>Behoben:</strong> Die WebUI wurde langsam und Pendant-Vorschauen schlugen fehl, während der Controller an das Handbediengerät sendete. Sendungen an das Handbediengerät werden gepuffert und Vorschauen dosiert übertragen.</li>
+<li><strong>Verbessert:</strong> Die WebUI bleibt beim Joggen verbunden. Alte Statusberichte werden verworfen, statt die Verbindung zu schließen.</li>
+<li><strong>Neu:</strong> Nach einem Watchdog-Neustart bewahrt der Controller einen Bericht darüber auf, was er gerade getan hat – angezeigt mit <code>$Crash</code>, im Boot-Log und in der WebUI.</li>
+</ul>
+
+<h3>SmartTabUI-Pendant-Firmware</h3>
+<p>Die Firmware des Handbediengeräts, installiert über die Seite Flash Firmware. Ihre Einstellungen am Handbediengerät bleiben beim Update erhalten.</p>
+
+<h4>20. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Die PART-Ansicht auf dem DRO-Bildschirm zeigt das Teil, das der Job erzeugt, aus einem Block herausgearbeitet und live mitgefräst, während der Job läuft. Drehen Sie es mit dem Handrad (AXIS auf OFF) oder wechseln Sie zu einer schattierten Ansicht von oben. Laser-Jobs zeigen die Brandspur.</li>
+<li><strong>Neu:</strong> Das dritte Override-Feld zeigt LASER, solange der Laser gewählt oder ein Laser-Job geladen ist.</li>
+</ul>
+
+<h4>17. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Registrierung. Ein Handbediengerät wird bei der ersten Installation mit einer Lizenz über seine Chip-ID registriert. Nichts wird gesperrt: Ein nicht registriertes Handbediengerät funktioniert voll und zeigt <em>Not registered</em> auf dem Startbildschirm und in den Einstellungen. Siehe <a href="index.php?route=journal3/blog/post&journal_blog_post_id=32">SmartTabUI installieren, aktualisieren und registrieren</a>.</li>
+<li><strong>Neu:</strong> Im Record-Modus lassen sich Vorschub, Eintauchen und Rampe (Eintauchwinkel der Helix) für jeden Wegpunkt einstellen.</li>
+<li><strong>Neu:</strong> Rewind zeigt einen Fortschrittsbalken, wie weit es entlang des Wegs zurück ist, und das Feld bleibt geöffnet, bis Rewind endet.</li>
+<li><strong>Geändert:</strong> Measure → Go to centre hebt Z zuerst ganz an, wie Home → Go to 0.</li>
+</ul>
+
+<h4>16. Oktober 2026</h4>
+<ul>
+<li><strong>Neue Firmware:</strong> SmartTabUI, von Grund auf neu geschrieben. DRO mit Schrittwahlschalter, Home- und Antast-Menü, Makros, Spindel, Dateibrowser mit Werkzeugweg-Vorschau, Prepare und Run, Live-Z-Anpassung, Rewind, Job-Wiederaufnahme und Record & Retrace.</li>
+<li><strong>Neu:</strong> Ein doppeltes Antippen von ENABLE fragt, ob das Teil vermessen oder Wegpunkte aufgezeichnet werden sollen.</li>
+<li><strong>Neu:</strong> Themes Dark, Neutral und Light; Einstellungen mit Eingangs- und UART-Monitor; Neustart mit Not-Halt + ENABLE 3 Sekunden gehalten.</li>
+<li><strong>Neu:</strong> Startbildschirm mit Build-Nummer und Pieptöne beim Drehen des Achs- oder Schrittwahlschalters.</li>
+<li><strong>Behoben:</strong> Das Popup von Record & Retrace schloss sich nach jedem Punkt von selbst.</li>
+<li><strong>Behoben:</strong> Die Live-Z-Anpassung bleibt jetzt auf dem Bildschirm, bis der Controller sie bestätigt.</li>
+<li><strong>Behoben:</strong> Das Ausführen einer Datei blockiert keine anderen Befehle vom Handbediengerät mehr.</li>
+</ul>
+
+<h3>dpCREATOR WebUI</h3>
+<p>Die Browser-Oberfläche, installiert auf dem Board über die Seite Flash Firmware (Reiter WebUI).</p>
+
+<h4>20. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Live-3D-Ansicht während eines Jobs: Spindel oder Lasermodul bewegen sich über den Job, die Schnitte sind nach Tiefe eingefärbt, und eine Karte zeigt Restzeit und Fortschritt. Schalter für Follow, Auto-fit, Spindle view und Stock.</li>
+<li><strong>Neu:</strong> Teileansicht: das mit dem gewählten Fräser aus dem Block gearbeitete Teil, live während der Job läuft, optional mit blassem Werkzeugweg darüber. Laser-Jobs zeigen die Brandspur.</li>
+<li><strong>Neu:</strong> die Run-Leiste unter der Ansicht mit Cycle start, Pause, Stop, Probe, Kühlung und Override-Schiebereglern. Bei einem Laser-Job zeigt sie die Laserleistung in %.</li>
+<li><strong>Neu:</strong> Die Position zeigt die Spalten Work und Machine, ein Kennzeichen <em>Not homed</em>, wenn die Maschine nicht referenziert ist, und das Nullen erfordert kurzes Halten, damit ein versehentlicher Klick den Werkstück-Nullpunkt nicht verschiebt.</li>
+<li><strong>Neu:</strong> Probe Z0 mit Antastplatte oder 3D-Taster.</li>
+<li><strong>Neu:</strong> Ein Laser mit eigener Werkzeugnummer bekommt eine Taste <em>T2 laser</em> in der Werkzeugspalte.</li>
+<li><strong>Neu:</strong> Die Studio-Taste wechselt zum Studio-Tab, wenn es bereits geöffnet ist, und die WebUI-Taste in Studio wechselt zurück.</li>
+<li><strong>Behoben:</strong> Bett und Verfahrweg werden nur gezeichnet, wenn sie echt sind (Referenzfahrt und Software-Endlagen aktiv), sodass der Job auf einer nicht referenzierten Maschine nicht mehr neben dem Raster angezeigt wird.</li>
+<li><strong>Behoben:</strong> Die Fußzeile konnte einen aktuellen Build in Rot anzeigen.</li>
+</ul>
+
+<h4>17. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Update-Hinweis. Etwa einmal am Tag fragt die WebUI bei dpcreator.eu nach, ob es neuere Builds gibt, und zeigt <em>update available</em> in ihrer Fußzeile. Sie können das in der Fußzeile abschalten.</li>
+<li><strong>Neu:</strong> Die Fußzeile zeigt den Build des verbundenen Handbediengeräts.</li>
+<li><strong>Neu:</strong> Registrierungshinweis. Nichts wird gesperrt: Eine nicht registrierte WebUI zeigt einen kleinen Hinweis, den Sie für eine Woche ausblenden können.</li>
+</ul>
+
+<h4>16. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Record & Retrace hat eine Wegpunktkarte und einen Editor für den gewählten Wegpunkt, passend zum Record-Modus am Handbediengerät.</li>
+<li><strong>Neu:</strong> Die Wegpunktliste wird auf dem Board gespeichert und mit dem Handbediengerät geteilt; rechteckige Taschen.</li>
+<li><strong>Neu:</strong> <em>Measure part</em> am Handbediengerät öffnet den Centre Finder; das Löschen der Ecken löscht sie auf beiden Seiten.</li>
+</ul>
+
+<h4>15. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Centre Finder: ein Teil über seine Ecken vermessen, seine Größe sehen, den Werkstück-Nullpunkt in seine Mitte oder an eine Ecke setzen und einen Planfräs-Job erstellen.</li>
+<li><strong>Neu:</strong> Record & Retrace: markierte Punkte anfahren, Wegpunkte hinzufügen und daraus einen Bohr- oder Taschenfräs-Job machen.</li>
+<li><strong>Neu:</strong> Offcuts → DXF: die Umrisse von Reststücken oder des Werkstücks aufzeichnen (mit 45°-Kantenfang) und als DXF exportieren, um Ihre Zeichnung darauf zu platzieren.</li>
+<li><strong>Neu:</strong> Werkzeugbibliothek mit schwebender Werkzeugauswahl, Werkzeugwechsel-Modi mit Parkpositionen pro Werkzeug und ein M6-Makro-Generator.</li>
+<li><strong>Neu:</strong> Materialhöhe antasten, Z0 über den Werkzeuglängensensor setzen und X0/Y0 an gemessenen Punkten setzen.</li>
+<li><strong>Neu:</strong> Joggen (einschließlich 45°-Diagonalen) funktioniert weiter, während Centre Finder, Record & Retrace oder Offcuts geöffnet sind.</li>
+<li><strong>Behoben:</strong> Aus der WebUI gespeicherte Dateien konnten leer auf dem Board ankommen. Speichervorgänge werden jetzt geprüft und bei Bedarf wiederholt.</li>
+<li><strong>Behoben:</strong> Die Liste von Record & Retrace wurde von der G-Code-Vorschau zusammengedrückt und konnte denselben Punkt doppelt hinzufügen.</li>
+<li><strong>Behoben:</strong> Das Fenster von Record & Retrace konnte nach dem Schließen auf dem Bildschirm bleiben; die sichere Z-Höhe ist jetzt standardmäßig 5 mm, und Jobs mit Problemen werden blockiert.</li>
+</ul>
+
+<h4>13. Oktober 2026</h4>
+<ul>
+<li><strong>Neu:</strong> Die dpCREATOR WebUI ist ein eigenes Produkt und wird von dpcreator.eu aus auf dem Board installiert.</li>
+<li><strong>Behoben:</strong> Zwei gleichzeitig geöffnete WebUI-Tabs streiten nicht mehr um die Verbindung zum Board.</li>
+<li><strong>Neu:</strong> eine Warnung, wenn das Modul des Boards kein 8 MB PSRAM hat, und eine Meldung, die erklärt, wann Pendant-Vorschauen pausieren, weil das Board wenig Speicher hat.</li>
+</ul>

@@ -1,0 +1,5 @@
+{
+ "name": "Ethernet (W5500) einrichten",
+ "meta_title": "Ethernet (W5500) einrichten — dpCREATOR Doku",
+ "meta_description": "Kabel-Ethernet am dpCREATOR Controller aktivieren: config.yaml, DHCP oder feste IP, Link prüfen, gSender über Ethernet."
+}

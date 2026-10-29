@@ -1,0 +1,31 @@
+<p>dpCREATOR R2 un R3 ir viena un tā pati izvadu shēma. Tālāk esošā tabula atbilst parauga konfigurācijai <code>dpcreator_r2_r3_w5500.yaml</code>, kas nāk kopā ar programmaparatūru.</p>
+<p><img src="image/catalog/dpc-site/controller-connections.jpg" alt="dpCREATOR R2/R3 kontrolieris ar visu savienotāju nosaukumiem" style="max-width:100%;height:auto"></p>
+<h3>Galvenās iespējas</h3>
+<ul><li>ESP32-S3-WROOM-1-N16R8: 16 MB flash, 8 MB PSRAM</li>
+<li>4 asis (X, Y, Z, A) — step/dir izejas ārējiem soļu vai servo dzinēju draiveriem, kopīgs enable</li>
+<li>Optoizolētas gala slēdžu ieejas, zondes ieeja</li>
+<li>Vārpsta: PWM izeja un relejs (ieslēgts/izslēgts); RS485 Modbus VFD frekvences pārveidotājiem</li>
+<li>W5500 vadu Ethernet, Wi-Fi, USB</li>
+<li>SD karte, koplietota tīklā kā disks</li>
+<li>Pults ports (UART1)</li>
+<li><strong>R3 pret R2:</strong> R3 ir integrēts 5 V barošanas modulis un atsevišķa zondes ieeja uz GPIO3 (R2 zonde dala GPIO45 ar Z gala slēdzi).</li></ul>
+<h3>Izvadu piešķiršana</h3>
+<table class="table table-bordered"><thead><tr><th>Funkcija</th><th>Izvadi (GPIO)</th><th>Piezīmes</th></tr></thead><tbody>
+<tr><td>X step / dir</td><td>4 / 5</td><td>X gala slēdzis: 47 (aktīvs zemā līmenī)</td></tr>
+<tr><td>Y step / dir</td><td>6 / 7</td><td>Y gala slēdzis: 48</td></tr>
+<tr><td>Z step / dir</td><td>15 / 16</td><td>Z gala slēdzis: 45 (R2 kopīgs ar zondi)</td></tr>
+<tr><td>A step / dir</td><td>17 / 18</td><td>A gala slēdzis: 38. Rotācijas ass: soļi uz grādu</td></tr>
+<tr><td>Draiveru enable (visiem)</td><td>8</td><td>Pievienojiet <code>:low</code>, ja jūsu draiveri ieslēdzas ar zemu līmeni</td></tr>
+<tr><td>Zonde</td><td>3 (R3)</td><td>R2: GPIO45, Z gala slēdža vietā</td></tr>
+<tr><td>Vārpstas PWM / relejs</td><td>21 / 39</td><td>5 kHz PWM, relejs kā vārpstas enable</td></tr>
+<tr><td>RS485 (UART2) TX / RX / DE</td><td>42 / 41 / 40</td><td>Pēc noklusējuma 9600 baud, Modbus VFD</td></tr>
+<tr><td>Pults (UART1) TX / RX</td><td>1 / 2</td><td>1 000 000 baud</td></tr>
+<tr><td>SPI SCK / MOSI / MISO</td><td>12 / 11 / 13</td><td>Kopīgs SD kartei un W5500</td></tr>
+<tr><td>SD kartes CS</td><td>10</td><td></td></tr>
+<tr><td>W5500 CS / INT</td><td>14 / 9</td><td>INT nav obligāts — ja nav pieslēgts, izmantojiet <code>NO_PIN</code></td></tr>
+<tr><td>Konsole (UART0)</td><td>43 / 44</td><td>115200, savienotājs J7. USB konsole uz GPIO19/20</td></tr>
+</tbody></table>
+<p><strong>Pirms griešanas:</strong> iestatiet <code>steps_per_mm</code> atbilstoši savai mehānikai. Parauga vērtības (400 X/Y/Z asīm, 44.444 A asij) ir tikai aizpildītāji.</p>
+<h3>Pieslēgumu pārskats</h3>
+<p>Kā pieslēdz tipisku CNC frēzi: katras ass draiveris un tās gala slēdzis izmanto ass spaiļu bloku; vārpstu darbina VFD caur RS485 (vai 0–10 V / PWM), relejs ieslēdz kontaktoru vai putekļu nosūcēju, un SmartTabUI pults pieslēdzas pie PENDANT ar savu GX12 kabeli.</p>
+<p><img src="image/catalog/dpc-site/wiring-overview.jpg" alt="Pieslēgumu pārskats: motori un draiveri, gala slēdži, zonde, VFD, relejs, E-stop, SmartTabUI pults, 24 V barošana, Ethernet un USB" style="max-width:100%;height:auto"></p>

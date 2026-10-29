@@ -1,0 +1,34 @@
+<p>Lapa <a href="/firmware">Flash Firmware</a> tagad iestata ne tikai dpCREATOR R3. Izvēlieties savu plati, izvēlieties konfigurāciju, atzīmējiet lietotnes un ierakstiet tīkla datus, un lapa caur USB izdarīs pārējo: programmaparatūra, konfigurācija, lietotnes, Wi-Fi un pieteikšanās. Jums vajadzīgs Chrome vai Edge datorā, USB kabelis un bezmaksas dpcreator.eu konts.</p>
+<p><a class="btn btn-primary" href="/firmware">Iestatīt manu plati</a></p>
+<p><img src="image/catalog/dpc-site/shots/install-any-board.jpg" alt="Instalēšanas lapa: plate, konfigurācija, lietotnes, tīkls un pieteikšanās vienā soļu sarakstā" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<h3>Jūsu plate no saraksta</h3>
+<p>Izvēlieties no 21 plates: dpCREATOR R3 un R2, Doberman un citu ražotāju FluidNC plates, piemēram, 6-Pack, Jackpot, MKS DLC32 un TinyBee, OpenBuilds BlackBox X32 un FYSETC E4. Zem saraksta lapa parāda, kas šai platei pieejams ar dpCREATOR: programmaparatūras būvējums, Ethernet, darba atjaunošana, lietotnes un pults.</p>
+<p>Plate nosaka, kura programmaparatūra tiek ierakstīta. ESP32-S3 plates saņem to pašu būvējumu, ko R3. Klasiskās ESP32 plates (WROOM-32) saņem šai mikroshēmai veidotu būvējumu: Wi-Fi Ethernet vietā, un funkcijas, kurām vajag S3 papildu atmiņu, izmanto mazākas versijas.</p>
+
+<h3>Gatava konfigurācija</h3>
+<p>Lielākajai daļai plašu ir gatavi <code>config.yaml</code> faili no <a href="https://github.com/bdring/fluidnc-config-files" target="_blank" rel="noopener">FluidNC kopienas konfigurāciju kolekcijas</a> (GPL-3.0). Pirms kaut kas tiek ierakstīts, katrs fails tiek pārbaudīts pret pašas programmaparatūras iestatījumu sarakstu, un vispirms to varat mainīt redaktorā. Varat arī saglabāt platē jau esošo konfigurāciju, izvēlēties savu failu vai atbildēt uz dažiem jautājumiem un saņemt jūsu mašīnai izveidotu konfigurāciju.</p>
+<div class="alert alert-warning">Kopienas konfigurācijas iesūta lietotāji, un dpCREATOR tās nav pārbaudījis. Pirms mašīnas palaišanas pārbaudiet izvadus un iestatījumus atbilstoši savai platei.</div>
+
+<h3>Lietotnes vienā piegājienā</h3>
+<p>Atzīmējiet lietotnes pirms ierakstīšanas, un tās tiks instalētas uzreiz pēc konfigurācijas:</p>
+<ul>
+<li><strong>dpCREATOR WebUI:</strong> vada mašīnu no jebkura pārlūka. Bez maksas ar dpCREATOR R3 (atsevišķi vai komplektā); €19.99 citām platēm.</li>
+<li><strong>WebUI Lite (jauns):</strong> WROOM-32 platēm — tas pats WebUI, kurā izslēgtas funkcijas, ko šī mikroshēma nespēj darbināt. <strong>Bez maksas</strong> ar kontu, un tas darbojas ar Studio Basic.</li>
+<li><strong>dpCREATOR Studio:</strong> projektējiet un veidojiet G-kodu pārlūkā. Studio Basic ir bez maksas.</li>
+<li><strong>dpCREATOR Motion:</strong> būvējiet un automatizējiet savu mašīnu. Bez maksas ar R3, <a href="index.php?route=product/product&product_id=391">€39</a> citām platēm.</li>
+</ul>
+<p>Lietotnes, kurām jums ir licence, var atzīmēt; pārējās ir pelēkas ar saiti to iegūšanai. WROOM-32 platēs Studio un Motion tiek ievietoti SD kartē, tāpēc vispirms ievietojiet platē FAT32 karti.</p>
+
+<h3>Tīklā jau no paša sākuma</h3>
+<p>Tikko ierakstītai platei nav piekļuves punkta un paroles, tāpēc tai var piekļūt tikai caur USB. Solī <em>Network and login</em> izvēlieties Ethernet kabeli (R3) vai Wi-Fi, piešķiriet platei nosaukumu un iestatiet pieteikšanās paroli. Pēc ierakstīšanas lapa nosūta tos caur USB, pārstartē plati un parāda tās adresi, piemēram, <code>http://192.168.1.57/</code> vai <code>http://plasma.local/</code>. Paroles tiek nosūtītas tikai uz plati; lapa tās neglabā.</p>
+<p>Programmaparatūra jau ierakstīta? Tajā pašā solī ir saite, lai iestatītu tīklu un pieteikšanos caur USB, neierakstot vēlreiz.</p>
+
+<h3>Pults ar WROOM-32 platēm</h3>
+<p>SmartTabUI pults darbojas arī ar WROOM-32 kontrolieriem: izvēlieties to pults iestatījumos.</p>
+
+<h3>Jaunums beta versijā: dpCREATOR PnP</h3>
+<p>Pick-and-place lietotne FluidNC mašīnām: augšējā kamera atrod plates atskaites zīmes (fiduciālus) un detaļas lentēs, apakšējā kamera pārbauda katru detaļu uz sprauslas, un vakuuma sprausla tās novieto. Tā ir beta versijā: pastāstiet mums par jebkuru problēmu, un tā tiks novērsta, cik ātri vien iespējams. <a href="/docs/dpcreator-pnp-beta">Izlasiet pirms sākšanas</a>; <a href="/rnd-club">R&D kluba</a> biedri to izmēģina pirmie. Pilnajā WebUI jau ir galvas kamera ar tēmēkli punktiem un mērīšanai.</p>
+
+<h3>Jautājumi</h3>
+<p>Neesat pārliecināti, kāda jums ir plate, vai konfigurācija neatbilst jūsu mašīnai? Rakstiet mums no <a href="index.php?route=information/contact">saziņas lapas</a> un pievienojiet plates fotogrāfiju.</p>

@@ -1,0 +1,34 @@
+<p>Auf dieser Seite erfahren Sie, wie Sie ein Sicherheitsproblem in einem dpCREATOR Produkt melden und wie lange jedes Produkt Sicherheitsupdates erhält. Sie ist unsere Richtlinie zur Offenlegung von Schwachstellen nach dem EU Cyber Resilience Act und den britischen Vorschriften zu Product Security and Telecommunications Infrastructure (PSTI).</p>
+<h2>Ein Sicherheitsproblem melden</h2>
+<p>Schreiben Sie an <a href="mailto:security@dpcreator.eu">security@dpcreator.eu</a>. Wir antworten innerhalb von 5 Werktagen und halten Sie auf dem Laufenden, bis das Problem behoben ist.</p>
+<p>Hilfreich sind folgende Angaben:</p>
+<ul>
+<li>das Produkt und Modell (zum Beispiel DPC-R3 v4.0.3 oder DPC-TABUI) und der Firmware-Build (angezeigt in der Fußzeile der WebUI oder auf der Seite Flash Firmware);</li>
+<li>was Sie gefunden haben und wie es sich reproduzieren lässt;</li>
+<li>was ein Angreifer damit tun könnte, soweit Sie es wissen;</li>
+<li>wie wir Sie nennen dürfen, falls Sie namentlich erwähnt werden möchten.</li>
+</ul>
+<p>Bitte geben Sie uns angemessen Zeit, das Problem zu beheben, bevor Sie Details veröffentlichen, und greifen Sie beim Testen nicht auf Maschinen oder Daten anderer Personen zu. Wir gehen nicht gegen Personen vor, die in gutem Glauben melden und sich an diese Seite halten. Wenn eine Korrektur veröffentlicht wird, weisen wir in den Versionshinweisen darauf hin und nennen auf Wunsch die meldende Person.</p>
+<p>Maschinenlesbarer Kontakt: <a href="/.well-known/security.txt">/.well-known/security.txt</a>.</p>
+<h2>Unterstützte Produkte und Sicherheitsupdates</h2>
+<table class="table table-bordered">
+<thead><tr><th>Produkt</th><th>Software</th><th>Sicherheitsupdates mindestens bis</th></tr></thead>
+<tbody>
+<tr><td>DPC-R3 Controller (und der R3 im Kombipaket DPC-R3-TABUI)</td><td>dpCREATOR FluidNC-Firmware und dpCREATOR WebUI</td><td><b>31. Dezember 2031</b></td></tr>
+<tr><td>DPC-TABUI SmartTabUI-Handbediengerät (und das Handbediengerät im Kombipaket)</td><td>SmartTabUI-Firmware für das Handbediengerät</td><td><b>31. Dezember 2031</b></td></tr>
+</tbody>
+</table>
+<p>Updates sind kostenlos und werden per USB von <a href="index.php?route=information/information&amp;information_id=8">dpcreator.eu (Seite Flash Firmware)</a> installiert. Der Controller nimmt keine Firmware über das Netzwerk an.</p>
+<h2>Sicherheit durch Design</h2>
+<ul>
+<li><b>Keine Standardpasswörter.</b> Sie legen Ihr eigenes Admin-Passwort (8 bis 64 Zeichen) fest, wenn Sie die WebUI zum ersten Mal öffnen. Der eigene WLAN-Access-Point des Controllers bleibt ausgeschaltet, bis Sie ein Access-Point-Passwort festlegen.</li>
+<li>Jeder Netzwerkzugang des Controllers, auch der Dateimanager, verlangt die Anmeldung. Wiederholt falsche Passwörter sperren die betreffende Adresse für eine Weile.</li>
+<li>Telnet ist standardmäßig aus, und kabelgebundenes Ethernet ist das Standardnetzwerk.</li>
+<li>Das SmartTabUI-Handbediengerät nutzt weder WLAN noch Bluetooth; es kommuniziert nur über sein Kabel mit dem Controller.</li>
+<li>Betreiben Sie den Controller nur in Ihrem lokalen Netzwerk. Leiten Sie seine Ports niemals ins Internet weiter: Die WebUI nutzt innerhalb Ihres Netzwerks unverschlüsseltes HTTP.</li>
+</ul>
+<p>Passwort vergessen? Verbinden Sie sich per USB (Seite Flash Firmware, Terminal) und senden Sie <code>$Auth/Set=&lt;new password&gt;</code> oder <code>$Auth/Clear</code>, um in der WebUI ein neues festzulegen.</p>
+<h2>Was die WebUI an dpcreator.eu sendet</h2>
+<p>Etwa einmal täglich fragt die WebUI bei dpcreator.eu nach, ob es einen neueren Build gibt. Sie sendet die Platinen-ID, die ID des Handbediengeräts und die Build-Nummern über HTTPS, sonst nichts. Sie können dies mit „update check“ in der Fußzeile der WebUI ausschalten. Siehe <a href="index.php?route=information/information&amp;information_id=3">Datenschutzerklärung</a>.</p>
+<h2>Konformitätserklärung</h2>
+<p>DPC-R3 und DPC-TABUI sind so ausgelegt, dass sie die Sicherheitsanforderungen an vernetzbare Produkte im Vereinigten Königreich (PSTI) und in der EU (Funkanlagenrichtlinie, EN 18031-1) erfüllen: keine universellen Standardpasswörter, ein veröffentlichter Weg zur Meldung von Sicherheitsproblemen (diese Seite) und ein veröffentlichter Mindestzeitraum für Sicherheitsupdates (die Tabelle oben).</p>

@@ -1,0 +1,160 @@
+<div class="dpc-bg">
+<p>Šī instrukcija ved jūs no detaļām uz darbgalda līdz strādājošai SmartTabUI pultij. Jums vajadzēs <a href="index.php?route=product/product&product_id=377">SmartTabUI pults programmaparatūru</a>. <a href="/image/catalog/dpc-site/files/SmartTabUI-pendant-case-v1.zip">PETG korpusa drukas faili</a> ir bez maksas. Gribat gatavu? Iegādājieties <a href="index.php?route=product/product&product_id=382">saliktu pulti</a>: katru no tām saliekam paši — to dara izstrādātājs vai pieredzējuši tehniķi.</p>
+<div class="alert alert-info"><strong>Prasības:</strong> SmartTabUI darbojas ar <strong>dpCREATOR FluidNC programmaparatūru</strong> kontrolierī (bez maksas, instalē no <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Tā balstās uz komandām, ko pievieno šī programmaparatūra &ndash; priekšskatījumi, Prepare, Rewind, Z korekcija, darba atjaunošana, makro, Measure un Record &ndash; tāpēc standarta FluidNC netiek atbalstīts.</div>
+<div class="note"><strong>Prasīgs darbs.</strong> Rēķinieties ar līdz pat četrām stundām. Jums šaurā vietā būs jālodē, jānotīra un jāizvieto daudz tievu vadu, tāpēc vajadzīgs lodāmurs un elektronikas pamatinstrumenti.</div>
+
+<figure><img src="image/catalog/dpc-site/build/front-panel-front.jpg" alt="Salikts SmartTabUI priekšpanelis ar rokratu, displeju un STEP un AXIS pārslēgiem" loading="lazy"><figcaption>Gatavs priekšpanelis, pirms tas tiek uzlikts uz korpusa.</figcaption></figure>
+
+<h3>Kas jums vajadzīgs</h3>
+<figure><img src="image/catalog/dpc-site/build/parts-kit.jpg" alt="SmartTabUI detaļas izklātas: displeja plate, PCF8574 modulis, skaļrunis, divi rotācijas pārslēgi ar rokturīšiem, drukāts korpuss, rokrats, E-stop, enable poga, GX12 savienotājs, kabeļi un skrūves" loading="lazy"><figcaption>Visas detaļas vienai pultij.</figcaption></figure>
+<table class="table table-bordered"><thead><tr><th>Sk.</th><th>Detaļa</th><th>Piezīmes</th></tr></thead><tbody>
+<tr><td>1</td><td>JC2432W328C displeja plate</td><td>2.8" kapacitatīvs skāriens, 240×320, ESP32. Versija <strong>C</strong> (kapacitatīvā).</td></tr>
+<tr><td>1</td><td>60 mm MPG rokrats</td><td>ZS61 tipa, 100 impulsi apgriezienā, izejas A un B</td></tr>
+<tr><td>1</td><td>E-stop poga, 16 mm</td><td>Fiksējoša, ar pārslēdzošu kontaktu (C, NO, NC)</td></tr>
+<tr><td>1</td><td>Spiedpoga bez fiksācijas, 12 mm</td><td>ENABLE poga labajā sānā</td></tr>
+<tr><td>1</td><td>Rotācijas pārslēgs, 3 pozīcijas</td><td>RS16 vai RS26 tipa, STEP pārslēgam</td></tr>
+<tr><td>1</td><td>Rotācijas pārslēgs, 5 pozīcijas</td><td>RS16 vai RS26 tipa, AXIS pārslēgam</td></tr>
+<tr><td>2</td><td>Rokturīši rotācijas pārslēgiem</td><td></td></tr>
+<tr><td>1</td><td>PCF8574 I/O paplašinātāja modulis</td><td>Nolasa pārslēgus un ENABLE pogu</td></tr>
+<tr><td>1</td><td>GX12 savienotājs, 5 kontaktu, vai PG7 kabeļa blīvslēgs</td><td>GX12: atvienojams kabelis uz kontrolieri. PG7 blīvslēgs: kabelis tā vietā iet tieši korpusā.</td></tr>
+<tr><td>1</td><td>Drukāts korpuss</td><td>Korpusa pamats, augšējā plāksne (slēgta vai ar 2 mm priekšpaneli), priekšpanelis un IO paplašinātāja turētājs (DPC-TC1 drukas faili)</td></tr>
+<tr><td>4</td><td>M2.5 pašvītņojošās skrūves</td><td>Notur displeju priekšpanelī</td></tr>
+<tr><td>1</td><td>Mazs skaļrunis ar JST spraudni</td><td>Pieslēdzas pie P4 (SPEAK)</td></tr>
+<tr><td>7</td><td>M3 skrūves (melnas)</td><td>Piestiprina priekšpaneli pie korpusa</td></tr>
+<tr><td>—</td><td>Montāžas vads un JST kabeļi</td><td>Displeja plates P1, P6 un CN1 savienotājiem</td></tr>
+<tr><td>—</td><td>Termosarūkošā caurulīte</td><td>Pēc izvēles, lodējumu izolēšanai</td></tr>
+<tr><td>—</td><td>704 silikona gumija elektronikai</td><td>Pielīmē displeju, moduļus un katru savienojumu</td></tr>
+</tbody></table>
+<p><strong>Instrumenti:</strong> lodāmurs un lodalva, sānknaibles, vadu nomizotājs, krustiņa skrūvgriezis, multimetrs, USB-C kabelis. Pēc izvēles: karstā gaisa fēns termosarūkošajai caurulītei.</p>
+<div class="note">Iesakām komponentes un katru savienojumu nostiprināt ar 704 silikona gumiju elektronikai. Tā neļauj vadiem un spraudņiem atslābt.</div>
+
+<h3>1. Noņemiet RGB LED no displeja plates</h3>
+<p>JC2432W328C priekšpusē blakus displejam ir RGB LED. Tas ir pieslēgts pie IO4, IO16 un IO17 — tiem pašiem izvadiem, ko pults savienotājā P6 izmanto rokratam un E-stop. Ja to atstāj, tas noslogo šīs līnijas, un ieejas nolasās neuzticami. Atlodējiet to ar lodāmuru vai karsto gaisu.</p>
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/lcd-with-led.jpg" alt="JC2432W328C displeja plate ar RGB LED augšējā labajā stūrī" loading="lazy"><figcaption>Pirms: RGB LED atrodas augšā pa labi.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/lcd-led-removed.jpg" alt="JC2432W328C displeja plate ar noņemtu RGB LED, tukši kontaktlaukumi augšā pa labi" loading="lazy"><figcaption>Pēc: LED ir noņemts, palikuši tikai tā kontaktlaukumi.</figcaption></figure>
+</div>
+
+<h3>2. Salieciet priekšpaneli</h3>
+<figure><img src="image/catalog/dpc-site/build/front-panel-printed.jpg" alt="Drukātā priekšpaneļa aizmugure ar atverēm rokratam, displejam un diviem pārslēgiem" loading="lazy"><figcaption>Drukātā priekšpaneļa aizmugure.</figcaption></figure>
+<ol class="steps">
+<li><strong>Displejs.</strong> Vispirms noņemiet no displeja aizsargplēvi. Ievietojiet plati priekšpanelī un nostipriniet ar četrām M2.5 pašvītņojošām skrūvēm.
+<div class="warn">Esiet uzmanīgi ar displeja savienotāju, ievietojot plati drukātajā panelī: tur ir ļoti šauri.</div>
+Pēc tam uzklājiet 704 silikona joslu ap plates perimetru visur, kur tā saskaras ar korpusu. Kamēr silikons žūst, piespiediet displeju un pārliecinieties, ka tas paliek pilnībā iesēdies.</li>
+<li><strong>Rokrats.</strong> Ievietojiet 60 mm MPG apaļajā atverē un pievelciet to uz trim stiprinājuma tapām.</li>
+<li><strong>STEP pārslēgs.</strong> Ievietojiet 3 pozīciju rotācijas pārslēgu (RS16 vai RS26) kreisajā atverē.</li>
+<li><strong>AXIS pārslēgs.</strong> Ievietojiet 5 pozīciju rotācijas pārslēgu labajā atverē.</li>
+</ol>
+<div class="note">Ja jūsu rotācijas pārslēgiem ir regulējama aizturpaplāksne, pirms uzgriežņa pievilkšanas iestatiet to uz 3 pozīcijām STEP un 5 pozīcijām AXIS pārslēgam, lai rokturis apstātos pie x1 / x100 un pie OFF / A.</div>
+<figure><img src="image/catalog/dpc-site/build/front-panel-back.jpg" alt="Priekšpaneļa aizmugure ar uzstādītu displeja plati, rokratu un abiem rotācijas pārslēgiem, vēl bez vadiem" loading="lazy"><figcaption>Priekšpanelis ar uzstādītu displeju, rokratu un abiem pārslēgiem, gatavs pieslēgšanai.</figcaption></figure>
+
+<h3>3. Salieciet galveno korpusu</h3>
+<ol class="steps">
+<li>Ieskrūvējiet <strong>E-stop pogu</strong> (16 mm) korpusa kreisajā sānā.</li>
+<li>Ieskrūvējiet <strong>ENABLE pogu</strong> (12 mm) labajā sānā.</li>
+<li><strong>GX12 savienotāju</strong> pagaidām neuzstādiet. Tas tiek ievietots pēc pieslēgšanas, lai vadiem būtu viegli piekļūt. Izmantojat <strong>PG7 kabeļa blīvslēgu</strong>? Ievietojiet to tajā pašā atverē un kabeli izvelciet caur to vēlāk.</li>
+</ol>
+<figure><img src="image/catalog/dpc-site/build/case-faceplate.jpg" alt="Galvenais korpuss ar priekšplāksni, rokturi un ENABLE pogu labajā sānā" loading="lazy"><figcaption>Galvenais korpuss ar rokturi. ENABLE poga ir labajā sānā.</figcaption></figure>
+
+<h3>4. Pieslēdziet vadus</h3>
+<p>Viss pieslēdzas pie savienotājiem displeja plates aizmugurē: <strong>P1</strong> (seriālais savienojums un barošana), <strong>P6</strong> (rokrats un E-stop), <strong>CN1</strong> (I²C uz PCF8574) un <strong>P4</strong> (skaļrunis). Pie pašas plates nekas netiek lodēts.</p>
+<figure class="wide"><a href="image/catalog/dpc-site/build/pendant-wiring-connectors.png" target="_blank" rel="noopener"><img src="image/catalog/dpc-site/build/pendant-wiring-connectors.png" alt="SmartTabUI pieslēguma shēma: GX12, E-stop, displeja plates savienotāji P1, P6 un CN1, MPG rokrats, PCF8574 un pārslēgi" loading="lazy"></a><figcaption>Visi savienojumi pultī (pieskarieties, lai atvērtu pilnā izmērā). Vadu krāsas kā tabulās zemāk.</figcaption></figure>
+
+<p><strong>P6 → rokrats un E-stop</strong></p>
+<table class="table table-bordered"><thead><tr><th>P6 kontakts</th><th>Vads</th><th>Kur pieslēgt</th></tr></thead><tbody>
+<tr><td>IO17</td><td><span class="sw" style="background:#d22b2b"></span>sarkans</td><td>E-stop poga, kontakts C</td></tr>
+<tr><td>IO4</td><td><span class="sw" style="background:#222"></span>melns</td><td>MPG B</td></tr>
+<tr><td>IO16</td><td><span class="sw" style="background:#e3b200"></span>dzeltens</td><td>MPG A</td></tr>
+<tr><td>GND</td><td><span class="sw" style="background:#2e9b4a"></span>zaļš</td><td>MPG −</td></tr>
+</tbody></table>
+<p>MPG <strong>+</strong> pieslēdz pie <strong>3.3 V</strong>: ņemiet to no CN1 kontakta 3.3V kopā ar PCF8574 VCC vadu.</p>
+
+<p><strong>CN1 → PCF8574 modulis</strong></p>
+<table class="table table-bordered"><thead><tr><th>CN1 kontakts</th><th>PCF8574</th></tr></thead><tbody>
+<tr><td>GND</td><td>GND</td></tr>
+<tr><td>IO22</td><td>SCL</td></tr>
+<tr><td>IO21</td><td>SDA</td></tr>
+<tr><td>3.3V</td><td>VCC</td></tr>
+</tbody></table>
+
+<p><strong>PCF8574 ieejas → pārslēgi un ENABLE</strong>. Katra ieeja slēdzas uz GND: pieslēdziet katra rotācijas pārslēga kopējo kontaktu un vienu ENABLE pogas pusi pie GND.</p>
+<table class="table table-bordered"><thead><tr><th>Ieeja</th><th>Funkcija</th></tr></thead><tbody>
+<tr><td>P0 · P1 · P2 · P3</td><td>AXIS pārslēgs: X · Y · Z · A (OFF = nav kontakta)</td></tr>
+<tr><td>P4 · P5</td><td>STEP pārslēgs: ×10 · ×100 (×1 = nav kontakta)</td></tr>
+<tr><td>P6</td><td>ENABLE poga</td></tr>
+<tr><td>P7</td><td>netiek izmantots</td></tr>
+</tbody></table>
+
+<p><strong>P1 → GX12 savienotājs</strong> (kabelis uz kontrolieri). Ar PG7 kabeļa blīvslēgu pieslēdziet piecas kabeļa dzīslas tiem pašiem signāliem.</p>
+<table class="table table-bordered"><thead><tr><th>GX12 kontakts</th><th>Signāls</th><th>Vads</th><th>No</th></tr></thead><tbody>
+<tr><td>1</td><td>+5V</td><td><span class="sw" style="background:#d22b2b"></span>sarkans</td><td>P1 5V</td></tr>
+<tr><td>2</td><td>TXD</td><td><span class="sw" style="background:#222"></span>melns</td><td>P1 TX</td></tr>
+<tr><td>3</td><td>E-STOP</td><td><span class="sw" style="background:#e8771a"></span>oranžs</td><td>E-stop poga, kontakts NC</td></tr>
+<tr><td>4</td><td>RXD</td><td><span class="sw" style="background:#e3b200"></span>dzeltens</td><td>P1 RX</td></tr>
+<tr><td>5</td><td>GND</td><td></td><td>P1 GND</td></tr>
+</tbody></table>
+
+<p><strong>E-stop pogas kontakti</strong></p>
+<table class="table table-bordered"><thead><tr><th>Kontakts</th><th>Kur pieslēgt</th></tr></thead><tbody>
+<tr><td>C (kopējais)</td><td>P6 IO17</td></tr>
+<tr><td>NO</td><td>GND</td></tr>
+<tr><td>NC</td><td>GX12 kontakts 3, uz kontrolieri</td></tr>
+</tbody></table>
+
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/front-panel-wired.jpg" alt="Priekšpaneļa aizmugure ar rokratu, pieslēgtu pie P6, un PCF8574 moduli, pieslēgtu pie CN1" loading="lazy"><figcaption>Rokrats pie P6, PCF8574 pie CN1, pirms modulis ir nostiprināts.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/wiring-overview-photo.jpg" alt="Atvērta pults: galvenais korpuss ar E-stop, ENABLE pogu un GX12 pa kreisi, pieslēgts priekšpanelis pa labi" loading="lazy"><figcaption>Pilnībā pieslēgta, pirms aizvēršanas: PCF8574 pielīmēts displeja plates aizmugurē.</figcaption></figure>
+</div>
+<ol class="steps">
+<li>Piestipriniet PCF8574 moduli displeja plates aizmugurē ar 704 silikona piku, atstatus no ESP32 moduļa.</li>
+<li>Iespraudiet skaļruni <strong>P4 (SPEAK)</strong> un nostipriniet to korpusā ar silikona pilīti.</li>
+<li>Uzlieciet silikona pilīti uz lodējumiem un savienotāju spraudņiem, lai tie nevarētu atslābt.</li>
+<li>Ievietojiet GX12 savienotāju korpusa apakšā un pielodējiet tā piecus vadus. Ar PG7 blīvslēgu: izvelciet kabeli caur blīvslēgu, pieslēdziet piecas dzīslas, tad pievelciet blīvslēgu, lai tas cieši satvertu kabeli.</li>
+<li>Izolējiet savienojumus ar termosarūkošo caurulīti (pēc izvēles).</li>
+</ol>
+
+<h3>5. Aizveriet korpusu</h3>
+<p>Izvietojiet vadus līdzeni, lai nekas netiktu iespiests, uzlieciet priekšpaneli uz korpusa un nostipriniet ar 7 melnajām M3 skrūvēm. Uzlieciet rokturīšus uz STEP un AXIS pārslēgiem tā, lai rādītājs sakristu ar x1 un OFF.</p>
+
+<h3>6. Ierakstiet programmaparatūru un pārbaudiet</h3>
+<p>Ierakstiet pults programmaparatūru caur USB-C no lapas <a href="index.php?route=information/information&information_id=8">Firmware & Downloads</a>. Ierakstīšanas laikā atvienojiet kontroliera kabeli: seriālie izvadi ir kopīgi.</p>
+<p><strong>Testa izvēlne.</strong> Pultij ir iebūvēta testa izvēlne, tāpēc katru būves daļu varat pārbaudīt, pirms pults vispār sazinās ar kontrolieri. Startēšanas pirmajā sekundē turiet nospiestu ENABLE pogu, lai atvērtu pults iestatījumus, tad pieskarieties <strong>Inputs</strong>, lai atvērtu <strong>Input Monitor</strong>.</p>
+<p>Input Monitor reāllaikā rāda:</p>
+<ul>
+<li>PCF8574 neapstrādāto vērtību un katru tā ieeju no P0 līdz P7 kā HIGH vai LOW (aktīva),</li>
+<li>E-stop uz IO17 (atlaists vai nospiests),</li>
+<li>rokrata <strong>encoder delta</strong>, kas skaita, kad to griežat,</li>
+<li>skārienekrānu: kur tam pieskaraties.</li>
+</ul>
+<ol class="steps">
+<li>Pagrieziet AXIS caur OFF, X, Y, Z un A: P0 līdz P3 pa vienam kļūst LOW, bet pie OFF neviens.</li>
+<li>Pagrieziet STEP caur x1, x10 un x100: vispirms P4, tad P5 kļūst LOW, bet pie x1 neviens.</li>
+<li>Nospiediet ENABLE: P6 kļūst LOW.</li>
+<li>Nospiediet E-stop un atlaidiet: E-stop līnijas stāvoklis mainās.</li>
+<li>Pagrieziet rokratu uz abām pusēm: encoder delta skaita uz augšu un uz leju. Ja tas skaita nepareizā virzienā, samainiet A un B vadus.</li>
+<li>Pieskarieties ekrānam dažās vietās.</li>
+</ol>
+<p>Lai izietu no Input Monitor, turiet E-stop 2 sekundes.</p>
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/test-settings.jpg" alt="Pults iestatījumu ekrāns ar pogām Inputs, UART un Save & Boot" loading="lazy"><figcaption>Pults iestatījumi: <strong>Inputs</strong> atver testa izvēlni.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/test-input-monitor.jpg" alt="Input Monitor ekrāns ar PCF8574 ieejām, E-stop, enkoderu un skārienu" loading="lazy"><figcaption>Input Monitor: šeit STEP ir pozīcijā ×100 (P5 aktīvs).</figcaption></figure>
+</div>
+
+<h3>7. Pieslēdziet kontrolierim</h3>
+<ol class="steps">
+<li>Iespraudiet pulti kontroliera pults portā un ieslēdziet barošanu. Kontroliera config.yaml vajadzīgas sadaļas <code>uart1</code> un <code>uart_channel1</code> ar 1 000 000 baud: skatiet <a href="index.php?route=journal3/blog/post&journal_blog_post_id=19">SmartTabUI pults pieslēgšana</a>.</li>
+<li>WebUI galvenē redzama pults zīme, un <code>$Pendant/Status</code> atbild <code>connected</code>.</li>
+<li>Pārbaudiet E-stop, lēnām pārvietojot asi: motoriem jāapstājas uzreiz, un mašīnai jāpāriet stāvoklī Alarm. Atlaidiet to un atbloķējiet ar atjaunošanas izvēlni.</li>
+</ol>
+
+<h3>Jau pazīstat CYD displeju?</h3>
+<p>SmartTabUI darbojas uz JC2432W328C displeja (CYD) ar 60 mm rokratu — tās pašas detaļas, ko pazīst daudzi FluidDial būvētāji. Ja jau esat strādājuši ar šo displeju, varat izmantot savu pieredzi. SmartTabUI ir savs pieslēgums, tāpēc atstājiet savu FluidDial pulti, kā ir, un SmartTabUI izmantojiet atsevišķu displeju, pieslēgtu kā šajā instrukcijā. Šos displeja izvadus izmanto SmartTabUI:</p>
+<table class="table table-bordered"><thead><tr><th>Displeja izvads</th><th>SmartTabUI</th></tr></thead><tbody>
+<tr><td>IO22</td><td>PCF8574 SCL (CN1)</td></tr>
+<tr><td>IO21</td><td>PCF8574 SDA (CN1)</td></tr>
+<tr><td>IO16</td><td>Rokrats A (P6)</td></tr>
+<tr><td>IO4</td><td>Rokrats B (P6)</td></tr>
+<tr><td>IO17</td><td>E-stop (P6)</td></tr>
+<tr><td>TX / RX</td><td>Seriālais savienojums ar kontrolieri, 1 Mbaud (P1)</td></tr>
+</tbody></table>
+</div>
