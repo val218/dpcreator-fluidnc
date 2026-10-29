@@ -178,6 +178,9 @@ uint32_t psram_total_kb() {
 }
 
 const char* psram_problem() {
+#if CONFIG_IDF_TARGET_ESP32
+    return "";  // the ESP32 (WROOM-32) build expects no PSRAM: features use their small fallbacks
+#endif
     uint32_t kb = psram_total_kb();
     if (kb == 0) {
         return "No PSRAM found. This firmware needs an ESP32-S3 module with 8 MB octal PSRAM (WROOM-1 N8R8 / N16R8 / N32R8V). "

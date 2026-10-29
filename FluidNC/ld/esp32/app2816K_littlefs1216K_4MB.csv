@@ -1,0 +1,6 @@
+# dpCREATOR ESP32 (WROOM-32, 4 MB): one app slot, no second (OTA) copy -
+# firmware updates are USB only. 2.75 MB app, 1.19 MB files.
+# Name,   Type, SubType, Offset,   Size, Flags
+nvs,      data, nvs,      0x9000,   0x5000,
+app0,     app,  factory,  0x10000,  0x2C0000,
+spiffs,   data, spiffs,   0x2D0000, 0x130000,

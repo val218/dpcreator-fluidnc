@@ -176,7 +176,7 @@ void rewind_init() {
     int      cap = 8192;  // ~ 256 KB in PSRAM: many metres of short moves
     RwEntry* buf = (RwEntry*)heap_caps_malloc(sizeof(RwEntry) * cap, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     if (!buf) {
-        cap = 512;  // no PSRAM: a short history
+        cap = 256;  // no PSRAM (ESP32 WROOM-32): a short history, 8 KB of internal RAM
         buf = (RwEntry*)malloc(sizeof(RwEntry) * cap);
     }
     if (buf) _ring.init(buf, cap);

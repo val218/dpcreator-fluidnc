@@ -1,4 +1,4 @@
-name: Build FluidNC 4.1.1 W5500 (ESP32-S3)
+name: Build FluidNC 4.1.1 W5500 (ESP32-S3 + ESP32 WROOM-32)
 
 on:
   push:
@@ -31,9 +31,10 @@ jobs:
           path: |
             ~/.cache/pip
             ~/.platformio
-          key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}
+          # v2: a fresh start - older caches mixed two platforms named espressif32
+          key: ${{ runner.os }}-pio-v2-${{ hashFiles('platformio.ini') }}
           restore-keys: |
-            ${{ runner.os }}-pio-
+            ${{ runner.os }}-pio-v2-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -49,7 +50,8 @@ jobs:
           set -o pipefail
           # Compiler errors also go to the run's annotations (readable without the log)
           pio run -e wifi_s3 2>&1 | tee build.log || {
-            grep -E "error|undefined|multiple definition|ld:|relocation|first defined" build.log | grep -v "^Compiling\|^Archiving\|^Indexing" | head -10 | while IFS= read -r l; do echo "::error::$l"; done
+            grep -iE "error|undefined|multiple definition|ld:|relocation|first defined|exception" build.log | grep -v "^Compiling\|^Archiving\|^Indexing" | head -8 | while IFS= read -r l; do echo "::error::$l"; done
+            echo "::error title=last lines::$(tail -25 build.log | sed ':a;N;$!ba;s/\n/%0A/g')"
             exit 1
           }
 
@@ -68,6 +70,47 @@ jobs:
           cp $B/littlefs.bin out/ 2>/dev/null || true
           cp $B/merged-flash.bin out/ 2>/dev/null || true
           cp $B/firmware.elf debug/
+          ls -l out debug
+
+      # ESP32 (WROOM-32) install option: same dpCREATOR firmware for the many
+      # FluidNC boards on the original ESP32 (4 MB flash, no PSRAM, no W5500,
+      # Wi-Fi only). It never blocks the R3 (S3) release: if it fails, the
+      # release goes out without the wroom32-* files.
+      - name: Build firmware (wifi, ESP32 WROOM-32)
+        id: wroom32
+        continue-on-error: true
+        shell: bash
+        env:
+          # Its own PlatformIO home: the ESP32 build uses platform-espressif32
+          # 6.9.0 (core 2.0.17), the S3 the pioarduino platform; both are named
+          # "espressif32" and must not share one install.
+          PLATFORMIO_CORE_DIR: ${{ github.workspace }}/.pio-esp32
+        run: |
+          set -o pipefail
+          pio run -e wifi 2>&1 | tee build-wroom32.log || {
+            grep -iE "error|undefined|multiple definition|ld:|relocation|first defined|overflow|exception" build-wroom32.log | grep -v "^Compiling\|^Archiving\|^Indexing" | head -10 | while IFS= read -r l; do echo "::warning title=WROOM-32 build::$l"; done
+            exit 1
+          }
+          grep -E "^(RAM|Flash):" build-wroom32.log | while IFS= read -r l; do echo "::notice title=WROOM-32 size::$l"; done
+
+      - name: Build merged flash image (ESP32 WROOM-32)
+        id: wroom32_merged
+        if: steps.wroom32.outcome == 'success'
+        continue-on-error: true
+        env:
+          # starter config.yaml without pins (the R3 config's pins do not exist on ESP32)
+          PLATFORMIO_DATA_DIR: FluidNC/data_esp32
+          PLATFORMIO_CORE_DIR: ${{ github.workspace }}/.pio-esp32
+        run: pio run -e wifi -t build_merged
+
+      - name: Collect ESP32 WROOM-32 binaries
+        if: steps.wroom32.outcome == 'success'
+        run: |
+          B=.pio/build/wifi
+          for f in firmware bootloader partitions littlefs merged-flash; do
+            if [ -f $B/$f.bin ]; then cp $B/$f.bin out/wroom32-$f.bin; fi
+          done
+          cp $B/firmware.elf debug/wroom32-firmware.elf
           ls -l out debug
 
       - name: Decode backtrace
@@ -114,4 +157,4 @@ jobs:
           gh release delete w5500-latest -y --cleanup-tag || true
           gh release create w5500-latest out/* --prerelease --target "$GITHUB_SHA" \
             --title "dpCREATOR FluidNC 4.1.1 W5500 - latest build ($SHORT)" \
-            --notes "Latest build of branch fluidnc-4.1.1-w5500 (commit $SHORT), replaced on every push. merged-flash.bin = fresh board at 0x0 (overwrites config.yaml); firmware.bin = update at 0x10000 over USB (network updates are off since 063dee80). Set the login password over USB with \$Auth/Set=<password> or on the first WebUI visit. The dpCREATOR WebUI is installed separately from dpcreator.eu. See W5500_ETHERNET.md."
+            --notes "Latest build of branch fluidnc-4.1.1-w5500 (commit $SHORT), replaced on every push. merged-flash.bin = fresh board at 0x0 (overwrites config.yaml); firmware.bin = update at 0x10000 over USB (network updates are off since 063dee80). Set the login password over USB with \$Auth/Set=<password> or on the first WebUI visit. The dpCREATOR WebUI is installed separately from dpcreator.eu. ESP32 (WROOM-32) boards: wroom32-merged-flash.bin = fresh board at 0x0 (starter config.yaml without pins, Wi-Fi only, no W5500); wroom32-firmware.bin = update at 0x10000 over USB. See W5500_ETHERNET.md."
