@@ -1,0 +1,5 @@
+{
+ "name": "Подключение пульта SmartTabUI",
+ "meta_title": "Подключение пульта SmartTabUI — Документация dpCREATOR",
+ "meta_description": "Подключите пульт SmartTabUI к контроллеру dpCREATOR, настройте uart_channel1 и проверьте связь."
+}

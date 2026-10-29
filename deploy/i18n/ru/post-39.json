@@ -1,0 +1,5 @@
+{
+ "name": "Настройте любую плату ESP32 с FluidNC вместе с dpCREATOR",
+ "meta_title": "Настройка любой платы ESP32 с FluidNC: прошивка, конфигурация, приложения и Wi-Fi — Документация dpCREATOR",
+ "meta_description": "Прошивка dpCREATOR FluidNC на R3, Doberman и ещё 19 плат ESP32 с готовой конфигурацией; WebUI, WebUI Lite, Studio, Motion; Wi-Fi и вход по USB."
+}

@@ -1,0 +1,22 @@
+<h3>Прошивка</h3>
+<table class="table table-bordered"><thead><tr><th>Проблема</th><th>Решение</th></tr></thead><tbody>
+<tr><td>Нет последовательного порта для выбора</td><td>Используйте Chrome или Edge, USB-кабель <em>для передачи данных</em> и другой USB-порт. Закройте другие программы, занимающие порт (gSender, монитор порта).</td></tr>
+<tr><td>«Device not supported» / не удаётся подключиться</td><td>Удерживайте кнопку <strong>BOOT</strong> при подключении USB, чтобы войти в режим загрузчика, и попробуйте снова. Проверьте, что выбрана правильная вкладка (контроллер или пульт).</td></tr>
+<tr><td>Браузер называет загрузку опасной</td><td>Ложная тревога на незнакомый файл. Выберите <em>Сохранить</em> / <em>Всё равно скачать</em>.</td></tr></tbody></table>
+<h3>Сеть</h3>
+<table class="table table-bordered"><thead><tr><th>Проблема</th><th>Решение</th></tr></thead><tbody>
+<tr><td><code>Ethernet PHY init failed</code></td><td>Нет раздела <code>spi:</code> или <code>ethernet:</code>, неверные выводы или ошибка в проводке.</td></tr>
+<tr><td>Связь есть, но IP 0.0.0.0, ping не проходит</td><td>INT настроен, но не подключён: укажите <code>int_pin: NO_PIN</code>. Или в этой сети нет DHCP-сервера.</td></tr>
+<tr><td>Статический IP: «Заданный узел недоступен»</td><td>Плата и ПК в разных подсетях. Используйте адрес из подсети вашего ПК.</td></tr>
+<tr><td>gSender: «Remote mode has been disabled»</td><td>Используйте <strong>Config → Ethernet</strong>, а не Remote Mode.</td></tr>
+<tr><td>gSender: не удаётся подключиться</td><td>IP и порт в Config → Ethernet должны совпадать с платой (<code>$Telnet/Port</code>, по умолчанию 23). Нажмите Apply Settings.</td></tr>
+<tr><td>Плата в точке доступа Wi-Fi «FluidNC»</td><td>В config.yaml нет раздела <code>ethernet:</code>, или плата трижды подряд упала. Откройте <code>http://192.168.0.1</code> и загрузите правильную конфигурацию.</td></tr></tbody></table>
+<h3>Пульт</h3>
+<table class="table table-bordered"><thead><tr><th>Проблема</th><th>Решение</th></tr></thead><tbody>
+<tr><td><code>$Pendant/Status</code> отвечает <code>none</code></td><td>В config.yaml нет раздела <code>uart_channel1</code>.</td></tr>
+<tr><td>На пульте нет траектории или она неправильная</td><td>Поищите <code>VizErr</code> в консоли WebUI; пересоберите превью кнопкой <strong>.viz</strong> у файла.</td></tr>
+<tr><td><code>RX overflow</code> / искажённые сообщения в терминале пульта</td><td>В кабеле теряются байты: используйте более короткий или экранированный кабель или более низкую скорость (одинаковую на обеих сторонах). <code>$Pendant/Debug</code> показывает счётчики.</td></tr>
+<tr><td>На пульте нет восстановления задания</td><td>Прошивка контроллера старше прошивки пульта. Прошейте оба.</td></tr></tbody></table>
+<h3>Сбои</h3>
+<p>Если WebUI показывает <em>Controller restarted after a crash</em>, нажмите <strong>Copy details</strong> и отправьте нам текст через <a href="index.php?route=information/contact">форму обратной связи</a>.</p>
+<p>Возможно, проблема уже исправлена в новой сборке: см. <a href="index.php?route=journal3/blog/post&journal_blog_post_id=33">примечания к выпускам и исправления ошибок</a>, затем обновитесь со страницы <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>.</p>

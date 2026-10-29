@@ -1,0 +1,179 @@
+<p>Что изменилось в каждой сборке прошивки контроллера dpCREATOR, прошивки пульта SmartTabUI и dpCREATOR WebUI, от новых к старым. Список последних изменений обновляется сам, как только публикуется новая сборка. Все три обновляются со страницы <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>. Они разрабатываются вместе, поэтому обновляйте их все одновременно.</p>
+
+<div class="dpc-callout"><strong>Нашли ошибку?</strong> Напишите нам, что вы делали, что произошло, и укажите номера сборок: в нижней строке WebUI видны сборки WebUI и контроллера, а пульт показывает свою сборку на загрузочном экране. Если контроллер перезапустился сам, приложите отчёт о сбое: <code>$Crash</code> в консоли или <em>Copy details</em> в WebUI.</div>
+
+<style>
+.dpc-auto{margin:22px 0 34px}
+.dpc-auto[hidden]{display:none}
+.dpc-auto .an-builds{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:0 0 20px}
+.dpc-auto .an-build{border:1px solid rgba(127,127,127,.3);border-radius:4px;padding:12px 14px}
+.dpc-auto .an-build b{display:block;font-size:14px}
+.dpc-auto .an-build span{font:12.5px ui-monospace,Menlo,Consolas,monospace;opacity:.75}
+.dpc-auto .an-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.dpc-auto .an-tabs button{border:1px solid rgba(127,127,127,.35);background:transparent;border-radius:3px;padding:6px 12px;font-size:13px;cursor:pointer;color:inherit}
+.dpc-auto .an-tabs button[aria-selected="true"]{background:#2b8fe0;border-color:#2b8fe0;color:#fff}
+.dpc-auto .an-day{margin:14px 0 4px;font-weight:700;font-size:14px}
+.dpc-auto ul{margin:0 0 6px;padding-left:0;list-style:none}
+.dpc-auto li{padding:4px 0 4px 64px;position:relative;line-height:1.45;font-size:14px}
+.dpc-auto li i{position:absolute;left:0;top:6px;font-style:normal;font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:rgba(43,143,224,.15);color:#1b6fb5}
+.dpc-auto li i.fx{background:rgba(46,155,74,.15);color:#237a3a}
+.dpc-auto .an-more{margin-top:8px;border:0;background:none;color:#2b8fe0;cursor:pointer;padding:0;font-size:14px}
+.dpc-auto .an-foot{font-size:12.5px;opacity:.7;margin-top:12px}
+</style>
+<section class="dpc-auto" id="dpc-auto" hidden>
+<h2>Текущие сборки</h2>
+<div class="an-builds" id="an-builds"></div>
+<h2>Последние изменения</h2>
+<p>Обновляется автоматически с каждой опубликованной сборкой, от новых к старым.</p>
+<div class="an-tabs" role="tablist" id="an-tabs"></div>
+<div id="an-list"></div>
+<p class="an-foot" id="an-foot"></p>
+</section>
+<script>
+(function(){
+  var box=document.getElementById("dpc-auto"); if(!box) return;
+  var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
+  var fmt=function(d){var p=d.split("-");var m=["January","February","March","April","May","June","July","August","September","October","November","December"];return p.length===3?(+p[2])+" "+m[+p[1]-1]+" "+p[0]:d;};
+  fetch("/notes.php",{cache:"no-cache"}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
+    var P=(d.products||[]).filter(function(p){return p.entries&&p.entries.length;}); if(!P.length) return;
+    document.getElementById("an-builds").innerHTML=d.products.map(function(p){return '<div class="an-build"><b>'+esc(p.name)+'</b><span>build '+esc(p.build||"-")+(p.date?" · "+esc(fmt(p.date)):"")+'</span></div>';}).join("");
+    var tabs=document.getElementById("an-tabs"), list=document.getElementById("an-list"), cur=0, all=false;
+    function show(i){cur=i;
+      [].forEach.call(tabs.children,function(b,k){b.setAttribute("aria-selected",k===i?"true":"false");});
+      var e=P[i].entries, n=all?e.length:Math.min(15,e.length), h="", day="";
+      for(var k=0;k<n;k++){var x=e[k]; if(x.date!==day){if(day)h+="</ul>"; day=x.date; h+='<div class="an-day">'+esc(fmt(day))+'</div><ul>';}
+        h+='<li><i class="'+(x.type==="fixed"?"fx":"nw")+'">'+(x.type==="fixed"?"Fixed":"New")+'</i>'+esc(x.text)+'</li>';}
+      if(day)h+="</ul>";
+      if(e.length>15) h+='<button type="button" class="an-more">'+(all?"Show fewer":"Show all "+e.length+" changes")+'</button>';
+      list.innerHTML=h; var m=list.querySelector(".an-more"); if(m)m.onclick=function(){all=!all;show(cur);};
+    }
+    tabs.innerHTML=P.map(function(p,i){return '<button type="button" role="tab">'+esc(p.name.replace(/ firmware$/,""))+'</button>';}).join("");
+    [].forEach.call(tabs.children,function(b,i){b.onclick=function(){all=false;show(i);};});
+    document.getElementById("an-foot").textContent="Last checked "+new Date(d.updated).toLocaleString()+".";
+    box.hidden=false; show(0);
+  }).catch(function(){});
+})();
+</script>
+
+<h2>Главное простыми словами</h2>
+<p>Краткое описание основных изменений по 20 октября 2026 года.</p>
+<h3>Прошивка контроллера dpCREATOR</h3>
+<p>FluidNC 4.1.1 с Ethernet W5500 и командами dpCREATOR. Бесплатно для всех покупателей.</p>
+
+<h4>20 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> лазер рядом с фрезой: дайте лазерному шпинделю собственный номер инструмента (<code>tools: 2</code>) и его смещение относительно фрезы (<code>offset_mm:</code>). <code>M6 T2</code> переключает на лазер с учётом смещения, так что один рабочий ноль подходит для обоих. См. <a href="index.php?route=journal3/blog/post&journal_blog_post_id=28#router-and-laser">Фрезер и лазер на одном станке</a>.</li>
+<li><strong>Новое:</strong> лазерные задания передают мощность в превью траектории, поэтому пульт и WebUI показывают прожиг.</li>
+<li><strong>Новое:</strong> <code>$Homed</code> сообщает WebUI и пульту, по каким осям найден ноль с момента включения.</li>
+<li><strong>Исправлено:</strong> пульт мог бесконечно ждать превью, если файл загружали повторно, пока его превью отправлялось.</li>
+</ul>
+
+<h4>17 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> пульт SmartTabUI при подключении сообщает контроллеру ID своего чипа и сборку, поэтому WebUI может показать, какой пульт подключён.</li>
+<li><strong>Изменено:</strong> стандартный <code>config.yaml</code> и документация называют пульт SmartTabUI.</li>
+</ul>
+
+<h4>16 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> список точек Record & Retrace хранится на SD-карте платы. Пульт и WebUI редактируют один и тот же список, и пульт работает с ним без ПК. При сохранении записывается <code>/retrace.nc</code> со сверлёными отверстиями и круглыми или прямоугольными карманами.</li>
+<li><strong>Новое:</strong> когда инструмент WebUI (Centre Finder, Offcuts) принимает двойные нажатия с пульта, пульт об этом узнаёт, и точка попадает куда нужно.</li>
+</ul>
+
+<h4>15 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> двойное нажатие кнопки ENABLE на пульте отправляет точку в инструменты WebUI.</li>
+</ul>
+
+<h4>13 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> используется 8 МБ PSRAM платы. Для плат с модулем, у которого слишком мало PSRAM, в WebUI и на странице Flash Firmware выводится предупреждение.</li>
+<li><strong>Новое:</strong> плата сообщает свой ID, который использует установщик WebUI. dpCREATOR WebUI теперь устанавливается отдельно от прошивки.</li>
+<li><strong>Исправлено:</strong> контроллер мог падать при обращении к SD-карте, когда заканчивалась внутренняя память. Теперь превью для пульта ждут освобождения памяти.</li>
+</ul>
+
+<h4>12 октября 2026</h4>
+<ul>
+<li><strong>Исправлено:</strong> перезапуски по сторожевому таймеру задач. Открытие WebUI могло подвесить контроллер, пока он отправлял отчёты о состоянии.</li>
+<li><strong>Исправлено:</strong> WebUI начинал тормозить, а превью для пульта не строились, пока контроллер передавал данные на пульт. Передача на пульт теперь буферизуется, а превью отправляются порциями.</li>
+<li><strong>Улучшено:</strong> WebUI не теряет связь во время джога. Старые отчёты о состоянии отбрасываются, а соединение не закрывается.</li>
+<li><strong>Новое:</strong> после перезапуска по сторожевому таймеру контроллер сохраняет отчёт о том, что он делал; его показывают <code>$Crash</code>, журнал загрузки и WebUI.</li>
+</ul>
+
+<h3>Прошивка пульта SmartTabUI</h3>
+<p>Прошивка пульта, устанавливается со страницы Flash Firmware. Настройки пульта при обновлении сохраняются.</p>
+
+<h4>20 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> вид PART на экране DRO показывает деталь, которую делает задание, вырезанной из заготовки, в реальном времени во время задания. Вращайте её маховиком (AXIS на OFF) или переключитесь на затенённый вид сверху. Лазерные задания показывают прожиг.</li>
+<li><strong>Новое:</strong> третье поле коррекции показывает LASER, пока выбран лазер или загружено лазерное задание.</li>
+</ul>
+
+<h4>17 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> регистрация. Пульт регистрируется по ID чипа при первой установке с лицензией. Ничего не блокируется: незарегистрированный пульт работает полностью и показывает <em>Not registered</em> на загрузочном экране и в Settings. См. <a href="index.php?route=journal3/blog/post&journal_blog_post_id=32">Установка, обновление и регистрация SmartTabUI</a>.</li>
+<li><strong>Новое:</strong> в режиме Record для каждой точки можно задать подачу, врезание и рампу (угол входа по спирали).</li>
+<li><strong>Новое:</strong> Rewind показывает полосу того, насколько далеко назад по траектории он ушёл, а панель остаётся открытой до конца Rewind.</li>
+<li><strong>Изменено:</strong> Measure → Go to centre сначала поднимает Z вверх, как Home → Go to 0.</li>
+</ul>
+
+<h4>16 октября 2026</h4>
+<ul>
+<li><strong>Новая прошивка:</strong> SmartTabUI, написанная с нуля. DRO с переключателем шага, меню нуля и щупа, макросы, шпиндель, обзор файлов с превью траектории, Prepare и Run, подстройка Z на ходу, Rewind, восстановление задания и Record & Retrace.</li>
+<li><strong>Новое:</strong> двойное нажатие ENABLE спрашивает, измерить деталь или записать точки.</li>
+<li><strong>Новое:</strong> темы Dark, Neutral и Light; Settings с монитором входов и монитором UART; перезапуск удержанием аварийного стопа + ENABLE в течение 3 секунд.</li>
+<li><strong>Новое:</strong> загрузочный экран с номером сборки и звуковые сигналы при повороте переключателей оси и шага.</li>
+<li><strong>Исправлено:</strong> всплывающее окно Record & Retrace закрывалось само после каждой точки.</li>
+<li><strong>Исправлено:</strong> подстройка Z на ходу теперь остаётся на экране, пока контроллер её не подтвердит.</li>
+<li><strong>Исправлено:</strong> выполнение файла больше не задерживает другие команды с пульта.</li>
+</ul>
+
+<h3>dpCREATOR WebUI</h3>
+<p>Браузерный интерфейс, устанавливается на плату со страницы Flash Firmware (вкладка WebUI).</p>
+
+<h4>20 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> живой 3D-вид во время задания: шпиндель или лазерный модуль движется над заданием, резы окрашены по глубине, а карточка показывает оставшееся время и ход выполнения. Переключатели Follow, Auto-fit, Spindle view и Stock.</li>
+<li><strong>Новое:</strong> вид детали: деталь, вырезанная из заготовки выбранной фрезой, в реальном времени во время задания, с бледной траекторией поверх по желанию. Лазерные задания показывают прожиг.</li>
+<li><strong>Новое:</strong> полоса выполнения под видом с Cycle start, Pause, Stop, Probe, охлаждением и ползунками коррекций. Для лазерного задания она показывает мощность лазера в %.</li>
+<li><strong>Новое:</strong> положение показывается в столбцах Work и Machine, метка <em>Not homed</em> — если ноль станка не найден, а обнуление требует короткого удержания, чтобы случайный щелчок не сдвинул рабочий ноль.</li>
+<li><strong>Новое:</strong> Probe Z0 с пластиной касания или 3D-щупом.</li>
+<li><strong>Новое:</strong> у лазера с собственным номером инструмента в столбце инструментов появляется кнопка <em>T2 laser</em>.</li>
+<li><strong>Новое:</strong> кнопка Studio переключает на вкладку Studio, если она уже открыта, а кнопка WebUI в Studio переключает обратно.</li>
+<li><strong>Исправлено:</strong> стол и ход рисуются только тогда, когда они реальны (поиск нуля и программные ограничения включены), поэтому на станке без найденного нуля задание больше не показывается за пределами сетки.</li>
+<li><strong>Исправлено:</strong> нижняя строка могла показывать актуальную сборку красным.</li>
+</ul>
+
+<h4>17 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> уведомление об обновлениях. Примерно раз в день WebUI спрашивает у dpcreator.eu, есть ли новые сборки, и показывает <em>update available</em> в нижней строке. Это можно отключить там же.</li>
+<li><strong>Новое:</strong> нижняя строка показывает сборку подключённого пульта.</li>
+<li><strong>Новое:</strong> уведомление о регистрации. Ничего не блокируется: незарегистрированный WebUI показывает небольшое уведомление, которое можно скрыть на неделю.</li>
+</ul>
+
+<h4>16 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> в Record & Retrace есть карта точек и редактор выбранной точки, как в режиме Record на пульте.</li>
+<li><strong>Новое:</strong> список точек хранится на плате и общий с пультом; прямоугольные карманы.</li>
+<li><strong>Новое:</strong> <em>Measure part</em> на пульте открывает Centre Finder; очистка углов очищает их на обеих сторонах.</li>
+</ul>
+
+<h4>15 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> Centre Finder: измерьте деталь по углам, узнайте её размер, задайте рабочий ноль в её центре или в углу и создайте задание выравнивания поверхности.</li>
+<li><strong>Новое:</strong> Record & Retrace: подводите джогом к отмеченным точкам, добавляйте точки маршрута и превращайте их в задание сверления или выборки карманов.</li>
+<li><strong>Новое:</strong> Offcuts → DXF: запишите контуры обрезков или заготовки (с привязкой кромок к 45°) и экспортируйте их в DXF, чтобы разместить на них свой чертёж.</li>
+<li><strong>Новое:</strong> библиотека инструментов с плавающим выбором инструмента, режимы смены инструмента с позициями парковки для каждого инструмента и генератор макроса M6.</li>
+<li><strong>Новое:</strong> измерение высоты материала щупом, установка Z0 по датчику длины инструмента и установка X0/Y0 в измеренных точках.</li>
+<li><strong>Новое:</strong> джог (включая диагонали 45°) продолжает работать, пока открыты Centre Finder, Record & Retrace или Offcuts.</li>
+<li><strong>Исправлено:</strong> файлы, сохранённые из WebUI, могли оказаться на плате пустыми. Теперь сохранения проверяются и повторяются.</li>
+<li><strong>Исправлено:</strong> список Record & Retrace сжимался превью G-кода и мог добавить одну и ту же точку дважды.</li>
+<li><strong>Исправлено:</strong> окно Record & Retrace могло оставаться на экране после закрытия; безопасная высота Z теперь по умолчанию 5 мм, а задания с проблемами блокируются.</li>
+</ul>
+
+<h4>13 октября 2026</h4>
+<ul>
+<li><strong>Новое:</strong> dpCREATOR WebUI стал отдельным продуктом, который устанавливается на плату с dpcreator.eu.</li>
+<li><strong>Исправлено:</strong> две одновременно открытые вкладки WebUI больше не борются за соединение с платой.</li>
+<li><strong>Новое:</strong> предупреждение, если на модуле платы нет 8 МБ PSRAM, и сообщение с объяснением, когда превью для пульта приостанавливаются из-за нехватки памяти на плате.</li>
+</ul>

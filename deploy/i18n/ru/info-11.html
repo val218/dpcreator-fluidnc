@@ -1,0 +1,75 @@
+<section class="rndc" id="rnd-profile">
+<div class="rndc-eye">dpCREATOR R&amp;D Club</div>
+<h2 class="rndc-h">Мой профиль R&amp;D</h2>
+<p class="rndc-lead">Ваш публичный профиль на странице <a href="rnd-members">участников клуба R&amp;D</a> и ваши новости о сборке. Мы проверяем всё перед публикацией, обычно в течение дня.</p>
+<div id="rnd-app"><p class="rndc-sub">Загружаем ваш профиль…</p></div>
+<noscript><p>Включите JavaScript, чтобы редактировать профиль.</p></noscript>
+</section>
+<script>
+(function(){
+var API='/rnd.php?f=';
+var STAGE={licences:'Got the licences',parts:'Parts ready',building:'Building',running:'First job run',report:'Report sent'};
+var LINK={youtube:'YouTube',instagram:'Instagram',facebook:'Facebook',tiktok:'TikTok',website:'Website',github:'GitHub',other:'Other link'};
+var app=document.getElementById('rnd-app'),me=null;
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+function post(f,body){return fetch(API+f,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-RND':'1'},body:JSON.stringify(body||{})}).then(function(r){return r.json();});}
+function upload(file){var fd=new FormData();fd.append('photo',file);return fetch(API+'photo',{method:'POST',credentials:'same-origin',headers:{'X-RND':'1'},body:fd}).then(function(r){return r.json();});}
+function field(label,name,val,opt){opt=opt||{};var f=el('div','rndc-f');f.dataset.name=name;var id='rf-'+name.replace(/\W/g,'');var l=el('label',null,label);l.htmlFor=id;f.appendChild(l);
+  var i=opt.area?el('textarea'):el('input');if(!opt.area)i.type=opt.type||'text';i.id=id;i.name=name;i.value=val||'';if(opt.max)i.maxLength=opt.max;if(opt.ph)i.placeholder=opt.ph;f.appendChild(i);if(opt.help)f.appendChild(el('small',null,opt.help));return f;}
+function showErrors(form,errs){form.querySelectorAll('.rndc-f').forEach(function(f){f.classList.remove('bad');var e=f.querySelector('.err');if(e)e.remove();});
+  Object.keys(errs||{}).forEach(function(k){var f=form.querySelector('[data-name="'+k.replace('link_','links.')+'"]');if(!f)return;f.classList.add('bad');f.appendChild(el('div','err',errs[k]));});
+  var first=form.querySelector('.bad input,.bad textarea');if(first)first.focus();}
+function note(text,kind){return el('div','rndc-note'+(kind?' '+kind:''),text);}
+function render(){
+  app.textContent='';
+  if(!me.logged_in){var p=el('div','rndc-panel');p.appendChild(el('h3',null,'Log in first'));p.appendChild(el('p',null,'Your R&D profile belongs to your dpcreator.eu account.'));var c=el('div','rndc-cta');var a=el('a','rndc-b','Log in');a.href='index.php?route=account/login';var b=el('a','rndc-b rndc-b2','Create an account');b.href='index.php?route=account/register';c.appendChild(a);c.appendChild(b);p.appendChild(c);app.appendChild(p);return;}
+  if(!me.member){var q=el('div','rndc-panel');q.appendChild(el('h3',null,'Profiles are for R&D Club members'));q.appendChild(el('p',null,'Once you are picked as a tester, you can fill in your profile and post build updates here.'));var ap=el('a','rndc-b','Apply to the R&D Club');ap.href='index.php?route=information/information&information_id=9';q.appendChild(ap);app.appendChild(q);return;}
+  // status
+  if(me.reject_note)app.appendChild(note('We sent your profile back: '+me.reject_note+' Change it and save again.','warn'));
+  else if(me.pending)app.appendChild(note(me.published?'Your changes are waiting for review. Your current profile stays visible meanwhile.':'Thanks! Your profile is waiting for review. It appears on the members page once approved.'));
+  else if(me.published){var ok=note('Your profile is live. ','ok');var v=el('a',null,'See it on the members page');v.href='rnd-members#m-'+me.pid;ok.appendChild(v);app.appendChild(ok);}
+  if(me.feedback){var fb=el('div','rndc-fb');fb.appendChild(el('b',null,'dpCREATOR on your build: '));fb.appendChild(document.createTextNode(me.feedback));app.appendChild(fb);}
+  // stage
+  var sp=el('div','rndc-panel');sp.appendChild(el('h3',null,'Where is your build?'));sp.appendChild(el('p',null,'This shows as a progress bar on your profile. It changes straight away.'));var pick=el('div','rndc-stagepick');
+  me.stages.forEach(function(s,i){var b=el('button',null,(i+1)+'. '+STAGE[s]);b.type='button';b.setAttribute('aria-pressed',me.stage===s?'true':'false');b.onclick=function(){post('stage',{stage:s}).then(function(j){if(!j.error){me.stage=s;pick.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed','false');});b.setAttribute('aria-pressed','true');}});};pick.appendChild(b);});
+  sp.appendChild(pick);app.appendChild(sp);
+  // profile form
+  var d=me.draft||{links:{}},form=el('form','rndc-panel');form.noValidate=true;form.appendChild(el('h3',null,'Your profile'));
+  var avaWrap=el('div','rndc-f');avaWrap.appendChild(el('label',null,'Profile photo'));var avaRow=el('div','rndc-who');var ava;var avatar=d.avatar||'';
+  function setAva(url){if(ava)ava.remove();if(url){ava=el('img','rndc-ava');ava.src=url;ava.alt='';}else{ava=el('div','rndc-ava','?');}avaRow.insertBefore(ava,avaRow.firstChild);}
+  setAva(d.avatar_url);var af=el('input');af.type='file';af.accept='image/jpeg,image/png,image/webp';af.onchange=function(){if(!af.files[0])return;af.disabled=true;upload(af.files[0]).then(function(j){af.disabled=false;af.value='';if(j.error){alert(j.error);return;}avatar=j.path;setAva(j.url);});};avaRow.appendChild(af);avaWrap.appendChild(avaRow);avaWrap.appendChild(el('small',null,'A photo of you, your workshop or your machine. Location data is removed from photos.'));form.appendChild(avaWrap);
+  var two=el('div','rndc-two');two.appendChild(field('Name or nickname','name',d.name,{max:60}));two.appendChild(field('Where you are (optional)','location',d.location,{max:60,ph:'e.g. Riga, Latvia'}));form.appendChild(two);
+  form.appendChild(field('What you do','work',d.work,{max:140,ph:'e.g. Furniture maker, sign shop, hobby machinist',help:'Your work or the kind of projects you make.'}));
+  var two2=el('div','rndc-two');two2.appendChild(field('Your machine','machine',d.machine,{max:140,ph:'e.g. 1000 x 600 mm router, 2.2 kW spindle'}));two2.appendChild(field('Controller','controller',d.controller,{max:90,ph:'e.g. dpCREATOR R2'}));form.appendChild(two2);
+  form.appendChild(field('About you and your build','bio',d.bio,{area:1,max:900,help:'A few lines: your experience, what you want to make with the machine.'}));
+  var lh=el('h3',null,'Where people can follow you');lh.style.fontSize='22px';lh.style.marginTop='18px';form.appendChild(lh);
+  var lg=el('div','rndc-two');me.links.forEach(function(k){lg.appendChild(field(LINK[k],'links.'+k,(d.links||{})[k],{type:'url',max:300,ph:'https://'}));});form.appendChild(lg);
+  var cf=el('div','rndc-f');cf.dataset.name='consent';var cl=el('label','rndc-chk');var cb=el('input');cb.type='checkbox';cb.checked=!!me.consent;cl.appendChild(cb);cl.appendChild(document.createTextNode('I agree that this profile, my build updates and photos are shown publicly on dpcreator.eu. I can delete them at any time on this page.'));cf.appendChild(cl);form.appendChild(cf);
+  var sv=el('button','rndc-b','Save profile');sv.type='submit';form.appendChild(sv);
+  form.onsubmit=function(e){e.preventDefault();var body={consent:cb.checked?1:0,avatar:avatar,links:{}};['name','location','work','machine','controller','bio'].forEach(function(n){body[n]=form.querySelector('[name="'+n+'"]').value;});me.links.forEach(function(k){body.links[k]=form.querySelector('[name="links.'+k+'"]').value;});
+    sv.disabled=true;post('save',body).then(function(j){sv.disabled=false;if(j.errors){showErrors(form,j.errors);return;}if(j.error){alert(j.error);return;}load(true);});};
+  app.appendChild(form);
+  // new update
+  var uf=el('form','rndc-panel');uf.noValidate=true;uf.appendChild(el('h3',null,'Post a build update'));uf.appendChild(el('p',null,'What you did, where you got stuck, what worked. Photos and a video make it much more useful. Each update is checked before it appears.'));
+  uf.appendChild(field('Title','title','',{max:120,ph:'e.g. Front panel wired, first power-up'}));uf.appendChild(field('What happened','body','',{area:1,max:3000}));
+  var pw=el('div','rndc-f');pw.appendChild(el('label',null,'Photos (up to 8)'));var th=el('div','rndc-thumbs');var photos=[];var pf=el('input');pf.type='file';pf.multiple=true;pf.accept='image/jpeg,image/png,image/webp';
+  function drawThumbs(){th.textContent='';photos.forEach(function(p,i){var w=el('div'),im=el('img');im.src=p.url;im.alt='';var x=el('button',null,'Remove');x.type='button';x.onclick=function(){photos.splice(i,1);drawThumbs();};w.appendChild(im);w.appendChild(x);th.appendChild(w);});}
+  pf.onchange=function(){var files=[].slice.call(pf.files,0,8-photos.length);pf.disabled=true;var chain=Promise.resolve();files.forEach(function(f){chain=chain.then(function(){return upload(f).then(function(j){if(j.error)alert(j.error);else{photos.push(j);drawThumbs();}});});});chain.then(function(){pf.disabled=false;pf.value='';});};
+  pw.appendChild(pf);pw.appendChild(th);uf.appendChild(pw);
+  uf.appendChild(field('Video link (optional)','video','',{type:'url',max:300,ph:'https://youtu.be/…',help:'A YouTube link shows as a preview; other links show as a link.'}));
+  var pb=el('button','rndc-b','Send update for review');pb.type='submit';uf.appendChild(pb);
+  uf.onsubmit=function(e){e.preventDefault();pb.disabled=true;post('update',{title:uf.querySelector('[name=title]').value,body:uf.querySelector('[name=body]').value,video:uf.querySelector('[name=video]').value,photos:photos.map(function(p){return p.path;})}).then(function(j){pb.disabled=false;if(j.errors){showErrors(uf,j.errors);return;}if(j.error){alert(j.error);return;}load(true);});};
+  app.appendChild(uf);
+  // my updates
+  if(me.updates.length){var mu=el('div','rndc-panel');mu.appendChild(el('h3',null,'Your updates'));var LBL={pending:'waiting for review',approved:'live',rejected:'sent back'};
+    me.updates.forEach(function(u){var r=el('div','rndc-myup'),t=el('div',null);t.appendChild(el('strong',null,u.title));t.appendChild(el('span','rndc-pill '+u.status,LBL[u.status]||u.status));r.appendChild(t);r.appendChild(el('div','rndc-sub',u.date));
+      if(u.status==='rejected'&&u.reject_note)r.appendChild(note('Our note: '+u.reject_note,'warn'));if(u.feedback){var f=el('div','rndc-fb');f.appendChild(el('b',null,'dpCREATOR: '));f.appendChild(document.createTextNode(u.feedback));r.appendChild(f);}
+      var del=el('button','rndc-b rndc-b2','Delete');del.type='button';del.style.fontSize='15px';del.style.padding='6px 14px';del.style.marginTop='8px';del.onclick=function(){if(!confirm('Delete this update and its photos?'))return;post('delete_update',{id:u.id}).then(function(){load();});};r.appendChild(del);mu.appendChild(r);});
+    app.appendChild(mu);}
+  // delete
+  var dz=el('div','rndc-panel');dz.appendChild(el('h3',null,'Delete my profile'));dz.appendChild(el('p',null,'Removes your profile, all your updates and photos from dpcreator.eu straight away. Your licences and account stay.'));var dd=el('button','rndc-b rndc-b3','Delete my profile');dd.type='button';dd.onclick=function(){if(!confirm('Delete your profile, all updates and photos? This cannot be undone.'))return;post('delete_me').then(function(){load(true);});};dz.appendChild(dd);app.appendChild(dz);
+}
+function load(scroll){fetch(API+'me',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json();}).then(function(j){me=j;render();if(scroll===true)window.scrollTo({top:document.getElementById('rnd-profile').offsetTop-20});}).catch(function(){app.textContent='Your profile could not be loaded. Try again in a minute.';});}
+load();
+})();
+</script>

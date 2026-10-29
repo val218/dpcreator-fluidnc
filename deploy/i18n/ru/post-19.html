@@ -1,0 +1,30 @@
+<p>Пульт SmartTabUI подключается к контроллеру по <strong>проводному последовательному каналу</strong> (UART1), а не по сети. Он продолжает работать, даже если пропадёт Wi-Fi или Ethernet.</p>
+<figure class="dpc-shot dpc-photo" style="margin:18px 0 22px"><img src="image/catalog/dpc-site/products/tabui-pendant-photo-1.jpg" alt="Собранный пульт SmartTabUI в одной руке" loading="lazy" style="max-width:480px;width:100%;height:auto;border-radius:6px;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Собранный пульт: маховик сверху, аварийный стоп слева, кнопка разрешения справа, под дисплеем переключатели STEP (x1, x10, x100) и AXIS (OFF, X, Y, Z, A).</figcaption></figure>
+<h3>Железо</h3>
+<ul><li>Плата JC2432W328C: ESP32, сенсорный экран 2,8" 320×240</li>
+<li>Маховик MPG (квадратурный энкодер) на GPIO16 / GPIO4</li>
+<li>Кнопка аварийного стопа на GPIO17 (активный низкий)</li>
+<li>Дополнительные переключатели оси и шага через расширитель портов PCF8574</li></ul>
+<h3>Подключение</h3>
+<p>Пульт подключается разъёмом <strong>GX12 на 5 контактов</strong> и пятижильным кабелем, все линии — на порт пульта контроллера:</p><ul><li><strong>TX / RX</strong> — последовательный канал (GPIO1 / GPIO2 контроллера), перекрёстно</li><li><strong>5V / GND</strong> — питание пульта</li><li><strong>E-STOP</strong> — кнопка аварийного стопа на пульте замыкает эту линию на GND; после этого контроллер аппаратно отключает импульсы шага</li></ul><p>Кабель должен быть коротким и экранированным; помехи в кабеле проявляются как потерянные байты (см. «Устранение неполадок»). Собираете пульт сами? См. <em><a href="index.php?route=journal3/blog/post&journal_blog_post_id=26">Соберите свой пульт SmartTabUI: сборка и подключение</a></em>.</p>
+<h3>config.yaml</h3>
+<p>В примере конфигурации это уже есть. На обеих сторонах должна быть одинаковая скорость (1 000 000 бод).</p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>uart1:
+  txd_pin: gpio.1
+  rxd_pin: gpio.2
+  rts_pin: NO_PIN
+  cts_pin: NO_PIN
+  baud: 1000000
+  mode: 8N1
+
+uart_channel1:
+  uart_num: 1
+  report_interval_ms: 75
+  message_level: Info</code></pre>
+<h3>Проверьте связь</h3>
+<ul><li>Когда пульт подключён, в заголовке WebUI отображается <strong>значок пульта</strong>.</li>
+<li><code>$Pendant/Status</code> отвечает <code>connected</code>, <code>disconnected</code> или <code>none</code> (в конфигурации нет <code>uart_channel1</code>).</li>
+<li>Отключённый пульт обнаруживается примерно за 3 секунды, пока станок простаивает.</li></ul>
+<figure class="dpc-shot" style="margin:18px 0 22px"><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/pendant-dro-idle.png" alt="Экран DRO на SmartTabUI, связь есть" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Связь есть: TX и RX мигают в правом верхнем углу, DRO показывает положение станка. Здесь выбрана ось X с шагом x10.</figcaption></figure><h3>Настройки пульта</h3>
+<p>Удерживайте кнопку EN, пока при запуске идёт 5-секундная полоса, чтобы открыть настройки пульта: тема, режим кнопки EN, оси на DRO, подсветка, громкость динамика, напоминание об обслуживании и лицензия с ID чипа пульта. Настройки станка (рабочая зона, угол нуля) берутся из <code>config.yaml</code> контроллера. См. <a href="index.php?route=journal3/blog/post&journal_blog_post_id=30">Пульт SmartTabUI: экраны, джог и настройки</a>.</p>
+<p><strong>Прошивайте оба:</strong> прошивки пульта и контроллера разрабатываются вместе. Обновили одну — обновите и другую, см. <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>.</p>

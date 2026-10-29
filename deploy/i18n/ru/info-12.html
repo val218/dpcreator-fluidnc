@@ -1,0 +1,64 @@
+<link rel="stylesheet" href="/catalog/view/javascript/dpc-setup/dpc-builder.css?v=1">
+<div class="dpmb">
+<div class="app">
+  <header class="top">
+
+    <span class="sub">Для dpCREATOR R3 или любой платы ESP32 / ESP32-S3 с вашими собственными пинами. Выберите оси, шпиндели и лазеры и то, что подключено к каждому входу и выходу: конструктор напишет <code>config.yaml</code> для dpCREATOR или обычной FluidNC и нарисует станок в масштабе. Или вставьте свою конфигурацию, чтобы увидеть её.</span>
+  </header>
+
+  <section class="left" aria-label="Конструктор и config.yaml">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="mb-tab-build" aria-selected="true" aria-controls="mb-pane-build">Сборка</button>
+      <button type="button" role="tab" id="mb-tab-yaml" aria-selected="false" aria-controls="mb-pane-yaml">config.yaml</button>
+      <span class="grow"></span>
+      <span class="status" id="mb-status" aria-live="polite"></span>
+    </div>
+    <div class="pane" id="mb-pane-build" role="tabpanel" aria-labelledby="mb-tab-build">
+      <div class="banner" id="mb-handnote" hidden><span>config.yaml был изменён вручную. Любое изменение здесь пересоберёт его из этих настроек.</span><button type="button" class="small" id="mb-import">Загрузить сюда</button></div>
+      <div class="scroll" id="mb-build"></div>
+    </div>
+    <div class="pane" id="mb-pane-yaml" role="tabpanel" aria-labelledby="mb-tab-yaml" hidden>
+      <div class="card" style="flex:1;display:flex;flex-direction:column;gap:8px;min-height:0">
+        <div class="row" style="justify-content:space-between">
+          <span class="note">Измените или вставьте конфигурацию. Чертёж и схема подключения следуют за ней.</span>
+          <span class="row"><button type="button" class="small" id="mb-import2">Загрузить в конструктор</button><button type="button" class="small" id="mb-copy">Копировать</button></span>
+        </div>
+        <textarea id="mb-yaml" spellcheck="false" aria-label="Текст config.yaml"></textarea>
+        <ul class="probs" id="mb-probs"></ul>
+      </div>
+      <div class="card"><div class="kv" id="mb-facts"></div></div>
+    </div>
+  </section>
+
+  <section class="stage" aria-label="Чертёж станка">
+    <div class="sheet">
+      <div class="views" role="group" aria-label="Чертёж">
+        <button type="button" id="mb-v-plan" aria-pressed="true">Вид сверху</button><button type="button" id="mb-v-wire" aria-pressed="false">Подключение</button>
+      </div>
+      <svg id="mb-plan" role="img" aria-label="Вид станка сверху"></svg>
+      <div id="mb-wiring" hidden></div>
+      <div class="msg" id="mb-msg" role="status"></div>
+    </div>
+    <div class="side">
+      <div class="dro" id="mb-dro"></div>
+      <div class="zpanel"><svg id="mb-elev" role="img" aria-label="Вид оси Z сбоку"></svg></div>
+      <div class="pad" role="group" aria-label="Джог и поиск нуля">
+        <div class="steps" role="group" aria-label="Шаг джога">
+          <button type="button" data-step="1" aria-pressed="false">1</button><button type="button" data-step="10" aria-pressed="false">10</button><button type="button" data-step="100" aria-pressed="true">100</button>
+        </div>
+        <span></span><button type="button" data-j="y,1" title="Джог Y+">Y+</button><button type="button" data-j="z,1" title="Джог Z+">Z+</button>
+        <button type="button" data-j="x,-1" title="Джог X-">X−</button><button type="button" data-j="y,-1" title="Джог Y-">Y−</button><button type="button" data-j="x,1" title="Джог X+">X+</button>
+        <button type="button" data-j="a,-1" title="Поворот A-" class="ajog">A−</button><button type="button" data-j="a,1" title="Поворот A+" class="ajog">A+</button><button type="button" data-j="z,-1" title="Джог Z-">Z−</button>
+        <button type="button" id="mb-home" class="two">$H поиск нуля</button><button type="button" id="mb-unlock">$X</button>
+        <button type="button" id="mb-zero" class="two">Обнулить XY здесь</button><button type="button" id="mb-zeroz">Z0</button>
+        <button type="button" id="mb-gozero" class="two">К рабочему нулю</button><button type="button" id="mb-tool" title="M6 смена инструмента">M6</button>
+      </div>
+    </div>
+  </section>
+</div>
+</div>
+
+<p class="dpmb-foot" style="margin:14px 0 0">Как пользоваться: <a href="/docs/machine-builder-guide">Руководство по конструктору станка</a>. Когда конфигурация готова, <a href="/firmware">прошейте плату</a> и загрузите на неё <code>config.yaml</code>.</p>
+<script src="/catalog/view/javascript/dpc-setup/dpc-setup-core.js?v=3"></script>
+<script src="/catalog/view/javascript/dpc-setup/dpc-builder.js?v=1"></script>
+

@@ -1,0 +1,5 @@
+{
+ "name": "Настройка Ethernet (W5500)",
+ "meta_title": "Настройка Ethernet (W5500) — Документация dpCREATOR",
+ "meta_description": "Включите проводной Ethernet на контроллере dpCREATOR: config.yaml, DHCP или статический IP, проверка связи, gSender по Ethernet."
+}

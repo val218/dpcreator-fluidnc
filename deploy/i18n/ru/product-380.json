@@ -1,0 +1,6 @@
+{
+ "name": "Комплект dpCREATOR R3 + пульт SmartTabUI",
+ "meta_title": "Контроллер ЧПУ FluidNC + пульт | Комплект dpCREATOR R3",
+ "meta_description": "Комплект управления ЧПУ на FluidNC: контроллер dpCREATOR R3 (ESP32-S3, Ethernet) и сенсорный пульт SmartTabUI с маховиком и аварийным стопом, проверены вместе.",
+ "tag": "fluidnc, контроллер ЧПУ, пульт, esp32-s3"
+}

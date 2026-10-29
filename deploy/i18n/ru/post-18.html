@@ -1,0 +1,14 @@
+<p>Плата открывает доступ к своей SD-карте в вашей сети по адресу <code>http://&lt;board-ip&gt;/sd</code>. Подключите её один раз и копируйте на неё G-код, как на флешку. Превью для пульта (<code>.viz</code>) строятся автоматически для каждого скопированного файла G-кода.</p>
+<figure class="dpc-shot" style="margin:18px 0 22px"><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/webui-files-console.jpg" alt="Файлы SD-карты в WebUI" loading="lazy" style="flex:1 1 280px;max-width:420px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">SD-карта в списке файлов WebUI. Сетевой диск показывает те же файлы.</figcaption></figure><h3>Windows: простой способ</h3>
+<ol><li>В панели Files в WebUI нажмите <strong>PC drive</strong>. Скачается скрипт установки, в котором уже указан IP-адрес вашей платы.</li>
+<li>Запустите его двойным щелчком (не используйте «Запуск от имени администратора»). Если Windows выдаст предупреждение, нажмите <strong>Подробнее → Выполнить в любом случае</strong>.</li>
+<li>Ответьте <strong>Да</strong> на единственный запрос прав администратора. SD-карта появится как диск <strong>S:</strong> с именем <em>dpCREATOR SD</em> и будет переподключаться при каждом входе в систему.</li></ol>
+<p>Если IP-адрес платы изменится, запустите скрипт ещё раз. Чтобы всё удалить: <code>dpcreator-sd-drive.cmd remove</code>.</p>
+<h3>macOS и Linux</h3>
+<ul><li>macOS: Finder → Переход → Подключение к серверу → <code>http://&lt;board-ip&gt;/sd</code></li>
+<li>Linux: файловый менеджер с адресом <code>dav://&lt;board-ip&gt;/sd</code> или davfs2</li></ul>
+<h3>Советы</h3>
+<ul><li>Дайте плате постоянный IP-адрес, чтобы диск продолжал работать после перезагрузки.</li>
+<li>Если ввести <code>\\&lt;board-ip&gt;</code> в Проводнике, будет ошибка — у платы нет общего доступа к файлам Windows (SMB). Используйте диск S:.</li>
+<li>Не копируйте большие файлы, пока с SD-карты выполняется задание; у задания приоритет.</li>
+<li>Оставляйте файлы <code>.viz</code> рядом с G-кодом — их использует пульт.</li></ul>

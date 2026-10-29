@@ -1,0 +1,16 @@
+<p>Страница <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> устанавливает самую новую сборку прямо из браузера. Она всегда предлагает последнюю версию, автоматически собранную из исходников.</p>
+<h3>Что понадобится</h3>
+<ul><li><strong>Chrome или Edge</strong> на настольном компьютере. Firefox и Safari не поддерживают Web Serial.</li>
+<li><strong>USB-кабель для передачи данных</strong>. Кабели только для зарядки не видны как порт.</li></ul>
+<h3>Шаги</h3>
+<ol><li><strong>Контроллер: сохраните резервную копию конфигурации.</strong> Сначала скачайте <code>config.yaml</code> из файлового менеджера WebUI. Полный образ заменит его примером конфигурации dpCREATOR. (Пульт свои настройки сохраняет.)</li>
+<li>Войдите в свою учётную запись на dpcreator.eu. Подключите плату, которую нужно прошить, — контроллер <em>или</em> пульт, по одной. Для пульта сначала отсоедините кабель контроллера.</li>
+<li>Откройте <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> и выберите вкладку <em>Controller</em> или <em>Pendant</em>.</li>
+<li><strong>Контроллер:</strong> нажмите <strong>Flash via browser</strong>, затем <strong>Connect & flash firmware</strong>, выберите последовательный порт и нажмите <strong>Install</strong>. Дождитесь <em>Installation complete</em>, перезапустите плату, снова загрузите свой <code>config.yaml</code> и перезагрузите командой <code>$bye</code>. Если вы пользуетесь dpCREATOR WebUI, установите его заново со вкладки <strong>WebUI</strong>: полный образ возвращает стандартную страницу FluidNC, а повторная установка не расходует плату из лицензии.</li>
+<li><strong>Пульт:</strong> нажмите <strong>Connect and install</strong> и выберите последовательный порт. Страница прочитает ID чипа пульта, при первой установке зарегистрирует его в вашей лицензии и установит последнюю версию SmartTabUI с лицензией. Когда появится <em>Done</em>, пульт перезапустится сам. См. <a href="index.php?route=journal3/blog/post&journal_blog_post_id=32">Установка, обновление и регистрация SmartTabUI</a>.</li>
+<li>Не отключайте плату во время прошивки.</li></ol>
+<h3>Какая сборка для чего</h3>
+<table class="table table-bordered"><thead><tr><th>Плата</th><th>Чип</th><th>Образ</th></tr></thead><tbody>
+<tr><td>Контроллер dpCREATOR R2/R3</td><td>ESP32-S3</td><td>FluidNC 4.1.1 + W5500, полный образ по адресу 0x0 (загрузчик, прошивка и стандартная страница FluidNC). dpCREATOR WebUI устанавливается отдельно.</td></tr>
+<tr><td>Пульт SmartTabUI</td><td>ESP32</td><td>Прошивка SmartTabUI по адресу 0x0, лицензия по адресу 0x310000 (настройки сохраняются)</td></tr></tbody></table>
+<h3>Кто что может прошивать</h3><table class="table table-bordered"><thead><tr><th>Прошивка</th><th>Доступ</th><th>Скачивание</th></tr></thead><tbody><tr><td>Контроллер (FluidNC + W5500)</td><td>Бесплатно — войдите в свою учётную запись</td><td>Да, <code>.bin</code> для esptool (запись по адресу <code>0x0</code>)</td></tr><tr><td>Пульт SmartTabUI</td><td>Зарегистрированные пульты — из любой учётной записи. Новый пульт регистрируется с лицензией при первой установке.</td><td>Нет — только установка с сайта</td></tr></tbody></table><p>На странице Flash Firmware указаны номер сборки и дата каждой версии.</p>

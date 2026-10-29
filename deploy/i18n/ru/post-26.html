@@ -1,0 +1,160 @@
+<div class="dpc-bg">
+<p>Это руководство проведёт вас от деталей на верстаке до работающего пульта SmartTabUI. Вам понадобится <a href="index.php?route=product/product&product_id=377">прошивка пульта SmartTabUI</a>. <a href="/image/catalog/dpc-site/files/SmartTabUI-pendant-case-v1.zip">Файлы для печати корпуса из PETG</a> бесплатны. Хотите готовый? Возьмите <a href="index.php?route=product/product&product_id=382">собранный пульт</a>: каждый собирается у нас — самим разработчиком или опытными техниками.</p>
+<div class="alert alert-info"><strong>Требования:</strong> SmartTabUI работает с <strong>прошивкой dpCREATOR FluidNC</strong> на контроллере (бесплатно, устанавливается со страницы <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Он построен на командах, которые добавляет эта прошивка, &ndash; превью, Prepare, Rewind, подстройка Z, восстановление задания, макросы, Measure и Record &ndash; поэтому стандартный FluidNC не поддерживается.</div>
+<div class="note"><strong>Непростая сборка.</strong> Заложите до четырёх часов. Вам предстоит паять, зачищать и прокладывать много тонких проводов в тесном пространстве, поэтому понадобятся паяльник и базовые инструменты для электроники.</div>
+
+<figure><img src="image/catalog/dpc-site/build/front-panel-front.jpg" alt="Собранная передняя панель SmartTabUI с маховиком, дисплеем и переключателями STEP и AXIS" loading="lazy"><figcaption>Готовая передняя панель перед установкой на корпус.</figcaption></figure>
+
+<h3>Что понадобится</h3>
+<figure><img src="image/catalog/dpc-site/build/parts-kit.jpg" alt="Детали SmartTabUI: плата дисплея, модуль PCF8574, динамик, два галетных переключателя с ручками, печатный корпус, маховик, аварийный стоп, кнопка разрешения, разъём GX12, кабели и винты" loading="lazy"><figcaption>Все детали для одного пульта.</figcaption></figure>
+<table class="table table-bordered"><thead><tr><th>Кол-во</th><th>Деталь</th><th>Примечания</th></tr></thead><tbody>
+<tr><td>1</td><td>Плата дисплея JC2432W328C</td><td>Ёмкостный сенсор 2,8", 240×320, ESP32. Версия <strong>C</strong> (ёмкостная).</td></tr>
+<tr><td>1</td><td>Маховик MPG 60 мм</td><td>Типа ZS61, 100 импульсов на оборот, выходы A и B</td></tr>
+<tr><td>1</td><td>Кнопка аварийного стопа, 16 мм</td><td>С фиксацией, с перекидным контактом (C, NO, NC)</td></tr>
+<tr><td>1</td><td>Кнопка без фиксации, 12 мм</td><td>Кнопка ENABLE на правой стороне</td></tr>
+<tr><td>1</td><td>Галетный переключатель, 3 положения</td><td>Типа RS16 или RS26, для STEP</td></tr>
+<tr><td>1</td><td>Галетный переключатель, 5 положений</td><td>Типа RS16 или RS26, для AXIS</td></tr>
+<tr><td>2</td><td>Ручки для галетных переключателей</td><td></td></tr>
+<tr><td>1</td><td>Модуль расширителя портов PCF8574</td><td>Читает переключатели и кнопку ENABLE</td></tr>
+<tr><td>1</td><td>Разъём GX12 на 5 контактов или кабельный ввод PG7</td><td>GX12: съёмный кабель к контроллеру. Ввод PG7: кабель заходит прямо в корпус.</td></tr>
+<tr><td>1</td><td>Печатный корпус</td><td>Корпус, верхняя пластина (глухая или с передней панелью 2 мм), передняя панель и держатель расширителя портов (файлы для печати DPC-TC1)</td></tr>
+<tr><td>4</td><td>Саморезы M2.5</td><td>Крепят дисплей в передней панели</td></tr>
+<tr><td>1</td><td>Небольшой динамик с разъёмом JST</td><td>Подключается к P4 (SPEAK)</td></tr>
+<tr><td>7</td><td>Винты M3 (чёрные)</td><td>Крепят переднюю панель к корпусу</td></tr>
+<tr><td>—</td><td>Монтажный провод и кабели JST</td><td>Для P1, P6 и CN1 на плате дисплея</td></tr>
+<tr><td>—</td><td>Термоусадочная трубка</td><td>По желанию, для изоляции паек</td></tr>
+<tr><td>—</td><td>Силиконовый герметик 704 для электроники</td><td>Фиксирует дисплей, модули и все соединения</td></tr>
+</tbody></table>
+<p><strong>Инструменты:</strong> паяльник и припой, бокорезы, стриппер, крестовая отвёртка, мультиметр, кабель USB-C. По желанию: термофен для термоусадки.</p>
+<div class="note">Рекомендуем зафиксировать компоненты и все соединения силиконовым герметиком 704 для электроники. Так провода и разъёмы не разболтаются.</div>
+
+<h3>1. Снимите RGB-светодиод с платы дисплея</h3>
+<p>На лицевой стороне JC2432W328C рядом с дисплеем стоит RGB-светодиод. Он подключён к IO4, IO16 и IO17 — тем же выводам, которые пульт использует на разъёме P6 для маховика и аварийного стопа. Если его оставить, он нагружает эти линии, и входы читаются ненадёжно. Выпаяйте его паяльником или феном.</p>
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/lcd-with-led.jpg" alt="Плата дисплея JC2432W328C с RGB-светодиодом в правом верхнем углу" loading="lazy"><figcaption>До: RGB-светодиод находится в правом верхнем углу.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/lcd-led-removed.jpg" alt="Плата дисплея JC2432W328C без RGB-светодиода, пустые площадки в правом верхнем углу" loading="lazy"><figcaption>После: светодиод снят, остались только площадки.</figcaption></figure>
+</div>
+
+<h3>2. Соберите переднюю панель</h3>
+<figure><img src="image/catalog/dpc-site/build/front-panel-printed.jpg" alt="Обратная сторона печатной передней панели с отверстиями для маховика, дисплея и двух переключателей" loading="lazy"><figcaption>Обратная сторона печатной передней панели.</figcaption></figure>
+<ol class="steps">
+<li><strong>Дисплей.</strong> Сначала снимите с дисплея защитную плёнку. Вставьте плату в переднюю панель и закрепите четырьмя саморезами M2.5.
+<div class="warn">Осторожно с разъёмом дисплея, когда плата входит в печатную панель: там очень тесно.</div>
+Затем нанесите валик силикона 704 по периметру платы — везде, где он достаёт до корпуса. Прижимайте дисплей, пока силикон сохнет, и следите, чтобы он сидел до упора.</li>
+<li><strong>Маховик.</strong> Вставьте MPG 60 мм в круглое отверстие и затяните на трёх крепёжных шпильках.</li>
+<li><strong>Переключатель STEP.</strong> Установите галетный переключатель на 3 положения (RS16 или RS26) в левое отверстие.</li>
+<li><strong>Переключатель AXIS.</strong> Установите галетный переключатель на 5 положений в правое отверстие.</li>
+</ol>
+<div class="note">Если у ваших галетных переключателей есть регулируемая стопорная шайба, установите её на 3 положения для STEP и на 5 для AXIS до того, как затянете гайку, чтобы ручка останавливалась на x1 / x100 и на OFF / A.</div>
+<figure><img src="image/catalog/dpc-site/build/front-panel-back.jpg" alt="Обратная сторона передней панели с установленными платой дисплея, маховиком и обоими галетными переключателями, без проводов" loading="lazy"><figcaption>Передняя панель с дисплеем, маховиком и обоими переключателями, готова к подключению.</figcaption></figure>
+
+<h3>3. Соберите корпус</h3>
+<ol class="steps">
+<li>Вкрутите <strong>кнопку аварийного стопа</strong> (16 мм) в левую сторону корпуса.</li>
+<li>Вкрутите <strong>кнопку ENABLE</strong> (12 мм) в правую сторону.</li>
+<li><strong>Разъём GX12</strong> пока не ставьте. Он устанавливается после подключения проводов, чтобы к ним было легко подобраться. Используете вместо него <strong>кабельный ввод PG7</strong>? Установите его в то же отверстие и протяните кабель позже.</li>
+</ol>
+<figure><img src="image/catalog/dpc-site/build/case-faceplate.jpg" alt="Корпус с лицевой пластиной, ручкой и кнопкой ENABLE на правой стороне" loading="lazy"><figcaption>Корпус с ручкой. Кнопка ENABLE находится на правой стороне.</figcaption></figure>
+
+<h3>4. Подключите провода</h3>
+<p>Всё подключается к разъёмам на обратной стороне платы дисплея: <strong>P1</strong> (последовательный канал и питание), <strong>P6</strong> (маховик и аварийный стоп), <strong>CN1</strong> (I²C к PCF8574) и <strong>P4</strong> (динамик). К самой плате ничего не паяется.</p>
+<figure class="wide"><a href="image/catalog/dpc-site/build/pendant-wiring-connectors.png" target="_blank" rel="noopener"><img src="image/catalog/dpc-site/build/pendant-wiring-connectors.png" alt="Схема подключения SmartTabUI: GX12, аварийный стоп, разъёмы платы дисплея P1, P6 и CN1, маховик MPG, PCF8574 и переключатели" loading="lazy"></a><figcaption>Все соединения пульта (нажмите, чтобы открыть в полном размере). Цвета проводов — как в таблицах ниже.</figcaption></figure>
+
+<p><strong>P6 → маховик и аварийный стоп</strong></p>
+<table class="table table-bordered"><thead><tr><th>Вывод P6</th><th>Провод</th><th>Куда</th></tr></thead><tbody>
+<tr><td>IO17</td><td><span class="sw" style="background:#d22b2b"></span>красный</td><td>Кнопка аварийного стопа, контакт C</td></tr>
+<tr><td>IO4</td><td><span class="sw" style="background:#222"></span>чёрный</td><td>MPG B</td></tr>
+<tr><td>IO16</td><td><span class="sw" style="background:#e3b200"></span>жёлтый</td><td>MPG A</td></tr>
+<tr><td>GND</td><td><span class="sw" style="background:#2e9b4a"></span>зелёный</td><td>MPG −</td></tr>
+</tbody></table>
+<p><strong>+</strong> MPG подключается к <strong>3,3 V</strong>: возьмите его с вывода 3.3V на CN1 вместе с проводом VCC модуля PCF8574.</p>
+
+<p><strong>CN1 → модуль PCF8574</strong></p>
+<table class="table table-bordered"><thead><tr><th>Вывод CN1</th><th>PCF8574</th></tr></thead><tbody>
+<tr><td>GND</td><td>GND</td></tr>
+<tr><td>IO22</td><td>SCL</td></tr>
+<tr><td>IO21</td><td>SDA</td></tr>
+<tr><td>3.3V</td><td>VCC</td></tr>
+</tbody></table>
+
+<p><strong>Входы PCF8574 → переключатели и ENABLE</strong>. Каждый вход замыкается на GND: подключите общий вывод каждого галетного переключателя и одну сторону кнопки ENABLE к GND.</p>
+<table class="table table-bordered"><thead><tr><th>Вход</th><th>Функция</th></tr></thead><tbody>
+<tr><td>P0 · P1 · P2 · P3</td><td>Переключатель AXIS: X · Y · Z · A (OFF = нет контакта)</td></tr>
+<tr><td>P4 · P5</td><td>Переключатель STEP: ×10 · ×100 (×1 = нет контакта)</td></tr>
+<tr><td>P6</td><td>Кнопка ENABLE</td></tr>
+<tr><td>P7</td><td>не используется</td></tr>
+</tbody></table>
+
+<p><strong>P1 → разъём GX12</strong> (кабель к контроллеру). С кабельным вводом PG7 подключите пять жил кабеля к тем же сигналам.</p>
+<table class="table table-bordered"><thead><tr><th>Контакт GX12</th><th>Сигнал</th><th>Провод</th><th>Откуда</th></tr></thead><tbody>
+<tr><td>1</td><td>+5V</td><td><span class="sw" style="background:#d22b2b"></span>красный</td><td>P1 5V</td></tr>
+<tr><td>2</td><td>TXD</td><td><span class="sw" style="background:#222"></span>чёрный</td><td>P1 TX</td></tr>
+<tr><td>3</td><td>E-STOP</td><td><span class="sw" style="background:#e8771a"></span>оранжевый</td><td>Кнопка аварийного стопа, контакт NC</td></tr>
+<tr><td>4</td><td>RXD</td><td><span class="sw" style="background:#e3b200"></span>жёлтый</td><td>P1 RX</td></tr>
+<tr><td>5</td><td>GND</td><td></td><td>P1 GND</td></tr>
+</tbody></table>
+
+<p><strong>Контакты кнопки аварийного стопа</strong></p>
+<table class="table table-bordered"><thead><tr><th>Контакт</th><th>Куда</th></tr></thead><tbody>
+<tr><td>C (общий)</td><td>P6 IO17</td></tr>
+<tr><td>NO</td><td>GND</td></tr>
+<tr><td>NC</td><td>Контакт 3 GX12, к контроллеру</td></tr>
+</tbody></table>
+
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/front-panel-wired.jpg" alt="Обратная сторона передней панели: маховик подключён к P6, модуль PCF8574 — к CN1" loading="lazy"><figcaption>Маховик на P6, PCF8574 на CN1, модуль ещё не закреплён.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/wiring-overview-photo.jpg" alt="Открытый пульт: слева корпус с аварийным стопом, кнопкой ENABLE и GX12, справа подключённая передняя панель" loading="lazy"><figcaption>Всё подключено, перед закрытием: PCF8574 приклеен к обратной стороне платы дисплея.</figcaption></figure>
+</div>
+<ol class="steps">
+<li>Закрепите модуль PCF8574 на обратной стороне платы дисплея каплей силикона 704, подальше от модуля ESP32.</li>
+<li>Подключите динамик к <strong>P4 (SPEAK)</strong> и закрепите его внутри корпуса каплей силикона.</li>
+<li>Нанесите немного силикона на пайки и разъёмы, чтобы они не разболтались.</li>
+<li>Установите разъём GX12 в нижнюю часть корпуса и припаяйте его пять проводов. С вводом PG7: протяните кабель через ввод, подключите пять жил, затем затяните ввод, чтобы он зажал кабель.</li>
+<li>Заизолируйте пайки термоусадкой (по желанию).</li>
+</ol>
+
+<h3>5. Закройте корпус</h3>
+<p>Уложите провода ровно, чтобы ничего не пережать, поставьте переднюю панель на корпус и закрепите 7 чёрными винтами M3. Наденьте ручки на переключатели STEP и AXIS так, чтобы указатель совпадал с x1 и OFF.</p>
+
+<h3>6. Прошейте и проверьте</h3>
+<p>Прошейте пульт через USB-C со страницы <a href="index.php?route=information/information&information_id=8">Firmware & Downloads</a>. Во время прошивки отсоедините кабель контроллера: выводы последовательного порта общие.</p>
+<p><strong>Тестовое меню.</strong> В пульте есть встроенное тестовое меню, чтобы проверить каждую часть сборки ещё до подключения к контроллеру. Удерживайте кнопку ENABLE в первую секунду загрузки, чтобы открыть настройки пульта, затем нажмите <strong>Inputs</strong>, чтобы открыть <strong>Input Monitor</strong>.</p>
+<p>Input Monitor показывает в реальном времени:</p>
+<ul>
+<li>сырое значение PCF8574 и каждый его вход, от P0 до P7, как HIGH или LOW (активен),</li>
+<li>аварийный стоп на IO17 (разомкнут или нажат),</li>
+<li><strong>приращение энкодера</strong> маховика, которое меняется при вращении,</li>
+<li>сенсорный экран: место касания.</li>
+</ul>
+<ol class="steps">
+<li>Поверните AXIS через OFF, X, Y, Z и A: P0–P3 по очереди переходят в LOW, а в OFF — ни один.</li>
+<li>Поверните STEP через x1, x10 и x100: в LOW переходит P4, затем P5, а на x1 — ни один.</li>
+<li>Нажмите ENABLE: P6 переходит в LOW.</li>
+<li>Нажмите аварийный стоп, затем отпустите: линия аварийного стопа меняет состояние.</li>
+<li>Покрутите маховик в обе стороны: приращение энкодера растёт и уменьшается. Если счёт идёт не в ту сторону, поменяйте местами провода A и B.</li>
+<li>Коснитесь экрана в нескольких местах.</li>
+</ol>
+<p>Чтобы выйти из Input Monitor, удерживайте аварийный стоп 2 секунды.</p>
+<div class="pair">
+<figure><img src="image/catalog/dpc-site/build/test-settings.jpg" alt="Экран настроек пульта с кнопками Inputs, UART и Save & Boot" loading="lazy"><figcaption>Настройки пульта: <strong>Inputs</strong> открывает тестовое меню.</figcaption></figure>
+<figure><img src="image/catalog/dpc-site/build/test-input-monitor.jpg" alt="Экран Input Monitor со списком входов PCF8574, аварийным стопом, энкодером и касанием" loading="lazy"><figcaption>Input Monitor: здесь STEP стоит на ×100 (P5 активен).</figcaption></figure>
+</div>
+
+<h3>7. Подключите к контроллеру</h3>
+<ol class="steps">
+<li>Подключите пульт к порту пульта контроллера и включите питание. В config.yaml контроллера должны быть разделы <code>uart1</code> и <code>uart_channel1</code> на 1 000 000 бод: см. <a href="index.php?route=journal3/blog/post&journal_blog_post_id=19">Подключение пульта SmartTabUI</a>.</li>
+<li>В заголовке WebUI появится значок пульта, а <code>$Pendant/Status</code> ответит <code>connected</code>.</li>
+<li>Проверьте аварийный стоп при медленном джоге: двигатели должны сразу остановиться, а станок — перейти в Alarm. Отпустите кнопку и разблокируйте станок через меню восстановления.</li>
+</ol>
+
+<h3>Уже знакомы с дисплеем CYD?</h3>
+<p>SmartTabUI работает на дисплее JC2432W328C (CYD) с маховиком 60 мм — те же детали, что знакомы многим, кто собирал FluidDial. Если вы уже собирали что-то на этом дисплее, этот опыт пригодится. У SmartTabUI своя схема подключения, поэтому оставьте пульт FluidDial как есть и используйте для SmartTabUI отдельный дисплей, подключённый по этому руководству. Вот выводы дисплея, которые использует SmartTabUI:</p>
+<table class="table table-bordered"><thead><tr><th>Вывод дисплея</th><th>SmartTabUI</th></tr></thead><tbody>
+<tr><td>IO22</td><td>PCF8574 SCL (CN1)</td></tr>
+<tr><td>IO21</td><td>PCF8574 SDA (CN1)</td></tr>
+<tr><td>IO16</td><td>Маховик A (P6)</td></tr>
+<tr><td>IO4</td><td>Маховик B (P6)</td></tr>
+<tr><td>IO17</td><td>Аварийный стоп (P6)</td></tr>
+<tr><td>TX / RX</td><td>Последовательный канал к контроллеру, 1 Мбод (P1)</td></tr>
+</tbody></table>
+</div>

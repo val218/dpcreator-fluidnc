@@ -1,0 +1,5 @@
+{
+ "title": "О нас",
+ "meta_title": "О dpCREATOR: контроллеры и пульты ЧПУ на FluidNC",
+ "meta_description": "dpCREATOR разрабатывает и делает аппаратную и программную часть ЧПУ на FluidNC: контроллеры ESP32-S3 с Ethernet, пульт SmartTabUI, WebUI и Studio."
+}

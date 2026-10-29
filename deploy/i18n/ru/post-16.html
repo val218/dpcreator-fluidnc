@@ -1,0 +1,43 @@
+<p>После свежей установки прошивки плата уже стартует с <strong>включённым Ethernet и DHCP</strong>: подключите кабель и найдите IP-адрес. Эта страница пригодится, чтобы перейти на постоянный IP или вернуться с Wi-Fi.</p>
+<h3>1. В config.yaml должен быть раздел Ethernet</h3>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>spi:
+  miso_pin: gpio.13
+  mosi_pin: gpio.11
+  sck_pin: gpio.12
+
+ethernet:
+  cs_pin: gpio.14
+  int_pin: gpio.9        # NO_PIN if INT is not wired
+  rst_pin: NO_PIN
+  phy_type: w5500
+  phy_addr: 1
+  frequency_hz: 8000000  # safe on a bus shared with the SD card</code></pre>
+<p><strong>Важно:</strong> если <code>int_pin</code> задан, но INT на самом деле не подключён, связь поднимается, но пакеты не приходят (DHCP не срабатывает, ping не проходит). В этом случае укажите <code>int_pin: NO_PIN</code>.</p>
+<p>Без раздела <code>ethernet:</code> плата переключается на Wi-Fi, чтобы оставаться доступной, — в вашу сохранённую сеть или в собственную точку доступа <strong>FluidNC</strong> по адресу <code>http://192.168.0.1</code>.</p>
+<h3>2. Выберите DHCP или постоянный IP</h3>
+<p>Отправьте эти команды через USB (последовательную консоль), по одной строке.</p>
+<p><strong>Автоматически (DHCP):</strong></p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>$network/type=Ethernet
+$Ethernet/IPMode=DHCP
+$bye</code></pre>
+<p><strong>Постоянный IP</strong> (рекомендуется — возьмите свободный адрес в своей сети):</p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>$network/type=Ethernet
+$Ethernet/IPMode=Static
+$Ethernet/IP=192.168.10.50
+$Ethernet/Netmask=255.255.255.0
+$Ethernet/Gateway=192.168.10.1
+$bye</code></pre>
+<p>После этого Wi-Fi выключен. Чтобы вернуться: <code>$network/type=WiFi</code>, затем <code>$bye</code> через USB.</p>
+<h3>3. Проверьте</h3>
+<p>После перезагрузки <code>$Ethernet/Status</code> или <code>$Startup/Show</code> должны показать <em>Ethernet link up</em> и <em>Ethernet IP is …</em>. Затем выполните <code>ping</code> этого IP с ПК и откройте <code>http://&lt;ip&gt;</code> или <code>http://fluidnc.local</code>.</p>
+<h3>4. gSender по Ethernet</h3>
+<ol><li>В gSender откройте <strong>Config → Ethernet</strong>.</li>
+<li>Введите IP-адрес платы и порт <code>23</code> (или ваш <code>$Telnet/Port</code>), нажмите <strong>Apply Settings</strong>.</li>
+<li>В меню подключения выберите пункт <strong>Ethernet</strong>, а не COM-порт.</li></ol>
+<p><strong>Не</strong> используйте <em>Remote Mode</em> в gSender — он предназначен для адреса самого ПК и выдаёт «Remote mode has been disabled».</p>
+<h3>Полезные команды</h3>
+<table class="table table-bordered"><tbody>
+<tr><td><code>$Ethernet/Status</code></td><td>Связь, IP, маска, шлюз, MAC</td></tr>
+<tr><td><code>$Ethernet/Init</code></td><td>Запустить W5500 вручную (для проверки)</td></tr>
+<tr><td><code>$network/type</code></td><td>WiFi или Ethernet</td></tr>
+<tr><td><code>$Telnet/Port</code></td><td>Порт, к которому подключается gSender (по умолчанию 23)</td></tr></tbody></table>

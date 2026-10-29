@@ -1,0 +1,6 @@
+{
+ "name": "Контроллер dpCREATOR R3",
+ "meta_title": "Контроллер ЧПУ dpCREATOR R3 на FluidNC: ESP32-S3, Ethernet, 4 оси",
+ "meta_description": "4-осевой контроллер ЧПУ на FluidNC: ESP32-S3 16 MB, Ethernet W5500, Wi-Fi, RS485 для частотника, SD-карта, порт пульта с аппаратным аварийным стопом.",
+ "tag": "fluidnc, контроллер ЧПУ, esp32-s3, w5500"
+}

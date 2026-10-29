@@ -1,0 +1,60 @@
+<p>dpCREATOR WebUI — это страница управления, которую отдаёт сам контроллер. Откройте адрес платы в браузере на ПК, планшете или телефоне (например, <code>http://fluidnc.local</code>). Она показывает, где находится станок, задание в 3D во время выполнения, получающуюся деталь и прожиг лазера. На этой странице описаны панель положения, 3D-вид и функции лазера. Файлам, восстановлению задания, подстройке Z и пульту посвящены отдельные статьи.</p>
+<div class="alert alert-info"><strong>Требования:</strong> dpCREATOR WebUI работает с <strong>прошивкой dpCREATOR FluidNC</strong> на контроллере (бесплатно, со страницы <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Обновляйте WebUI, прошивку контроллера и пульт SmartTabUI вместе.</div>
+
+<figure class="dpc-shot" style="margin:18px 0 22px"><img src="image/catalog/dpc-site/shots/webui-live-job.jpg" alt="dpCREATOR WebUI во время выполнения задания 3D-рельефа" loading="lazy" style="max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Выполняется 3D-рельеф: слева положение, в центре шпиндель движется над заданием, справа панель станка, файлы и консоль, под видом — полоса выполнения.</figcaption></figure>
+
+<h2>Положение</h2>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+<img src="image/catalog/dpc-site/shots/webui-position-laser.jpg" alt="Панель положения со столбцами Work и Machine" loading="lazy" style="flex:0 1 360px;max-width:360px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a">
+<ul style="flex:1 1 300px;margin:0">
+  <li><strong>Work и Machine:</strong> крупные числа — рабочие координаты, то есть координаты вашего задания. Мелкие — машинные координаты, отсчитываемые от положения нуля станка.</li>
+  <li><strong>Not homed · Home:</strong> эта метка видна, пока ось с концевиками нуля не прошла поиск нуля после включения или сброса. Нажмите на неё, чтобы найти ноль. Машинные координаты означают <em>место на столе</em> только после поиска нуля; рабочие координаты верны всегда. Unlock не считается поиском нуля.</li>
+  <li><strong>Обнуление оси удержанием:</strong> удерживайте строку оси или её кнопку X0 / Y0 / Z0 около секунды. Короткое нажатие ничего не делает, поэтому случайный щелчок не сдвинет рабочий ноль. <strong>Zero all</strong> работает так же.</li>
+  <li><strong>Tool:</strong> фреза в шпинделе (из таблицы инструментов) или <em>T2 Laser</em>, когда выбран лазер (см. <a href="index.php?route=journal3/blog/post&journal_blog_post_id=28#router-and-laser">Фрезер и лазер на одном станке</a>).</li>
+</ul>
+</div>
+
+<h3>Probe Z0</h3>
+<p><strong>Probe Z0</strong> (под положением) задаёт рабочий ноль Z с помощью пластины касания или 3D-щупа:</p>
+<figure class="dpc-shot" style="margin:12px 0 18px"><img src="image/catalog/dpc-site/shots/webui-probe-z0.jpg" alt="Диалог Probe Z0" loading="lazy" style="max-width:640px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a;display:block"></figure>
+<ol>
+  <li>Расположите щуп в нескольких миллиметрах над деталью.</li>
+  <li>Проверьте его: нажмите на щуп или коснитесь пластиной фрезы. Индикатор станет зелёным.</li>
+  <li>Введите толщину пластины (и смещение Z, если нужно), затем <strong>Start probe</strong>. Инструмент опускается до касания, задаёт Z0 на верхней плоскости пластины (или касаемой поверхности для 3D-щупа) и поднимается на 5&nbsp;мм.</li>
+</ol>
+
+<h2>3D-вид во время задания</h2>
+<ul>
+  <li>Шпиндель (или лазерный модуль) движется над заданием. Готовые резы окрашены по глубине, а карточка показывает файл, оставшееся время, процент выполнения и строку.</li>
+  <li><strong>Follow</strong> держит инструмент в поле зрения. <strong>Auto-fit</strong> держит в поле зрения всё задание, когда оно загружается или сдвигается рабочий ноль. <strong>Spindle view</strong> показывает корпус шпинделя или только фрезу. <strong>Stock</strong> показывает заготовку (её размер задаётся через <em>Stock</em> над видом).</li>
+  <li><strong>G-code</strong> показывает файл текстом под видом, следуя за выполняемой строкой.</li>
+  <li><strong>Стол и ход станка:</strong> когда у X и Y есть поиск нуля, в config.yaml задано <code>soft_limits: true</code> и ноль станка найден, рисуются стол и ход станка, а примечание предупреждает, если задание выходит за пределы хода. Иначе под работой показывается простая сетка.</li>
+  <li><strong>Столбец инструментов</strong> (слева от вида): инструменты из таблицы инструментов. Нажмите на инструмент, чтобы сменить его (M6). Лазер с собственным номером инструмента отображается как <em>T2 laser</em>.</li>
+</ul>
+
+<h3>Вид детали</h3>
+<p><strong>Part</strong> (рядом с кнопками вида) показывает деталь, которую делает задание: траекторию, вырезанную в заготовке, с формой фрезы, выбранной в столбце инструментов (прямая, сферическая, V-образная…). Выберите фрезу, под которую сделан файл. Во время задания деталь вырезается по мере движения фрезы. Переключатель <strong>Path</strong> рисует траекторию бледно поверх детали.</p>
+<figure class="dpc-shot" style="margin:12px 0 18px"><img src="image/catalog/dpc-site/shots/webui-part-view.jpg" alt="Вид детали: рельеф, вырезанный в заготовке" loading="lazy" style="max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Вид детали со сферической фрезой 3 мм: рельеф появляется в дереве по мере движения фрезы.</figcaption></figure>
+
+<h3>Полоса выполнения</h3>
+<p>Под видом: <strong>Cycle start</strong>, <strong>Pause</strong>, <strong>Stop</strong> и <strong>Probe</strong>, туман и полив, а также коррекции подачи и шпинделя ползунками (перетаскивайте или используйте кнопки на панели Overrides).</p>
+
+<h2>Лазерные задания</h2>
+<p>Файл считается <strong>лазерным заданием</strong>, если в нём используется M4 или если все его резы на одной высоте Z и в нём больше двух уровней мощности (гравировка в оттенках серого). Для лазерного задания:</p>
+<ul>
+  <li>3D-вид показывает лазерный модуль и луч, когда он включён. С включённым <strong>Part</strong> видно, как на материале проявляется прожиг: чем темнее, тем больше мощность.</li>
+  <li>Полоса выполнения показывает <strong>Laser</strong> и мощность в % от максимального S лазера в config.yaml, вместе со значением S (например, <em>42% S420</em>).</li>
+  <li>Пульт SmartTabUI показывает прожиг в своём виде PART, а его третье поле коррекции показывает <strong>LASER</strong>.</li>
+</ul>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start">
+<img src="image/catalog/dpc-site/shots/webui-laser-job.jpg" alt="Лазерное задание выполняется в WebUI" loading="lazy" style="flex:2 1 420px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a">
+<img src="image/catalog/dpc-site/shots/webui-laser-burn-top.jpg" alt="Прожиг лазера, вид сверху" loading="lazy" style="flex:1 1 260px;max-width:440px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a">
+</div>
+<p style="font-size:13px;color:#8a97a3">Лазерная гравировка в оттенках серого на 30%: лазер на T2 с применённым смещением, мощность в полосе выполнения и прожиг сверху (Spindle view выключен).</p>
+<p>Для M4 нужен шпиндель <code>Laser:</code> в config.yaml. На станке только с фрезерным шпинделем M4 останавливает задание с <em>error 20</em>: используйте M3 или настройте лазер, как описано в разделе <a href="index.php?route=journal3/blog/post&journal_blog_post_id=28#router-and-laser">Фрезер и лазер на одном станке</a>.</p>
+
+<h2>Studio</h2>
+<p>Кнопка <strong>Studio</strong> в правом верхнем углу открывает <a href="index.php?route=journal3/blog/post&journal_blog_post_id=34">dpCREATOR Studio</a> в отдельной вкладке. Если Studio уже открыта, кнопка переключает на ту вкладку, а не открывает ещё одну. В Studio кнопка <strong>WebUI</strong> переключает обратно на вкладку WebUI, где отправленное задание уже готово к запуску.</p>
+
+<h2>Обновления</h2>
+<p>Нижняя строка показывает сборки WebUI, контроллера и пульта. Когда выходит более новая сборка, она становится красной: обновитесь со страницы <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>. Что изменилось — в <a href="index.php?route=journal3/blog/post&journal_blog_post_id=33">примечаниях к выпускам</a>.</p>

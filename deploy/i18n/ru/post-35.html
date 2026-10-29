@@ -1,0 +1,54 @@
+<p>dpCREATOR Studio может жить и на вашем контроллере, рядом с WebUI. Тогда она открывается по адресу самого станка, работает без интернета и отправляет G-код прямо на SD-карту. Установка бесплатна при наличии учётной записи на dpcreator.eu и занимает около минуты по USB. Она работает на любом контроллере с FluidNC 4.x; с прошивкой dpCREATOR вы также получаете кнопку Studio в WebUI и задания, которые приходят уже подготовленными.</p>
+
+<div class="alert alert-info"><strong>Требования:</strong> FluidNC <strong>4.0 или новее</strong> на контроллере — стандартный FluidNC или бесплатная прошивка dpCREATOR — с примерно 500 КБ свободного места во flash-памяти (установщик это проверяет), USB-кабель и Chrome или Edge на компьютере. Чтобы пользоваться Studio без установки, откройте <a href="/studio/" target="_blank" rel="noopener">dpcreator.eu/studio</a> (<a href="index.php?route=journal3/blog/post&journal_blog_post_id=34">как работает Studio</a>).</div>
+
+<h3>Установка</h3>
+<ol>
+  <li>Войдите в свою учётную запись на dpcreator.eu (создаётся бесплатно).</li>
+  <li>Откройте <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>, вкладку <strong>Studio</strong>, карточку <strong>Install Studio on your controller</strong>.</li>
+  <li>Подключите контроллер к компьютеру USB-кабелем. Станок должен быть в состоянии <strong>Idle</strong> (или в Alarm), а не выполнять задание. Закройте другие программы, которые используют его последовательный порт.</li>
+  <li>Нажмите <strong>Install Studio on my controller</strong> и выберите порт контроллера.</li>
+  <li>Дождитесь <strong>Done</strong>. Контроллер не перезапускается, а ваши настройки, WebUI и файлы на SD-карте не затрагиваются.</li>
+</ol>
+
+<h3>Как открыть</h3>
+<ul>
+  <li><strong>Прошивка dpCREATOR:</strong> <code>http://&lt;your board&gt;/studio.html</code>, например <code>http://fluidnc.local/studio.html</code>, или нажмите <strong>Studio</strong> в правом верхнем углу dpCREATOR WebUI.</li>
+  <li><strong>Стандартный FluidNC 4.x:</strong> <code>http://&lt;your board&gt;/flash/studio.html</code>, например <code>http://192.168.1.50/flash/studio.html</code>. Добавьте в закладки.</li>
+</ul>
+
+<h3>Отправка задания на станок</h3>
+<ol>
+  <li>Создайте проект и нажмите <strong>Make g-code</strong>. Если Studio открыта с контроллера, она уже знает адрес станка (в других копиях введите его в <strong>Setup</strong>).</li>
+  <li>Нажмите <strong>Send</strong>. Файл попадает в корень SD-карты и сразу <strong>подготавливается</strong>: любой открытый dpCREATOR WebUI показывает его превью с панелью <strong>Run</strong> / <strong>Cancel</strong>, и пульт SmartTabUI тоже его показывает. Пока ничего не движется.</li>
+  <li>Задайте рабочий ноль, затем нажмите <strong>Run</strong> в WebUI или на пульте. WebUI не открыт? Синяя кнопка <strong>WebUI</strong> в правом верхнем углу Studio откроет его с готовым заданием. Если WebUI уже открыт в другой вкладке, она переключится на эту вкладку, а не откроет новую; кнопка Studio в WebUI делает то же самое в обратную сторону.</li>
+</ol>
+<p>На контроллере со стандартным FluidNC файл отправляется на SD-карту, но не подготавливается (для этого нужна прошивка dpCREATOR): запустите его из списка SD-карты в WebUI.</p>
+<p><img src="image/catalog/dpc-site/shots/studio-machine-v2.jpg" alt="dpCREATOR Studio: 3D-вид станка, выполняющего задание" style="max-width:100%;height:auto;border-radius:6px"></p>
+
+<h3>Обновление и удаление</h3>
+<ul>
+  <li><strong>Обновление:</strong> установите заново со страницы Flash Firmware. Новая копия заменит старую. Ваши проекты сохранятся: они хранятся в браузере, а не на контроллере.</li>
+  <li><strong>Удаление:</strong> удалите <code>studio.html.gz</code> из flash-файлов контроллера (Classic UI → flash files) или отправьте в консоли <code>$LocalFS/Delete=/localfs/studio.html.gz</code>.</li>
+  <li>Прошивка полного образа контроллера (merged image) стирает flash-файлы: после неё установите Studio заново, как и WebUI.</li>
+</ul>
+
+<h3>Проекты в копии на контроллере</h3>
+<p>Браузеры хранят данные отдельно для каждого адреса, поэтому проекты, созданные в копии на контроллере, отделены от проектов на dpcreator.eu, а смена адреса платы (например, с <code>fluidnc.local</code> на её IP) показывает другой список. Чтобы перенести проект, используйте <strong>Save</strong> (файл проекта) и <strong>Open</strong>.</p>
+
+<h3>Если не получается</h3>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><em>Needs Chrome or Edge on a computer</em></td><td>В этом браузере нет Web Serial. Используйте Chrome или Edge на Windows, macOS или Linux.</td></tr>
+    <tr><td><em>The controller does not answer</em></td><td>Проверьте кабель (для передачи данных) и порт. Закройте мониторы порта, другие вкладки WebUI, подключённые по USB, или программы вроде LaserGRBL или UGS.</td></tr>
+    <tr><td><em>The machine is Run / Hold / Jog …</em></td><td>Дождитесь окончания задания или остановите его, затем попробуйте снова.</td></tr>
+    <tr><td><em>needs FluidNC 4.0 or newer</em></td><td>На контроллере FluidNC 3.x или старше. Обновите его (бесплатная прошивка dpCREATOR или стандартный FluidNC 4.x) или используйте Studio на dpcreator.eu.</td></tr>
+    <tr><td><em>Not enough room in the controller's flash</em></td><td>Удалите ненужные файлы из flash (Classic UI → flash files) или используйте Studio на dpcreator.eu.</td></tr>
+    <tr><td>Браузер скачивает studio.html вместо того, чтобы открыть</td><td>Так ведут себя стандартный FluidNC и старые сборки dpCREATOR. Откройте <code>/flash/studio.html</code> или обновитесь до последней прошивки dpCREATOR.</td></tr>
+    <tr><td><em>Too many installs in the last hour</em></td><td>Подождите час и попробуйте снова.</td></tr>
+    <tr><td>Send сообщает, что браузер заблокировал соединение</td><td>Вы используете https-копию на dpcreator.eu. Откройте копию на контроллере (http) или используйте Download .nc.</td></tr>
+  </tbody>
+</table>
+
+<h3>Вопросы</h3>
+<p>Воспользуйтесь страницей <a href="index.php?route=extension/module/dpc_support">Support</a> (сначала войдите в учётную запись). Сообщите сборку Studio (кнопка <strong>i</strong> в Studio), свой контроллер и версию его прошивки, а если установка не удалась, скопируйте текст из <strong>Details</strong> на карточке установки.</p>

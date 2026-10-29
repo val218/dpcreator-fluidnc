@@ -1,0 +1,31 @@
+<p>У dpCREATOR R2 и R3 одна и та же распиновка. Таблица ниже соответствует примеру конфигурации <code>dpcreator_r2_r3_w5500.yaml</code>, который поставляется с прошивкой.</p>
+<p><img src="image/catalog/dpc-site/controller-connections.jpg" alt="Контроллер dpCREATOR R2/R3 с подписанными разъёмами" style="max-width:100%;height:auto"></p>
+<h3>Основные возможности</h3>
+<ul><li>ESP32-S3-WROOM-1-N16R8: 16 МБ flash, 8 МБ PSRAM</li>
+<li>4 оси (X, Y, Z, A) — выходы step/dir для внешних драйверов шаговых двигателей или сервоприводов, общий сигнал enable</li>
+<li>Оптически развязанные входы концевиков, вход щупа</li>
+<li>Шпиндель: выход PWM плюс реле (вкл/выкл); RS485 для частотников с Modbus</li>
+<li>Проводной Ethernet W5500, Wi-Fi, USB</li>
+<li>SD-карта, доступная по сети как диск</li>
+<li>Порт пульта (UART1)</li>
+<li><strong>R3 и R2:</strong> в R3 встроен модуль питания 5 V и есть отдельный вход щупа на GPIO3 (на R2 щуп делит GPIO45 с концевиком Z).</li></ul>
+<h3>Назначение выводов</h3>
+<table class="table table-bordered"><thead><tr><th>Функция</th><th>Выводы (GPIO)</th><th>Примечания</th></tr></thead><tbody>
+<tr><td>X step / dir</td><td>4 / 5</td><td>Концевик X: 47 (активный низкий)</td></tr>
+<tr><td>Y step / dir</td><td>6 / 7</td><td>Концевик Y: 48</td></tr>
+<tr><td>Z step / dir</td><td>15 / 16</td><td>Концевик Z: 45 (на R2 общий со щупом)</td></tr>
+<tr><td>A step / dir</td><td>17 / 18</td><td>Концевик A: 38. Поворотная ось: шаги на градус</td></tr>
+<tr><td>Enable драйверов (все)</td><td>8</td><td>Добавьте <code>:low</code>, если ваши драйверы включаются низким уровнем</td></tr>
+<tr><td>Щуп</td><td>3 (R3)</td><td>R2: GPIO45, вместо концевика Z</td></tr>
+<tr><td>Шпиндель PWM / реле</td><td>21 / 39</td><td>PWM 5 кГц, реле как включение шпинделя</td></tr>
+<tr><td>RS485 (UART2) TX / RX / DE</td><td>42 / 41 / 40</td><td>По умолчанию 9600 бод, для частотников с Modbus</td></tr>
+<tr><td>Пульт (UART1) TX / RX</td><td>1 / 2</td><td>1 000 000 бод</td></tr>
+<tr><td>SPI SCK / MOSI / MISO</td><td>12 / 11 / 13</td><td>Общие для SD-карты и W5500</td></tr>
+<tr><td>SD-карта CS</td><td>10</td><td></td></tr>
+<tr><td>W5500 CS / INT</td><td>14 / 9</td><td>INT необязателен — укажите <code>NO_PIN</code>, если он не подключён</td></tr>
+<tr><td>Консоль (UART0)</td><td>43 / 44</td><td>115200, разъём J7. USB-консоль на GPIO19/20</td></tr>
+</tbody></table>
+<p><strong>Перед резкой:</strong> задайте <code>steps_per_mm</code> под свою механику. Значения из примера (400 для X/Y/Z, 44.444 для A) — просто заглушки.</p>
+<h3>Схема подключения</h3>
+<p>Как подключается типичный фрезерный станок с ЧПУ: драйвер каждой оси и её концевик подключаются к клеммнику этой оси; шпиндель работает от частотника по RS485 (или 0–10 V / PWM), реле включает контактор или пылеудаление, а пульт SmartTabUI подключается к разъёму PENDANT кабелем GX12.</p>
+<p><img src="image/catalog/dpc-site/wiring-overview.jpg" alt="Схема подключения: двигатели и драйверы, концевики, щуп, частотник, реле, аварийный стоп, пульт SmartTabUI, питание 24 V, Ethernet и USB" style="max-width:100%;height:auto"></p>

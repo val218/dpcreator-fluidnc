@@ -1,0 +1,81 @@
+<p>SmartTabUI — это прошивка пульта dpCREATOR: сенсорный экран 2,8", маховик с переключателями AXIS и STEP, кнопка ENABLE и аварийный стоп на одном кабеле к контроллеру. На этой странице описаны экраны, джог и настройки пульта. Выполнению заданий, восстановлению, подстройке Z и перемотке, а также Measure и Record посвящены отдельные статьи в этом разделе.</p>
+<div class="alert alert-info"><strong>Требования:</strong> пульт SmartTabUI и dpCREATOR WebUI работают с <strong>прошивкой dpCREATOR FluidNC</strong> на контроллере (бесплатно, устанавливается со страницы <a href="index.php?route=information/information&information_id=8">Flash Firmware</a>). Они построены на командах, которые добавляет эта прошивка, &ndash; превью, Prepare, Rewind, подстройка Z, восстановление задания, макросы, Measure и Record &ndash; поэтому стандартный FluidNC не поддерживается.</div>
+
+<h3>Запуск</h3>
+<ul>
+  <li>Загрузочный экран показывает логотип dpCREATOR, номер сборки и 5-секундную полосу. <strong>Удерживайте ENABLE, пока идёт полоса</strong>, чтобы открыть Settings.</li>
+  <li>Затем пульт подключается к контроллеру. Пока контроллер не ответит, отображается <em>No connection</em>: проверьте кабель (вкладка Term показывает, что приходит).</li>
+  <li><strong>Перезапуск пульта:</strong> нажмите аварийный стоп и удерживайте ENABLE 3 секунды.</li>
+</ul>
+
+<h3>Экран</h3>
+<ul>
+  <li><strong>Заголовок:</strong> состояние станка (Idle, Cycle, Hold, Jog, Alarm, Homing), <em>STP</em>, пока нажат аварийный стоп, текущий джог или ход задания и индикаторы EN / TX / RX.</li>
+  <li><strong>DRO (слева):</strong> рабочие координаты каждой оси. Ось, выбранная переключателем AXIS, подсвечена своим цветом, под ней — шаг (x1 / x10 / x100).</li>
+  <li><strong>Вид (справа):</strong> траектория задания с вкладками XY / XZ / YZ / 3D / PART (см. <em>Вид PART</em> ниже). Во время задания уже вырезанная часть рисуется голубым, а инструмент отмечен. Если задания нет, показана рабочая зона станка.</li>
+  <li><strong>FEED / RAPID / SPND:</strong> нажмите на поле и крутите маховик, чтобы изменить эту коррекцию (мелкий шаг на x1, крупный на x10 и x100). Нажмите ещё раз или отпустите ENABLE, чтобы вернуться к джогу. SPND показывает <strong>LASER</strong>, когда выбранный шпиндель — лазер или загружено лазерное задание.</li>
+  <li><strong>Нижняя панель:</strong> вкладки DRO, HOME, FILES, TERM и MACROS. Во время задания она превращается в <strong>Hold / Resume · Z adj · Abort</strong>.</li>
+</ul>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-dro-idle-v2.png" alt="Экран DRO пульта в простое" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-running-3d.png" alt="Пульт выполняет задание в 3D-виде" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Слева: экран DRO в покое. Справа: выполняется 3D-рельеф, уже вырезанное — голубым, ход выполнения под видом.</p>
+<h3>Джог</h3>
+<ol>
+  <li>Выберите ось переключателем AXIS (OFF = джог выключен).</li>
+  <li>Выберите шаг: <strong>x1 = 0,01 мм</strong>, <strong>x10 = 0,1 мм</strong>, <strong>x100 = 1 мм</strong> на щелчок.</li>
+  <li>Крутите маховик. Чем быстрее крутите, тем быстрее движение; отпустили — сразу остановка.</li>
+</ol>
+<p>Нужно ли удерживать ENABLE, зависит от настройки <strong>P6 BTN</strong> (см. ниже). Если ENABLE нужен, а вы его не держите, вокруг экрана видна тонкая красная рамка; пока вы удерживаете ENABLE, она исчезает.</p>
+
+<h3>Вид PART</h3>
+<p><strong>PART</strong> показывает деталь, которую делает задание: траектория, вырезанная в заготовке сферической фрезой, с освещением и цветом по глубине. Во время задания деталь вырезается в реальном времени.</p>
+<ul>
+<li>Когда переключатель AXIS стоит на <strong>OFF</strong>, крутите маховик, чтобы вращать заготовку.</li>
+<li><strong>TOP</strong> (в виде) переключает между наклонённой 3D-заготовкой и затенённым видом сверху.</li>
+<li><strong>Лазерные задания</strong> вместо этого отображаются как прожиг на фанере: чем темнее, тем больше мощность. Для этого нужна прошивка контроллера начиная со сборки 3bbf865d, которая передаёт мощность лазера вместе с превью.</li>
+<li>Детализация зависит от превью, которое отправляет контроллер: на большом файле мелкие детали выглядят мягче, чем в WebUI.</li>
+</ul>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-part-3d.png" alt="Вид PART: задание в виде вырезанной заготовки" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-part-top.png" alt="Вид PART сверху" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-part-running.png" alt="Вид PART вырезает деталь во время задания" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-laser-running.png" alt="Лазерное задание: прожиг в виде PART, LASER в поле коррекции" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Сверху: 3D-рельеф перед запуском, наклонённый и сверху. Снизу: вырезание в реальном времени на 63% и лазерная гравировка в процессе, с LASER в третьем поле.</p>
+<h3>Вкладки</h3>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><strong>DRO</strong></td><td>Координаты, коррекции и вид траектории.</td></tr>
+    <tr><td><strong>HOME</strong></td><td>Home All (сначала Z, затем X и Y) и отдельные оси; <strong>Probe</strong> (поверхность Z, край X/Y, угол, отверстие, бобышка, длина инструмента); рабочее смещение G54–G59; Zero X / Y / Z / all; Go to 0 (Z сначала поднимается); Unlock и Park; состояния концевиков.</td></tr>
+    <tr><td><strong>FILES</strong></td><td>SD-карта: открывайте папки, <strong>Text</strong> — прочитать файл, <strong>View</strong> — показать траекторию, <strong>Prepare</strong> — загрузить для запуска (см. <em>Выполнение задания</em>).</td></tr>
+    <tr><td><strong>TERM</strong></td><td>Всё, что сообщает контроллер (зелёным), ваши команды (голубым), Soft Reset и быстрые команды.</td></tr>
+    <tr><td><strong>MACROS</strong></td><td>Сверху шпиндель CW / CCW / Stop и охлаждение, ниже — макросы, отмеченные в WebUI как «on the pendant». На каждой кнопке виден G-код макроса; макросы с «ask first» требуют двух нажатий.</td></tr>
+  </tbody>
+</table>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:14px 0 6px"><img src="image/catalog/dpc-site/shots/pendant-home.png" alt="Вкладка HOME" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/pendant-files.png" alt="Вкладка FILES" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><p style="font-size:13px;color:#8a97a3;margin:0 0 18px">Вкладки HOME и FILES.</p>
+<h3>Измерение щупом</h3>
+<ol>
+  <li>HOME → <strong>Probe</strong>, выберите цикл. Картинка показывает, где поставить инструмент, например <em>tool beside the edge, below the top</em>.</li>
+  <li>Выберите сторону или угол. На этой странице маховик работает как джог, так что инструмент можно установить прямо здесь.</li>
+  <li><strong>Start:</strong> удерживайте ENABLE и нажмите дважды. Щуп касается дважды (быстро, затем медленно), задаёт рабочий ноль в выбранной СК и возвращается в исходную точку.</li>
+</ol>
+<p>Настройки щупа (толщина пластины, диаметр инструмента, расстояния, подачи, зазоры, СК, датчик длины инструмента) находятся в том же меню.</p>
+
+<h3>Настройки</h3>
+<p>Удерживайте ENABLE во время загрузочной полосы. Крутите маховик, чтобы выбрать строку, нажмите, чтобы изменить; <strong>Save & Boot</strong> сохраняет настройки и перезапускает пульт.</p>
+<table class="table table-bordered">
+  <tbody>
+    <tr><td><strong>THEME</strong></td><td>Тёмная, нейтральная или светлая.</td></tr>
+    <tr><td><strong>MACHINE</strong></td><td>CNC, нож / плоттер или лазер.</td></tr>
+    <tr><td><strong>P6 BTN</strong></td><td>Что делает ENABLE: <strong>Gate</strong> — удерживать для джога и для работы с экраном (самый безопасный); <strong>Jog</strong> — удерживать для джога, экран работает без неё; <strong>Touch</strong> и <strong>Off</strong> — не нужна; <strong>Macro</strong> — нажатие запускает макрос, выбранный в P6 MACRO.</td></tr>
+    <tr><td><strong>DRO AXES</strong></td><td>XYZ, XYZA, XY или XYYZ (два двигателя Y).</td></tr>
+    <tr><td><strong>BRIGHT / VOL</strong></td><td>Яркость экрана, громкость пищалки (0 = без звука; сирена аварийного стопа всегда громкая).</td></tr>
+    <tr><td><strong>MAINT</strong></td><td>Напоминание об обслуживании после указанного числа часов работы заданий; <em>Reset Maint</em> после обслуживания.</td></tr>
+    <tr><td><strong>AREA, HOME</strong></td><td>Рабочая зона и угол нуля, читаются из config.yaml контроллера.</td></tr>
+    <tr><td><strong>LICENCE</strong></td><td>Зарегистрирован пульт или нет, и <strong>ID чипа</strong> этого пульта (нужен для поддержки).</td></tr>
+  </tbody>
+</table>
+<p><strong>Inputs</strong> (внизу Settings) показывает в реальном времени каждый переключатель, маховик, аварийный стоп и касания — первое место, куда смотреть, если какой-то переключатель будто не работает. <strong>UART</strong> показывает связь с контроллером. Чтобы выйти, удерживайте аварийный стоп 2 секунды.</p>
+
+<h3>Звуки</h3>
+<ul>
+  <li>Короткий щелчок: нажата кнопка на экране. Восходящий сигнал: ENABLE нажата, более низкий сигнал: отпущена.</li>
+  <li>Один сигнал, когда переключатель AXIS встал в положение (выше на оси, ниже на OFF), короткий высокий сигнал при смене положения STEP.</li>
+  <li>Высокий сигнал: точка взята (двойное нажатие ENABLE).</li>
+  <li>Двухтональная сирена: 4 раза при тревоге, 3 раза на полной громкости при аварийном стопе.</li>
+</ul>
+<p>Если при нажатии ENABLE нет никакого сигнала, значит, блок переключателей не подключён — проверьте Settings → Inputs.</p>

@@ -1,0 +1,19 @@
+<p>Система ЧПУ dpCREATOR состоит из трёх частей: <strong>платы контроллера</strong>, <strong>пульта SmartTabUI</strong> и <strong>прошивки</strong> на обоих устройствах. На этой странице показано, как они соединяются и что читать дальше.</p>
+<figure class="dpc-shot dpc-photo" style="margin:18px 0 22px"><img src="image/catalog/dpc-site/products/tabui-pendant-photo-2.jpg" alt="Пульт SmartTabUI на верстаке во время задания" loading="lazy" style="max-width:480px;width:100%;height:auto;border-radius:6px;display:block"><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Пульт SmartTabUI во время задания: положение станка, коррекции FEED, RAPID и SPND, кнопки Hold и Abort.</figcaption></figure>
+<h3>Из чего состоит система</h3>
+<table class="table table-bordered"><thead><tr><th>Часть</th><th>Что делает</th><th>К чему подключается</th></tr></thead><tbody>
+<tr><td><strong>Контроллер dpCREATOR R2/R3</strong></td><td>Работает на FluidNC 4.1.1 на ESP32-S3 (16 МБ flash, 8 МБ PSRAM). Управляет до 4 осей (X, Y, Z, A) через выходы step/dir, читает концевики и щуп, управляет шпинделем.</td><td>ПК по Ethernet (W5500), Wi-Fi или USB · пульт по UART1 · частотник по RS485</td></tr>
+<tr><td><strong>Пульт SmartTabUI</strong></td><td>Сенсорный экран с маховиком (MPG) и аварийным стопом прямо у станка: джог, обнуление, запуск заданий, восстановление прерванных заданий, подстройка Z во время резки.</td><td>UART1 контроллера, по проводу, 1 Мбод</td></tr>
+<tr><td><strong>dpCREATOR WebUI</strong></td><td>Работает на плате, устанавливается со страницы <a href="index.php?route=information/information&information_id=8">Flash Firmware</a> (входит в комплект R3): 3D-вид траектории, DRO, джог, файлы, макросы, история заданий, консоль, Centre Finder, Record & Retrace и Offcuts → DXF. В бесплатной прошивке есть и стандартная страница FluidNC.</td><td>Любой браузер в вашей сети: <code>http://fluidnc.local</code> или IP-адрес платы</td></tr>
+</tbody></table>
+<figure class="dpc-shot" style="margin:18px 0 22px"><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start"><img src="image/catalog/dpc-site/shots/pendant-running-3d.png" alt="Пульт SmartTabUI выполняет задание" loading="lazy" style="flex:1 1 280px;max-width:480px;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"><img src="image/catalog/dpc-site/shots/webui-live-job.jpg" alt="dpCREATOR WebUI выполняет то же задание" loading="lazy" style="flex:1 1 280px;max-width:100%;width:100%;height:auto;border-radius:6px;border:1px solid #2c333a"></div><figcaption style="font-size:13px;color:#8a97a3;margin-top:6px">Пульт SmartTabUI и dpCREATOR WebUI показывают одно и то же задание: то, что вы запустили на одном, появляется на другом.</figcaption></figure><h3>Как проходит задание</h3>
+<ol><li>Скопируйте G-код на SD-карту платы (загрузка через WebUI или сетевой диск SD-карты).</li>
+<li>Плата автоматически строит превью траектории <code>.viz</code> для пульта.</li>
+<li><strong>Подготовьте</strong> файл в WebUI или на пульте — оба показывают одну и ту же деталь.</li>
+<li><strong>Запустите</strong> с любого из них. Hold, подстройка Z на ходу, перемотка назад и Stop работают с обоих.</li>
+<li>Если задание прервалось (аварийный стоп, тревога, отключение питания), плата предложит перезапустить его с безопасной строки.</li></ol>
+<h3>Что читать дальше</h3>
+<ul><li><a href="index.php?route=journal3/blog&journal_blog_category_id=6">Начало работы</a> → Быстрый старт: первое включение</li>
+<li><a href="index.php?route=journal3/blog&journal_blog_category_id=9">Прошивка</a> → Прошивка из браузера</li>
+<li><a href="index.php?route=journal3/blog&journal_blog_category_id=7">Контроллер dpCREATOR</a> → Настройка Ethernet (W5500)</li>
+<li><a href="index.php?route=journal3/blog/post&journal_blog_post_id=36">dpCREATOR WebUI: положение, 3D-вид, вид детали и лазер</a></li></ul>

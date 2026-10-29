@@ -1,0 +1,29 @@
+<p>Контроллер управляет шпинделем двумя способами: <strong>PWM + реле</strong> (по умолчанию в примере конфигурации) или <strong>частотник по RS485</strong> (Modbus). Используйте в <code>config.yaml</code> один из них.</p>
+<h3>PWM + реле (по умолчанию)</h3>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>PWM:
+  pwm_hz: 5000
+  output_pin: gpio.21
+  enable_pin: gpio.39     # relay: spindle on/off
+  direction_pin: NO_PIN
+  spinup_ms: 2000
+  spindown_ms: 2000
+  speed_map: 0=0.000% 24000=100.000%</code></pre>
+<p>Укажите в <code>speed_map</code> максимальные обороты своего шпинделя.</p>
+<h3>Частотник по RS485</h3>
+<p>RS485 работает на UART2 (TX GPIO42, RX GPIO41, driver enable GPIO40). Подключите A/B к клеммам RS485 частотника и настройте в самом частотнике управление по Modbus на 9600 бод, адрес 1. Затем замените раздел <code>PWM:</code> на свой тип частотника, например Huanyang:</p>
+<pre style="background:#f4f4f4;padding:10px;border-radius:4px;overflow:auto"><code>uart2:
+  txd_pin: gpio.42
+  rxd_pin: gpio.41
+  rts_pin: gpio.40
+  baud: 9600
+  mode: 8N1
+
+Huanyang:
+  uart_num: 2
+  modbus_id: 1
+  tool_num: 1
+  spinup_ms: 5000
+  spindown_ms: 5000
+  speed_map: 0=0% 24000=100%</code></pre>
+<p>Типы частотников, которые поддерживает эта прошивка, — используйте имя как заголовок раздела вместо <code>Huanyang:</code>:</p><p><code>Huanyang</code> · <code>YL620</code> · <code>H2A</code> · <code>H100</code> · <code>NowForever</code> · <code>SiemensV20</code> · <code>DeltaMS300</code> · <code>FolinnBD600</code> · <code>MollomG70</code> · <code>DanfossVLT2800</code> · <code>ModbusVFD</code> (универсальный, регистры задаёте сами)</p><p>Другие типы шпинделей: <code>PWM</code>, <code>10V</code>, <code>Relay</code>, <code>OnOff</code>, <code>Laser</code>, <code>BESC</code>, <code>DAC</code>, <code>HBridge</code>, <code>PlasmaSpindle</code>. Для каждого частотника нужно также настроить его собственные параметры для управления по RS485 (скорость, адрес, источник пуска и частоты) — см. руководство к частотнику и <a href="http://wiki.fluidnc.com/" target="_blank" rel="noopener">вики FluidNC</a>.</p>
+<p><strong>Безопасность:</strong> настраивайте и проверяйте частотник со шпинделем без нагрузки и без установленного инструмента.</p>

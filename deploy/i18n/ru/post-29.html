@@ -1,0 +1,73 @@
+<p>Это ранние платы контроллеров dpCREATOR. Они сняты с производства и больше не продаются. Эта страница показывает их для справки и чтобы владельцы могли определить свою плату. Текущая плата — <a href="index.php?route=journal3/blog/post&journal_blog_post_id=15">dpCREATOR R2/R3</a>.</p>
+
+<h2>Платы на ESP32 (FluidNC)</h2>
+
+<div class="dpc-legacy-board">
+<div class="dpc-legacy-imgs">
+<img src="image/catalog/dpc-site/legacy/legacy-modular-v4-0-4.jpg" alt="Модульная плата v4.0.4: несущая плата со сменным ядром, модулем управления движением, модулем 0-10 V PWM и модулем питания DC-DC">
+</div>
+<div class="dpc-legacy-text">
+<h3>v4.0.4 (модульная)</h3>
+<p>Модульная версия платы v4. Несущая плата с винтовыми клеммами, реле, USB и портом RJ11 принимает сменные модули: ядро PLC V2.0.1, 4-осевой модуль управления движением, модуль 0–10 V PWM для шпинделя и источник питания DC-DC с 24 V на 5 V. Каждую часть можно было заменить отдельно.</p>
+</div>
+</div>
+
+<div class="dpc-legacy-board">
+<div class="dpc-legacy-imgs">
+<img src="image/catalog/dpc-site/legacy/r1-v4-0-2-machine.jpg" alt="Плата R1 v4.0.2 в шкафу управления ЧПУ с четырьмя драйверами шаговых двигателей и частотником">
+<img src="image/catalog/dpc-site/legacy/r1-v4-0-2-angle.jpg" alt="Плата R1 v4.0.2 под углом в шкафу управления">
+<img src="image/catalog/dpc-site/legacy/legacy-plc-v4-0-2-pcb.jpg" alt="Голая плата R1 v4.0.2 с зелёными винтовыми клеммами">
+<img src="image/catalog/dpc-site/legacy/legacy-plc-v4-0-2-r1-din.jpg" alt="R1 v4.0.2 в сером корпусе на DIN-рейку">
+</div>
+<div class="dpc-legacy-text">
+<h3>R1 (v4.0.2)</h3>
+<p>«4 Axis CNC PLC» с маркировкой GRBL 32 / FluidNC. На плате — модуль ESP32, слот для microSD, релейный выход, USB и винтовые клеммы для четырёх осей step/direction и входов. На фото она работает в станке и управляет четырьмя внешними драйверами шаговых двигателей и шпинделем с частотником.</p>
+<p>R1 была первой платой серии R. Опыт, полученный на ней, вошёл в R2 и R3.</p>
+</div>
+</div>
+
+<div class="dpc-legacy-board">
+<div class="dpc-legacy-imgs">
+<img src="image/catalog/dpc-site/legacy/legacy-shield-v3-0-2.jpg" alt="4 Axis CNC Shield V3.0.2 с гнездом для отладочного модуля ESP32">
+</div>
+<div class="dpc-legacy-text">
+<h3>v3.0.2 (v1)</h3>
+<p>Несущая плата для стандартного отладочного модуля ESP32. Отладочный модуль вставлялся в плату, а не ESP32 припаивался к ней.</p>
+</div>
+</div>
+
+<h2>Платы на Atmel (GRBL 1.1)</h2>
+<p>Проект начался на Atmel ATmega328P с GRBL 1.1. Эти платы выпускала 3dp.lv Ltd — компания, которая делала платы до dpCREATOR.</p>
+
+<div class="dpc-legacy-board">
+<div class="dpc-legacy-imgs">
+<img src="image/catalog/dpc-site/legacy/shield-v1-2-angle.jpg" alt="3dp.lv 3 Axis CNC Shield V1.2, 3D-рендер">
+<img src="image/catalog/dpc-site/legacy/shield-v1-2-top.jpg" alt="3dp.lv 3 Axis CNC Shield V1.2, 3D-рендер с другой стороны">
+</div>
+<div class="dpc-legacy-text">
+<h3>3 Axis CNC Shield V1.2</h3>
+<p>Полноценный контроллер GRBL 1.1 с ATmega328P на плате и логикой 5&nbsp;V. У него есть выходы step, direction и enable для X, Z и двух двигателей Y с отдельными концевиками Y (два концевика Y для выравнивания портала). Также есть enable и PWM шпинделя, входы щупа и abort, вход питания 12&nbsp;V, разъём USB + LCD и гребёнка для дополнительного модуля Bluetooth HC-06.</p>
+</div>
+</div>
+
+<div class="dpc-legacy-board">
+<div class="dpc-legacy-imgs">
+<img src="image/catalog/dpc-site/legacy/legacy-uno-terminal-shield.jpg" alt="Шилды 3dp.lv с винтовыми клеммами для Arduino UNO: один установлен на UNO, два отдельно, видны логотип 3dp.lv и клеммники снизу">
+</div>
+<div class="dpc-legacy-text">
+<h3>Шилд UNO с винтовыми клеммами: с чего всё началось</h3>
+<p>Первая версия проекта. Она работала на GRBL на плате UNO с Atmel ATmega328P и была сделана для станков с внешними драйверами шаговых двигателей. Мы сделали её, потому что нам не нравились дешёвые CNC-шилды со вставными модулями драйверов.</p>
+<p>Шилд устанавливается поверх UNO и выводит её контакты на пять рядов винтовых клемм с подписями для сигналов step, direction, концевиков, enable и земли, так что драйверы и концевики можно было подключать без пайки.</p>
+</div>
+</div>
+
+<div class="dpc-legacy-board">
+<div class="dpc-legacy-imgs">
+<img src="image/catalog/dpc-site/legacy/uno-r3-cnc-angle.jpg" alt="3dp.lv UNO R3 CNC Edition, 3D-рендер">
+<img src="image/catalog/dpc-site/legacy/uno-r3-cnc-angle2.jpg" alt="3dp.lv UNO R3 CNC Edition, 3D-рендер под другим углом">
+</div>
+<div class="dpc-legacy-text">
+<h3>UNO R3 CNC Edition</h3>
+<p>Плата, совместимая с UNO R3, на самом мощном чипе для UNO, доступном в то время, с USB и разъёмом питания DC, сделанная для работы GRBL под CNC-шилдом.</p>
+</div>
+</div>
