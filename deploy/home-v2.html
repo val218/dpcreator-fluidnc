@@ -1,0 +1,174 @@
+<div class="dpx"><div class="dph"><style>
+.dpx > .dph{width:100vw;margin-left:calc(50% - 50vw)}
+.dph{background:#0d1014;color:#eef2f5;font-family:Barlow,Arial,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.dph *{box-sizing:border-box}
+.dph a{text-decoration:none}
+.dph .w{max-width:1240px;margin:0 auto;padding:0 32px}
+.dph h1,.dph h2,.dph h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;margin:0;line-height:1.04;color:#fff;text-transform:none;letter-spacing:0}
+.dph h2{font-size:46px}
+.dph h3{font-family:Barlow,Arial,sans-serif;font-weight:600;font-size:22px;line-height:1.25}
+.dph .lead{margin:12px 0 36px;color:#a9b4bf;font-size:18px;max-width:720px}
+.dph .sec{padding:88px 0}
+.dph .alt{background:#121820;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.dph .btn{display:inline-block;background:#2b8fe0;color:#fff;padding:14px 24px;border-radius:4px;font-weight:600;font-size:16px;line-height:1.2}
+.dph .btn:hover{background:#3a9cec;color:#fff}
+.dph .btn-line{background:transparent;border:1px solid rgba(255,255,255,.3);padding:13px 22px}
+.dph .btn-line:hover{background:rgba(255,255,255,.06)}
+.dph .btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.dph .muted{color:#a9b4bf}
+.dph .uses{margin:4px 0 0;font-size:14px;color:#7fd8b9}
+.dph .beta{font-family:Barlow,Arial,sans-serif;font-size:13px;font-weight:600;color:#8cc4f2;background:rgba(43,143,224,.16);padding:2px 8px;border-radius:3px;vertical-align:middle}
+.dph-hero{padding:72px 0 44px}
+.dph-hero .g{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:center}
+.dph-hero .kick{margin:0 0 14px;color:#8fd8fa;font-size:16px;font-weight:500}
+.dph-hero h1{font-size:72px;line-height:1.0}
+.dph-hero .sub{margin:22px 0 0;font-size:19px;color:#b6c1cb;max-width:560px}
+.dph-hero img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid rgba(255,255,255,.1)}
+.dph-chips{list-style:none;margin:44px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.dph-chips li{padding:8px 14px;border:1px solid rgba(255,255,255,.14);border-radius:999px;font-size:15px;color:#dfe5ea}
+.dph-chips li.new{border-style:dashed;border-color:rgba(79,195,247,.5);color:#8fd8fa}
+.dph-flow{display:flex;align-items:stretch}
+.dph-flow .st{flex:1 1 0;min-width:0;background:#0d1014;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:20px;color:inherit;display:flex;flex-direction:column;gap:10px;transition:border-color .15s}
+.dph-flow .st:hover{border-color:rgba(79,195,247,.55)}
+.dph-flow .n{color:#8fd8fa;font-size:14px;font-weight:600}
+.dph-flow .pic{height:120px;display:flex;align-items:center;justify-content:center}
+.dph-flow .pic img{max-width:100%;max-height:120px;object-fit:contain}
+.dph-flow b{font-size:20px;color:#fff}
+.dph-flow .d{font-size:15px;color:#a9b4bf}
+.dph-flow .ar{flex:0 0 36px;display:flex;align-items:center;justify-content:center;color:#4fc3f7}
+.dph-log{font-family:ui-monospace,monospace;font-size:13px;color:#7fd8b9;display:flex;flex-direction:column;gap:8px;justify-content:center;align-items:flex-start;width:100%}
+.dph-log span:nth-child(2){color:#93a1ae}
+.dph-appchips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+.dph-appchips span{background:#1a222c;border-radius:6px;padding:10px;font-weight:600;font-size:14px}
+.dph-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.dph-card{background:#121820;border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;color:inherit}
+.dph-card.own{border-style:dashed;border-color:rgba(79,195,247,.4)}
+.dph-card .im{height:200px;background:#0f1419;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.dph-card .im img{width:100%;height:100%;object-fit:cover}
+.dph-card .im img.top{object-position:top}
+.dph-card .im img.fit{width:80%;height:160px;object-fit:contain}
+.dph-card .tx{padding:20px;display:flex;flex-direction:column;gap:8px}
+.dph-card p{margin:0;color:#a9b4bf;font-size:15px}
+.dph-apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.dph-app{background:#0d1014;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:20px;color:inherit;display:flex;flex-direction:column;gap:8px;transition:border-color .15s}
+.dph-app:hover{border-color:rgba(79,195,247,.55)}
+.dph-app b{font-size:20px;color:#fff}
+.dph-app .d{font-size:15px;color:#a9b4bf}
+.dph-app .p{margin-top:auto;padding-top:10px;font-size:14px;color:#7fd8b9}
+.dph-app .p.b{color:#8cc4f2}
+.dph-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:48px;align-items:center}
+.dph-split img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid rgba(255,255,255,.1)}
+.dph-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:stretch}
+.dph-panel{background:#0d1014;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:28px;display:flex;flex-direction:column;gap:14px}
+.dph-panel h2{font-size:36px}
+.dph-panel p{margin:0;color:#a9b4bf}
+.dph-panel .shot{width:100%;height:320px;object-fit:cover;object-position:top;border-radius:6px;border:1px solid rgba(255,255,255,.08)}
+.dph-panel iframe{width:100%;height:560px;border:0;border-radius:6px;background:#0c1014}
+.dph-panel .btn{align-self:flex-start}
+.dph-docs{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:17px}
+.dph-docs a,.dph .lk{color:#4fc3f7}
+.dph-docs a:hover,.dph .lk:hover{color:#8fd8fa}
+.dph #shop{background:#0d1014}
+@media (max-width:980px){.dph-flow{flex-direction:column}.dph-flow .ar{transform:rotate(90deg);height:32px;flex-basis:32px}.dph-hero .g,.dph-split,.dph-two{grid-template-columns:1fr}.dph-hero h1{font-size:52px}.dph h2{font-size:38px}}
+@media (max-width:600px){.dph .w{padding:0 16px}.dph .sec{padding:60px 0}.dph-hero{padding:44px 0 32px}.dph-hero h1{font-size:42px}.dph-cards{grid-template-columns:1fr}.dph-panel{padding:20px}.dph-panel iframe{height:520px}}
+</style>
+
+<section class="dph-hero" id="top"><div class="w">
+<div class="g">
+<div>
+<p class="kick">FluidNC controller, pendant and apps, from one maker</p>
+<h1>One controller.<br>Any machine you build.</h1>
+<p class="sub">Run a router or a laser from your browser, design the job, automate a robot arm or a conveyor, or place parts on a circuit board. The dpCREATOR R3 and the SmartTabUI pendant do all of it, and every job picks up where it stopped after a power cut.</p>
+<div class="btns"><a class="btn" href="#shop">Shop the R3 and pendant</a><a class="btn btn-line" href="/firmware">I already have a board</a></div>
+</div>
+<img src="image/catalog/dpc-site/photo-r2-tabui-combo.jpg" alt="dpCREATOR controller and SmartTabUI pendant side by side" width="1445" height="1088">
+</div>
+<ul class="dph-chips" aria-label="Machines it runs"><li>CNC router</li><li>Laser</li><li>Plotter</li><li>Robot arm</li><li>Conveyor and test rig</li><li>Pick and place</li><li class="new">Something nobody has built yet</li></ul>
+</div></section>
+
+<section class="sec alt" id="system"><div class="w">
+<h2>How it fits together</h2>
+<p class="lead">Four layers. Start with the board and add what your machine needs; each one works on its own.</p>
+<div class="dph-flow">
+<a class="st" href="index.php?route=product/product&amp;product_id=381"><span class="n">1 · The board</span><span class="pic"><img src="image/catalog/dpc-site/hero2/hov-board.png" alt="dpCREATOR R3 controller board" loading="lazy"></span><b>dpCREATOR R3</b><span class="d">Ethernet, opto-isolated inputs, RS485 for the spindle and an SD card. Or bring your own: 21 ESP32 boards are on the list.</span></a>
+<span class="ar" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+<a class="st" href="/firmware"><span class="n">2 · The firmware</span><span class="pic"><span class="dph-log" aria-hidden="true"><span>[MSG:Recovery:interrupted]</span><span>Resume from line 18 240?</span><span>ok</span></span></span><b>dpCREATOR FluidNC</b><span class="d">FluidNC 4.1 with job recovery after a power cut, wired Ethernet and a login. Free, flashed from the browser.</span></a>
+<span class="ar" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+<a class="st" href="#apps"><span class="n">3 · The apps on the board</span><span class="pic"><span class="dph-appchips" aria-hidden="true"><span>WebUI</span><span>Studio</span><span>Motion</span><span>PnP</span></span></span><b>Open in any browser</b><span class="d">They live in the controller's own memory: no install on your computer, no cloud. Pick them when you flash.</span></a>
+<span class="ar" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+<a class="st" href="index.php?route=product/product&amp;product_id=382"><span class="n">4 · At the machine</span><span class="pic"><img src="image/catalog/dpc-site/hero2/hov-pendant.png" alt="SmartTabUI pendant" loading="lazy"></span><b>SmartTabUI pendant</b><span class="d">A real handwheel, a hardware E-stop and a touchscreen. Works with the R3 and with WROOM-32 boards.</span></a>
+</div>
+</div></section>
+
+<section class="sec" id="build"><div class="w">
+<h2>What are you building?</h2>
+<p class="lead">Same controller each time. Only the apps change.</p>
+<div class="dph-cards">
+<a class="dph-card" href="index.php?route=product/product&amp;product_id=383"><span class="im"><img class="top" src="image/catalog/dpc-site/shots/webui-running.jpg" alt="WebUI running a router job with the 3D toolpath" loading="lazy"></span><span class="tx"><h3>CNC router</h3><p>Design in Studio, run it in the WebUI with a live 3D toolpath, jog and zero from the pendant.</p><p class="uses">WebUI · Studio · Pendant</p></span></a>
+<a class="dph-card" href="index.php?route=product/product&amp;product_id=386"><span class="im"><img src="image/catalog/dpc-site/shots/studio-preview.jpg" alt="Studio preview of a job on the material" loading="lazy"></span><span class="tx"><h3>Laser or plotter</h3><p>Import an SVG, DXF, PDF or a picture in Studio and send it to the SD card. Studio Basic is free.</p><p class="uses">Studio · WebUI</p></span></a>
+<a class="dph-card" href="/docs/dpcreator-motion"><span class="im"><img src="image/catalog/dpc-site/shots/motion-d-arm.jpg" alt="Motion with a 4-joint robot arm and taught positions" loading="lazy"></span><span class="tx"><h3>Robot arm</h3><p>Add each joint, test it, teach the positions and run the sequence from the controller, or start it from the pendant.</p><p class="uses">Motion · Pendant</p></span></a>
+<a class="dph-card" href="/docs/dpcreator-motion"><span class="im"><img src="image/catalog/dpc-site/shots/motion-d-conveyor.jpg" alt="Motion with a conveyor, a part sensor and a pusher" loading="lazy"></span><span class="tx"><h3>Conveyor or test rig</h3><p>Motors, sensors, relays and outputs put to work without G-code or config files. Motion writes both.</p><p class="uses">Motion</p></span></a>
+<a class="dph-card" href="/docs/dpcreator-pnp-beta"><span class="im" aria-hidden="true"><svg width="300" height="180" viewBox="0 0 400 240" fill="none"><rect x="40" y="20" width="320" height="200" rx="8" fill="#123524" stroke="#2c6b4a"/><g fill="#c9a24a"><circle cx="64" cy="44" r="6"/><circle cx="336" cy="196" r="6"/><circle cx="336" cy="44" r="6"/></g><g fill="#b8bec4"><rect x="100" y="80" width="14" height="22" rx="2"/><rect x="124" y="80" width="14" height="22" rx="2"/><rect x="100" y="150" width="22" height="14" rx="2"/><rect x="280" y="140" width="14" height="22" rx="2"/></g><rect x="190" y="74" width="60" height="44" rx="3" fill="#1b1f24" stroke="#5d6977"/><g stroke="#ff6a3d" stroke-width="2"><path d="M272 122V194M232 158H312"/><circle cx="272" cy="158" r="14"/></g></svg></span><span class="tx"><h3>Pick and place <span class="beta">Beta</span></h3><p>Top and bottom cameras find the board and check each part; the vacuum nozzle places them from cut strips and trays.</p><p class="uses">PnP · WebUI</p></span></a>
+<a class="dph-card own" href="/docs/dpcreator-motion"><span class="im"><img class="fit" src="image/catalog/dpc-site/hero2/hov-board.png" alt="" loading="lazy"></span><span class="tx"><h3>Your own machine</h3><p>Every axis, input, relay and output of the controller put to work. Wire one part, test it, then add the next.</p><p class="uses">Motion · WebUI · Pendant</p></span></a>
+</div>
+</div></section>
+
+<section class="sec alt" id="apps"><div class="w">
+<h2>The apps</h2>
+<p class="lead">Ticked when you flash, installed on the board over USB, opened from any browser on your network.</p>
+<div class="dph-apps">
+<a class="dph-app" href="index.php?route=product/product&amp;product_id=383"><b>WebUI</b><span class="d">Run and watch jobs: DRO, live 3D toolpath, live Z adjust, job recovery, head camera.</span><span class="p">Free with the R3 · €19.99 other boards</span></a>
+<a class="dph-app" href="/docs/install-any-esp32-board"><b>WebUI Lite</b><span class="d">The same WebUI for WROOM-32 boards, with the features that chip can't run turned off.</span><span class="p">Free</span></a>
+<a class="dph-app" href="index.php?route=product/product&amp;product_id=386"><b>Studio</b><span class="d">Design in the browser and make the G-code: V-carve, laser, import SVG, DXF, PDF or a picture.</span><span class="p">Studio Basic free</span></a>
+<a class="dph-app" href="/docs/dpcreator-motion"><b>Motion</b><span class="d">Build your machine part by part, teach positions and run sequences. Try it in the simulator.</span><span class="p">Free with the R3 · €39 other boards</span></a>
+<a class="dph-app" href="/docs/dpcreator-pnp-beta"><b>PnP</b><span class="d">Pick and place with cameras, cut strips and trays. Read the beta notes before the first run.</span><span class="p b">Beta · R&amp;D Club first</span></a>
+</div>
+</div></section>
+
+<section class="sec" id="recovery"><div class="w dph-split">
+<div>
+<h2>Power cut at line 18 240? Carry on from there.</h2>
+<p class="muted" style="margin:16px 0 0;font-size:18px">The board records the job as it runs. After a power cut or an E-stop it suggests the safest place to restart, lets you dry-run to it, and resumes. From the WebUI or the pendant.</p>
+<div class="btns"><a class="btn btn-line" href="/demo/">Try it in the demo</a></div>
+</div>
+<img src="image/catalog/dpc-site/shots/webui-recovery.jpg" alt="WebUI job recovery panel after an E-stop" loading="lazy">
+</div></section>
+
+<!--SHOP-->
+
+<section class="sec alt" id="try"><div class="w dph-two">
+<div class="dph-panel" id="setup">
+<h2>Set up any ESP32 board in one page</h2>
+<p>Pick your board from 21, pick a ready config, tick the apps, type your Wi-Fi and a login. The page flashes, writes and checks it all over USB, then shows the board's address.</p>
+<img class="shot" src="image/catalog/dpc-site/shots/install-any-board.jpg" alt="The install page: board, configuration, apps, and network and login" loading="lazy">
+<a class="btn" href="/firmware">Set up my board</a>
+</div>
+<div class="dph-panel">
+<h2>Try the pendant here</h2>
+<p>The SmartTabUI pendant running a simulated machine in your browser. The knobs, the handwheel, the touchscreen and the E-stop all work.</p>
+<iframe src="/demo/?embed=1" title="SmartTabUI pendant, live demo" loading="lazy"></iframe>
+<a class="btn btn-line" href="/demo/">Full demo with the WebUI</a>
+</div>
+</div></section>
+
+<section class="sec" id="rnd-club"><div class="w" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:40px">
+<div>
+<h2 style="font-size:40px">Build it first: the R&amp;D Club</h2>
+<p class="muted" style="margin:14px 0 0;font-size:17px">Before launch, 10 makers get the SmartTabUI firmware and the WebUI free to build and test on their own machines, and try new apps like PnP first. The 3 best builds get a dpCREATOR R3 controller.</p>
+<div class="btns"><a class="btn" href="index.php?route=information/information&amp;information_id=9">Apply for a place</a><a class="btn btn-line" href="rnd-members">Meet the members</a></div>
+</div>
+<div id="docs">
+<h2 style="font-size:40px">Documentation</h2>
+<ul class="dph-docs">
+<li><a href="index.php?route=journal3/blog&amp;journal_blog_category_id=6">Getting started</a></li>
+<li><a href="/docs/install-any-esp32-board">Set up any ESP32 FluidNC board</a></li>
+<li><a href="index.php?route=journal3/blog&amp;journal_blog_category_id=7">The controller</a> · <a href="index.php?route=journal3/blog&amp;journal_blog_category_id=8">the pendant</a> · <a href="index.php?route=journal3/blog&amp;journal_blog_category_id=9">firmware</a></li>
+<li><a href="/docs/dpcreator-motion">Automate any project with Motion</a></li>
+<li><a href="/docs/dpcreator-pnp-beta">PnP beta: read before you start</a></li>
+<li><a href="index.php?route=journal3/blog&amp;journal_blog_category_id=10">Troubleshooting</a></li>
+</ul>
+<p class="muted" style="margin:18px 0 0;font-size:15px">Designed and built by a CNC engineer. Earlier boards: <a class="lk" href="legacy-boards">where the R2 and R3 come from</a>.</p>
+</div>
+</div></section>
+
+</div></div>
