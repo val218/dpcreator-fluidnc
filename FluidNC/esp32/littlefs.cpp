@@ -1,5 +1,6 @@
 #include "esp_partition.h"
 #include "esp_littlefs.h"
+#include "esp_idf_version.h"
 #include "esp_log.h"
 #include "wdt.h"
 #include "Driver/watchdog.h"  // suspend_watchdog_for_task()
@@ -33,6 +34,12 @@ bool littlefs_mount(const char* label, bool format) {
     conf.base_path               = "/littlefs";
     conf.partition_label         = label;
     conf.format_if_mount_failed  = format;
+    // A larger partition than the file system was made for (an R3 moved to the
+    // 16 MB layout, or the 16 MB merged image's 1.9 MB file system): use all of
+    // it, keeping the files.
+#if ESP_IDF_VERSION_MAJOR >= 5  // the ESP32 build's older esp_littlefs (IDF 4.4) has no grow_on_mount
+    conf.grow_on_mount = true;
+#endif
 
     esp_err_t err = esp_vfs_littlefs_register(&conf);
 

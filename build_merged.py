@@ -13,13 +13,17 @@ for image in env.get("FLASH_EXTRA_IMAGES", []):
     cmd += image[0] + " " + env.subst(image[1]) + " "
 
 filesystem_start = env.GetProjectOption("custom_filesystem_start", "Missing_custom_filesystem_start_variable")
+# custom_filesystem_image: another env's (smaller) file system image instead of
+# building one the size of this env's partition; LittleFS grows it on the first
+# start (wifi_s3_16m uses wifi_s3's 1.9 MB image: a merged file of 8 MB, not 16)
+filesystem_image = env.GetProjectOption("custom_filesystem_image", "")
 
-cmd += " 0x10000 $BUILD_DIR/firmware.bin " + filesystem_start + " $BUILD_DIR/littlefs.bin"
+cmd += " 0x10000 $BUILD_DIR/firmware.bin " + filesystem_start + " " + (filesystem_image or "$BUILD_DIR/littlefs.bin")
 
 env.AddCustomTarget(
     name="build_merged",
     dependencies=["$BUILD_DIR/bootloader.bin", "$BUILD_DIR/firmware.bin"],
-    actions=["pio run -e $PIOENV -t buildfs", cmd],
+    actions=[cmd] if filesystem_image else ["pio run -e $PIOENV -t buildfs", cmd],
     title="Build Merged",
     description="Build combined image with program and filesystem"
 )

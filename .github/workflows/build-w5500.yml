@@ -4,7 +4,7 @@ on:
   push:
     # bt-decode: a copy of a released commit plus .github/backtrace.txt, to
     # decode a crash backtrace against that build (see the Decode step)
-    branches: [ fluidnc-4.1.1-w5500, bt-decode ]
+    branches: [ fluidnc-4.1.1-w5500, bt-decode, flash16m ]
   workflow_dispatch:
     inputs:
       backtrace:
@@ -71,6 +71,24 @@ jobs:
           cp $B/merged-flash.bin out/ 2>/dev/null || true
           cp $B/firmware.elf debug/
           ls -l out debug
+
+      # dpCREATOR R3 (16 MB flash): the 16 MB layout, 9.9 MB file system.
+      # Files r3-16m-*; never blocks the release while it is new.
+      - name: Build firmware (wifi_s3_16m, R3 16 MB layout)
+        id: s3_16m
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          pio run -e wifi_s3_16m 2>&1 | tee build-16m.log || {
+            grep -iE "error|undefined" build-16m.log | head -8 | while IFS= read -r l; do echo "::warning title=16 MB build::$l"; done
+            exit 1
+          }
+          pio run -e wifi_s3_16m -t build_merged
+          B=.pio/build/wifi_s3_16m
+          for f in firmware bootloader partitions merged-flash; do cp $B/$f.bin out/r3-16m-$f.bin; done
+          cp $B/firmware.elf debug/r3-16m-firmware.elf
+          ls -l out/r3-16m-*
 
       # ESP32 (WROOM-32) install option: same dpCREATOR firmware for the many
       # FluidNC boards on the original ESP32 (4 MB flash, no PSRAM, no W5500,
@@ -193,4 +211,4 @@ jobs:
           gh release delete w5500-latest -y --cleanup-tag || true
           gh release create w5500-latest out/* --prerelease --target "$GITHUB_SHA" \
             --title "dpCREATOR FluidNC 4.1.1 W5500 - latest build ($SHORT)" \
-            --notes "Latest build of branch fluidnc-4.1.1-w5500 (commit $SHORT), replaced on every push. merged-flash.bin = fresh board at 0x0 (overwrites config.yaml); firmware.bin = update at 0x10000 over USB (network updates are off since 063dee80). Set the login password over USB with \$Auth/Set=<password> or on the first WebUI visit. The dpCREATOR WebUI is installed separately from dpcreator.eu. ESP32 (WROOM-32) boards: wroom32-merged-flash.bin = fresh board at 0x0 (starter config.yaml without pins, Wi-Fi only, no W5500); wroom32-firmware.bin = update at 0x10000 over USB. Head camera (WebUI camera crosshair): camera-s3-eye-flash.bin (ESP32-S3-EYE, Freenove ESP32-S3 CAM), camera-xiao-s3-flash.bin (XIAO ESP32S3 Sense), camera-esp32cam-flash.bin (AI-Thinker ESP32-CAM), each at 0x0 on the camera board. See W5500_ETHERNET.md."
+            --notes "Latest build of branch fluidnc-4.1.1-w5500 (commit $SHORT), replaced on every push. merged-flash.bin = fresh board at 0x0 (overwrites config.yaml); firmware.bin = update at 0x10000 over USB (network updates are off since 063dee80). Set the login password over USB with \$Auth/Set=<password> or on the first WebUI visit. The dpCREATOR WebUI is installed separately from dpcreator.eu. ESP32 (WROOM-32) boards: wroom32-merged-flash.bin = fresh board at 0x0 (starter config.yaml without pins, Wi-Fi only, no W5500); wroom32-firmware.bin = update at 0x10000 over USB. R3 with 16 MB flash, 16 MB layout (9.9 MB file system): r3-16m-merged-flash.bin = fresh board at 0x0; moving an R3 to it keeps config.yaml: r3-16m-bootloader.bin at 0x0, r3-16m-partitions.bin at 0x8000, r3-16m-firmware.bin at 0x10000 (nothing else - the file system grows at the next start); updates then use r3-16m-firmware.bin at 0x10000. Only for 16 MB chips. Head camera (WebUI camera crosshair): camera-s3-eye-flash.bin (ESP32-S3-EYE, Freenove ESP32-S3 CAM), camera-xiao-s3-flash.bin (XIAO ESP32S3 Sense), camera-esp32cam-flash.bin (AI-Thinker ESP32-CAM), each at 0x0 on the camera board. See W5500_ETHERNET.md."
