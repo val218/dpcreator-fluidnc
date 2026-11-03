@@ -773,6 +773,24 @@ static void protocol_do_start() {
 
 static void protocol_do_alarm(void* alarmVoid) {
     lastAlarm = (ExecAlarm)((int)(intptr_t)alarmVoid);
+    // dpCREATOR: motion stopped abruptly (a reset or E-stop while moving, a hard
+    // limit or stop, a failed homing, a probe into a limit): steps may be lost,
+    // so a recovery resume needs homing again ($X alone is not enough there).
+    switch (lastAlarm) {
+        case ExecAlarm::HardLimit:
+        case ExecAlarm::AbortCycle:
+        case ExecAlarm::HomingFailReset:
+        case ExecAlarm::HomingFailDoor:
+        case ExecAlarm::HomingFailPulloff:
+        case ExecAlarm::HomingFailApproach:
+        case ExecAlarm::HomingAmbiguousSwitch:
+        case ExecAlarm::HardStop:
+        case ExecAlarm::ProbeHardLimit:
+            recov_position_lost();
+            break;
+        default:
+            break;
+    }
     if (spindle->_off_on_alarm) {
         spindle->stop();
     }
