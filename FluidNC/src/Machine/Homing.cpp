@@ -7,6 +7,7 @@
 #include "Stepper.h"   // st_wake
 #include "Protocol.h"  // protocol_handle_events
 #include "Limit.h"     // ambiguousLimit
+#include "Recovery.h"  // recov_axes_homed()
 #include "Machine/Axes.h"
 #include "Machine/MachineConfig.h"  // config
 
@@ -299,6 +300,7 @@ namespace Machine {
             }
         }
         log_msg("Homed:" << homedAxes);
+        recov_axes_homed(_cycleAxes & Machine::Axes::homingMask);  // dpCREATOR: position trust for a resume
         //        logArray("mpos becomes", mpos, n_axis);
 
         config->_kinematics->set_homed_mpos(mpos);

@@ -516,8 +516,18 @@ leaves it in **alarm**, so the recovery screens have their own **Unlock**
 (`$X`) and **Home** (`$H`, asks first) buttons: the WebUI card shows them in a
 red row with what to do, the pendant's last screen swaps *Dry run / START* for
 *Unlock / Home* until the machine is ready. The board reports this as
-`[MSG:RecoveryReady:<alarm|unhomed|busy|ok>]` whenever it changes. If the chosen line is in the middle of an arc, a note asks you to
+`[MSG:RecoveryReady:<alarm|unhomed|rezero|busy|ok>]` whenever it changes. If the chosen line is in the middle of an arc, a note asks you to
 check the first move.
+
+**When the position counts as lost.** After a power-up, and whenever motion
+stopped abruptly - a reset or E-stop while moving, a hard limit or hard stop,
+a failed homing - steps may have been lost, so a resume needs a real
+**homing** first; *Unlock* (`$X`) alone is not enough for a resume (it still
+lets you jog and move as before). A stop after the machine had come to rest
+(Hold finished, or Idle) keeps the position. A machine **without homing
+switches** can't home: the screens then ask you to set X, Y and Z zero again
+at exactly the same spot as for this job and confirm it (**Zeroed** on the
+pendant, **Zero set again** in the WebUI, `$Job/Zeroed`).
 
 ```
 $Job/Recovery            report: [MSG:Recovery:<state>:<stop>:<retract>:<tool>:<reason>:<file>]
@@ -526,6 +536,7 @@ $Job/Points              work out the suggested restart lines
 $Job/Resume=<line>       continue the interrupted job from <line>
 $Job/Resume=<line>:dry   only move above that line's start point
 $Job/Discard             forget the interrupted job
+$Job/Zeroed              no homing switches: X/Y/Z zero is set again at the same spot
 ```
 
 The pendant no longer keeps its own checkpoint: with an older board

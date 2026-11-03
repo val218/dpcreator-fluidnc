@@ -17,6 +17,7 @@
 #include "Logging.h"
 #include "Machine/MachineConfig.h"
 #include "Machine/Homing.h"
+#include "Machine/Axes.h"
 #include "Driver/watchdog.h"
 
 #include <Arduino.h>  // millis
@@ -72,9 +73,18 @@ namespace {
     // Can the job be continued now? alarm -> unlock ($X); unhomed -> home ($H);
     // busy -> wait for Idle; ok. Sent with every report and when it changes,
     // so the screens can offer Unlock / Home right in the recovery dialog.
+    // Position trust (Recovery.h): axes that must be homed again before a
+    // resume; a machine without homing needs the operator's $Job/Zeroed instead.
+    const uint32_t        ALL_HOMING = 0xFFFFFFFFu;  // "every axis that homes" (config may load later)
+    std::atomic<uint32_t> _needHome { ALL_HOMING };
+    std::atomic<bool>     _posLost { true };  // power-up: the machine may have been moved
+    uint32_t homing_axes() { return Machine::Axes::homingMask; }
+    bool     position_ok() { return !_posLost.load(); }
+
     const char* ready_name() {
         if (state_is(State::Alarm) || state_is(State::ConfigAlarm) || state_is(State::Critical)) return "alarm";
         if (Machine::Homing::unhomed_axes()) return "unhomed";
+        if (!position_ok()) return homing_axes() ? "unhomed" : "rezero";
         if (!state_is(State::Idle)) return "busy";
         return "ok";
     }
@@ -308,6 +318,7 @@ namespace {
 }
 
 void recov_init() {
+    recov_position_lost();  // power-up: the machine may have been moved while off
     load();
     if (_r.st == St::Interrupted) {
         save();  // "running" -> "interrupted"
@@ -374,6 +385,18 @@ bool recov_command(const char* line) {
         report();
         return true;
     }
+    if (strcasecmp(cmd, "Zeroed") == 0) {
+        if (homing_axes()) {
+            report_err("this machine homes - press Home");
+        } else if (!state_is(State::Idle)) {
+            report_err("the machine must be Idle");
+        } else {
+            _posLost = false;
+            log_info("Recovery: the operator confirmed the zero");
+        }
+        report_ready();
+        return true;
+    }
     if (strcasecmp(cmd, "Discard") == 0) {
         scan_stop();
         _r = Record();
@@ -423,8 +446,13 @@ bool recov_command(const char* line) {
             report_ready();
             return true;
         }
-        if (Machine::Homing::unhomed_axes()) {
+        if (Machine::Homing::unhomed_axes() || (!position_ok() && homing_axes())) {
             report_err("home the machine first - press Home");
+            report_ready();
+            return true;
+        }
+        if (!position_ok()) {
+            report_err("position lost: set X/Y/Z zero again, then confirm");
             report_ready();
             return true;
         }
@@ -439,4 +467,16 @@ bool recov_command(const char* line) {
         return true;
     }
     return false;
+}
+
+void recov_position_lost() {
+    _needHome = ALL_HOMING;
+    _posLost  = true;
+}
+
+void recov_axes_homed(uint32_t axes) {
+    uint32_t need = (_needHome.load() == ALL_HOMING ? homing_axes() : _needHome.load()) & ~axes;
+    _needHome     = need;
+    // all the axes that home are homed again (homing since the loss, or since power-up)
+    if (homing_axes() && !need && !(Machine::Homing::unhomed_axes() & homing_axes())) _posLost = false;
 }
