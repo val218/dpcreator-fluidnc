@@ -6,6 +6,8 @@
 #include "EventPin.h"
 #include "Types.h"
 
+#include <vector>
+
 namespace Machine {
     class LimitPin : public EventPin {
     private:
@@ -25,6 +27,11 @@ namespace Machine {
         volatile bool* _pLimited      = nullptr;
         volatile bool* _pExtraLimited = nullptr;
 
+        // Motors of other axes whose switch is wired to this same input (switches in series on one
+        // pin, as on Stepcraft machines). They home in different cycles, so a touch during homing
+        // belongs to the one axis that is moving.
+        std::vector<volatile bool*> _pShared;
+
         volatile MotorMask* _posLimits = nullptr;
         volatile MotorMask* _negLimits = nullptr;
 
@@ -35,6 +42,7 @@ namespace Machine {
 
         void makeDualMask();  // makes this a mask for motor0 and motor1
         void setExtraMotorLimit(axis_t axis, motor_t motorNum);
+        void addSharedMotor(axis_t axis, motor_t motorNum);
 
         bool isHard() { return _pHardLimits; }
         void init();

@@ -80,6 +80,7 @@ namespace Machine {
         static void set_disable(axis_t axis, bool disable, bool manual_override);
         static void set_disable(bool disable, bool manual_override);
         static void config_motors();
+        static void link_shared_limits();
 
         static std::string maskToNames(AxisMask mask);
 

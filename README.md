@@ -6,6 +6,8 @@
 > - [Pendant connection status](https://github.com/val218/fluidNC-with-w5500-support/blob/fluidnc-4.1.1-w5500/W5500_ETHERNET.md#7-pendant-connection-status)
 > - [Job preview on the pendant: Prepare → Run](https://github.com/val218/fluidNC-with-w5500-support/blob/fluidnc-4.1.1-w5500/W5500_ETHERNET.md#8-job-preview-on-the-tabui-pendant) · [Troubleshooting](https://github.com/val218/fluidNC-with-w5500-support/blob/fluidnc-4.1.1-w5500/W5500_ETHERNET.md#9-troubleshooting)
 
+> - [One limit-switch input for several axes (`limit_shared_with`)](SHARED_LIMIT_SWITCH.md): Stepcraft and other machines with the end switches in series
+
 <img src="https://github.com/bdring/FluidNC/wiki/images/logos/FluidNC.svg" width="600">
 
 ## Introduction
