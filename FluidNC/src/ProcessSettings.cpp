@@ -1,6 +1,7 @@
 // Copyright (c) 2020 Mitch Bradley
 // Use of this source code is governed by a GPLv3 license that can be found in the LICENSE file.
 
+#include "ChargePump.h"
 #include "Settings.h"
 #include "PathRetrace.h"  // PathRetrace plugin
 #include "VizGenerator.h"  // VizGenerator plugin
@@ -778,6 +779,15 @@ static Error forceCrash(const char* value, AuthenticationLevel auth_level, Chann
 }
 #endif
 
+static Error showChargePump(const char* value, AuthenticationLevel auth_level, Channel& out) {
+    if (!chargePump || !chargePump->configured()) {
+        log_string(out, "ChargePump:none");
+    } else {
+        log_string(out, std::string("ChargePump:") + (chargePump->on() ? "on" : std::string("off:") + chargePump->reason()));
+    }
+    return Error::Ok;
+}
+
 static Error showGPIOs(const char* value, AuthenticationLevel auth_level, Channel& out) {
     gpio_dump(out);
     return Error::Ok;
@@ -1011,6 +1021,7 @@ static Error list_parameters(const char* value, AuthenticationLevel auth_level, 
 // to performing some system state change.  Each command is responsible
 // for decoding its own value string, if it needs one.
 void make_user_commands() {
+    new UserCommand("CP", "ChargePump", showChargePump, anyState);
     new UserCommand("GD", "GPIO/Dump", showGPIOs, anyState);
     new UserCommand("GI", "GPIO/Input", setGPIOInput, anyState);
     new UserCommand("GO", "GPIO/Output", setGPIOOutput, anyState);

@@ -7,6 +7,7 @@
   Protocol.cpp - execution state machine
 */
 
+#include "ChargePump.h"
 #include "Protocol.h"
 #include "Event.h"
 
@@ -350,6 +351,9 @@ void protocol_auto_cycle_start() {
 // NOTE: The sys_rt_exec_state.bit variable flags are set by any process, step or serial interrupts, pinouts,
 // limit switches, or the main program.
 void protocol_execute_realtime() {
+    if (chargePump) {
+        chargePump->feed();  // its watchdog: stops the charge pump if this loop stalls
+    }
     protocol_exec_rt_system();
     if (sys.suspend().value) {
         protocol_exec_rt_suspend();
