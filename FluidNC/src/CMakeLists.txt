@@ -1,5 +1,6 @@
 idf_component_register(SRCS BTConfig.cpp
 							Channel.cpp
+							ChargePump.cpp
 							Control.cpp
 							ControlPin.cpp
 							CoolantControl.cpp

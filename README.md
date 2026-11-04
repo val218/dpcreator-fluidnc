@@ -6,6 +6,8 @@
 > - [Pendant connection status](https://github.com/val218/fluidNC-with-w5500-support/blob/fluidnc-4.1.1-w5500/W5500_ETHERNET.md#7-pendant-connection-status)
 > - [Job preview on the pendant: Prepare → Run](https://github.com/val218/fluidNC-with-w5500-support/blob/fluidnc-4.1.1-w5500/W5500_ETHERNET.md#8-job-preview-on-the-tabui-pendant) · [Troubleshooting](https://github.com/val218/fluidNC-with-w5500-support/blob/fluidnc-4.1.1-w5500/W5500_ETHERNET.md#9-troubleshooting)
 
+> - [Charge pump for parallel-port breakouts (`charge_pump:`)](CHARGE_PUMP.md): Mach3-style breakouts that only enable their drivers while a square wave runs
+
 <img src="https://github.com/bdring/FluidNC/wiki/images/logos/FluidNC.svg" width="600">
 
 ## Introduction
