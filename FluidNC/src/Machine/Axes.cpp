@@ -8,6 +8,8 @@
 #include "Limit.h"
 #include "MachineConfig.h"  // config->
 
+#include <strings.h>  // strcasecmp
+
 namespace Machine {
     MotorMask Axes::posLimitMask = 0;
     MotorMask Axes::negLimitMask = 0;
@@ -68,7 +70,66 @@ namespace Machine {
             }
         }
 
+        link_shared_limits();
         config_motors();
+    }
+
+    // Motors with "limit_shared_with: <axis>" join that axis's limit_all_pin. One input, several axes:
+    // only safe when they home one after the other, so axes in the same homing cycle are refused.
+    void Axes::link_shared_limits() {
+        for (axis_t axis = X_AXIS; axis < _numberAxis; axis++) {
+            auto a = _axis[axis];
+            if (!a) {
+                continue;
+            }
+            for (motor_t motor = 0; motor < Axis::MAX_MOTORS_PER_AXIS; motor++) {
+                auto m = a->_motors[motor];
+                if (!m || m->_sharedWith.empty()) {
+                    continue;
+                }
+                axis_t owner = INVALID_AXIS;
+                for (axis_t o = X_AXIS; o < _numberAxis; o++) {
+                    if (strcasecmp(axisName(o), m->_sharedWith.c_str()) == 0) {
+                        owner = o;
+                    }
+                }
+                auto oa = owner == INVALID_AXIS ? nullptr : _axis[owner];
+                auto om = oa ? oa->_motors[0] : nullptr;
+                const char* err = nullptr;
+                if (!om || owner == axis) {
+                    err = "names no other axis";
+                } else if (!om->allLimitPin().defined()) {
+                    err = "needs limit_all_pin on that axis's motor0";
+                } else if (!om->_sharedWith.empty()) {
+                    err = "points at an axis that shares a switch itself";
+                } else if (a->_homing && oa->_homing && a->_homing->_cycle > 0 && a->_homing->_cycle == oa->_homing->_cycle) {
+                    err = "must home in a different cycle than the axis it shares with";
+                } else {
+                    for (axis_t o = X_AXIS; o < _numberAxis && !err; o++) {
+                        auto x = _axis[o];
+                        if (o == axis || !x || !x->_homing || !a->_homing || a->_homing->_cycle <= 0) {
+                            continue;
+                        }
+                        for (motor_t k = 0; k < Axis::MAX_MOTORS_PER_AXIS; k++) {
+                            auto xm = x->_motors[k];
+                            if (xm && xm->_sharedWith == m->_sharedWith && x->_homing->_cycle == a->_homing->_cycle) {
+                                err = "must home in a different cycle than the other axes on the same switch";
+                            }
+                        }
+                    }
+                }
+                if (err) {
+                    log_error("Axis " << axisName(axis) << " limit_shared_with: " << m->_sharedWith << " " << err << ": no switch for this axis");
+                    m->_sharedWith.clear();
+                    continue;
+                }
+                om->allLimitPin().addSharedMotor(axis, motor);
+                if (m->_hardLimits != om->_hardLimits) {
+                    log_warn("Axis " << axisName(axis) << " shares " << axisName(owner) << "'s switch: hard_limits follows " << axisName(owner));
+                }
+                log_info("Axis " << axisName(axis) << " limit switch shared with " << axisName(owner));
+            }
+        }
     }
 
     void IRAM_ATTR Axes::set_disable(axis_t axis, bool disable, bool manual_override) {

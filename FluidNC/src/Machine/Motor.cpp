@@ -19,6 +19,7 @@ namespace Machine {
         handler.item("limit_pos_pin", _posLimitPin);
         handler.item("limit_all_pin", _allLimitPin);
         handler.item("hard_limits", _hardLimits);
+        handler.item("limit_shared_with", _sharedWith, 0, 1);
         handler.item("pulloff_mm", _pulloff, 0.1, 100000.0);
         MotorDrivers::MotorFactory::factory(handler, _driver);
     }
@@ -48,7 +49,7 @@ namespace Machine {
 
     // true if there is at least one switch for this motor
     bool Motor::hasSwitches() {
-        return (_negLimitPin.defined() || _posLimitPin.defined() || _allLimitPin.defined());
+        return (_negLimitPin.defined() || _posLimitPin.defined() || _allLimitPin.defined() || !_sharedWith.empty());
     }
 
     // Used when a single switch input is wired to 2 axes.
@@ -75,7 +76,7 @@ namespace Machine {
 
     // Use true to check positive and false to check negative homing directions
     bool Motor::supports_homing_dir(bool positive) {
-        if (_driver->can_self_home() || _allLimitPin.defined()) {
+        if (_driver->can_self_home() || _allLimitPin.defined() || !_sharedWith.empty()) {
             return true;
         }
         return positive ? _posLimitPin.defined() : _negLimitPin.defined();

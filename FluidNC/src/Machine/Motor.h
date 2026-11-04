@@ -32,6 +32,11 @@ namespace Machine {
 
         bool _hardLimits = false;
 
+        // "limit_shared_with: z": this motor has no input of its own; its switch is wired in series with
+        // the switches on that axis's limit_all_pin. Axes sharing a switch must home in different cycles.
+        std::string _sharedWith;
+        LimitPin&   allLimitPin() { return _allLimitPin; }
+
         // Configuration system helpers:
         void group(Configuration::HandlerBase& handler) override;
         void afterParse() override;

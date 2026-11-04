@@ -60,6 +60,9 @@ namespace Machine {
                 if (_pExtraLimited != nullptr) {
                     *_pExtraLimited = active;
                 }
+                for (auto p : _pShared) {
+                    *p = active;
+                }
             }
 
             if (_posLimits != nullptr) {
@@ -74,6 +77,9 @@ namespace Machine {
             }
             if (_pExtraLimited != nullptr) {
                 *_pExtraLimited = active;
+            }
+            for (auto p : _pShared) {
+                *p = active;
             }
             if (_posLimits != nullptr) {
                 clear_bits(*_posLimits, _bitmask);
@@ -94,5 +100,13 @@ namespace Machine {
 
     void LimitPin::setExtraMotorLimit(axis_t axis, motor_t motorNum) {
         _pExtraLimited = Stepping::limit_var(axis, motorNum);
+    }
+
+    // Another axis's motor shares this switch input: it sets that motor's limit bit and stops it too
+    void LimitPin::addSharedMotor(axis_t axis, motor_t motorNum) {
+        _bitmask |= 1 << Axes::motor_bit(axis, motorNum);
+        _pShared.push_back(Stepping::limit_var(axis, motorNum));
+        _legend = Axes::motorMaskToNames(_bitmask);
+        _legend += " shared Limit";
     }
 }
