@@ -3,6 +3,7 @@
 
 #include <driver/uart.h>
 #include "fnc_idf_uart.h"
+#include "esp_system.h"  // esp_register_shutdown_handler
 #include "hal/uart_hal.h"
 #include "Protocol.h"
 
@@ -52,6 +53,20 @@ void uart_register_input_pin(uint32_t uart_num, pinnum_t pinnum, InputPin* objec
 // returns at once and the UART interrupt sends it.
 static const int UART_TX_BUFFER = 4096;
 
+// esp_restart() resets without draining the drivers' TX ring buffers, so output
+// written just before a restart - the reply to $Bye - could be lost. A shutdown
+// handler drains every installed UART first, bounded per UART (from upstream
+// FluidNC #1939; this fork keeps its larger buffer on every UART).
+static bool s_tx_buffered[UART_NUM_MAX] = { false };
+
+static void uart_flush_tx_buffers() {
+    for (uint32_t uart_num = 0; uart_num < UART_NUM_MAX; uart_num++) {
+        if (s_tx_buffered[uart_num]) {
+            uart_wait_output(uart_num, 100);  // a reply line takes < 10 ms even at 115200
+        }
+    }
+}
+
 static SemaphoreHandle_t s_done;
 
 static void uart_init_on_core_task(void* arg) {
@@ -73,6 +88,14 @@ void init_uart_on_core(BaseType_t core_id, uart_port_t uart_num) {
 
 void uart_init(uint32_t uart_num) {
     uart_port_t port = (uart_port_t)uart_num;
+
+    static bool flush_registered = false;
+    if (!flush_registered) {
+        flush_registered = esp_register_shutdown_handler(uart_flush_tx_buffers) == ESP_OK;
+    }
+    if (uart_num < UART_NUM_MAX) {
+        s_tx_buffered[uart_num] = true;
+    }
 
     // For UART0, install directly on the current core (usually the main core)
     // For other UARTs, use core 0 to avoid StepTimer conflicts
