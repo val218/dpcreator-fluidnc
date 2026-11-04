@@ -8,6 +8,7 @@ idf_component_register(SRCS AssertionFailed.cpp
                             localfs.cpp
                             nvs.cpp
                             PwmPin.cpp
+                            random.cpp
                             restart.cpp
                             board_id.cpp
                             sdspi.cpp
