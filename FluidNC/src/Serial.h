@@ -25,8 +25,14 @@ class AllChannels : public Channel {
     std::vector<Channel*> _zombies;
 
     Channel*      _lastChannel = nullptr;
-    QueueHandle_t _killQueue;
-    QueueHandle_t _addQueue;
+    // Channel registrations and deletions requested from other tasks, applied
+    // by the polling task in the order they were queued (see poll()).
+    struct ChannelOp {
+        enum class Kind : uint8_t { Add, Kill } kind;
+        Channel* channel;
+    };
+    QueueHandle_t _opQueue;
+    bool          queue_op(ChannelOp::Kind kind, Channel* channel);
 
     static SemaphoreHandle_t _mutex_general;
     static SemaphoreHandle_t _mutex_pollLine;
@@ -36,18 +42,20 @@ class AllChannels : public Channel {
 
 public:
     // Depth covers the worst realistic burst: every WebSocket client plus the
-    // telnet and HTTP-command channels being torn down between two poll cycles.
-    AllChannels() : Channel("all") {
-        _killQueue = xQueueCreate(32, sizeof(Channel*));
-        _addQueue  = xQueueCreate(16, sizeof(Channel*));
-    }
+    // telnet and HTTP-command channels being torn down between two poll cycles,
+    // with room for WebSocket connects queued alongside them.
+    AllChannels() : Channel("all") { _opQueue = xQueueCreate(32, sizeof(ChannelOp)); }
 
     // Queues a new channel to be registered by the polling task (at the start
     // of its next pass, before it takes the channel locks). For callers that
     // run under another library's lock - the WebSocket connect event holds
     // AsyncWebSocket's lock, and the polling task takes that lock (to send)
     // while it holds _mutex_pollLine: registering right there deadlocked both
-    // tasks (task watchdog). Returns false if it could not be queued.
+    // tasks (task watchdog). Adds and kills share one queue, so a kill queued
+    // after an add of the same channel is always applied after it. Until the
+    // polling task applies the add, the channel gets no polling and misses
+    // broadcasts. Returns false if it could not be queued; the caller still
+    // owns the channel.
     bool registerLater(Channel* channel);
 
     // Queues a channel for deletion by the polling task.  Returns false if it

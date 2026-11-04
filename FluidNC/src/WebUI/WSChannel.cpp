@@ -521,13 +521,9 @@ namespace WebUI {
                     break;  // owned destructs here -> channel freed
                 }
 
-                try {
-                    // Not registration(): this runs under AsyncWebSocket's lock
-                    // (see AllChannels::registerLater) - the polling task adds it.
-                    if (!allChannels.registerLater(newChannel)) {
-                        throw std::runtime_error("channel add queue full");
-                    }
-                } catch (...) {
+                // Not registration(): this runs under AsyncWebSocket's lock
+                // (see AllChannels::registerLater) - the polling task adds it.
+                if (!allChannels.registerLater(newChannel)) {
                     // erase/remove/back on a vector of pointers do not allocate.
                     const bool unwindHeld = xSemaphoreTake(ws_channels_mutex, portMAX_DELAY) == pdTRUE;
                     _wsChannels.erase(std::remove(_wsChannels.begin(), _wsChannels.end(), newChannel), _wsChannels.end());
