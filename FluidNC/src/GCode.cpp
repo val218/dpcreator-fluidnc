@@ -6,6 +6,8 @@
 // RS274/NGC parser.
 
 #include "GCode.h"
+
+#include <algorithm>  // std::min
 #include "Settings.h"
 #include "Config.h"
 #include "Report.h"
@@ -132,21 +134,33 @@ static void gcode_comment_msg(const char* comment) {
         const char* format   = "%lf";
         size_t      msgindex = 0;
         size_t      len      = strlen(comment);
+        // Truncate to fit msg; the last byte is reserved for the terminator
+        // (from upstream FluidNC #1942: a long PRINT/DEBUG comment overran the
+        // 128-byte buffer on the stack).
+        auto put = [&](char c) {
+            if (msgindex < msglen - 1) {
+                msg[msgindex++] = c;
+            }
+        };
         for (index = offset; index < len; ++index) {
             char c = comment[index];
             if (c == '%') {
                 if (!decode_format_string(comment, index, len, format)) {
-                    msg[msgindex++] = c;
+                    put(c);
                 }
             } else if (c == '#') {
                 float number;
                 if (read_number(comment, index, number)) {
-                    msgindex += snprintf(&msg[msgindex], msglen - msgindex, format, number);
+                    // snprintf returns the length it wanted, not what it wrote
+                    int n = snprintf(&msg[msgindex], msglen - msgindex, format, number);
+                    if (n > 0) {
+                        msgindex = std::min(msgindex + size_t(n), msglen - 1);
+                    }
                 } else {
-                    msg[msgindex++] = c;
+                    put(c);
                 }
             } else {
-                msg[msgindex++] = c;
+                put(c);
             }
         }
         msg[msgindex] = '\0';
