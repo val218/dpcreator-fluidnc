@@ -1,0 +1,149 @@
+<style id="dpc-mca-dark">html:not(.dpc-light) body #mca{--mca-ink:#EEF2F5;--mca-muted:#9AA7B4;--mca-line:#26303A;--mca-soft:#1B232C;--mca-tint:color-mix(in srgb,var(--mca-accent) 18%,#151B22);--mca-tint2:color-mix(in srgb,var(--mca-accent) 30%,#151B22);font-family:inherit}html:not(.dpc-light) body #mca a{color:#7CCBF7}html:not(.dpc-light) body #mca .mca-btn-fill,html:not(.dpc-light) body #mca .mca-btn-fill:hover{color:#fff}html:not(.dpc-light) body #mca .mca-nav,html:not(.dpc-light) body #mca .mca-card,html:not(.dpc-light) body #mca .mca-tile,html:not(.dpc-light) body #mca .mca-product{background:#151B22;border-color:#26303A}html:not(.dpc-light) body #mca .mca-nav-a.mca-on,html:not(.dpc-light) body #mca .mca-avatar{color:#7CCBF7}html:not(.dpc-light) body #mca .mca-who,html:not(.dpc-light) body #mca .mca-logout,html:not(.dpc-light) body #mca .mca-table td,html:not(.dpc-light) body #mca .mca-table tr{border-color:#26303A}html:not(.dpc-light) body #mca .mca-step-bar,html:not(.dpc-light) body #mca .mca-bar{background:#26303A}html:not(.dpc-light) body #mca .mca-coupon{background:#10151B;border-color:#3A5A86}html:not(.dpc-light) body #mca .mca-coupon-old{background:#10151B;border-color:#26303A}html:not(.dpc-light) body #mca .mca-btn-line{background:transparent;border-color:#7CCBF7;color:#7CCBF7}html:not(.dpc-light) body #mca .mca-tag-hunt,html:not(.dpc-light) body #mca .mca-coin-on{background:#3A2E12;color:#F2C46B}html:not(.dpc-light) body #mca .mca-hint{background:#2A2312;color:#F2DDB0}html:not(.dpc-light) body #mca .mca-tag-old,html:not(.dpc-light) body #mca .mca-chip,html:not(.dpc-light) body #mca .mca-chip-closed{background:#26303A;color:#C3CCD5}html:not(.dpc-light) body #mca .mca-chip-delivered,html:not(.dpc-light) body #mca .mca-check-on .mca-tick{background:#173A27;color:#7FD6A2}html:not(.dpc-light) body #mca .mca-chip-placed,html:not(.dpc-light) body #mca .mca-chip-preparing{background:#3A2614;color:#F2B27A}html:not(.dpc-light) body #mca .mca-address{border-color:#33404C}html:not(.dpc-light) body #mca .mca-tick{border-color:#5A6774}html:not(.dpc-light) body #mca input,html:not(.dpc-light) body #mca select{background:#10151B;color:#EEF2F5;border-color:#33404C}</style><div id="mca" class="mca" style="--mca-accent:#2B8FE0"><style>#mca{--mca-ink:#16202C;--mca-muted:#586474;--mca-line:#E2E6EC;--mca-soft:#F4F6F9;--mca-tint:#EEF2FD;--mca-tint:color-mix(in srgb,var(--mca-accent) 10%,#fff);--mca-tint2:color-mix(in srgb,var(--mca-accent) 22%,#fff);color:var(--mca-ink);font-size:15px;line-height:1.45;margin:0 0 30px;text-align:left}
+#mca *{box-sizing:border-box}
+#mca a{color:var(--mca-accent);text-decoration:none}
+#mca a:hover{text-decoration:underline}
+#mca p{margin:0}
+#mca .mca-wrap{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+#mca .mca-nav{flex:1 1 220px;max-width:270px;background:#fff;border:1px solid var(--mca-line);border-radius:14px;padding:12px}
+#mca .mca-who{display:flex;align-items:center;gap:12px;padding:8px 8px 16px;border-bottom:1px solid #EEF1F5;margin-bottom:8px}
+#mca .mca-avatar{width:44px;height:44px;border-radius:22px;background:var(--mca-tint);color:var(--mca-accent);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+#mca .mca-who-name{font-weight:600}
+#mca .mca-nav-a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;padding:0 12px;border-radius:10px;color:var(--mca-ink);font-size:15px}
+#mca .mca-nav-a:hover{background:var(--mca-soft);text-decoration:none}
+#mca .mca-nav-a.mca-on{background:var(--mca-tint);color:var(--mca-accent);font-weight:600}
+#mca .mca-count{font-size:12px;color:var(--mca-muted)}
+#mca .mca-logout{margin-top:8px;border-top:1px solid #EEF1F5;border-radius:0;color:var(--mca-muted)}
+#mca .mca-main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px}
+#mca .mca-h1{margin:0;font-size:26px;font-weight:700;line-height:1.2;color:var(--mca-ink);text-transform:none;letter-spacing:0}
+#mca .mca-head .mca-muted{margin-top:4px}
+#mca .mca-h2{margin:0;font-size:18px;font-weight:700;line-height:1.3;color:var(--mca-ink);text-transform:none;letter-spacing:0}
+#mca .mca-h2-out{margin-bottom:12px}
+#mca .mca-muted{color:var(--mca-muted)}
+#mca .mca-small{font-size:13px}
+#mca .mca-strong{font-weight:600}
+#mca .mca-nowrap{white-space:nowrap}
+#mca .mca-big{font-size:26px;font-weight:700;line-height:1.15}
+#mca .mca-grow{flex-grow:1}
+#mca .mca-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#mca .mca-card{background:#fff;border:1px solid var(--mca-line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+#mca .mca-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px}
+#mca .mca-link{font-weight:600;font-size:14px}
+#mca .mca-empty{padding:4px 0}
+#mca .mca-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+#mca .mca-tile{background:#fff;border:1px solid var(--mca-line);border-radius:14px;padding:16px 18px;color:var(--mca-ink);display:flex;flex-direction:column;gap:4px}
+#mca .mca-tile:hover{border-color:var(--mca-accent);text-decoration:none}
+#mca .mca-tile-link{font-size:13px;font-weight:600;color:var(--mca-accent)}
+#mca .mca-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;align-items:start}
+#mca .mca-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+#mca .mca-step{display:flex;flex-direction:column;gap:6px;margin:0}
+#mca .mca-step-bar{height:8px;border-radius:4px;background:#E4E8EE}
+#mca .mca-step-on .mca-step-bar{background:var(--mca-accent)}
+#mca .mca-step-label{font-weight:600;font-size:14px}
+#mca .mca-step-now .mca-step-label{color:var(--mca-accent)}
+#mca .mca-coupon{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px dashed #9AA9C9;background:#FAFBFE}
+#mca .mca-coupon-old{border:1px solid #E8ECF2;background:#F7F8FA;opacity:.8}
+#mca .mca-coupon-body{flex-grow:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+#mca .mca-coupon-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+#mca .mca-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;font-weight:700;letter-spacing:.06em;word-break:break-all}
+#mca .mca-coupon-old .mca-code{text-decoration:line-through;color:var(--mca-muted)}
+#mca .mca-tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--mca-tint);color:var(--mca-accent)}
+#mca .mca-tag-hunt{background:#FBF4E4;color:#7A5208}
+#mca .mca-tag-old{background:#ECEEF2;color:var(--mca-muted)}
+#mca .mca-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:10px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;line-height:1}
+#mca .mca-btn-line{border:1px solid var(--mca-accent);background:#fff;color:var(--mca-accent)}
+#mca .mca-btn-line:hover{background:var(--mca-tint)}
+#mca .mca-btn-fill{border:none;background:var(--mca-accent);color:#fff;align-self:flex-start}
+#mca .mca-btn-fill:hover{text-decoration:none;filter:brightness(.92)}
+#mca .mca-hunt-count{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+#mca .mca-coins{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:8px}
+#mca .mca-coin{display:flex;align-items:center;justify-content:center;height:44px;border-radius:10px;background:var(--mca-soft);margin:0}
+#mca .mca-coin-on{background:#FBF4E4}
+#mca .mca-bar{height:8px;border-radius:4px;background:#E8ECF2;overflow:hidden}
+#mca .mca-bar span{display:block;height:100%;background:var(--mca-accent);border-radius:4px}
+#mca #mca-hunt .mca-bar span{background:#C98A12}
+#mca .mca-hint{background:#FBF4E4;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;color:#4A3A12}
+#mca .mca-table-box{overflow-x:auto;margin:0 -4px}
+#mca .mca-table{width:100%;border-collapse:collapse;min-width:600px;margin:0;background:transparent;border:0}
+#mca .mca-table th{text-align:left;font-size:13px;color:var(--mca-muted);font-weight:600;padding:10px 8px;border:0;background:transparent}
+#mca .mca-table td{padding:12px 8px;border:0;border-top:1px solid #EEF1F5;vertical-align:middle;background:transparent}
+#mca .mca-actions{text-align:right;white-space:nowrap}
+#mca .mca-actions .mca-link+.mca-link{margin-left:14px}
+#mca .mca-chip{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;background:#ECEEF2;color:#3B4655}
+#mca .mca-chip-shipped{background:var(--mca-tint);color:var(--mca-accent)}
+#mca .mca-chip-delivered{background:#DFF1E6;color:#1C6B3D}
+#mca .mca-chip-placed,#mca .mca-chip-preparing{background:#FBEBD9;color:#8A4B0F}
+#mca .mca-chip-closed{background:#ECEEF2;color:#586474}
+#mca .mca-addresses{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+#mca .mca-address{border:1px solid #D5DBE3;border-radius:12px;padding:12px;font-size:14px;line-height:1.5;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+#mca .mca-address-def{border:2px solid var(--mca-accent)}
+#mca .mca-checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+#mca .mca-check{display:flex;align-items:center;gap:10px;min-height:38px;font-size:14px;margin:0}
+#mca .mca-tick{width:22px;height:22px;border-radius:11px;border:2px solid #9AA5B4;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+#mca .mca-check-on .mca-tick{border:none;background:#DFF1E6;color:#1C6B3D}
+#mca .mca-again{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+#mca .mca-product{background:#fff;border:1px solid var(--mca-line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;color:var(--mca-ink)}
+#mca .mca-product:hover{border-color:var(--mca-accent);text-decoration:none}
+#mca .mca-product-img{display:block;aspect-ratio:4/3;background:var(--mca-soft);overflow:hidden}
+#mca .mca-product-img img{width:100%;height:100%;object-fit:cover;display:block;margin:0;border:0}
+#mca .mca-product-body{padding:12px 14px;display:flex;flex-direction:column;gap:4px;flex-grow:1}
+#mca .mca-product-foot{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:auto;padding-top:6px}
+@media (max-width:767px){
+#mca .mca-wrap{flex-direction:column;align-items:stretch}
+#mca .mca-main{order:1;flex-basis:auto}
+#mca .mca-nav{order:2;max-width:none;flex-basis:auto}
+#mca .mca-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+#mca .mca-coupon{flex-wrap:wrap}
+#mca .mca-h1{font-size:22px}
+#mca .mca-table-box{overflow:visible;margin:0}
+#mca .mca-table{min-width:0}
+#mca .mca-table thead{display:none}
+#mca .mca-table tbody,#mca .mca-table tr,#mca .mca-table td{display:block}
+#mca .mca-table tr{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 0;border-top:1px solid #EEF1F5}
+#mca .mca-table td{padding:0;border:0}
+#mca .mca-table td:nth-child(2){text-align:right;color:var(--mca-muted);font-size:13px}
+#mca .mca-table td:nth-child(3){grid-column:1/-1}
+#mca .mca-table td:nth-child(5){text-align:right}
+#mca .mca-table td:nth-child(6){grid-column:1/-1;text-align:left}
+}
+</style><div class="mca-wrap"><nav class="mca-nav" aria-label="My account"><div class="mca-who"><div class="mca-avatar" aria-hidden="true">NP</div><div><div class="mca-who-name">New Person</div><div class="mca-muted mca-small">Customer since 2026</div></div></div><a class="mca-nav-a mca-on" href="#mca" aria-current="page"><span>Overview</span><span class="mca-count"></span></a><a class="mca-nav-a" href="https://dpcreator.eu/index.php?route=account/order"><span>Orders</span><span class="mca-count"></span></a><a class="mca-nav-a" href="https://dpcreator.eu/index.php?route=account/return"><span>Returns</span><span class="mca-count"></span></a><a class="mca-nav-a" href="https://dpcreator.eu/index.php?route=account/wishlist"><span>Wishlist</span><span class="mca-count"></span></a><a class="mca-nav-a" href="https://dpcreator.eu/index.php?route=account/address"><span>Addresses</span><span class="mca-count"></span></a><a class="mca-nav-a" href="https://dpcreator.eu/index.php?route=account/download"><span>Downloads</span><span class="mca-count"></span></a><a class="mca-nav-a" href="https://dpcreator.eu/index.php?route=account/reward"><span>Reward points</span><span class="mca-count">0</span></a><a class="mca-nav-a" href="#mca-coupons"><span>Coupons</span><span class="mca-count"></span></a><a class="mca-nav-a" href="https://dpcreator.eu/index.php?route=account/edit"><span>Personal details</span><span class="mca-count"></span></a><a class="mca-nav-a" href="https://dpcreator.eu/index.php?route=account/password"><span>Password</span><span class="mca-count"></span></a><a class="mca-nav-a" href="https://dpcreator.eu/index.php?route=account/newsletter"><span>Newsletter</span><span class="mca-count">Off</span></a><a class="mca-nav-a mca-logout" href="https://dpcreator.eu/index.php?route=account/logout">Log out</a></nav><div class="mca-main"><div class="mca-head"><h1 class="mca-h1" data-mca-greet="[&quot;Good morning, %s&quot;,&quot;Good afternoon, %s&quot;,&quot;Good evening, %s&quot;,&quot;New&quot;]">Good morning, New</h1><p class="mca-muted">Welcome! We are glad you are here.</p></div><div class="mca-tiles"><a class="mca-tile" href="https://dpcreator.eu/index.php?route=account/order"><span class="mca-muted mca-small">On the way</span><span class="mca-big">0</span><span class="mca-tile-link">Nothing on the way</span></a><a class="mca-tile" href="https://dpcreator.eu/index.php?route=account/reward"><span class="mca-muted mca-small">Reward points</span><span class="mca-big">0</span><span class="mca-tile-link">See history</span></a><a class="mca-tile" href="https://dpcreator.eu/index.php?route=account/wishlist"><span class="mca-muted mca-small">Wishlist</span><span class="mca-big">0</span><span class="mca-tile-link">See wishlist</span></a><a class="mca-tile" href="https://dpcreator.eu/index.php?route=account/return"><span class="mca-muted mca-small">Open returns</span><span class="mca-big">0</span><span class="mca-tile-link">No open returns</span></a></div><div class="mca-two"><section class="mca-card" id="mca-coupons" aria-labelledby="mca-cpn-h"><h2 class="mca-h2" id="mca-cpn-h">Your coupons</h2><p class="mca-muted mca-empty">No coupons right now. Coupons you win or receive from us will appear here.</p></section></div><section class="mca-card" aria-labelledby="mca-ord-h"><div class="mca-row"><h2 class="mca-h2" id="mca-ord-h">Recent orders</h2><a class="mca-link" href="https://dpcreator.eu/index.php?route=account/order">All orders</a></div><p class="mca-muted mca-empty">You have no orders yet. <a class="mca-link" href="https://dpcreator.eu/index.php?route=common/home">Start shopping</a></p></section><div class="mca-two"><section class="mca-card" aria-labelledby="mca-adr-h"><div class="mca-row"><h2 class="mca-h2" id="mca-adr-h">Addresses</h2><a class="mca-link" href="https://dpcreator.eu/index.php?route=account/address">Add an address</a></div><p class="mca-muted mca-empty">No address saved yet. Saving one makes checkout faster.</p></section><section class="mca-card" aria-labelledby="mca-chk-h"><h2 class="mca-h2" id="mca-chk-h">Your account is 25% complete</h2><div class="mca-bar"><span style="width:25%"></span></div><ul class="mca-checks"><li class="mca-check mca-check-on"><span class="mca-tick" aria-hidden="true">✓</span><span class="mca-grow">Email address<span class="mca-sr"> Done</span></span></li><li class="mca-check"><span class="mca-tick" aria-hidden="true"></span><span class="mca-grow">Phone number for the courier<span class="mca-sr"> </span></span><a class="mca-link" href="https://dpcreator.eu/index.php?route=account/edit">Add</a></li><li class="mca-check"><span class="mca-tick" aria-hidden="true"></span><span class="mca-grow">Delivery address saved<span class="mca-sr"> </span></span><a class="mca-link" href="https://dpcreator.eu/index.php?route=account/address">Add</a></li><li class="mca-check"><span class="mca-tick" aria-hidden="true"></span><span class="mca-grow">Newsletter with offers<span class="mca-sr"> </span></span><a class="mca-link" href="https://dpcreator.eu/index.php?route=account/newsletter">Add</a></li></ul></section></div></div></div><script>/* Modern Customer Account: the greeting by the customer's own clock, and copying coupon codes. */
+(function () {
+  var root = document.getElementById('mca');
+  if (!root) return;
+
+  var g = root.querySelector('[data-mca-greet]');
+  if (g) {
+    try {
+      var t = JSON.parse(g.getAttribute('data-mca-greet'));
+      var hr = new Date().getHours();
+      var pick = hr >= 5 && hr < 12 ? t[0] : (hr >= 12 && hr < 18 ? t[1] : t[2]);
+      if (t[3]) g.textContent = pick.replace('%s', t[3]);
+    } catch (e) {}
+  }
+
+  function copied(btn, code) {
+    var was = btn.textContent;
+    btn.textContent = btn.getAttribute('data-mca-done') || 'Copied';
+    btn.setAttribute('aria-live', 'polite');
+    setTimeout(function () { btn.textContent = was; }, 1800);
+  }
+
+  root.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('[data-mca-copy]') : null;
+    if (!btn) return;
+    var code = btn.getAttribute('data-mca-copy');
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code).then(function () { copied(btn, code); }, function () { fallback(); });
+    } else {
+      fallback();
+    }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = code; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (x) {}
+      document.body.removeChild(ta);
+      copied(btn, code);
+    }
+  });
+})();
+</script></div>
