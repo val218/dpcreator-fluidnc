@@ -11,9 +11,12 @@ html:not(.dpc-light):not(.route-common-home){--k-bg:#000;--k-card:#0a0a0a;--k-ca
 /* ---------- ground and type ---------- */
 html:not(.dpc-light) body,html:not(.dpc-light) .site-wrapper{background:#000!important;color:#c9c9c9;font-family:var(--p-font)!important;-webkit-font-smoothing:antialiased}
 html:not(.dpc-light) body p,html:not(.dpc-light) body li,html:not(.dpc-light) body td,html:not(.dpc-light) body label,html:not(.dpc-light) body input,html:not(.dpc-light) body select,html:not(.dpc-light) body textarea,html:not(.dpc-light) body button,html:not(.dpc-light) body .btn{font-family:var(--p-font)!important}
-html:not(.dpc-light) #content h1,html:not(.dpc-light) #content h2,html:not(.dpc-light) .page-title,html:not(.dpc-light) .title-wrapper .title,html:not(.dpc-light) h1.title,html:not(.dpc-light) .module-title,html:not(.dpc-light) .title.module-title,html:not(.dpc-light) .dph h1,html:not(.dpc-light) .dpx h1,html:not(.dpc-light) .dpx h2{font-family:var(--p-font)!important;font-weight:300!important;letter-spacing:-.03em!important;text-transform:none!important;color:#f4f4f4!important;text-shadow:var(--p-glow)}
-html:not(.dpc-light) #content h3,html:not(.dpc-light) #content h4,html:not(.dpc-light) .dpx h3{font-family:var(--p-font)!important;font-weight:500!important;letter-spacing:-.01em;text-transform:none!important}
+html:not(.dpc-light) #content h1,html:not(.dpc-light) .page-title,html:not(.dpc-light) .title-wrapper .title,html:not(.dpc-light) h1.title,html:not(.dpc-light) .dph h1,html:not(.dpc-light) .dpx h1,html:not(.dpc-light) .dpx h2{font-family:var(--p-font)!important;font-weight:300!important;letter-spacing:-.03em!important;text-transform:none!important;color:#f4f4f4!important;text-shadow:var(--p-glow)}
+html:not(.dpc-light) #content h2,html:not(.dpc-light) .module-title,html:not(.dpc-light) #content h3,html:not(.dpc-light) #content h4,html:not(.dpc-light) .dpx h3{font-family:var(--p-font)!important;font-weight:500!important;letter-spacing:-.01em;text-transform:none!important}
 html:not(.dpc-light) .title-wrapper .title::after,html:not(.dpc-light) .page-title::after{display:none!important}
+html:not(.dpc-light) body .site-wrapper>h1.page-title,html:not(.dpc-light) body h1.title.page-title{font-family:var(--p-font)!important;font-weight:300!important;font-size:clamp(30px,3.4vw,48px)!important;letter-spacing:-.03em!important;text-transform:none!important;color:#f4f4f4!important;text-shadow:var(--p-glow)!important;background:#000!important;border:0!important;padding-top:46px!important;padding-bottom:30px!important}
+html:not(.dpc-light) body .breadcrumb{background:#000!important}
+html:not(.dpc-light) body .breadcrumb a,html:not(.dpc-light) body .breadcrumb li{font-family:var(--p-font)!important;text-transform:none!important;color:#8c8c8c!important}
 html:not(.dpc-light) a{color:#7ccbf7}
 html:not(.dpc-light) a:hover{color:#b5e2fb}
 
@@ -67,7 +70,7 @@ html:not(.dpc-light).route-product-product .tabs-container .nav-tabs>li.active>a
 
 /* ---------- footer ---------- */
 html:not(.dpc-light) footer,html:not(.dpc-light) footer .grid-row{background:#000!important;border-top:1px solid #1a1a1a}
-html:not(.dpc-light) footer .title,html:not(.dpc-light) footer .module-title{font-family:var(--p-font)!important;font-weight:500!important;font-size:14px!important;text-transform:none!important;text-shadow:none!important;letter-spacing:0!important}
+html:not(.dpc-light) footer .title,html:not(.dpc-light) footer .module-title,html:not(.dpc-light) body footer .title.module-title{color:#ededed!important;font-family:var(--p-font)!important;font-weight:500!important;font-size:14px!important;text-transform:none!important;text-shadow:none!important;letter-spacing:0!important}
 html:not(.dpc-light) footer a{color:#9c9c9c!important}
 html:not(.dpc-light) footer a:hover{color:#fff!important}
 
