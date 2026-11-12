@@ -263,8 +263,7 @@ html.dpc-light .dpp .pp-spech{color:#1d1d1f}
 html.dpc-light .dpp .pp-line{border-color:#e5e5e7}
 html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .header-cart-group *::before,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .mobile-header *::before,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .header-cart-group i{color:#1d1d1f!important}
 
-/* header: no pixel pattern, no boxed shadow, full-width bar (both themes) */
-html:not(.p_1):not(.p_2):not(.p_3) header .mid-bar::before,html:not(.p_1):not(.p_2):not(.p_3) header .mid-bar::after{display:none!important}
+/* header: keeps the dpCREATOR pixel pattern at both ends; no boxed shadow, full-width bar (both themes) */
 html:not(.p_1):not(.p_2):not(.p_3) header .mid-bar,html:not(.p_1):not(.p_2):not(.p_3) header.header-compact{box-shadow:none!important}
 html.dpc-light:not(.p_1):not(.p_2):not(.p_3) header::before{background:#f5f5f7!important;border-bottom:1px solid #e5e5e7}
 html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) header::before{background:#000!important}
