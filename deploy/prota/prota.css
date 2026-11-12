@@ -325,3 +325,8 @@ html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .bottom-menu a,html:not(
 html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .bottom-menu li{border-color:#141414!important}
 /* phones: the side switch a little smaller, above the bottom bar */
 @media (max-width:767px){html:not(.p_1) body #dpc-theme-fab{width:40px!important;height:84px!important;top:45%!important}html:not(.p_1) body #dpc-theme-fab::before,html:not(.p_1) body #dpc-theme-fab::after{width:32px;height:32px;font-size:15px}}
+
+/* R3 diagram: a slow, gentle drift of the real photo and its labels together (no AI, nothing invented) */
+@keyframes ppDrift{0%{transform:scale(1) translateX(0)}100%{transform:scale(1.035) translateX(-1.2%)}}
+.dpp .pp-fig{animation:ppDrift 14s ease-in-out infinite alternate;transform-origin:50% 50%;will-change:transform}
+@media (prefers-reduced-motion:reduce){.dpp .pp-fig{animation:none}}
