@@ -336,3 +336,14 @@ html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .bottom-menu li{border-c
 html:not(.dpc-light) .dpp .pp-ar43 video{-webkit-mask-image:radial-gradient(ellipse 75% 75% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 75% 75% at 50% 50%,#000 62%,transparent 100%)}
 @media (prefers-reduced-motion:reduce){.dpp .pp-ar43 video{display:none}.dpp .pp-ar43 .pp-still{display:block!important}}
 .dpp .pp-ar43 .pp-still{display:none}
+
+/* dark theme: forms and boxes that still had a white background (R&D Club application and others) */
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #rnd-form{background:#0a0a0a!important;border:1px solid #262626!important;border-radius:18px!important;color:#e6e6e6}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form label{color:#e6e6e6!important;font-weight:500!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form small,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form .help-block{color:#9c9c9c!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form input:not([type=checkbox]):not([type=radio]):not([type=submit]):not([type=button]),html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form select,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form textarea{background:#000!important;color:#f0f0f0!important;border:1px solid #3a3a3a!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form input::placeholder,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form textarea::placeholder{color:#6e6e6e!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form select option{background:#0a0a0a;color:#f0f0f0}
+/* light theme: the same forms on white, with readable dark labels */
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content form label{color:#1d1d1f!important;font-weight:500!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content form input:not([type=checkbox]):not([type=radio]):not([type=submit]):not([type=button]),html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content form select,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content form textarea{background:#fff!important;color:#1d1d1f!important;border:1px solid #d2d2d7!important;border-radius:9px!important}
