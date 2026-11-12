@@ -261,3 +261,4 @@ html.dpc-light .dpp .pp-spec{color:#1d1d1f;border-color:#e5e5e7}
 html.dpc-light .dpp .pp-spec>span:first-child{color:#6e6e73}
 html.dpc-light .dpp .pp-spech{color:#1d1d1f}
 html.dpc-light .dpp .pp-line{border-color:#e5e5e7}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .header-cart-group *::before,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .mobile-header *::before,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .header-cart-group i{color:#1d1d1f!important}
