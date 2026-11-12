@@ -347,3 +347,28 @@ html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content form select opt
 /* light theme: the same forms on white, with readable dark labels */
 html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content form label{color:#1d1d1f!important;font-weight:500!important}
 html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content form input:not([type=checkbox]):not([type=radio]):not([type=submit]):not([type=button]),html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content form select,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content form textarea{background:#fff!important;color:#1d1d1f!important;border:1px solid #d2d2d7!important;border-radius:9px!important}
+
+/* dark theme: boxes in page texts that kept a white or pale background (found by a contrast check of every page) */
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content table,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content table tr,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content table td,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content table th{background-color:transparent!important;color:#e6e6e6;border-color:#262626!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content table tr:nth-child(even) td{background-color:#0d0d0f!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content table th,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content table thead td{background-color:#141416!important;color:#f4f4f4!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content table td.free,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content table td.inc{color:#7fd6a2!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content figure.dpc-shot,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content figure{background:#0a0a0a!important;border-color:#262626!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content figcaption{color:#a3a3a3!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content .note{background:#0b1a2a!important;border-color:#1c3550!important;color:#c9d9e8!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content .note strong,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content .note b{color:#fff!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .module-form{background:#0a0a0a!important;border:1px solid #262626!important;border-radius:18px!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .route-information-sitemap #content .col-sm-6,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3).route-information-sitemap body #content .col-sm-6{background:#0a0a0a!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3).route-information-sitemap #content [class*="col-"]{background:#0a0a0a!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content .btn-success,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content .btn-info{background:#f2f2f2!important;color:#0a0a0a!important;border:0!important;border-radius:9px!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content em{color:inherit}
+
+/* light theme fixes from the same contrast check */
+.dpp .pp-term>div:nth-child(1),.dpp .pp-term>div:nth-child(2){color:#7a7a7a!important}
+.dpp .pp-term>div:nth-child(3){color:#f2b27a!important}
+.dpp .pp-term>div:nth-child(4){color:#ededed!important}
+.dpp .pp-term>div:nth-child(5){color:#7ccbf7!important}
+.dpp .pp-term>div:nth-child(6){color:#7fd6a2!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content a.btn:not(.btn-primary):not(.btn-success):not(.btn-info){color:#1d1d1f!important;background:#fff!important;border:1px solid #d2d2d7!important;border-radius:9px!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content .btn-success,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content .btn-info{background:#1d1d1f!important;color:#fff!important;border:0!important;border-radius:9px!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .product-price-new{color:#1a7f37!important}
