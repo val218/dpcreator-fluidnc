@@ -69,7 +69,7 @@ html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3).route-product-product .tabs-c
 html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3).route-product-product .tabs-container .nav-tabs>li.active>a{color:#fff!important;border-bottom:2px solid #fff!important}
 
 
-html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3).route-product-product .product-image .swiper-container,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3).route-product-product .product-image .additional-images .swiper-container{background:#000!important;border:1px solid #262626;border-radius:18px!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3).route-product-product .product-image .swiper-container,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3).route-product-product .product-image .additional-images .swiper-container{background:#000!important;border:1px solid #262626!important;border-radius:18px!important;box-shadow:none!important;outline:0!important}
 html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3).route-product-product .product-image .additional-image img,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3).route-product-product .additional-images img{border-radius:10px;background:#000}
 /* ---------- footer ---------- */
 html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) footer,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) footer .grid-row{background:#000!important;border-top:1px solid #1a1a1a}
