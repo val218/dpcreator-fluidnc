@@ -285,3 +285,4 @@ html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) .grid-row-top-3{background:#0
 html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) .grid-row-top-3 *{color:#8fbfe0!important}
 html.dpc-light .dpp .pp-hero{background:linear-gradient(180deg,#fff 0%,#f5f5f7 100%)}
 html:not(.dpc-light) .dpp .pp-hero{background:radial-gradient(ellipse at 70% 55%,#16191d 0%,#000 62%)}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body header .top-bar,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body header .top-bar{background:transparent!important;border:0!important}
