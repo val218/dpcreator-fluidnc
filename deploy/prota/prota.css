@@ -380,3 +380,6 @@ html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .refine-categories a,htm
 html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .refine-name,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .refine-name *{color:#e6e6e6!important}
 html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .product-thumb .extra-group>div{background:transparent!important}
 html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content code{background:#141416!important;color:#e6e6e6!important;border-radius:5px}
+/* "Buy Now" / "Ask Question" text buttons on product cards */
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .product-thumb .btn-extra,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .product-thumb .btn-extra .btn-text{color:#c9c9c9!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .product-thumb .btn-extra:hover,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .product-thumb .btn-extra:hover .btn-text{color:#fff!important}
