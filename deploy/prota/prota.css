@@ -307,3 +307,21 @@ html.dpc-light:not(.p_1) body #dpc-theme-fab{background:rgba(255,255,255,.9)!imp
 html.dpc-light:not(.p_1) body #dpc-theme-fab::before{background:#1d1d1f;color:#fff}
 html.dpc-light:not(.p_1) body #dpc-theme-fab::after{color:#6e6e73}
 @media print{#dpc-theme-fab{display:none!important}}
+
+/* phones: header solid (it sticks on scroll and must not show the page or the blue band through it) */
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body header.header-compact,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .mobile-header,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .mobile-bar,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .mobile-header *[class*="sticky"]{background:#fff!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .mobile-header,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .mobile-bar,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .mobile-header *[class*="sticky"]{background:#000!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+@media (max-width:1023px){html:not(.p_1):not(.p_2):not(.p_3) body header.header-compact{background:inherit!important}
+ html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body header.header-compact{background:#fff!important}
+ html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body header.header-compact{background:#000!important}
+ html:not(.p_1):not(.p_2):not(.p_3) body .grid-row-top-3 *{font-size:13px!important;line-height:1.4!important}
+ html:not(.p_1):not(.p_2):not(.p_3) body .grid-row-top-3{padding-top:10px!important;padding-bottom:10px!important}}
+/* phones: bottom bar (Login, Register, Wishlist, Contact, Call us) in the same look */
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .bottom-menu{background:rgba(255,255,255,.96)!important;border-top:1px solid #e5e5e7!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .bottom-menu a,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .bottom-menu a *,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .bottom-menu a *::before{color:#1d1d1f!important;font-family:var(--p-font)!important;text-transform:none!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .bottom-menu li{border-color:#eee!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .bottom-menu{background:rgba(0,0,0,.94)!important;border-top:1px solid #1a1a1a!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .bottom-menu a,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .bottom-menu a *,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .bottom-menu a *::before{color:#d6d6d6!important;font-family:var(--p-font)!important;text-transform:none!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .bottom-menu li{border-color:#141414!important}
+/* phones: the side switch a little smaller, above the bottom bar */
+@media (max-width:767px){html:not(.p_1) body #dpc-theme-fab{width:40px!important;height:84px!important;top:45%!important}html:not(.p_1) body #dpc-theme-fab::before,html:not(.p_1) body #dpc-theme-fab::after{width:32px;height:32px;font-size:15px}}
