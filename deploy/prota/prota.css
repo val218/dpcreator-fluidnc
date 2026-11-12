@@ -372,3 +372,11 @@ html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content em{color:inheri
 html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content a.btn:not(.btn-primary):not(.btn-success):not(.btn-info){color:#1d1d1f!important;background:#fff!important;border:1px solid #d2d2d7!important;border-radius:9px!important}
 html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content .btn-success,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body #content .btn-info{background:#1d1d1f!important;color:#fff!important;border:0!important;border-radius:9px!important}
 html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .product-price-new{color:#1a7f37!important}
+/* R&D Club cards, the answer template, category sub-links, bundle buttons, login buttons */
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .dpc-rnd .gets>div,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .dpc-rnd .tpl{background:#0a0a0a!important;border:1px solid #262626!important;color:#c9c9c9!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .dpc-rnd .gets>div.prize{background:#0b1a2a!important;border-color:#1c3550!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .dpc-rnd .gets>div b,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .dpc-rnd .tpl strong{color:#f4f4f4!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .refine-categories a,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .refine-items a,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body a:has(> .refine-name){background:#0a0a0a!important;border:1px solid #262626!important;border-radius:12px!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .refine-name,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .refine-name *{color:#e6e6e6!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .product-thumb .extra-group>div{background:transparent!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body #content code{background:#141416!important;color:#e6e6e6!important;border-radius:5px}
