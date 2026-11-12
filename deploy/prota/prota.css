@@ -1,5 +1,5 @@
 /* dpCREATOR "Prota" look: black ground, Inter, thin glowing headings, white buttons, quiet cards.
-   Dark theme only (not when the visitor picks the light theme, html.dpc-light).
+   Dark theme (default) and a matching white version for visitors who pick the light theme (html.dpc-light).
    Loaded by the dpc_prota add-on after every other stylesheet. Turn it off in Extensions > Modules > dpCREATOR look. */
 @import url(fonts.css);
 
@@ -184,3 +184,80 @@ html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) .dpch-h,html:not(.dpc-light):
   .dpp .pp-card{height:300px}
 }
 /* light theme: the home page stays dark on purpose, like a product page; nothing else changes */
+
+/* ======================================================================
+   LIGHT THEME (html.dpc-light): the same look, on white
+   ====================================================================== */
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3){--p-font:'DPC Inter',Inter,system-ui,-apple-system,'Segoe UI',sans-serif}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .site-wrapper{background:#fff!important;color:#3c3c43;font-family:var(--p-font)!important;-webkit-font-smoothing:antialiased}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body p,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body li,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body td,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body label,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body input,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body button,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .btn{font-family:var(--p-font)!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body h1.title.page-title,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) #content h1,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .page-title,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) #content .dpch-h,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) #content [class^="dpc"] h2,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) #content [class^="dpc"] h1{font-family:var(--p-font)!important;font-weight:300!important;letter-spacing:-.03em!important;text-transform:none!important;color:#111!important;text-shadow:none!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body h1.title.page-title{font-size:clamp(30px,3.4vw,48px)!important;background:#fff!important;padding-top:46px!important;padding-bottom:30px!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .page-title::after,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .page-title span::after,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .title-wrapper .title::after{display:none!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) #content h2,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) #content h3,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .module-title{font-family:var(--p-font)!important;font-weight:500!important;text-transform:none!important;letter-spacing:-.01em!important;color:#111!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .breadcrumb{background:#fff!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .breadcrumb a,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .breadcrumb li{font-family:var(--p-font)!important;text-transform:none!important;color:#6e6e73!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) a{color:#0066cc}
+/* header */
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) header,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .header{background:rgba(255,255,255,.86)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid #e5e5e7}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .top-bar{background:#f5f5f7!important;border-bottom:1px solid #e5e5e7}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .top-bar a,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .top-bar .dropdown-toggle,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .top-bar span{font-family:var(--p-font)!important;font-size:12px!important;font-weight:400!important;text-transform:none!important;letter-spacing:0!important;color:#6e6e73!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .mid-bar{background:transparent!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .main-menu .j-menu>li>a,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .desktop-main-menu-wrapper .j-menu>li>a{font-family:var(--p-font)!important;font-weight:400!important;font-size:14px!important;text-transform:none!important;letter-spacing:0!important;color:#1d1d1f!important;background:transparent!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .main-menu .j-menu>li:hover>a{color:#000!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .main-menu .dropdown-menu,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .mega-menu-content{background:#fff!important;border:1px solid #e5e5e7!important;border-radius:14px!important;box-shadow:0 24px 60px rgba(0,0,0,.12)!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .header-cart-group .btn,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .header-cart-group a,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .header-cart-group i,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .desktop-search-wrapper .search-trigger,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .header-cart-group svg{color:#1d1d1f!important;background:transparent!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .mobile-header,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .mobile-bar{background:rgba(255,255,255,.92)!important;border-bottom:1px solid #e5e5e7}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .grid-row-top-3{background:#e8f2fc!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .grid-row-top-3 *{text-transform:none!important;font-family:var(--p-font)!important;letter-spacing:0!important;font-weight:400!important;color:#0b4f8a!important}
+/* buttons: black on white */
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .btn-primary,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) #button-cart,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .btn-cart,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) #button-confirm,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .buttons .btn-primary{background:#1d1d1f!important;color:#fff!important;border:0!important;border-radius:9px!important;font-weight:500!important;text-transform:none!important;letter-spacing:0!important;box-shadow:none!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .btn-primary:hover,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) #button-cart:hover{background:#000!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .btn-default,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .btn-secondary{background:#fff!important;color:#1d1d1f!important;border:1px solid #d2d2d7!important;border-radius:9px!important;text-transform:none!important}
+/* cards and product page */
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .product-thumb{background:#fff!important;border:1px solid #e5e5e7!important;border-radius:18px!important;overflow:hidden;box-shadow:none!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .product-thumb:hover{box-shadow:0 12px 40px rgba(0,0,0,.08)!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .product-thumb .name a{font-family:var(--p-font)!important;font-weight:500!important;color:#1d1d1f!important;text-transform:none!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) .dpch{background:#f5f5f7!important;border:1px solid #e5e5e7!important;border-radius:18px!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3).route-product-product .product-image .swiper-container{background:#000!important;border-radius:18px!important;border:0!important}
+/* footer */
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) footer,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) footer .grid-row{background:#f5f5f7!important;border-top:1px solid #e5e5e7}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body footer .title.module-title{font-family:var(--p-font)!important;font-weight:500!important;font-size:14px!important;text-transform:none!important;letter-spacing:0!important;color:#1d1d1f!important}
+html.dpc-light:not(.p_1):not(.p_2):not(.p_3) footer a{color:#6e6e73!important}
+
+/* home page on white: black product panels on a light page */
+html.dpc-light .dpp{background:#fff;color:#1d1d1f}
+html.dpc-light .dpp .pp-t{color:#111!important;text-shadow:none}
+html.dpc-light .dpp .pp-sub,html.dpc-light .dpp .pp-app p.d,html.dpc-light .dpp .pp-stats p.d,html.dpc-light .dpp .pp-floor p{color:#6e6e73}
+html.dpc-light .dpp .pp-eyebrow,html.dpc-light .dpp .pp-lead,html.dpc-light .dpp .pp-feat{color:#1d1d1f}
+html.dpc-light .dpp .pp-small{color:#6e6e73}
+html.dpc-light .dpp .pp-hero{background:linear-gradient(180deg,#f5f5f7 0%,#fff 100%)}
+html.dpc-light .dpp .pp-pill{background:#fff;border-color:#d2d2d7}
+html.dpc-light .dpp .pp-pill>span{color:#1d1d1f}
+html.dpc-light .dpp .pp-btn{background:#1d1d1f;color:#fff!important}
+html.dpc-light .dpp .pp-btn:hover{background:#000}
+html.dpc-light .dpp .pp-btn-o{background:#fff;color:#1d1d1f!important;border-color:#d2d2d7}
+html.dpc-light .dpp .pp-ar43{background:#000;border-radius:24px;overflow:hidden}
+html.dpc-light .dpp .pp-hero img,html.dpc-light .dpp .pp-ar43 img{-webkit-mask-image:none;mask-image:none}
+html.dpc-light .dpp .pp-card{border-color:#e5e5e7}
+html.dpc-light .dpp .pp-num,html.dpc-light .dpp .pp-icon{background:#f5f5f7}
+html.dpc-light .dpp .pp-num p{color:#6e6e73}
+html.dpc-light .dpp .pp-icon svg{filter:none}
+html.dpc-light .dpp .pp-icon svg [stroke="#EDEDED"],html.dpc-light .dpp .pp-icon svg{stroke:#1d1d1f}
+html.dpc-light .dpp .pp-icon .pp-cardh{color:#1d1d1f}
+html.dpc-light .dpp .pp-icon .pp-cardp,html.dpc-light .dpp .pp-num .pp-cardp{color:#6e6e73}
+html.dpc-light .dpp .pp-tile{background:#f5f5f7;border-color:#e5e5e7;color:#1d1d1f!important}
+html.dpc-light .dpp .pp-tile b{color:#1d1d1f}
+html.dpc-light .dpp .pp-tile small{color:#6e6e73}
+html.dpc-light .dpp .pp-tile svg{filter:none}
+html.dpc-light .dpp .pp-tile svg [stroke="#7CCBF7"]{stroke:#0071e3}
+html.dpc-light .dpp .pp-badge{background:#e8f2fc;color:#0066cc}
+html.dpc-light .dpp .pp-win{box-shadow:0 20px 50px rgba(0,0,0,.12)}
+html.dpc-light .dpp .pp-fig{background:#000;border-radius:24px;overflow:hidden}
+html.dpc-light .dpp .pp-colist{color:#6e6e73}
+html.dpc-light .dpp .pp-rec{background:#f5f5f7}
+html.dpc-light .dpp .pp-floor b{color:#1d1d1f}
+html.dpc-light .dpp .pp-spec{color:#1d1d1f;border-color:#e5e5e7}
+html.dpc-light .dpp .pp-spec>span:first-child{color:#6e6e73}
+html.dpc-light .dpp .pp-spech{color:#1d1d1f}
+html.dpc-light .dpp .pp-line{border-color:#e5e5e7}
