@@ -290,3 +290,20 @@ html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body header .top-bar,html:not(.dpc-
 html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .grid-row-top-3,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .grid-row-top-3{background:#1f6fb8!important;border:0!important;margin-top:1px!important;box-shadow:0 1px 0 rgba(0,0,0,.04)}
 html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .grid-row-top-3 *,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .grid-row-top-3 *{color:#fff!important;font-weight:500!important;font-size:14px!important;text-transform:none!important;font-family:var(--p-font)!important;letter-spacing:0!important}
 html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .grid-row-top-3 i,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .grid-row-top-3 i,html.dpc-light:not(.p_1):not(.p_2):not(.p_3) body .grid-row-top-3 i::before,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) body .grid-row-top-3 i::before{color:#fff!important}
+
+/* light / dark switch: a tab on the right edge of the screen, sun on top, moon below, the current one lit */
+html:not(.p_1) body #dpc-theme-fab{position:fixed!important;left:auto!important;right:0!important;bottom:auto!important;top:50%!important;transform:translateY(-50%);z-index:9990;width:46px!important;height:96px!important;padding:6px 0!important;margin:0!important;border-radius:14px 0 0 14px!important;display:flex!important;flex-direction:column;align-items:center;justify-content:space-between;cursor:pointer;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);transition:width .2s}
+html:not(.p_1) body #dpc-theme-fab:hover{width:52px!important}
+html:not(.p_1) body #dpc-theme-fab .ic{display:none!important}
+html:not(.p_1) body #dpc-theme-fab::before,html:not(.p_1) body #dpc-theme-fab::after{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;font-size:17px;line-height:1;transition:background .2s,color .2s}
+html:not(.p_1) body #dpc-theme-fab::before{content:"\2600"}
+html:not(.p_1) body #dpc-theme-fab::after{content:"\263E"}
+/* dark theme: tab is dark, moon lit */
+html:not(.dpc-light):not(.p_1) body #dpc-theme-fab{background:rgba(18,18,20,.88)!important;border:1px solid #2a2a2a!important;border-right:0!important;box-shadow:0 10px 30px rgba(0,0,0,.5)!important;color:#9c9c9c!important}
+html:not(.dpc-light):not(.p_1) body #dpc-theme-fab::after{background:#f2f2f2;color:#0a0a0a}
+html:not(.dpc-light):not(.p_1) body #dpc-theme-fab::before{color:#9c9c9c}
+/* light theme: tab is white, sun lit */
+html.dpc-light:not(.p_1) body #dpc-theme-fab{background:rgba(255,255,255,.9)!important;border:1px solid #e5e5e7!important;border-right:0!important;box-shadow:0 10px 30px rgba(0,0,0,.10)!important;color:#6e6e73!important}
+html.dpc-light:not(.p_1) body #dpc-theme-fab::before{background:#1d1d1f;color:#fff}
+html.dpc-light:not(.p_1) body #dpc-theme-fab::after{color:#6e6e73}
+@media print{#dpc-theme-fab{display:none!important}}
