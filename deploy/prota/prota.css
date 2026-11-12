@@ -76,7 +76,7 @@ html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) footer a:hover{color:#fff!imp
 
 /* ---------- the shop's own sections inside category and product texts (.dpch, .dpcp) ---------- */
 html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) .dpch{background:radial-gradient(ellipse at 75% 40%,#121518 0%,#050505 65%)!important;border:1px solid #262626!important;border-radius:18px!important}
-html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) .dpch-h,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) [class^="dpc"] h2,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) [class^="dpc"] h1{font-family:var(--p-font)!important;font-weight:300!important;letter-spacing:-.035em!important;text-transform:none!important;color:#f4f4f4!important;text-shadow:var(--p-glow)!important}
+html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) .dpch-h,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) #content .dpch-h,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) #content [class^="dpc"] h2,html:not(.dpc-light):not(.p_1):not(.p_2):not(.p_3) #content [class^="dpc"] h1{font-family:var(--p-font)!important;font-weight:300!important;letter-spacing:-.035em!important;text-transform:none!important;color:#f4f4f4!important;text-shadow:var(--p-glow)!important}
 
 /* ======================================================================
    HOME PAGE (.dpp, put in the home page module)
