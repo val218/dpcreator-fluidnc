@@ -7,6 +7,8 @@
 #include "Channel.h"
 #include "lineedit.h"
 
+class ExpanderMonitor;
+
 class UartChannel : public Channel, public Configuration::Configurable {
 private:
     Lineedit* _lineedit;
@@ -48,6 +50,10 @@ private:
     bool _released = false;
 
     static constexpr int _ack_timeout = 2000;
+
+    objnum_t         _num = 0;
+    std::string      _expander_id;          // the ID reply of an expander on this channel, "" if none
+    ExpanderMonitor* _monitor = nullptr;    // a dpCREATOR IO expander's live state
 
 public:
     uint32_t last_rx_ms() const { return _last_rx_ms; }
@@ -101,6 +107,13 @@ public:
 
     void getExpanderId();
 
+    objnum_t           num() const { return _num; }
+    const std::string& expander_id() const { return _expander_id; }
+    ExpanderMonitor*   monitor() { return _monitor; }
+    bool               expanderFrame(uint32_t cp) override;
+    void               startMonitor();  // [EXP:MON=1] to a dpCREATOR IO expander
+    void               requestState();  // [EXP:STATE]: one frame now
+
     void registerEvent(pinnum_t pinnum, InputPin* obj);
 
     // Configuration methods
@@ -113,10 +126,11 @@ public:
         // channel, whether or not the machine is moving -- useful for driving a DRO without
         // it having to poll. Also marks the channel as one that expects to be spoken to, so
         // the startup greeting is repeated until the device answers. 0 disables proactive
-        // reporting. No range is enforced by this item() call itself,
-        // but keeping it at 0 or in roughly the 50-5000 range is recommended to avoid
-        // overloading the processor with reports.
-        handler.item("report_interval_ms", _report_interval_ms);
+        // reporting. A negative value (upstream's "report while idle too") is taken as
+        // its absolute value: channels here always report while idle. Keeping it at 0
+        // or in roughly the 50-5000 range is recommended to avoid overloading the
+        // processor with reports.
+        handler.item("report_interval_ms", _report_interval_ms, -60000, 60000);
 
         // @config uart_num
         // @default 0

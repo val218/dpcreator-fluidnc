@@ -18,6 +18,7 @@ StringSetting* start_message;
 IntSetting* status_mask;
 EnumSetting* report_userio;
 EnumSetting* report_modbus;
+EnumSetting* report_expander;
 
 IntSetting* sd_fallback_cs;
 
@@ -120,6 +121,10 @@ void make_settings() {
 
     // |MB:name=value,... in the status report (Modbus analog values with a name), at most every 250 ms.
     report_modbus = new EnumSetting("Modbus values in status report", EXTENDED, WG, NULL, "Report/Modbus", 0, &onoffOptions);
+
+    // |EXP:<channel>,<inputs>,<outputs>,<flags> in the status report: live state of
+    // the dpCREATOR IO expanders (see ExpanderMonitor.h). A change reports at once.
+    report_expander = new EnumSetting("IO expander state in status report", EXTENDED, WG, NULL, "Report/Expander", 0, &onoffOptions);
 }
 
 void make_proxies() {

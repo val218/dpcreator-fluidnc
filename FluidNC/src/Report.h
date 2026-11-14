@@ -96,4 +96,7 @@ extern const char* git_url;
 extern bool readyNext;
 
 extern std::string report_pin_string;
+
+// Changes whenever the |EXP: status field would (0 while $Report/Expander is off)
+uint32_t expander_report_version();
 void               report_recompute_pin_string();
