@@ -1148,6 +1148,12 @@ its live monitor:
   it finish first; feed hold and reset still work while it waits. `#5399` =
   the input's state, or -1 on timeout: `o1 if [#5399 LT 0]`.
   `M66 P<n> L0` also reads only after the moves before it have finished.
+- Firmware update of the IO16 through the R3 (Idle or Alarm):
+  `$Expander/Bootloader` (`$EXPB`; `=2` picks the channel when there are
+  several). The IO16 switches its outputs off and starts the STM32 ROM
+  bootloader; FluidNC stops using the channel. Then
+  `$Uart/Passthrough=uart0,60s` and an STM32 flasher (e.g. stm32flash) on
+  the USB port at 57600 baud, 8E1. Restart FluidNC afterwards.
 
 **Testing without a machine.** The Linux host build
 (`pio run -e linux_x86_64`) runs the real firmware code. Next to the

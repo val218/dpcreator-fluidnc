@@ -394,10 +394,23 @@ void UartChannel::registerEvent(pinnum_t pinnum, InputPin* obj) {
 }
 
 bool UartChannel::setAttr(pinnum_t index, bool* value, const std::string& attrString) {
-    out(attrString, "EXP:");
-    _ackwait = 1;
-    for (size_t i = 0; i < 75; i++) {
-        pollLine(nullptr);
+    return sendAcked(attrString, 75);
+}
+
+extern TaskHandle_t pollingTask;
+
+// Sends [EXP:<s>] and waits up to about timeout_ms for the expander's ACK
+// (true) or NAK (false).  At startup and on the polling task this polls the
+// channel itself; on any other task the polling task reads the answer, and
+// polling here as well would have two tasks decoding the same bytes.
+bool UartChannel::sendAcked(const std::string& s, uint32_t timeout_ms) {
+    const bool poll_here = !pollingTask || xTaskGetCurrentTaskHandle() == pollingTask;
+    _ackwait             = 1;
+    out(s, "EXP:");
+    for (uint32_t i = 0; i < timeout_ms; i++) {
+        if (poll_here) {
+            pollLine(nullptr);
+        }
         if (_ackwait < 1) {
             return _ackwait == 0;
         }

@@ -98,6 +98,7 @@ public:
     Uart*    uart() { return _uart; }
 
     bool setAttr(pinnum_t index, bool* valuep, const std::string& s);
+    bool sendAcked(const std::string& s, uint32_t timeout_ms);  // [EXP:<s>], true on ACK
 
     void out(const std::string& s, const char* tag) override;
     void out_acked(const std::string& s, const char* tag) override;
