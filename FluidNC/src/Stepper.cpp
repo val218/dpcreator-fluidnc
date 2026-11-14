@@ -17,6 +17,8 @@
 #include "Protocol.h"
 #include "ZAdjust.h"               // live Z adjust: extra Z steps
 #include "Driver/delay_usecs.h"   // getCpuTicks
+#include "SCurve.h"
+#include "MotionStats.h"
 #include <cmath>
 
 using namespace Stepper;
@@ -117,6 +119,18 @@ typedef struct {
     float        inv_rate;  // Used by PWM laser mode to speed up segment calculations.
     SpindleSpeed current_spindle_speed;
 
+    // S-curve ($Stepping/SCurve, SCurve.h).  A ramp is shaped only between two
+    // points where the acceleration is zero anyway (a stop, a cruise, the top
+    // of a triangle); ramps that run on through several short blocks stay
+    // straight, so the acceleration never drops at a block boundary.
+    SCurve::Ramp s_ramp;
+    bool         s_on;         // s_ramp is shaping the current ramp
+    uint8_t      s_type;       // RAMP_ACCEL or RAMP_DECEL
+    bool         s_decel_ok;   // the coming deceleration of this block may be shaped
+    float        s_floor;      // an S-deceleration stops at this speed and cruises to the block end (0 = at its own end)
+    uint8_t      start_state;  // how the block was entered: 0 at rest / cruising, 1 accelerating, 2 decelerating
+    uint8_t      end_state;    // how it ends, for the next block's start_state
+
 } st_prep_t;
 static st_prep_t prep;
 
@@ -206,7 +220,8 @@ bool IRAM_ATTR Stepper::pulse_func() {
     if (!awake) {
         return false;
     }
-    auto n_axis = Axes::_numberAxis;
+    int32_t isr_t0 = getCpuTicks();  // $Stepping/Stats: how long a pass takes
+    auto    n_axis = Axes::_numberAxis;
 
     AxisMask dirs = st.dir_outbits;
     if (zadj_inject) {
@@ -299,6 +314,7 @@ bool IRAM_ATTR Stepper::pulse_func() {
     }
 
     Stepping::unstep();
+    MotionStats::isrTime(uint32_t(getCpuTicks() - isr_t0));
     return true;
 }
 
@@ -407,6 +423,82 @@ static uint8_t next_block_index(uint8_t block_index) {
    Currently, the segment buffer conservatively holds roughly up to 40-50 msec of steps.
    NOTE: Computation units are in steps, millimeters, and minutes.
 */
+// $Stepping/SCurve: Off, Light (k = 0.5), Full (k = 1)
+static float scurve_strength() {
+    switch (MotionStats::scurveMode()) {
+        case 1:
+            return 0.5f;
+        case 2:
+            return 1.0f;
+        default:
+            return 0.0f;
+    }
+}
+
+// After a block's velocity profile was (re)computed: which of its ramps get
+// the S shape.  See SCurve.h; the distances and times are those of the
+// straight ramps, so nothing here can make a move longer or faster.
+static void scurve_plan(bool recalc, uint8_t old_ramp_type, bool old_s_on, uint8_t old_s_type) {
+    float k = sys.step_control.executeSysMotion ? 0.0f : scurve_strength();
+
+    // How this block ends: still accelerating (into the next block),
+    // decelerating on into the next block, or at a point of zero acceleration.
+    if (prep.ramp_type == RAMP_ACCEL && prep.accelerate_until <= 0.0f) {
+        prep.end_state = 1;
+    } else if (prep.ramp_type != RAMP_CRUISE || prep.decelerate_after > 0.0f || prep.exit_speed < prep.maximum_speed) {
+        prep.end_state = plan_next_block_starts_decel() ? 2 : 0;
+    } else {
+        prep.end_state = 0;
+    }
+
+    if (recalc && old_s_on) {
+        // The planner changed this block while an S-ramp ran.  Keep it if it
+        // still heads for the same speed; otherwise finish this ramp straight
+        // (starting a new S-ramp now would drop the acceleration to zero).
+        if (old_s_type == RAMP_ACCEL && prep.ramp_type == RAMP_ACCEL && prep.accelerate_until > 0.0f &&
+            fabsf(prep.maximum_speed - prep.s_ramp.v1) <= 0.001f * prep.s_ramp.v1) {
+            float end = prep.s_ramp.endMm();
+            if (end >= prep.decelerate_after) {
+                prep.accelerate_until = end;  // the S-ramp's own end
+                prep.s_decel_ok       = k > 0 && prep.end_state != 2;
+                return;  // s_on stays
+            }
+        }
+        if (old_s_type == RAMP_DECEL && prep.ramp_type == RAMP_DECEL) {
+            // Still decelerating to the block end.  An S-deceleration is faster
+            // than the straight one at the same point, so it must not be
+            // finished straight (the straight ramp could not slow down in time).
+            // Keep it; if the new exit speed is higher (more blocks arrived), it
+            // stops there and cruises to the block end.
+            prep.s_floor = prep.exit_speed > prep.s_ramp.v1 + 0.001f ? prep.exit_speed : 0.0f;
+            return;
+        }
+        // Accelerating, or the new plan has room to speed up or cruise: the
+        // straight plan from here is feasible.
+        prep.s_on       = false;
+        prep.s_decel_ok = false;
+        return;
+    }
+    prep.s_on = false;
+    if (k <= 0.0f) {
+        prep.s_decel_ok = false;
+        return;
+    }
+    // A ramp that starts now starts from zero acceleration if this is a new
+    // block entered at rest / cruising, or a recalculation while cruising.
+    bool calm = recalc ? (old_ramp_type == RAMP_CRUISE) : (prep.start_state == 0);
+    if (prep.ramp_type == RAMP_ACCEL && prep.accelerate_until > 0.0f && calm && prep.maximum_speed > prep.current_speed) {
+        prep.s_ramp.start(k, prep.current_speed, prep.maximum_speed, pl_block->acceleration, pl_block->millimeters);
+        prep.s_on   = true;
+        prep.s_type = RAMP_ACCEL;
+    }
+    // The deceleration: shaped when it starts inside the block (after a
+    // cruise or an S-acceleration) or the block starts with it from a calm
+    // entry, and it does not run on into the next block.
+    bool decel_inside = prep.ramp_type != RAMP_DECEL || calm;
+    prep.s_decel_ok   = decel_inside && prep.end_state != 2 && prep.ramp_type != RAMP_DECEL_OVERRIDE;
+}
+
 void Stepper::prep_buffer() {
     // Block step prep buffer, while in a suspend state and there is no suspend motion to execute.
     if (sys.step_control.endMotion) {
@@ -428,6 +520,13 @@ void Stepper::prep_buffer() {
             }
 
             // Check if we need to only recompute the velocity profile or load a new block.
+            bool    recalc         = prep.recalculate_flag.recalculate;
+            uint8_t old_ramp_type  = prep.ramp_type;
+            bool    old_s_on       = prep.s_on;
+            uint8_t old_s_type     = prep.s_type;
+            if (!recalc) {
+                prep.start_state = prep.end_state;  // the previous block's end
+            }
             if (prep.recalculate_flag.recalculate) {
                 if (prep.recalculate_flag.parking) {
                     prep.recalculate_flag.recalculate = 0;
@@ -488,7 +587,9 @@ void Stepper::prep_buffer() {
             if (sys.step_control.executeHold) {  // [Forced Deceleration to Zero Velocity]
                 // Compute velocity profile parameters for a feed hold in-progress. This profile overrides
                 // the planner block profile, enforcing a deceleration to zero speed.
-                prep.ramp_type = RAMP_DECEL;
+                prep.ramp_type  = RAMP_DECEL;
+                prep.s_on       = false;  // a feed hold stops along a straight ramp
+                prep.s_decel_ok = false;
                 // Compute decelerate distance relative to end of block.
                 float decel_dist = pl_block->millimeters - inv_2_accel * pl_block->entry_speed_sqr;
                 if (decel_dist < 0.0) {
@@ -557,9 +658,10 @@ void Stepper::prep_buffer() {
                     }
                 } else {  // Acceleration-only type
                     prep.accelerate_until = 0.0;
-                    // prep.decelerate_after = 0.0;
-                    prep.maximum_speed = prep.exit_speed;
+                    prep.decelerate_after = 0.0;
+                    prep.maximum_speed    = prep.exit_speed;
                 }
+                scurve_plan(recalc, old_ramp_type, old_s_on, old_s_type);
             }
 
             sys.step_control.updateSpindleSpeed = true;  // Force update whenever updating block.
@@ -596,6 +698,8 @@ void Stepper::prep_buffer() {
         if (minimum_mm < 0.0) {
             minimum_mm = 0.0;
         }
+        bool  seg_shaped = false;                // an S-ramp shaped this segment ($Stepping/Trace)
+        float seg_v0     = prep.current_speed;  // speed at the segment start
 
         do {
             switch (prep.ramp_type) {
@@ -614,6 +718,26 @@ void Stepper::prep_buffer() {
                     }
                     break;
                 case RAMP_ACCEL:
+                    if (prep.s_on && prep.s_type == RAMP_ACCEL) {
+                        seg_shaped = true;
+                        float tn   = prep.s_ramp.t + time_var;
+                        float mm = prep.s_ramp.mm0 - prep.s_ramp.distAt(tn);
+                        if (tn >= prep.s_ramp.T || mm <= prep.accelerate_until) {
+                            // End of the S-ramp: the same point and speed as the straight one
+                            if (tn > prep.s_ramp.T) {
+                                time_var = prep.s_ramp.T - prep.s_ramp.t;
+                            }
+                            mm_remaining       = prep.accelerate_until;
+                            prep.current_speed = prep.maximum_speed;
+                            prep.s_on          = false;
+                            prep.ramp_type     = (mm_remaining <= prep.decelerate_after) ? RAMP_DECEL : RAMP_CRUISE;
+                        } else {
+                            prep.s_ramp.t      = tn;
+                            mm_remaining       = mm;
+                            prep.current_speed = prep.s_ramp.speedAt(tn);
+                        }
+                        break;
+                    }
                     // NOTE: Acceleration ramp only computes during first do-while loop.
                     speed_var = pl_block->acceleration * time_var;
                     mm_remaining -= time_var * (prep.current_speed + 0.5f * speed_var);
@@ -646,6 +770,63 @@ void Stepper::prep_buffer() {
                     }
                     break;
                 default:  // case RAMP_DECEL:
+                    if (prep.s_decel_ok && !prep.s_on && !sys.step_control.executeHold) {
+                        // A deceleration that starts here, from zero acceleration, and
+                        // ends this block at its exit speed: shape it, if the distance
+                        // left is the one the straight ramp needs (it always is, unless
+                        // the plan changed underneath).
+                        prep.s_decel_ok = false;
+                        float need = (prep.current_speed * prep.current_speed - prep.exit_speed * prep.exit_speed) * (0.5f / pl_block->acceleration);
+                        float have = mm_remaining - prep.mm_complete;
+                        if (prep.current_speed > prep.exit_speed && fabsf(need - have) <= 0.002f * have + 0.0005f) {
+                            prep.s_ramp.start(scurve_strength(), prep.current_speed, prep.exit_speed, pl_block->acceleration, mm_remaining);
+                            prep.s_on    = true;
+                            prep.s_type  = RAMP_DECEL;
+                            prep.s_floor = 0.0f;
+                        }
+                    }
+                    if (prep.s_on && prep.s_type == RAMP_DECEL) {
+                        seg_shaped = true;
+                        float tn   = prep.s_ramp.t + time_var;
+                        float mm = prep.s_ramp.mm0 - prep.s_ramp.distAt(tn);
+                        if (prep.s_floor > 0.0f && prep.s_ramp.speedAt(tn > prep.s_ramp.T ? prep.s_ramp.T : tn) <= prep.s_floor) {
+                            // Down to the new exit speed: find when, then cruise to the block end
+                            float lo = prep.s_ramp.t, hi = tn > prep.s_ramp.T ? prep.s_ramp.T : tn;
+                            for (int i = 0; i < 24; ++i) {
+                                float mid = 0.5f * (lo + hi);
+                                if (prep.s_ramp.speedAt(mid) > prep.s_floor) {
+                                    lo = mid;
+                                } else {
+                                    hi = mid;
+                                }
+                            }
+                            time_var              = hi - prep.s_ramp.t;
+                            mm_remaining          = prep.s_ramp.mm0 - prep.s_ramp.distAt(hi);
+                            if (mm_remaining < prep.mm_complete) {
+                                mm_remaining = prep.mm_complete;
+                            }
+                            prep.current_speed    = prep.s_floor;
+                            prep.maximum_speed    = prep.s_floor;
+                            prep.decelerate_after = prep.mm_complete;
+                            prep.ramp_type        = RAMP_CRUISE;
+                            prep.s_on             = false;
+                            prep.s_floor          = 0.0f;
+                            break;
+                        }
+                        if (tn >= prep.s_ramp.T || mm <= prep.mm_complete) {
+                            if (tn > prep.s_ramp.T) {
+                                time_var = prep.s_ramp.T - prep.s_ramp.t;
+                            }
+                            mm_remaining       = prep.mm_complete;
+                            prep.current_speed = prep.exit_speed;
+                            prep.s_on          = false;
+                        } else {
+                            prep.s_ramp.t      = tn;
+                            mm_remaining       = mm;
+                            prep.current_speed = prep.s_ramp.speedAt(tn);
+                        }
+                        break;
+                    }
                     // NOTE: mm_var used as a misc worker variable to prevent errors when near zero speed.
                     speed_var = pl_block->acceleration * time_var;  // Used as delta speed (mm/min)
                     if (prep.current_speed > speed_var) {           // Check if at or below zero speed.
@@ -743,6 +924,9 @@ void Stepper::prep_buffer() {
         dt += prep.dt_remainder;  // Apply previous segment partial step execute time
         // dt is in minutes so inv_rate is in minutes
         float inv_rate = dt / (last_n_steps_remaining - step_dist_remaining);  // Compute adjusted step rate inverse
+
+        MotionStats::segment(dt, prep_segment->n_step, pl_block->steps, pl_block->step_event_count, Axes::_numberAxis, prep.current_speed,
+                             prep.current_speed > seg_v0 ? 'A' : prep.current_speed < seg_v0 ? 'D' : 'C', seg_shaped);
 
         // Compute CPU cycles per step for the prepped segment.
         // fStepperTimer is in units of timerTicks/sec, so the dimensional analysis is

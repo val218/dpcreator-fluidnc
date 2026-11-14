@@ -1242,6 +1242,8 @@ void make_user_commands() {
     make_motion_commands();
     extern void make_expander_commands();  // ExpanderCommands.cpp: $Expander/State, $Expander/Pins
     make_expander_commands();
+    extern void motion_stats_commands();  // MotionStats.cpp: $Stepping/Stats, $Stepping/Trace
+    motion_stats_commands();
     extern void make_automation_commands();  // Automation.cpp: $Automation/List, Reload, Run
     make_automation_commands();
 #ifdef HEAPDIFF

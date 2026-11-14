@@ -1,6 +1,7 @@
 #include "Machine/MachineConfig.h"
 #include "SettingsDefinitions.h"
 #include "Camera.h"
+#include "MotionStats.h"
 #include "Config.h"
 #include "Stepping.h"
 #include "Machine/Homing.h"
@@ -124,7 +125,9 @@ void make_settings() {
 
     // |EXP:<channel>,<inputs>,<outputs>,<flags> in the status report: live state of
     // the dpCREATOR IO expanders (see ExpanderMonitor.h). A change reports at once.
-    report_expander = new EnumSetting("IO expander state in status report", EXTENDED, WG, NULL, "Report/Expander", 0, &onoffOptions);
+    MotionStats::make_settings();  // Stepping/SCurve
+
+        report_expander = new EnumSetting("IO expander state in status report", EXTENDED, WG, NULL, "Report/Expander", 0, &onoffOptions);
 }
 
 void make_proxies() {
