@@ -83,7 +83,7 @@ namespace Machine {
 
     void UserOutputs::group(Configuration::HandlerBase& handler) {
         // General-purpose spare output pins for M62-M65/$ commands and macros, independent
-        // of any axis/spindle/coolant feature. Exactly 4 analog + 8 digital slots -- a fixed
+        // of any axis/spindle/coolant feature. Exactly 4 analog + 16 digital slots -- a fixed
         // array size (MaxUserAnalogPin/MaxUserDigitalPin), not extensible via config.
 
         // @config analog0_pin
@@ -177,5 +177,53 @@ namespace Machine {
         // @pin_attributes output
         // Digital output slot 7.
         handler.item("digital7_pin", _digitalOutput[7]);
+
+        // @config digital8_pin
+        // @default NO_PIN
+        // @pin_attributes output
+        // Digital output slot 8.
+        handler.item("digital8_pin", _digitalOutput[8]);
+
+        // @config digital9_pin
+        // @default NO_PIN
+        // @pin_attributes output
+        // Digital output slot 9.
+        handler.item("digital9_pin", _digitalOutput[9]);
+
+        // @config digital10_pin
+        // @default NO_PIN
+        // @pin_attributes output
+        // Digital output slot 10.
+        handler.item("digital10_pin", _digitalOutput[10]);
+
+        // @config digital11_pin
+        // @default NO_PIN
+        // @pin_attributes output
+        // Digital output slot 11.
+        handler.item("digital11_pin", _digitalOutput[11]);
+
+        // @config digital12_pin
+        // @default NO_PIN
+        // @pin_attributes output
+        // Digital output slot 12.
+        handler.item("digital12_pin", _digitalOutput[12]);
+
+        // @config digital13_pin
+        // @default NO_PIN
+        // @pin_attributes output
+        // Digital output slot 13.
+        handler.item("digital13_pin", _digitalOutput[13]);
+
+        // @config digital14_pin
+        // @default NO_PIN
+        // @pin_attributes output
+        // Digital output slot 14.
+        handler.item("digital14_pin", _digitalOutput[14]);
+
+        // @config digital15_pin
+        // @default NO_PIN
+        // @pin_attributes output
+        // Digital output slot 15.
+        handler.item("digital15_pin", _digitalOutput[15]);
     }
 }

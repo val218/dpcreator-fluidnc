@@ -3,7 +3,7 @@
 
 // IO expander commands for the WebUI's "I/O Expander" page.
 //
-//   $Expander/State  ($EXP)   [EXP:CAPS=M66WAIT,UIO=8] (what this firmware can do), then
+//   $Expander/State  ($EXP)   [EXP:CAPS=M66WAIT,UIO=16] (what this firmware can do), then
 //                             one line per expander that answered the ID query:
 //       [EXP:2,ID=dpCREATOR IO16 v1.0.0,IN=00A1,OUT=0003,FLAGS=07]
 //       [EXP:2,ID=dpCREATOR IO16 v1.0.0,OFFLINE]     (monitored, silent for 3 s)
