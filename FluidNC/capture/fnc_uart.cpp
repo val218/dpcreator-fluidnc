@@ -18,7 +18,7 @@ VFDSimulator* vfd_simulator[MAX_N_UARTS];
 // Host build: a UART can be a real or pseudo terminal. When the file
 // native_uart<N> exists, it names the device (e.g. /dev/pts/7, written by a
 // test's simulated Modbus slave), and an RS485 (half duplex) uartN talks to
-// it instead of the built-in Huanyang VFD simulator.
+// it instead of the built-in Huanyang VFD simulator.  See uart_init() below.
 #include <fcntl.h>
 #include <poll.h>
 #include <termios.h>
@@ -67,7 +67,13 @@ void uart_discard_input(uint32_t uart_num) {
     }
 }
 
-void uart_init(uint32_t uart_num) {}
+// Also a full-duplex uartN (e.g. an IO expander's uart_channel) talks to the
+// device named in native_uart<N> when that file exists (tools/io16_sim.py).
+void uart_init(uint32_t uart_num) {
+    if (uart_num < MAX_N_UARTS && uart_fd[uart_num] < 0) {
+        uart_fd[uart_num] = uart_open_device(uart_num);
+    }
+}
 
 int uart_buflen(uint32_t uart_num) {
     if (uart_num < MAX_N_UARTS && uart_fd[uart_num] >= 0) {

@@ -5,6 +5,7 @@
 #include "Driver/Console.h"
 #include "Report.h"                 // report_gcode_modes
 #include "Machine/MachineConfig.h"  // config
+#include "ExpanderMonitor.h"
 #include "RealtimeCmd.h"            // execute_realtime_command
 #include "Limit.h"
 #include "Logging.h"
@@ -278,7 +279,7 @@ void Channel::autoReport() {
         const char* stateName = state_name();
         const bool  due       = (motionState() || _report_when_idle) && (int32_t(xTaskGetTickCount()) - _nextReportTime) >= 0;
         const bool  event     = _reportOvr || _reportWco || _reportState || _lastPinString != report_pin_string ||
-                         (_lastJobActive != Job::active());
+                         (_lastJobActive != Job::active()) || _lastExpVersion != expander_report_version();
         // Events (a state change above all) report at once, but not more than
         // every REPORT_EVENT_MIN_MS: short handwheel jogs flipped Jog/Idle
         // dozens of times a second and every flip sent a report to every
@@ -298,6 +299,7 @@ void Channel::autoReport() {
             }
             _lastPinString = report_pin_string;
             _lastJobActive = Job::active();
+            _lastExpVersion = expander_report_version();
 
             _nextReportTime = xTaskGetTickCount() + _reportInterval;
             report_realtime_status(*this);
@@ -367,6 +369,9 @@ void Channel::handleRealtimeCharacter(uint8_t ch) {
     }
     if (cmd >= PinHighFirst && cmd < PinHighLast) {
         pin_event(cmd - PinHighFirst, true);
+        return;
+    }
+    if (ExpanderMonitor::isFrame(cmd) && expanderFrame(cmd)) {
         return;
     }
     execute_realtime_command(static_cast<Cmd>(cmd), *this);

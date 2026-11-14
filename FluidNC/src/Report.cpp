@@ -29,6 +29,7 @@
 #include "WebUI/NotificationsService.h"  // WebUI::notificationsService
 #include "InputFile.h"
 #include "Job.h"
+#include "ExpanderMonitor.h"
 
 #include <map>
 #include <freertos/task.h>
@@ -39,6 +40,13 @@
 volatile bool protocol_pin_changed = false;
 
 std::string report_pin_string;
+
+uint32_t expander_report_version() {
+    if (!report_expander || !report_expander->get() || ExpanderMonitor::all().empty()) {
+        return 0;
+    }
+    return ExpanderMonitor::reportVersion(millis());
+}
 
 void notifyf(const char* title, const char* format, ...) {
     char    loc_buf[64];
@@ -547,6 +555,15 @@ void report_realtime_status(Channel& channel) {
         std::string v = Modbus::Bus::status_values();  // refreshed at most every 250 ms
         if (!v.empty()) {
             msg << "|MB:" << v;
+        }
+    }
+
+    if (report_expander && report_expander->get()) {
+        // |EXP:<channel>,<inputs>,<outputs>,<flags> per monitored IO expander
+        // (hex, bit 0 = IN1/OUT1), "<channel>,-" when it has been silent for 3 s.
+        std::string v = ExpanderMonitor::reportField(millis());
+        if (!v.empty()) {
+            msg << "|EXP:" << v;
         }
     }
 

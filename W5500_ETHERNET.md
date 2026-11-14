@@ -1109,12 +1109,46 @@ console is the USB port only. It needs the USB console on
 (`$USBCDC/Enable=ON`); otherwise UART0 stays the console and an error says
 why. Without a `uart0:` section nothing changes.
 
+**dpCREATOR IO16 (16 × 24 V in, 16 × 24 V out).** On J7 at 1 Mbaud:
+
+```yaml
+uart0:
+  txd_pin: gpio.43
+  rxd_pin: gpio.44
+  baud: 1000000
+  mode: 8N1
+  passthrough_baud: 57600
+  passthrough_mode: 8E1
+uart_channel2:
+  uart_num: 0
+  report_interval_ms: 100   # the IO16's heartbeat: no report for 1 s = outputs off
+  message_level: Info
+```
+
+Pins: `uart_channel2.0`–`.15` = IN1–IN16, `.16`–`.31` = OUT1–OUT16.
+`report_interval_ms` must not be 0 (a negative value counts as positive).
+When the expander answers `dpCREATOR IO…` to the ID query, FluidNC turns on
+its live monitor:
+
+- `$Report/Expander=On` adds `|EXP:2,00A1,0003,07` to the status report:
+  channel, inputs (hex, bit 0 = IN1, 1 = 24 V present), outputs (bit 0 =
+  OUT1, 1 = on), flags (bit0 output rail on, bit1 configured, bit2
+  heartbeat OK, bit3 config error). `|EXP:2,-` = no word from it for 3 s.
+  A change sends a report at once.
+- `$Expander/State` (`$EXP`):
+  `[EXP:2,ID=dpCREATOR IO16 v1.0.0,IN=00A1,OUT=0003,FLAGS=07]`
+  (`OFFLINE` when silent; `NOMON` for other expanders).
+- `$Expander/Pins` (`$EXPP`): what uses each expander pin,
+  `[EXP:PIN=2.0,control/safety_door_pin,in,low]`.
+
 **Testing without a machine.** The Linux host build
 (`pio run -e linux_x86_64`) runs the real firmware code. Next to the
 program: `native_localfs/config.yaml`, `native_sd/` for files,
 `native_gpio/<n>` (exists = GPIO n high), `native_gpio/adc<n>` (raw ADC
 value) and `tools/modbus_sim.py --dir .`, a simulated Modbus module on a
 pseudo terminal (its state in `modbus_sim.json`).
+`tools/io16_sim.py --dir . --uart 1` simulates an IO16 on `uart1`
+(host builds only have `uart_channel1`; inputs in `io16_inputs`, hex).
 
 ---
 

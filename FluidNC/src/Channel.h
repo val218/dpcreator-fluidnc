@@ -101,6 +101,7 @@ protected:
     MotorMask   _lastLimits       = 0;
     bool        _lastJobActive    = false;
     std::string _lastPinString    = "";
+    uint32_t    _lastExpVersion   = 0;  // ExpanderMonitor::reportVersion() at the last report
 
     bool       _reportState = true;
     bool       _reportOvr   = true;
@@ -208,6 +209,10 @@ public:
     // and is in the middle of an escape sequence that could include what would otherwise
     // be a realtime character.
     virtual bool realtimeOkay(char c) { return true; }
+
+    // A dpCREATOR IO expander's live-monitor codepoint (0xA000-0xA4FF, see
+    // ExpanderMonitor.h).  Returns false when this channel does not monitor one.
+    virtual bool expanderFrame(uint32_t cp) { return false; }
 
     void handleRealtimeCharacter(uint8_t byte);
 

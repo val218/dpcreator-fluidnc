@@ -43,6 +43,58 @@ jobs:
           (printf '$I\n$SD/Run=/smoke.nc\n'; sleep 4) | timeout 10 ../.pio/build/linux_x86_64/program - | tee out.txt || true
           grep -q "VER:" out.txt
 
+      - name: IO16 expander test (simulated dpCREATOR IO16 on a pty)
+        run: |
+          mkdir -p io16/native_localfs io16/native_sd && cd io16
+          cat > native_localfs/config.yaml <<'YAML'
+          name: io16 test
+          board: host
+          uart1:
+            txd_pin: gpio.1
+            rxd_pin: gpio.2
+            baud: 1000000
+            mode: 8N1
+          uart_channel1:
+            uart_num: 1
+            report_interval_ms: -100
+            message_level: Info
+          control:
+            safety_door_pin: uart_channel1.0
+          coolant:
+            flood_pin: uart_channel1.16
+          user_outputs:
+            digital0_pin: uart_channel1.17
+            analog0_pin: uart_channel1.22
+            analog0_hz: 1000
+          user_inputs:
+            digital0_pin: uart_channel1.5
+            digital1_pin: uart_channel1.6:low
+          YAML
+          python3 ../tools/io16_sim.py --dir . --uart 1 --inputs 00A0 > sim.log 2>&1 &
+          SIM=$!
+          sleep 1
+          (sleep 2; printf '$Report/Expander=On\n'; sleep 0.5; printf '?'; sleep 0.3
+           printf '$EXPP\nM62 P0\nM67 E0 Q50\nM8\n'; sleep 0.6; printf '?'; sleep 0.3
+           echo 80 > io16_inputs; sleep 0.5
+           printf '?$EXP\nM66 P0 L0\n(PRINT,in0=#5399)\nM66 P1 L0\n(PRINT,in1=#5399)\n'; sleep 2
+           kill $SIM; sleep 3.5; printf '?'; sleep 0.3
+           printf '$Report/Expander=Off\n?'; sleep 0.5) | timeout 20 ../.pio/build/linux_x86_64/program - > out.txt 2>&1 || true
+          cat out.txt sim.log
+          set -x
+          grep -q "IO Expander dpCREATOR IO16 v1.0.0" out.txt
+          grep -q "|EXP:1,00A0,0000,07" out.txt          # heartbeat OK although report_interval_ms is negative
+          grep -q "|EXP:1,00A0,0043,07" out.txt          # OUT1 (flood), OUT2 (M62), OUT7 (PWM) on
+          grep -q "|EXP:1,0080,0043,07" out.txt          # input change
+          grep -q "\[EXP:1,ID=dpCREATOR IO16 v1.0.0,IN=0080,OUT=0043,FLAGS=07\]" out.txt
+          grep -q "\[EXP:PIN=1.0,control/safety_door_pin,in\]" out.txt
+          grep -q "\[EXP:PIN=1.6,user_inputs/digital1_pin,in,low\]" out.txt
+          grep -q "\[EXP:PIN=1.22,user_outputs/analog0_pin,pwm\]" out.txt
+          grep -q "PRINT,in0=0.000000" out.txt
+          grep -q "PRINT,in1=1.000000" out.txt
+          grep -q "|EXP:1,-" out.txt                     # expander gone: offline after 3 s
+          if grep -q "no heartbeat" sim.log; then exit 1; fi
+          tail -n 5 out.txt | grep "<Idle" | tail -1 | grep -vq "EXP:"  # setting off: no field
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

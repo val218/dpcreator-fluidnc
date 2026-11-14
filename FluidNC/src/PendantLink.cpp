@@ -73,6 +73,11 @@ UartChannel* pendant_channel() {
     if (!ch || !ch->uart() || !ch->uart()->configured()) {
         return nullptr;
     }
+    // An IO expander on uart_channel1 is not a pendant: the pendant guard would
+    // drop its pin events and monitor frames (multi-byte UTF-8) as line noise.
+    if (!ch->expander_id().empty()) {
+        return nullptr;
+    }
     return ch;
 }
 

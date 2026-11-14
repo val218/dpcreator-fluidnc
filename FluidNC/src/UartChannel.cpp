@@ -6,13 +6,21 @@
 #include "Machine/MachineConfig.h"  // config
 #include "Serial.h"                 // allChannels
 #include "Report.h"                 // report_realtime_status
+#include "ExpanderMonitor.h"
 
-UartChannel::UartChannel(objnum_t num, bool addCR) : Channel("uart_channel", num, addCR) {
+UartChannel::UartChannel(objnum_t num, bool addCR) : Channel("uart_channel", num, addCR), _num(num) {
     _lineedit = new Lineedit(this, _line, Channel::maxLine - 1);
     _active   = false;
 }
 
 void UartChannel::init() {
+    // Upstream FluidNC takes a negative report_interval_ms as "report while idle
+    // too".  Here setReportInterval() takes it unsigned, so -100 would become a
+    // huge interval and stop the reports - an IO expander's heartbeat, without
+    // which it switches its outputs off.  Channels here always report while idle.
+    if (_report_interval_ms < 0) {
+        _report_interval_ms = -_report_interval_ms;
+    }
     auto uart = config->_uarts[_uart_num];
     if (!uart) {
         log_error(name() << ": missing uart" << _uart_num);
@@ -114,7 +122,9 @@ void UartChannel::getExpanderId() {
                 *pos = '\0';
                 print("ok\n");
                 log_info("IO Expander " << &buf[prefix_len]);
-                _peer_spoke = true;
+                _peer_spoke  = true;
+                _expander_id = &buf[prefix_len];
+                startMonitor();
                 return;
             }
             // Still a possible prefix of a reply.  Wait for the rest, unless
@@ -137,6 +147,34 @@ void UartChannel::getExpanderId() {
     // Timed out part way through something that still looked like a reply.  It
     // was not one, so it is input like any other.
     queueInput(buf, len);
+}
+
+// A dpCREATOR IO expander reports its live I/O state when asked to with
+// [EXP:MON=1] (see ExpanderMonitor.h).  It sends no ACK for MON or STATE, so
+// these do not disturb setAttr()'s ACK counting.  Stock expanders never get it.
+static const char dpcreator_io_prefix[] = "dpCREATOR IO";
+
+void UartChannel::startMonitor() {
+    if (_monitor || _expander_id.compare(0, sizeof(dpcreator_io_prefix) - 1, dpcreator_io_prefix) != 0) {
+        return;
+    }
+    _monitor = new ExpanderMonitor(int(_num), _expander_id);
+    ExpanderMonitor::all().push_back(_monitor);
+    out("MON=1", "EXP:");
+}
+
+bool UartChannel::expanderFrame(uint32_t cp) {
+    if (!_monitor) {
+        return false;
+    }
+    _monitor->feed(cp, millis());
+    return true;
+}
+
+void UartChannel::requestState() {
+    if (_monitor) {
+        out("STATE", "EXP:");
+    }
 }
 
 void UartChannel::queueInput(const char* buf, size_t len) {

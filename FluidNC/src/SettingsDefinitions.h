@@ -11,6 +11,7 @@ extern StringSetting* start_message;
 extern IntSetting* status_mask;
 extern EnumSetting* report_userio;
 extern EnumSetting* report_modbus;
+extern EnumSetting* report_expander;
 
 extern IntSetting* sd_fallback_cs;
 
