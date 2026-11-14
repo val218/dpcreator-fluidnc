@@ -105,6 +105,7 @@ int           plan_blocks_queued();  // blocks queued incl. the executing one
 
 // Called by step segment buffer when computing executing block velocity profile.
 float plan_get_exec_block_exit_speed_sqr();
+bool  plan_next_block_starts_decel();  // S-curve: the next block begins with a deceleration
 
 // Called by main program during planner calculations and step segment buffer during initialization.
 float plan_compute_profile_nominal_speed(plan_block_t* block);

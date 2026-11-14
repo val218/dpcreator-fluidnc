@@ -189,6 +189,9 @@ jobs:
           grep -q "OUT4 on" sim.log && grep -q "Automation: pedal" out.txt
           grep -q "Automation: Vacuum lost" out.txt && grep -q "<Hold" out.txt
 
+      - name: Motion check (S-curve vs straight ramps, from the segment trace)
+        run: python3 tools/motion_check.py .pio/build/linux_x86_64/program
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

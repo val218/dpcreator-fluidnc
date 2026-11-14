@@ -247,6 +247,26 @@ float plan_get_exec_block_exit_speed_sqr() {
     return block_buffer[block_index].entry_speed_sqr;
 }
 
+// S-curve (Stepper.cpp): does the block after the executing one start by
+// decelerating?  Then the executing block's deceleration goes on into it, and
+// is not shaped as a separate S-ramp (that would bring the acceleration to
+// zero at the block boundary).
+bool plan_next_block_starts_decel() {
+    uint8_t index = plan_next_block_index(block_buffer_tail);
+    if (index == block_buffer_head) {
+        return false;  // nothing after it: it ends at a stop
+    }
+    plan_block_t* next      = &block_buffer[index];
+    uint8_t       after     = plan_next_block_index(index);
+    float         exit_sqr  = (after == block_buffer_head) ? 0.0f : block_buffer[after].entry_speed_sqr;
+    float         nominal   = plan_compute_profile_nominal_speed(next);
+    if (next->entry_speed_sqr > nominal * nominal) {
+        return true;  // decelerates to a lower override speed
+    }
+    // Deceleration-only: it needs its whole length to slow down to its exit speed
+    return next->entry_speed_sqr > exit_sqr && (next->entry_speed_sqr - exit_sqr) >= 2.0f * next->acceleration * next->millimeters * 0.999f;
+}
+
 // Returns the availability status of the block ring buffer. True, if full.
 uint8_t plan_check_full_buffer() {
     return block_buffer_tail == next_buffer_head;

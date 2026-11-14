@@ -1166,6 +1166,30 @@ pseudo terminal (its state in `modbus_sim.json`).
 
 ---
 
+**Motion smoothing and step rate** (WebUI: Machine → Tuning…).
+
+- `$Stepping/SCurve=Off|Light|Full` (saved): S-shaped speed ramps. The
+  planner is unchanged – same corner speeds, same move times, same
+  distances – only the speed curve inside each ramp bends, so the
+  acceleration rises and falls smoothly instead of switching on and off.
+  Full: from zero acceleration, peak 1.5 × `acceleration_mm_per_sec2`;
+  Light: peak 1.25 ×. Less ringing after direction changes, quieter
+  belts, cleaner laser edges. If a motor stalls with Full, lower that
+  axis's acceleration about a third. Ramps that run on through several
+  short G-code lines (3D carving) stay straight so the acceleration never
+  dips at a line boundary; a feed hold always stops along a straight ramp.
+- `$Stepping/Stats` (`$SST`): `[STEP:ENGINE=…,ENGINE_LIMIT=…]` (pulse
+  timing), `[STEP:ISR_MAX_US=…,ISR_LIMIT=…]` (the measured stepper
+  interrupt time and the step rate it allows), `[STEP:PEAK=…,X=…]`
+  (highest step rates since `$SST=Reset`) and `[STEP:NEED,X=…]` (each
+  axis at its max_rate). Benchmark: `$SST=Reset`, a fast move or jog on
+  each axis, then `$SST`.
+- `$Stepping/Trace=On`, move, `$Stepping/Trace`: the speed of each 10 ms
+  step segment, `[TRACE:<ms>,<mm/min>,<A|C|D>[S]]` (S = S-shaped).
+  `tools/motion_check.py` uses it on the host build.
+
+---
+
 ## 19. Camera crosshair (IP / ESP32 camera on the head)
 
 A small Wi-Fi camera fixed to the head becomes a crosshair: aim at a hole,
