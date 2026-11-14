@@ -945,14 +945,19 @@ static Error uartPassthrough(const char* value, AuthenticationLevel auth_level, 
         }
     }
     Uart* downstream_uart = nullptr;
+    // uart0 is there only when config.yaml gave it to a uart_channel (an IO
+    // expander on J7), so it can be a passthrough target too.  "auto" tries it
+    // last, so a pendant on uart1 is still found first.
     if (uart_name == "auto") {
-        // Find a UART device with a non-empty passthrough_baud config item
-        for (uart_num = 1; uart_num < MAX_N_UARTS; ++uart_num) {
-            downstream_uart = config->_uarts[uart_num];
-            if (downstream_uart) {
-                if (downstream_uart->_passthrough_baud != 0) {
-                    break;
-                }
+        // Find a UART device with a non-empty passthrough_baud config item:
+        // uart1, uart2, ... and uart0 last
+        uart_num = MAX_N_UARTS;
+        for (objnum_t n = 1; n <= MAX_N_UARTS; ++n) {
+            objnum_t u = n % MAX_N_UARTS;
+            if (config->_uarts[u] && config->_uarts[u]->_passthrough_baud != 0) {
+                uart_num        = u;
+                downstream_uart = config->_uarts[u];
+                break;
             }
         }
         if (uart_num == MAX_N_UARTS) {
@@ -961,7 +966,7 @@ static Error uartPassthrough(const char* value, AuthenticationLevel auth_level, 
         }
     } else {
         // Find a UART device that matches the name
-        for (uart_num = 1; uart_num < MAX_N_UARTS; ++uart_num) {
+        for (uart_num = 0; uart_num < MAX_N_UARTS; ++uart_num) {
             downstream_uart = config->_uarts[uart_num];
             if (downstream_uart) {
                 if (downstream_uart->name() == uart_name) {
@@ -987,12 +992,16 @@ static Error uartPassthrough(const char* value, AuthenticationLevel auth_level, 
 
     out.pause();  // Stop input polling on the upstream channel
 
+    // The uart_channel on that UART stops reading it meanwhile.  (Channels
+    // start at uart_channel1: index 0 is always empty, so stopping at the
+    // first empty slot, as this did, never found one.)
     UartChannel* channel = nullptr;
-    for (size_t n = 0; (channel = config->_uart_channels[n]) != nullptr; ++n) {
-        if (channel->uart_num() == uart_num) {
+    for (size_t n = 0; n < MAX_N_UARTS; ++n) {
+        auto c = config->_uart_channels[n];
+        if (c && c->uart_num() == uart_num) {
+            channel = c;
             break;
         }
-        channel = nullptr;  // Leave channel null if not found
     }
 
     if (channel) {

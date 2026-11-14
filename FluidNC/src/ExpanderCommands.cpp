@@ -14,6 +14,8 @@
 //       [EXP:PIN=2.16,coolant/flood_pin,out]
 //       [EXP:PIN=2.22,user_outputs/analog0_pin,pwm]
 //   (path from the YAML section names; direction from how FluidNC set the pin up)
+//
+//   $Expander/Bootloader ($EXPB)  firmware update through the R3, see below
 #include "ExpanderMonitor.h"
 #include "UartChannel.h"
 #include "Settings.h"
@@ -139,7 +141,53 @@ namespace {
     }
 }
 
+namespace {
+    // $Expander/Bootloader[=<channel>]: the dpCREATOR IO16 resets into the
+    // STM32 ROM bootloader (outputs off) for a firmware update through the R3:
+    //   $Expander/Bootloader       (or =2 when there are several expanders)
+    //   $Uart/Passthrough=uart0,60s, then an STM32 flasher at 57600 8E1
+    //   restart FluidNC
+    // The channel is let go of at once: status reports and messages sent to
+    // it would reach the ROM bootloader, whose autobaud takes the first byte.
+    Error expander_bootloader(const char* value, AuthenticationLevel auth_level, Channel& out) {
+        UartChannel* ch    = nullptr;
+        int          found = 0;
+        int          want  = (value && *value) ? atoi(value) : -1;
+        for (size_t n = 0; n < MAX_N_UARTS; ++n) {
+            auto c = config->_uart_channels[n];
+            if (!c || c->expander_id().empty()) {
+                continue;
+            }
+            ++found;
+            if (want < 0 || int(c->num()) == want) {
+                ch = c;
+            }
+        }
+        if (!found) {
+            log_error_to(out, "No IO expander");
+            return Error::InvalidValue;
+        }
+        if (want < 0 && found > 1) {
+            log_error_to(out, "Several IO expanders: say which, e.g. $Expander/Bootloader=2");
+            return Error::InvalidValue;
+        }
+        if (!ch) {
+            log_error_to(out, "No IO expander on uart_channel" << want);
+            return Error::InvalidValue;
+        }
+        if (!ch->sendAcked("BOOT", 500)) {
+            log_error_to(out, ch->name() << ": the expander refused the bootloader (not Idle there, or not a dpCREATOR IO)");
+            return Error::InvalidValue;
+        }
+        ch->release();
+        log_info_to(out, ch->name() << ": expander is in its bootloader, outputs off. Flash it with $Uart/Passthrough=uart"
+                                    << ch->uart_num() << ",60s and an STM32 flasher at 57600 8E1, then restart FluidNC");
+        return Error::Ok;
+    }
+}
+
 void make_expander_commands() {
+    new UserCommand("EXPB", "Expander/Bootloader", expander_bootloader, notIdleOrAlarm);
     new ReportCommand("EXP", "Expander/State", expander_state, anyState);
     new ReportCommand("EXPP", "Expander/Pins", expander_pins, anyState);
 }

@@ -11,6 +11,8 @@ the real firmware (val218/dpcreator-io16, src/proto.c):
   [EXP:ID]         -> "(EXP,dpCREATOR IO16 v1.0.0)"
   [EXP:io.N=...]   -> ACK (U+00B2)
   [EXP:MON=1/0]    monitor stream on/off (no ACK); [EXP:STATE] one frame (no ACK)
+  [EXP:BOOT]       ACK, then "bootloader": silent, counts the bytes it gets
+                   (written to <dir>/io16_boot_rx on exit)
   [MSG:RST]        drop the configuration
   <...> lines      heartbeat (status reports); outputs drop after 1 s without
   U+0100+N/0140+N  output N off / on;  U+10000+(N<<10)+duty  PWM
@@ -49,6 +51,8 @@ class IO16:
         self.mon_t = 0.0
         self.line = b""
         self.utf = b""
+        self.boot = False
+        self.boot_rx = 0
 
     def reset(self):
         self.modes = {}  # n -> "in"/"out"/"pwm"
@@ -83,6 +87,9 @@ class IO16:
 
     # ---- receive
     def rx(self, data):
+        if self.boot:
+            self.boot_rx += len(data)  # a real ROM bootloader would take these for autobaud
+            return
         for b in data:
             if self.utf or b >= 0xC0:
                 self.utf += bytes([b])
@@ -139,6 +146,11 @@ class IO16:
             self.mon = False
         elif p.startswith("STATE]"):
             self.mon_once = True
+        elif p.startswith("BOOT]"):
+            self.send(cp(0xB2))
+            self.log("BOOT: now in the ROM bootloader (outputs off)")
+            self.boot = True
+            self.out = 0
         else:
             self.send(cp(0xB3))
 
@@ -174,6 +186,8 @@ class IO16:
 
     # ---- periodic
     def poll(self, now):
+        if self.boot:
+            return
         self.inputs = self.read_inputs(self.inputs)
         for n, m in self.modes.items():
             if m == "in":
@@ -212,7 +226,9 @@ def main():
         f.write(name + "\n")
     print("io16_sim on", name, flush=True)
 
-    sim = IO16(master, inputs_path, a.quiet, a.id)
+    global SIM, SIM_DIR
+    SIM_DIR = a.dir
+    sim = SIM = IO16(master, inputs_path, a.quiet, a.id)
     while True:
         r, _, _ = select.select([master], [], [], 0.01)
         if r:
@@ -225,8 +241,20 @@ def main():
         sim.poll(time.monotonic())
 
 
+SIM = None
+
+
+def _bye(*_):
+    if SIM is not None and SIM.boot:
+        with open(os.path.join(SIM_DIR, "io16_boot_rx"), "w") as f:
+            f.write("%d\n" % SIM.boot_rx)
+    raise SystemExit(0)
+
+
 if __name__ == "__main__":
+    import signal
+    signal.signal(signal.SIGTERM, _bye)
     try:
         main()
     except KeyboardInterrupt:
-        pass
+        _bye()

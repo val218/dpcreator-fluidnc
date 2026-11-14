@@ -120,6 +120,22 @@ jobs:
           grep -q "PRINT,f=1.000000" out.txt   # user input 15 = IN16
           grep -q "IN=8020,OUT=8000" out.txt   # user output 15 = OUT16
 
+      - name: IO16 bootloader command
+        run: |
+          cd io16 && rm -f native_uart1 io16_inputs io16_boot_rx out.txt sim.log
+          python3 ../tools/io16_sim.py --dir . --uart 1 --inputs 0000 > sim.log 2>&1 &
+          SIM=$!
+          sleep 1
+          (sleep 2; printf 'M62 P0\n$EXPB=3\n$EXPB\n'; sleep 3; printf '?'; sleep 0.3) | timeout 20 ../.pio/build/linux_x86_64/program - > out.txt 2>&1 || true
+          kill $SIM || true
+          sleep 0.5
+          cat out.txt sim.log
+          set -x
+          grep -q "No IO expander on uart_channel3" out.txt
+          grep -q "uart_channel1: expander is in its bootloader" out.txt
+          grep -q "BOOT: now in the ROM bootloader" sim.log
+          test "$(cat io16_boot_rx)" = 0                # nothing sent to the bootloader afterwards
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
