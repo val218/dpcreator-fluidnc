@@ -1140,8 +1140,9 @@ its live monitor:
   (`OFFLINE` when silent; `NOMON` for other expanders).
 - `$Expander/Pins` (`$EXPP`): what uses each expander pin,
   `[EXP:PIN=2.0,control/safety_door_pin,in,low]`.
-- `$Expander/State` starts with `[EXP:CAPS=M66WAIT,UIO=8]`: M66 waits are
-  there, and how many user digital inputs/outputs (P0..P7).
+- `$Expander/State` starts with `[EXP:CAPS=M66WAIT,UIO=16]`: M66 waits are
+  there, and how many user digital inputs/outputs (`digital0_pin` to
+  `digital15_pin` in `user_inputs:` / `user_outputs:`, M62–M66 P0–P15).
 - Waiting for an input in G-code: `M66 P<n> L<mode> Q<seconds>`, L1 rising
   edge, L2 falling edge, L3 high, L4 low (Q > 0 required). The moves before
   it finish first; feed hold and reset still work while it waits. `#5399` =

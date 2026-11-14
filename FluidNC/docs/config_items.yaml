@@ -532,6 +532,62 @@ user_outputs:
     description: |
       Digital output slot 7.
 
+  digital8_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: output
+    description: |
+      Digital output slot 8.
+
+  digital9_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: output
+    description: |
+      Digital output slot 9.
+
+  digital10_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: output
+    description: |
+      Digital output slot 10.
+
+  digital11_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: output
+    description: |
+      Digital output slot 11.
+
+  digital12_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: output
+    description: |
+      Digital output slot 12.
+
+  digital13_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: output
+    description: |
+      Digital output slot 13.
+
+  digital14_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: output
+    description: |
+      Digital output slot 14.
+
+  digital15_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: output
+    description: |
+      Digital output slot 15.
+
 uartN:
   txd_pin:
     type: pin
@@ -3810,6 +3866,62 @@ user_inputs:
     pin_attributes: input
     description: |
       Digital input slot 7.
+
+  digital8_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: input
+    description: |
+      Digital input slot 8.
+
+  digital9_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: input
+    description: |
+      Digital input slot 9.
+
+  digital10_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: input
+    description: |
+      Digital input slot 10.
+
+  digital11_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: input
+    description: |
+      Digital input slot 11.
+
+  digital12_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: input
+    description: |
+      Digital input slot 12.
+
+  digital13_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: input
+    description: |
+      Digital input slot 13.
+
+  digital14_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: input
+    description: |
+      Digital input slot 14.
+
+  digital15_pin:
+    type: pin
+    default: 'NO_PIN'
+    pin_attributes: input
+    description: |
+      Digital input slot 15.
 
   analog0_pin:
     type: pin

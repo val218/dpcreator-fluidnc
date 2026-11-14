@@ -15,7 +15,7 @@ namespace Machine {
     UserInputs::~UserInputs() {}
 
     // General-purpose spare input pins, independent of any axis/spindle/coolant feature.
-    // Exactly 8 digital + 4 analog slots -- a fixed array size (MaxUserDigitalPin/
+    // Exactly 16 digital + 4 analog slots -- a fixed array size (MaxUserDigitalPin/
     // MaxUserAnalogPin), not extensible via config. group() below registers these via a
     // loop (handler.item(pin.legend(), pin)), not a literal handler.item() call per slot --
     // see ItemDocs.md's "data-driven item lists" section for why these are annotated here,
@@ -63,6 +63,46 @@ namespace Machine {
         // @pin_attributes input
         // Digital input slot 7.
         InputPin { "digital7_pin" },
+        // @config digital8_pin
+        // @default NO_PIN
+        // @pin_attributes input
+        // Digital input slot 8.
+        InputPin { "digital8_pin" },
+        // @config digital9_pin
+        // @default NO_PIN
+        // @pin_attributes input
+        // Digital input slot 9.
+        InputPin { "digital9_pin" },
+        // @config digital10_pin
+        // @default NO_PIN
+        // @pin_attributes input
+        // Digital input slot 10.
+        InputPin { "digital10_pin" },
+        // @config digital11_pin
+        // @default NO_PIN
+        // @pin_attributes input
+        // Digital input slot 11.
+        InputPin { "digital11_pin" },
+        // @config digital12_pin
+        // @default NO_PIN
+        // @pin_attributes input
+        // Digital input slot 12.
+        InputPin { "digital12_pin" },
+        // @config digital13_pin
+        // @default NO_PIN
+        // @pin_attributes input
+        // Digital input slot 13.
+        InputPin { "digital13_pin" },
+        // @config digital14_pin
+        // @default NO_PIN
+        // @pin_attributes input
+        // Digital input slot 14.
+        InputPin { "digital14_pin" },
+        // @config digital15_pin
+        // @default NO_PIN
+        // @pin_attributes input
+        // Digital input slot 15.
+        InputPin { "digital15_pin" },
     };
     InputPin UserInputs::analogInput[MaxUserAnalogPin] = {
         // @config analog0_pin

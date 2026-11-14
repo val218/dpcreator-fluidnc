@@ -64,11 +64,13 @@ jobs:
             flood_pin: uart_channel1.16
           user_outputs:
             digital0_pin: uart_channel1.17
+            digital15_pin: uart_channel1.31
             analog0_pin: uart_channel1.22
             analog0_hz: 1000
           user_inputs:
             digital0_pin: uart_channel1.5
             digital1_pin: uart_channel1.6:low
+            digital15_pin: uart_channel1.15
           YAML
           python3 ../tools/io16_sim.py --dir . --uart 1 --inputs 00A0 > sim.log 2>&1 &
           SIM=$!
@@ -104,7 +106,8 @@ jobs:
           (sleep 2; printf '$EXP\nM66 P0 L3 Q3\n(PRINT,a=#5399)\n'; sleep 0.7; echo 20 > io16_inputs; sleep 0.5
            printf 'M66 P0 L2 Q2\n(PRINT,b=#5399)\n'; sleep 0.5; echo 00 > io16_inputs; sleep 0.5
            printf 'M66 P0 L3 Q0.5\n(PRINT,d=#5399)\nG1 X5 F300\nM66 P0 L0\n(PRINT,e=#5399)\n'; sleep 0.4
-           echo 20 > io16_inputs; sleep 2.5) | timeout 20 ../.pio/build/linux_x86_64/program - > out.txt 2>&1 || true
+           echo 8020 > io16_inputs; sleep 2.5
+           printf 'M62 P15\nM66 P15 L0\n(PRINT,f=#5399)\n'; sleep 0.5; printf '$EXP\n'; sleep 0.5) | timeout 20 ../.pio/build/linux_x86_64/program - > out.txt 2>&1 || true
           kill $SIM || true
           cat out.txt
           set -x
@@ -113,6 +116,9 @@ jobs:
           grep -q "PRINT,b=0.000000" out.txt   # L2: falling edge
           grep -q "PRINT,d=-1.000000" out.txt  # timeout
           grep -q "PRINT,e=1.000000" out.txt   # L0 reads after the move (input changed during it)
+          grep -q "\[EXP:CAPS=M66WAIT,UIO=16\]" out.txt
+          grep -q "PRINT,f=1.000000" out.txt   # user input 15 = IN16
+          grep -q "IN=8020,OUT=8000" out.txt   # user output 15 = OUT16
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
