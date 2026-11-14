@@ -2,6 +2,7 @@
 // Use of this source code is governed by a GPLv3 license that can be found in the LICENSE file.
 
 #include "ChannelPinDetail.h"
+#include "Machine/InputPin.h"
 
 namespace Pins {
     ChannelPinDetail::ChannelPinDetail(UartChannel* channel, pinnum_t index, const PinOptionsParser& options) :
@@ -48,7 +49,11 @@ namespace Pins {
     }
 
     bool ChannelPinDetail::read() {
-        return _value;
+        // An input's state arrives as pin events (Channel::pin_event ->
+        // InputPin::trigger), so the InputPin has it; _value only follows
+        // write().  Before, read() of an expander input was always false:
+        // M66 L1-L4 never saw the input change.
+        return _input ? _input->get() : _value;
     }
     void ChannelPinDetail::setAttr(PinAttributes attr, uint32_t frequency) {
         _attributes = _attributes | attr;
@@ -87,6 +92,7 @@ namespace Pins {
     }
 
     void ChannelPinDetail::registerEvent(InputPin* obj) {
+        _input = obj;
         _channel->registerEvent(_index, obj);
     }
 }

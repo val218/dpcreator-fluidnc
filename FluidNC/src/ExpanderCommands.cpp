@@ -3,7 +3,8 @@
 
 // IO expander commands for the WebUI's "I/O Expander" page.
 //
-//   $Expander/State  ($EXP)   one line per expander that answered the ID query:
+//   $Expander/State  ($EXP)   [EXP:CAPS=M66WAIT,UIO=8] (what this firmware can do), then
+//                             one line per expander that answered the ID query:
 //       [EXP:2,ID=dpCREATOR IO16 v1.0.0,IN=00A1,OUT=0003,FLAGS=07]
 //       [EXP:2,ID=dpCREATOR IO16 v1.0.0,OFFLINE]     (monitored, silent for 3 s)
 //       [EXP:3,ID=<other expander>,NOMON]            (no live monitor)
@@ -21,6 +22,7 @@
 #include "Configuration/HandlerBase.h"
 #include "Configuration/Configurable.h"
 #include "Pins/PinAttributes.h"
+#include "GCode.h"  // MaxUserDigitalPin
 
 #include <algorithm>
 #include <string>
@@ -97,6 +99,10 @@ namespace {
     };
 
     Error expander_state(const char* value, AuthenticationLevel auth_level, Channel& out) {
+        // What this firmware can do, for the WebUI's macro builder:
+        //   M66WAIT  M66 P<n> L1-L4 Q<s> waits (#5399 = -1 on timeout), L0 reads after motion
+        //   UIO=<n>  user digital inputs/outputs P0..P<n-1> (M62-M66)
+        log_stream(out, "[EXP:CAPS=M66WAIT,UIO=" << MaxUserDigitalPin);
         bool     any = false;
         uint32_t now = millis();
         for (size_t n = 0; n < MAX_N_UARTS; ++n) {

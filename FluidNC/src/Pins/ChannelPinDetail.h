@@ -13,7 +13,8 @@ namespace Pins {
     private:
         UartChannel*  _channel;
         PinAttributes _attributes;
-        bool          _value = false;
+        bool          _value = false;      // an output's state
+        InputPin*     _input = nullptr;    // an input's InputPin, kept up to date by the expander's pin events
 
     public:
         ChannelPinDetail(UartChannel* channel, pinnum_t index, const PinOptionsParser& options);
