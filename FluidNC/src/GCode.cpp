@@ -6,6 +6,7 @@
 // RS274/NGC parser.
 
 #include "GCode.h"
+#include "Automation.h"
 
 #include <algorithm>  // std::min
 #include "Settings.h"
@@ -400,6 +401,7 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
     bool laserIsMotion        = false;
     bool nonmodalG38          = false;  // Used for G38.6-9
     bool isWaitOnInputDigital = false;
+    int  user_mcode           = -1;  // M100-M199 with an automation rule (Automation.cpp)
     std::vector<float> clustered_spindle_speeds;
 
     auto    n_axis = Axes::_numberAxis;
@@ -860,6 +862,11 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
                         mg_word_bit               = ModalGroup::MM5;
                         break;
                     default:
+                        if (int_value >= 100 && int_value <= 199 && automation_has_mcode(int_value)) {
+                            user_mcode  = int_value;
+                            mg_word_bit = ModalGroup::MM10;
+                            break;
+                        }
                         return Error::GcodeUnsupportedCommand;  // [Unsupported M command]
                 }
                 // Check for more than one command per modal group violations in the current block
@@ -1939,6 +1946,15 @@ Error gc_execute_line(const char* input_line, Channel& channel) {
         if (err != Error::Ok) {
             return deferred_err(err);  // e.g. an input that is not set in config.yaml
         }
+    }
+
+    // M100-M199: an automation's actions, after the moves before it (like M62).
+    if (user_mcode >= 0 && !state_is(State::CheckMode)) {
+        protocol_buffer_synchronize();
+        if (sys.abort()) {
+            return Error::Ok;
+        }
+        automation_mcode(user_mcode);
     }
 
     // [9. Override control ]: NOT SUPPORTED. Always enabled, except for parking control.

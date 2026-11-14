@@ -1242,6 +1242,8 @@ void make_user_commands() {
     make_motion_commands();
     extern void make_expander_commands();  // ExpanderCommands.cpp: $Expander/State, $Expander/Pins
     make_expander_commands();
+    extern void make_automation_commands();  // Automation.cpp: $Automation/List, Reload, Run
+    make_automation_commands();
 #ifdef HEAPDIFF
     new ReportCommand("HS", "Heap/Snapshot", heap_snapshot, anyState);
     new ReportCommand("HD", "Heap/Diff", heap_diff, anyState);

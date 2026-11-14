@@ -8,6 +8,7 @@
 */
 
 #include "Protocol.h"
+#include "Automation.h"
 #include "Event.h"
 
 #include <climits>      // UINT_MAX
@@ -336,6 +337,8 @@ static void poll_once() {
         zadj_poll();  // live Z adjust: job start/end, pending -> active
         wd_mark(WD_POLL, "stats_poll");
         stats_poll();  // run / spindle hour counters
+        wd_mark(WD_POLL, "automation_poll");
+        automation_poll();  // automation.json rules
         wd_mark(WD_POLL, "input lines (inline $ commands, job file)");
 
         // Checks unwind_cause against the job stack and aborts atomically
