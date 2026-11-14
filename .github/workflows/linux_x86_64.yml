@@ -136,6 +136,59 @@ jobs:
           grep -q "BOOT: now in the ROM bootloader" sim.log
           test "$(cat io16_boot_rx)" = 0                # nothing sent to the bootloader afterwards
 
+      - name: Automations (follow, M-code, timer, input, hold) on the simulated IO16
+        run: |
+          mkdir -p auto/native_localfs auto/native_sd && cd auto
+          cat > native_localfs/config.yaml <<'YAML'
+          name: automation test
+          board: host
+          uart1:
+            txd_pin: gpio.1
+            rxd_pin: gpio.2
+            baud: 1000000
+            mode: 8N1
+          uart_channel1:
+            uart_num: 1
+            report_interval_ms: 100
+            message_level: Info
+          user_outputs:
+            digital0_pin: uart_channel1.16
+            digital1_pin: uart_channel1.17
+            digital2_pin: uart_channel1.18
+            digital3_pin: uart_channel1.19
+          user_inputs:
+            digital0_pin: uart_channel1.0
+          YAML
+          cat > native_localfs/automation.json <<'JSON'
+          {"version": 1, "rules": [
+           {"name": "Dust extraction", "type": "follow", "when": "spindle", "out": 0, "off_delay": 1},
+           {"name": "Vacuum on", "type": "mcode", "code": 110, "actions": [{"do": "out", "n": 1, "value": 1}]},
+           {"name": "Vacuum off", "type": "mcode", "code": 111, "actions": [{"do": "out", "n": 1, "value": 0}]},
+           {"name": "Lube", "type": "timer", "every": 2, "actions": [{"do": "pulse", "n": 2, "time": 0.5}]},
+           {"name": "Pedal", "type": "input", "input": {"user": 0}, "edge": "rise", "actions": [{"do": "out", "n": 3, "value": "toggle"}, {"do": "msg", "text": "pedal"}]},
+           {"name": "Vacuum lost", "type": "input", "input": {"exp": 1, "in": 2}, "edge": "fall", "only": "job", "actions": [{"do": "hold", "text": "Vacuum lost"}]}
+          ]}
+          JSON
+          python3 ../tools/io16_sim.py --dir . --uart 1 --inputs 0002 > sim.log 2>&1 &
+          SIM=$!
+          sleep 1
+          (sleep 2; printf '$AUL\nM3 S1000\nG4 P0.3\n'; sleep 0.3; printf 'M5\nG4 P0.1\n'; sleep 1.5
+           printf 'M110\n(PRINT,after110)\nM111\nM150\n'; sleep 1; echo 0003 > io16_inputs; sleep 0.5; echo 0002 > io16_inputs; sleep 0.3
+           printf 'G1 X20 F600\n'; sleep 0.5; echo 0000 > io16_inputs; sleep 0.5; printf '?'; sleep 0.5) \
+            | timeout 25 ../.pio/build/linux_x86_64/program - > out.txt 2>&1 || true
+          kill $SIM || true
+          cat out.txt sim.log
+          set -x
+          grep -q "Automation: 6 rule(s) from automation.json" out.txt
+          grep -q "\[AUTO:1,mcode,ready,M110,Vacuum on\]" out.txt
+          grep -q "OUT1 on" sim.log && grep -q "OUT1 off" sim.log    # dust extraction followed the spindle
+          grep -q "OUT2 on" sim.log && grep -q "OUT2 off" sim.log    # M110 / M111
+          grep -q "PRINT,after110" out.txt
+          grep -q "Unsupported GCode command" out.txt               # M150 has no rule
+          [ "$(grep -c 'OUT3 on' sim.log)" -ge 2 ]                    # lube pulses
+          grep -q "OUT4 on" sim.log && grep -q "Automation: pedal" out.txt
+          grep -q "Automation: Vacuum lost" out.txt && grep -q "<Hold" out.txt
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
