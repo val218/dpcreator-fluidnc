@@ -95,6 +95,25 @@ jobs:
           if grep -q "no heartbeat" sim.log; then exit 1; fi
           tail -n 5 out.txt | grep "<Idle" | tail -1 | grep -vq "EXP:"  # setting off: no field
 
+      - name: IO16 M66 waits on an expander input
+        run: |
+          cd io16 && rm -f native_uart1 io16_inputs out.txt sim.log
+          python3 ../tools/io16_sim.py --dir . --uart 1 --inputs 0000 --quiet > sim.log 2>&1 &
+          SIM=$!
+          sleep 1
+          (sleep 2; printf '$EXP\nM66 P0 L3 Q3\n(PRINT,a=#5399)\n'; sleep 0.7; echo 20 > io16_inputs; sleep 0.5
+           printf 'M66 P0 L2 Q2\n(PRINT,b=#5399)\n'; sleep 0.5; echo 00 > io16_inputs; sleep 0.5
+           printf 'M66 P0 L3 Q0.5\n(PRINT,d=#5399)\nG1 X5 F300\nM66 P0 L0\n(PRINT,e=#5399)\n'; sleep 0.4
+           echo 20 > io16_inputs; sleep 2.5) | timeout 20 ../.pio/build/linux_x86_64/program - > out.txt 2>&1 || true
+          kill $SIM || true
+          cat out.txt
+          set -x
+          grep -q "\[EXP:CAPS=M66WAIT,UIO=" out.txt
+          grep -q "PRINT,a=1.000000" out.txt   # L3: input went high during the wait
+          grep -q "PRINT,b=0.000000" out.txt   # L2: falling edge
+          grep -q "PRINT,d=-1.000000" out.txt  # timeout
+          grep -q "PRINT,e=1.000000" out.txt   # L0 reads after the move (input changed during it)
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

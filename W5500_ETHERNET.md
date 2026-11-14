@@ -1140,6 +1140,13 @@ its live monitor:
   (`OFFLINE` when silent; `NOMON` for other expanders).
 - `$Expander/Pins` (`$EXPP`): what uses each expander pin,
   `[EXP:PIN=2.0,control/safety_door_pin,in,low]`.
+- `$Expander/State` starts with `[EXP:CAPS=M66WAIT,UIO=8]`: M66 waits are
+  there, and how many user digital inputs/outputs (P0..P7).
+- Waiting for an input in G-code: `M66 P<n> L<mode> Q<seconds>`, L1 rising
+  edge, L2 falling edge, L3 high, L4 low (Q > 0 required). The moves before
+  it finish first; feed hold and reset still work while it waits. `#5399` =
+  the input's state, or -1 on timeout: `o1 if [#5399 LT 0]`.
+  `M66 P<n> L0` also reads only after the moves before it have finished.
 
 **Testing without a machine.** The Linux host build
 (`pio run -e linux_x86_64`) runs the real firmware code. Next to the

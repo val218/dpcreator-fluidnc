@@ -2202,8 +2202,16 @@ template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
 static Error gc_wait_on_input(bool is_digital, objnum_t input_number, WaitOnInputMode mode, float timeout) {
-    // TODO - only Immediate read mode is supported
     if (mode == WaitOnInputMode::Immediate) {
+        // Read after the moves before it have finished, as LinuxCNC does:
+        // "G1 X100" then "M66 P0 L0" reads the input at X100, not at the start
+        // of the move (the line is executed when it is parsed, ahead of motion).
+        if (!state_is(State::CheckMode)) {
+            protocol_buffer_synchronize();
+            if (sys.abort()) {
+                return Error::Ok;
+            }
+        }
         float result;
         if (is_digital) {
             if (input_number >= MaxUserDigitalPin) {
