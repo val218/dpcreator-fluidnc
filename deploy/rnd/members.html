@@ -4,6 +4,8 @@
 <p class="rndc-lead">Ten makers are building the SmartTabUI pendant and running the dpCREATOR WebUI on their own machines. Follow their builds here: the machines, the problems they hit, what worked, and our feedback on each step.</p>
 <div class="rndc-cta"><a class="rndc-b" href="index.php?route=information/information&amp;information_id=9">Apply to join</a><a class="rndc-b rndc-b2" href="rnd-profile">Edit my profile</a></div>
 <div class="rndc-stages" id="rnd-legend"></div>
+<div class="rndc-prog" id="rnd-progress" hidden></div>
+<style>.rndc-prog{margin:18px 0 8px;padding:14px 16px;border:1px solid var(--line,#262626);border-radius:12px}.rndc-prog-n{font-size:20px;font-weight:600;margin-bottom:8px}.rndc-prog-row{display:flex;gap:8px;flex-wrap:wrap}.rndc-chip{display:inline-flex;align-items:center;gap:7px;font-size:14px;padding:5px 11px;border-radius:99px;border:1px solid var(--line,#262626)}.rndc-chip i{width:9px;height:9px;border-radius:50%;display:inline-block}</style>
 <div id="rnd-list"><p class="rndc-sub">Loading the members…</p></div>
 <noscript><p>Turn on JavaScript to see the members.</p></noscript>
 </section>
@@ -40,11 +42,24 @@ function card(m){
   return c;
 }
 var lg=document.getElementById('rnd-legend');ORDER.forEach(function(s,i){var sp=el('span'),x=el('i');x.style.background=COLORS[i];sp.appendChild(x);sp.appendChild(document.createTextNode(STAGE[s]));lg.appendChild(sp);});
+function prog(){fetch('index.php?route=extension/module/dpc_rnd/progress',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(p){
+  if(!p||typeof p.live!=='number')return;var total=p.live+p.setting_up+p.waiting;if(!total)return;
+  var box=document.getElementById('rnd-progress');box.hidden=false;
+  box.appendChild(el('div','rndc-prog-n',total+(total===1?' maker in the club':' makers in the club')));
+  var row=el('div','rndc-prog-row');
+  function chip(n,t,c){if(!n)return;var s=el('span','rndc-chip');var x=el('i');x.style.background=c;s.appendChild(x);s.appendChild(document.createTextNode(n+' '+t));row.appendChild(s);}
+  chip(p.setting_up,'setting up their profile','#5b6570');chip(p.waiting,'profile in review','#d9822b');
+  ORDER.forEach(function(k,i){chip(p.stages[k],STAGE[k].toLowerCase(),COLORS[i]);});
+  if(p.updates)chip(p.updates,p.updates===1?'build update posted':'build updates posted','#1f6fb8');
+  box.appendChild(row);
+  var em=document.querySelector('.rndc-empty h3');if(em&&!p.live){em.textContent=total===1?'The first tester is setting up':'The first '+total+' testers are setting up';}
+}).catch(function(){});}
 fetch('/rnd.php?f=list',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){
   var box=document.getElementById('rnd-list');box.textContent='';
-  if(!j.members||!j.members.length){var e=el('div','rndc-empty');e.appendChild(el('h3',null,'The first testers are being picked now'));e.appendChild(el('p',null,'Their profiles and build updates will appear here as soon as they start. Want to be one of them?'));var a=el('a','rndc-b','Apply to the R&D Club');a.href='index.php?route=information/information&information_id=9';e.appendChild(a);box.appendChild(e);return;}
+  if(!j.members||!j.members.length){var e=el('div','rndc-empty');e.appendChild(el('h3',null,'The first testers are being picked now'));e.appendChild(el('p',null,'Their profiles and build updates will appear here as soon as they start. Want to be one of them?'));var a=el('a','rndc-b','Apply to the R&D Club');a.href='index.php?route=information/information&information_id=9';e.appendChild(a);box.appendChild(e);prog();return;}
   var g=el('div','rndc-grid');j.members.forEach(function(m){g.appendChild(card(m));});box.appendChild(g);
+  prog();
   if(location.hash){var t=document.querySelector(location.hash);if(t)t.scrollIntoView();}
-}).catch(function(){document.getElementById('rnd-list').textContent='The members could not be loaded. Try again in a minute.';});
+}).catch(function(){document.getElementById('rnd-list').textContent='The members could not be loaded. Try again in a minute.';prog();});
 })();
 </script>
