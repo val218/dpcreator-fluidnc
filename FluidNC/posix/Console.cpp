@@ -217,8 +217,10 @@ public:
             return -1;
         }
 
-        char c;
-        auto ret = ::read(STDIN_FILENO, &c, 1);
+        // unsigned: a realtime byte 0x80-0xFF (jog cancel 0x85, overrides) read as
+        // a signed char came back negative and was taken as "no data"
+        uint8_t c;
+        auto    ret = ::read(STDIN_FILENO, &c, 1);
         return ret == 1 ? c : -1;
     }
 
