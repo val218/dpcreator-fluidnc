@@ -56,7 +56,7 @@ namespace Spindles {
                 // const uint8_t response_byte_count = response[2]
 
                 uint32_t dev_speed = (uint16_t(response[3]) << 8) | response[4];
-                xQueueSend(VFD::VFDProtocol::vfd_speed_queue, &dev_speed, 0);
+                VFD::VFDProtocol::report_speed(vfd, dev_speed);
                 return true;
             };
         }

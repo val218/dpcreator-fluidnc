@@ -141,6 +141,10 @@ namespace Spindles {
             return;
         }
 
+        // Speeds left from an earlier sync are stale: start empty
+        if (VFD::VFDProtocol::vfd_speed_queue) {
+            xQueueReset(VFD::VFDProtocol::vfd_speed_queue);
+        }
         _syncing = true;  // poll for speed
 
         auto minSpeedAllowed = dev_speed > _slop ? (dev_speed - _slop) : 0;

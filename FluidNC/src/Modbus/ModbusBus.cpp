@@ -95,6 +95,92 @@ namespace Modbus {
         return (bus && bus->_uart && bus->_uart == uart) ? &bus_lock : nullptr;
     }
 
+    std::recursive_mutex& Bus::uart_lock(Uart* uart) {
+        static std::recursive_mutex vfd_uart_lock;  // a VFD UART without a modbus_bus:
+        auto l = lock_for(uart);
+        return l ? *l : vfd_uart_lock;
+    }
+
+    size_t Bus::raw(Uart* uart, const uint8_t* tx, size_t txlen, uint8_t* rx, size_t rxmax, uint32_t timeout_ms, uint32_t tries,
+                    const char*& err) {
+        err = "no answer";
+        if (!uart || txlen < 2 || txlen + 2 > 260 || rxmax < 5) {
+            return 0;
+        }
+        uint8_t msg[262];
+        memcpy(msg, tx, txlen);
+        uint16_t c     = crc(msg, txlen);
+        msg[txlen]     = c & 0xFF;
+        msg[txlen + 1] = c >> 8;
+        size_t     n   = txlen + 2;
+        TickType_t to  = timeout_ms / portTICK_PERIOD_MS;
+        if (to == 0) {
+            to = 1;
+        }
+        // After the first bytes, the rest of a frame comes without gaps; a
+        // short wait ends an answer whose length the function does not tell
+        // (Huanyang's own functions, say).
+        TickType_t gap = 30 / portTICK_PERIOD_MS ? 30 / portTICK_PERIOD_MS : 1;
+        int        dbg = bus ? bus->_debug : 0;
+
+        for (uint32_t attempt = 0; attempt < tries; ++attempt) {
+            size_t got = 0;
+            {
+                std::lock_guard<std::recursive_mutex> l(uart_lock(uart));
+                if (dbg > 1) {
+                    hex_msg(msg, "Modbus Tx:", n);
+                }
+                uart->flushRx();
+                uart->write(msg, n);
+                uart->flushTxTimed(to);
+                got = uart->timedReadBytes(rx, 3, to);
+                if (got == 3) {
+                    uint8_t fn   = rx[1];
+                    size_t  want = 0;  // whole frame with CRC, 0: unknown
+                    if (fn & 0x80) {
+                        want = 5;
+                    } else if (fn >= 1 && fn <= 4 && fn == tx[1]) {
+                        want = 3 + size_t(rx[2]) + 2;
+                    } else if ((fn == 5 || fn == 6 || fn == 15 || fn == 16) && fn == tx[1]) {
+                        want = 8;
+                    }
+                    if (want) {
+                        if (want > rxmax) {
+                            want = rxmax;
+                        }
+                        got += uart->timedReadBytes(rx + 3, want - 3, to);
+                    } else {
+                        size_t more;
+                        while (got < rxmax && (more = uart->timedReadBytes(rx + got, rxmax - got, gap)) > 0) {
+                            got += more;
+                        }
+                    }
+                } else if (got > 0) {
+                    got += uart->timedReadBytes(rx + got, rxmax - got, gap);
+                }
+                if (dbg > 1 && got) {
+                    hex_msg(rx, "Modbus Rx:", got);
+                }
+            }
+            if (got == 0) {
+                err = "no answer";
+            } else if (got < 4) {
+                err = "short answer";
+            } else if (rx[0] != tx[0]) {
+                err = "other modbus device";
+            } else {
+                uint16_t rc = crc(rx, got - 2);
+                if (rx[got - 2] == (rc & 0xFF) && rx[got - 1] == (rc >> 8)) {
+                    err = "";
+                    return got - 2;
+                }
+                err = "crc";
+            }
+            vTaskDelay(5 / portTICK_PERIOD_MS ? 5 / portTICK_PERIOD_MS : 1);
+        }
+        return 0;
+    }
+
     uint16_t Bus::crc(const uint8_t* buf, size_t len) {
         uint16_t c = 0xFFFF;
         for (size_t pos = 0; pos < len; pos++) {

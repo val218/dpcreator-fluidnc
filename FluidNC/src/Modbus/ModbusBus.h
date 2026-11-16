@@ -80,6 +80,18 @@ namespace Modbus {
 
         // The lock a VFD on this UART must hold for each transaction (nullptr: no shared bus).
         static std::recursive_mutex* lock_for(Uart* uart);
+        // The lock for one request/answer on this UART: the bus lock when a
+        // modbus_bus: uses it, otherwise one shared by the VFD task and the
+        // $Modbus/... commands.  Never nullptr.
+        static std::recursive_mutex& uart_lock(Uart* uart);
+
+        // One request/answer on any RS485 UART, for the $Modbus/... commands.
+        // tx: id, function, data (no CRC). Takes uart_lock(). Returns the
+        // answer length without CRC (a Modbus exception answer counts: rx[1]
+        // has 0x80 set), or 0 with `err` set: "no answer", "crc",
+        // "other modbus device", "short answer".
+        static size_t raw(Uart* uart, const uint8_t* tx, size_t txlen, uint8_t* rx, size_t rxmax, uint32_t timeout_ms, uint32_t tries,
+                          const char*& err);
 
         // Values for G-code / reports, from every module.
         static bool get_value(const std::string& name, float& v);  // #<_mb_name>

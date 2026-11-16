@@ -606,7 +606,7 @@ static Error go_to_sleep(const char* value, AuthenticationLevel auth_level, Chan
 // The chip ID identifies the board (WebUI licence installs from dpcreator.eu);
 // api is the level of the dpCREATOR commands this firmware has, so a WebUI can
 // tell when it is older than the firmware.
-static constexpr int DPC_API_LEVEL = 4;  // 2: $Spindle, spindle tools:/offset_mm; 3: compact pendant previews (VZ2); 4: $Measure/Save
+static constexpr int DPC_API_LEVEL = 5;  // 2: $Spindle, spindle tools:/offset_mm; 3: compact pendant previews (VZ2); 4: $Measure/Save; 5: $VFD/State, $Modbus/Read|Write|Raw|Scan
 // $Homed -> [MSG:HomedAxes:<axes homed since power-up / reset>:of=<axes that home>]
 // The WebUI asks after connecting: machine positions only mean "where on the
 // bed" once the axes have homed. (The live [MSG:Homed:..] only comes at the end
@@ -1238,6 +1238,8 @@ void make_user_commands() {
     new ReportCommand("SA", "Alarm/Send", sendAlarm, anyState);
     new ReportCommand("Heap", "Heap/Show", showHeap, anyState);
     new ReportCommand("MBV", "Modbus/Values", showModbusValues, anyState);
+    extern void make_modbus_commands();  // Modbus/ModbusCommands.cpp: $VFD/State, $Modbus/Read, Write, Raw, Scan
+    make_modbus_commands();
     extern void make_motion_commands();  // MotionInfo.cpp: $Motion/Show, $Motion/Steps (pendant)
     make_motion_commands();
     extern void make_expander_commands();  // ExpanderCommands.cpp: $Expander/State, $Expander/Pins
