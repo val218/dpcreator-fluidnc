@@ -7,6 +7,8 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include <atomic>
+#include <mutex>
+#include <string>
 
 namespace Spindles {
     namespace VFD {
@@ -18,25 +20,103 @@ namespace Spindles {
         QueueHandle_t VFDProtocol::vfd_speed_queue   = nullptr;
         TaskHandle_t  VFDProtocol::vfd_cmdTaskHandle = nullptr;
 
+        // ---- what the task learns about the drive ($VFD/State)
+        namespace {
+            VFDSpindle*           active = nullptr;  // the spindle the task runs for
+            std::mutex            health_lock;
+            bool                  ever_ok      = false;
+            uint32_t              fails_in_row = 0;
+            uint32_t              error_count  = 0;
+            std::atomic<uint32_t> last_rpm { 0 };
+            std::string           last_why;
+            bool                  warned = false;  // "not answering" was printed for this run of failures
+
+            const uint32_t FAILS_FOR_DOWN  = 3;     // failed transactions in a row: not answering
+            const uint32_t PRESENCE_POLL_MS = 1000;  // "are you there" when nothing else was sent for this long
+
+            void transaction_done(bool ok, const std::string& why) {
+                bool down = false, up = false;
+                {
+                    std::lock_guard<std::mutex> l(health_lock);
+                    if (ok) {
+                        ever_ok      = true;
+                        fails_in_row = 0;
+                        last_why.clear();
+                        up     = warned;
+                        warned = false;
+                    } else {
+                        ++error_count;
+                        ++fails_in_row;
+                        last_why = why;
+                        if (fails_in_row >= FAILS_FOR_DOWN && !warned) {
+                            warned = true;
+                            down   = true;
+                        }
+                    }
+                }
+                // Logged outside the lock; once per change, to every channel
+                if (down) {
+                    log_warn("VFD not answering (" << why << ")");
+                }
+                if (up) {
+                    log_info("VFD answering again");
+                }
+            }
+        }
+
+        bool VFDProtocol::health(Health& h) {
+            if (!active) {
+                return false;
+            }
+            h.name = active->name();
+            h.id   = active->_modbus_id;
+            h.rpm  = last_rpm;
+            std::lock_guard<std::mutex> l(health_lock);
+            h.answering = ever_ok && fails_in_row < FAILS_FOR_DOWN;
+            h.errors    = error_count;
+            h.last      = last_why;
+            return true;
+        }
+
+        Uart* VFDProtocol::uart() {
+            return active ? active->_uart : nullptr;
+        }
+
+        void VFDProtocol::report_speed(VFDSpindle* spindle, uint32_t dev_speed) {
+            last_rpm = dev_speed;
+            if (spindle->_syncing) {
+                xQueueSend(vfd_speed_queue, &dev_speed, 0);
+            }
+        }
+
         void VFDProtocol::reportParsingErrors(ModbusCommand cmd, uint8_t* rx_message, size_t read_length) {}
-        bool VFDProtocol::checkRx(ModbusCommand cmd, uint8_t* rx_message, size_t read_length, VFDSpindle* instance) {
+        bool VFDProtocol::checkRx(ModbusCommand cmd, uint8_t* rx_message, size_t read_length, VFDSpindle* instance, std::string& why) {
             if (read_length == 0) {
+                why = "no response";
                 if (instance->_debug > 1) {
                     log_info("RS485 No response");
                 }
                 return false;
             }
             if (rx_message[0] != instance->_modbus_id) {
+                why = "other modbus device";
                 log_info("RS485 received message from other modbus device");
                 return false;
             }
+            if (read_length >= 3 && (rx_message[1] & 0x80) && read_length != cmd.rx_length) {
+                why = "exception " + std::to_string(int(rx_message[2]));
+                log_info("RS485 exception " << int(rx_message[2]) << " to function " << int(rx_message[1] & 0x7f));
+                return false;
+            }
             if (read_length != cmd.rx_length) {
+                why = "unexpected length " + std::to_string(int(read_length)) + "/" + std::to_string(int(cmd.rx_length));
                 log_info("RS485 received message of unexpected length; expected:" << int(cmd.rx_length) << " got:" << int(read_length));
                 return false;
             }
 
             auto crc16response = ModRTU_CRC(rx_message, cmd.rx_length - 2);
             if (rx_message[read_length - 1] != (crc16response & 0xFF00) >> 8 || rx_message[read_length - 2] != (crc16response & 0xFF)) {
+                why = "crc";
                 log_info("RS485 CRC check failed");
                 return false;
             }
@@ -45,7 +125,6 @@ namespace Spindles {
 
         // The communications task
         void VFDProtocol::vfd_cmd_task(void* pvParameters) {
-            static bool    unresponsive = false;  // to pop off a message once each time it becomes unresponsive
             static int32_t pollidx      = -1;
 
             VFDSpindle*   instance = static_cast<VFDSpindle*>(pvParameters);
@@ -54,10 +133,15 @@ namespace Spindles {
             ModbusCommand cmd;
             uint8_t       rx_message[VFD_RS485_MAX_MSG_SIZE];
             bool          safetyPollingEnabled = impl->safety_polling();
+            uint32_t      last_sent            = 0;  // ms of the last transaction
+            std::string   why;
+
+            active = instance;
 
             for (; true; delay_ms(instance->_poll_ms)) {
                 std::atomic_thread_fence(std::memory_order_seq_cst);  // read fence for settings
-                response_parser parser = nullptr;
+                response_parser parser   = nullptr;
+                bool            presence = false;  // an "are you there" poll
 
                 // First check if we should ask the VFD for the speed parameters as part of the initialization.
                 if (pollidx < 0) {
@@ -125,6 +209,16 @@ namespace Spindles {
                             }
                         }
 
+                        // Nothing else to send for a while: ask for the speed as an
+                        // "are you there" ($VFD/State), whether or not safety_polling
+                        // is on (that only decides whether a failure stops the spindle).
+                        // The answer reaches the speed sync only while it waits.
+                        if (parser == nullptr && impl->use_speed_feedback() &&
+                            uint32_t(xTaskGetTickCount() * portTICK_PERIOD_MS) - last_sent >= PRESENCE_POLL_MS) {
+                            parser   = impl->get_current_speed(cmd);
+                            presence = parser != nullptr;
+                        }
+
                         // If we have no parser, that means get_status_ok is not implemented (and we have
                         // nothing resting in our queue). Let's fall back on a simple continue.
                         if (parser == nullptr) {
@@ -153,10 +247,10 @@ namespace Spindles {
                     // With a modbus_bus: on this UART, hold the bus for the
                     // request and its answer so an I/O module's poll can't
                     // interleave; without one, nothing changes.
-                    std::recursive_mutex* bus_lock = Modbus::Bus::lock_for(&uart);
-                    if (bus_lock) {
-                        bus_lock->lock();
-                    }
+                    // Without one, the lock still keeps $Modbus/... commands off the
+                    // wire meanwhile.
+                    std::recursive_mutex& bus_lock = Modbus::Bus::uart_lock(&uart);
+                    bus_lock.lock();
 
                     // Flush the UART and write the data:
                     uart.flushRx();
@@ -167,10 +261,7 @@ namespace Spindles {
                     size_t read_length  = 0;
                     size_t current_read = uart.timedReadBytes(rx_message, cmd.rx_length, response_ticks);
                     read_length += current_read;
-                    if (bus_lock) {
-                        bus_lock->unlock();
-                    }
-                    unresponsive = read_length != 0;
+                    bus_lock.unlock();
 
                     // Apparently some Huanyang report modbus errors in the correct way
                     // and others do not.  Check for the condition and truncate the first byte.
@@ -183,7 +274,7 @@ namespace Spindles {
                         hex_msg(rx_message, "RS485 Rx: ", read_length);
                     }
 
-                    if (checkRx(cmd, rx_message, read_length, instance)) {
+                    if (checkRx(cmd, rx_message, read_length, instance, why)) {
                         // The response is well-formed
 
                         // Parse it if we have a parser
@@ -193,7 +284,7 @@ namespace Spindles {
                                 if (pollidx < 0) {
                                     --pollidx;
                                 }
-                            } else {
+                            } else if (!presence) {
                                 log_debug("Parse Failed");
 
                                 // Restart the init sequence
@@ -201,6 +292,7 @@ namespace Spindles {
                             }
                         }
                         retry_count = instance->_retries + 1;  // stop retry'ing
+                        transaction_done(true, why);
                     } else {
                         // Wait a bit before we retry.
                         delay_ms(instance->_poll_ms);
@@ -210,6 +302,11 @@ namespace Spindles {
                         reportTaskStackSize(uxHighWaterMark);
 #endif
                     }
+                }
+
+                last_sent = xTaskGetTickCount() * portTICK_PERIOD_MS;
+                if (retry_count == instance->_retries) {
+                    transaction_done(false, why);
                 }
 
 #if 0

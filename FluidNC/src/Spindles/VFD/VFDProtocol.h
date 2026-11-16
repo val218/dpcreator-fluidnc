@@ -1,7 +1,10 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 #include "Spindles/Spindle.h"
+
+class Uart;
 
 namespace Spindles {
     class VFDSpindle;
@@ -72,13 +75,31 @@ namespace Spindles {
             bool            prepareSetSpeedCommand(uint32_t speed, ModbusCommand& data, VFDSpindle* spindle);
 
             static void reportParsingErrors(ModbusCommand cmd, uint8_t* rx_message, size_t read_length);
-            static bool checkRx(ModbusCommand cmd, uint8_t* rx_message, size_t read_length, VFDSpindle* spindle);
+            static bool checkRx(ModbusCommand cmd, uint8_t* rx_message, size_t read_length, VFDSpindle* spindle, std::string& why);
 
         public:
             static QueueHandle_t vfd_speed_queue;
 
             // True while VFD commands wait to be sent (a shared Modbus bus lets them go first).
             static bool commands_waiting() { return vfd_cmd_queue && uxQueueMessagesWaiting(vfd_cmd_queue) > 0; }
+
+            // What the VFD task has learned about the drive ($VFD/State).
+            struct Health {
+                std::string name;              // the spindle's config section
+                uint8_t     id        = 0;     // modbus_id
+                bool        answering = false; // a good answer, and fewer than 3 failed transactions in a row since
+                uint32_t    rpm       = 0;     // last speed the drive reported
+                uint32_t    errors    = 0;     // failed transactions since boot
+                std::string last;              // why the last one failed; empty when fine
+            };
+            static bool  health(Health& h);  // false: no VFD spindle
+            static Uart* uart();             // the VFD's UART, or nullptr
+
+            // A protocol's speed parser hands the drive's speed here. The
+            // spindle's speed sync gets it only while it waits for it, so
+            // answers to the "are you there" polls never queue up as stale
+            // speeds for the next sync.
+            static void report_speed(VFDSpindle* spindle, uint32_t dev_speed);
 
             VFDProtocol() {}
             VFDProtocol(const VFDProtocol&)            = delete;

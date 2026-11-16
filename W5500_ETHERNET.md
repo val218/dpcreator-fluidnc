@@ -1163,6 +1163,47 @@ value) and `tools/modbus_sim.py --dir .`, a simulated Modbus module on a
 pseudo terminal (its state in `modbus_sim.json`).
 `tools/io16_sim.py --dir . --uart 1` simulates an IO16 on `uart1`
 (host builds only have `uart_channel1`; inputs in `io16_inputs`, hex).
+The host build has the VFD spindles too: without a `native_uart1` file a
+Huanyang on `uart1` talks to a built-in simulated Huanyang;
+`python3 tools/vfd_check.py` plays a YL620 and an I/O module on `uart1` and
+checks the RS485 commands below.
+
+**RS485 / Modbus commands** (WebUI: Machine › RS485…). They use the VFD
+spindle's UART, or the `modbus_bus:` one when there is no VFD, and never
+overlap a VFD command or an I/O module's poll on the wire.
+
+- `$VFD/State` (`$VFDS`, any state):
+  `[VFD:YL620,id=1,answering=1,rpm=12000,errors=0,last=]`.
+  The drive is asked for its speed about once a second when nothing else
+  was sent, also with the spindle off and without `safety_polling`, so
+  you can see whether it answers before turning the spindle on.
+  `answering=0` after 3 failed requests in a row (or before the first
+  answer); `last` says why: `no response`, `other modbus device`,
+  `unexpected length 6/8`, `crc`, `exception <code>`. `errors` counts failed
+  requests since boot. Without a VFD spindle: `[MSG:INFO: No VFD spindle]`.
+  When it changes, every channel gets one
+  `[MSG:WARN: VFD not answering (no response)]` and later
+  `[MSG:INFO: VFD answering again]` (no alarm; `safety_polling: true` still
+  decides whether a silent drive stops the spindle).
+- `$Modbus/Read=<id>,<function 1-4>,<register>[,<count 1-32>]` (`$MBR`):
+  `[MODBUS:READ:1,3,776=0,4000]` (values decimal, bits 0/1 for functions
+  1/2; register decimal or `0x` hex). `$Modbus/Read` alone prints its usage
+  and `ok`.
+- `$Modbus/Write=<id>,<register>,<value>[,<value>...]` (`$MBW`): one value
+  function 6, several function 16; `$Modbus/Write=<id>,coil:<address>,<0|1>`
+  function 5 → `[MODBUS:WROTE:1,256]`. Idle or Alarm only (`error:8`).
+- `$Modbus/Raw=<hex bytes from the id, without CRC>` (`$MBX`), for drives
+  with their own functions (Huanyang: `$MBX=01 01 03 05 00 00` reads PD005)
+  → `[MODBUS:RX:01 01 03 05 01 90]` (an exception answer too).
+- `$Modbus/Scan[=<from>-<to>]` (`$MBS`, default 1-16, Idle or Alarm):
+  `[MODBUS:FOUND:<id>]` for each id that answers (an exception counts),
+  then `[MODBUS:SCAN:done,<n> found]`. About 120 ms per id at the bus's baud.
+- Errors: `[MODBUS:ERR:<id>,no answer]`, `…,exception <code>`, `…,crc`,
+  `[MODBUS:ERR:no bus]` (no VFD spindle and no `modbus_bus:`), then
+  `error:90`; bad arguments `error:81`.
+- Read and Raw wait for the drive's answer (up to ~0.4 s), so they never
+  run while the machine moves: they run after the moves before them, and
+  from another channel during a job they are refused (`error:120`).
 
 ---
 

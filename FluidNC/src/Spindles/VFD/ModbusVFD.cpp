@@ -87,7 +87,7 @@ namespace Spindles {
                     }
 
                     // pass along the processed rpm data
-                    xQueueSend(VFD::VFDProtocol::vfd_speed_queue, &dev_speed, 0);
+                    VFD::VFDProtocol::report_speed(spindle, dev_speed);
                     continue;
                 }
 
