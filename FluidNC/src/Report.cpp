@@ -475,7 +475,7 @@ const char* state_name() {
 
 void report_recompute_pin_string() {
     report_pin_string.clear();
-    if (config->_probe->probePin().get()) {
+    if (config->_probe->probePin().get() || config->_probe->sharedActive()) {
         report_pin_string += 'P';
     }
     if (config->_probe->toolsetterPin().get()) {

@@ -7,6 +7,9 @@
 
 #include "Limit.h"
 #include "Protocol.h"  // protocol_send_event_from_ISR()
+#include "MotionControl.h"  // probing
+
+extern const ArgEvent probeEvent;  // Probe.cpp
 
 namespace Machine {
     LimitPin::LimitPin(axis_t axis, motor_t motor, int8_t direction, bool& pHardLimits) :
@@ -56,7 +59,11 @@ namespace Machine {
     }
 
     void LimitPin::trigger(bool active) {
-        if (active) {
+        // A probe move on the shared probe / limit input: the touch is the
+        // probe's, on either edge (G38.4/5 wait for the release), and must not
+        // stop the motor as a limit would
+        bool asProbe = _alsoProbe && probing;
+        if (active && !asProbe) {
             if (Homing::approach()) {
                 // Prevent spamming with rapid-fire events if motion
                 // stops right at the switch activation threshold
@@ -70,7 +77,8 @@ namespace Machine {
                     *_pExtraLimited = active;
                 }
             }
-
+        }
+        if (active) {
             if (_posLimits != nullptr) {
                 set_bits(*_posLimits, _bitmask);
             }
@@ -90,6 +98,11 @@ namespace Machine {
             if (_negLimits != nullptr) {
                 clear_bits(*_negLimits, _bitmask);
             }
+        }
+        if (asProbe) {
+            InputPin::trigger(active);  // the pin's state, for get()
+            protocol_send_event(&probeEvent, this);
+            return;
         }
         EventPin::trigger(active);
     }

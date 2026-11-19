@@ -83,6 +83,19 @@ namespace Machine {
         return (_negLimitPin.defined() || _posLimitPin.defined() || _allLimitPin.defined());
     }
 
+    LimitPin* Motor::switchPin() {
+        if (_allLimitPin.defined()) {
+            return &_allLimitPin;
+        }
+        if (_negLimitPin.defined()) {
+            return &_negLimitPin;
+        }
+        if (_posLimitPin.defined()) {
+            return &_posLimitPin;
+        }
+        return nullptr;
+    }
+
     void Motor::rearmSwitches() {
         if (_negLimitPin.defined()) {
             _negLimitPin.rearm();

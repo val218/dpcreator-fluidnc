@@ -32,6 +32,7 @@ namespace Machine {
         void group(Configuration::HandlerBase& handler) override;
         void afterParse() override;
         bool hasSwitches();
+        LimitPin* switchPin();  // the defined limit pin (all, else neg, else pos), or nullptr
         void rearmSwitches();
         bool isReal();
         void makeDualSwitches();
