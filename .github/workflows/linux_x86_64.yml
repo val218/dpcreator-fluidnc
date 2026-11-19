@@ -191,6 +191,37 @@ jobs:
           grep -q "OUT4 on" sim.log && grep -q "Automation: pedal" out.txt
           grep -q "Automation: Vacuum lost" out.txt && grep -q "<Hold" out.txt
 
+      - name: Probe on the Z limit input (probe use_z_limit_pin)
+        run: |
+          mkdir -p pz/native_localfs pz/native_gpio && cd pz
+          cat > native_localfs/config.yaml <<'YAML'
+          name: probe on z limit
+          board: host
+          axes:
+            z:
+              steps_per_mm: 400
+              max_rate_mm_per_min: 1000
+              acceleration_mm_per_sec2: 50
+              max_travel_mm: 100
+              motor0:
+                limit_all_pin: gpio.3:low
+                hard_limits: true
+                null_motor:
+          probe:
+            use_z_limit_pin: true
+          YAML
+          touch native_gpio/3   # HIGH: open (active low)
+          (sleep 2.5; printf 'G21 G91 G38.2 Z-20 F300\n'; sleep 0.8; rm native_gpio/3; sleep 0.6
+           printf 'G38.4 Z5 F300\n'; sleep 0.6; touch native_gpio/3; sleep 0.6
+           printf 'G1 Z-10 F300\n'; sleep 0.6; rm native_gpio/3; sleep 0.5; printf '?'; sleep 0.3) \
+            | timeout 15 ../.pio/build/linux_x86_64/program - > out.txt 2>&1 || true
+          cat out.txt
+          set -x
+          grep -q "Probe: on the Z limit input gpio.3:low" out.txt
+          [ "$(grep -c ':1\]$' out.txt)" -ge 2 ]                   # G38.2 and G38.4 both hit ([PRB:...:1])
+          [ "$(grep -c 'ALARM:1$' out.txt)" -eq 1 ]                 # only the plain G1 trips the hard limit
+          grep -q "Pn:PZ" out.txt
+
       - name: Motion check (S-curve vs straight ramps, from the segment trace)
         run: python3 tools/motion_check.py .pio/build/linux_x86_64/program
 

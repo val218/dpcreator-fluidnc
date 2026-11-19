@@ -37,6 +37,11 @@ namespace Machine {
         void setExtraMotorLimit(axis_t axis, motor_t motorNum);
 
         bool isHard() { return _pHardLimits; }
+
+        // dpCREATOR: the probe shares this input (probe: use_z_limit_pin). While
+        // a probe move runs (G38), both edges go to the probe and the input is
+        // not a limit; otherwise it is the limit, as before.
+        bool _alsoProbe = false;
         void init();
 
         axis_t  _axis;

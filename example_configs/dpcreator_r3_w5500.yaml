@@ -127,10 +127,8 @@ axes:
       seek_mm_per_min: 800.000
       settle_ms: 250
     motor0:
-      # LIM_Z on GPIO3 is shared with the PROBE terminal.
-      # FluidNC allows one role per pin: it is the Z limit here.
-      # To use it as the probe instead, set this to NO_PIN and
-      # set probe: pin: gpio.3:low
+      # LIM_Z and the PROBE terminal are one line (OK3 -> GPIO3): the Z limit
+      # here, and the probe too (probe: use_z_limit_pin)
       limit_all_pin: gpio.3:low
       hard_limits: false
       pulloff_mm: 2.000
@@ -156,7 +154,9 @@ axes:
 
 # ---------------- Probe ----------------
 probe:
-  pin: NO_PIN                            # GPIO3 is the Z limit (shared PROBE terminal)
+  pin: NO_PIN
+  use_z_limit_pin: true                  # PROBE terminal = Z limit input (GPIO3): G38 probes on it,
+                                         # homing and hard limits use it as the Z limit otherwise
   toolsetter_pin: NO_PIN
   check_mode_start: true
 

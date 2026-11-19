@@ -5,9 +5,14 @@
 #include "Probe.h"
 #include "Machine/EventPin.h"
 #include "Machine/MachineConfig.h"
+#include "Machine/Axes.h"
+#include "Machine/Axis.h"
+#include "Machine/Motor.h"
+#include "Machine/LimitPin.h"
 
-extern void    protocol_do_probe(void* arg);
-const ArgEvent probeEvent { protocol_do_probe };
+extern void           protocol_do_probe(void* arg);
+extern const ArgEvent probeEvent;  // external linkage: the Z limit's input sends it too (LimitPin.cpp)
+const ArgEvent        probeEvent { protocol_do_probe };
 
 Probe::ProbeEventPin::ProbeEventPin(const char* legend) : EventPin(&probeEvent, ExecAlarm::None, legend) {}
 
@@ -18,6 +23,26 @@ void Probe::init() {
     }
     _probePin.init();
     _toolsetterPin.init();
+
+    if (_useZLimitPin) {
+        auto axes = config->_axes;
+        auto z    = (axes && Z_AXIS < Machine::Axes::_numberAxis) ? axes->_axis[Z_AXIS] : nullptr;
+        auto m    = z ? z->_motors[0] : nullptr;
+        _zLimit   = m ? m->switchPin() : nullptr;
+        if (_probePin.defined()) {
+            log_config_error("probe: use_z_limit_pin and pin can't both be set");
+            _zLimit = nullptr;
+        } else if (!_zLimit) {
+            log_config_error("probe: use_z_limit_pin needs a Z limit pin (z: motor0: limit_all_pin, limit_neg_pin or limit_pos_pin)");
+        } else {
+            _zLimit->_alsoProbe = true;
+            log_info("Probe: on the Z limit input " << _zLimit->name());
+        }
+    }
+}
+
+bool Probe::sharedActive() {
+    return _zLimit && _zLimit->get();
 }
 
 void Probe::set_direction(bool away) {
@@ -26,7 +51,7 @@ void Probe::set_direction(bool away) {
 
 // Returns the probe pin state. Triggered = true. Called by gcode parser.
 bool Probe::get_state() {
-    return _probePin.get() || _toolsetterPin.get();
+    return _probePin.get() || _toolsetterPin.get() || sharedActive();
 }
 
 // Returns true if the probe pin is tripped, accounting for the direction (away or not).
@@ -51,6 +76,15 @@ void Probe::group(Configuration::HandlerBase& handler) {
     // N.C./N.O. (or PNP/NPN) probes be wired without an external OR'ing circuit, and each
     // shows up as a separate switch in the '?' status report to help debug wiring.
     handler.item("toolsetter_pin", _toolsetterPin);
+
+    // @config use_z_limit_pin
+    // @default false
+    // @tuning typical
+    // The probe shares the Z limit's input (dpCREATOR R3 / R3.1: the PROBE terminal
+    // and the Z limit are one line, one optocoupler, GPIO3). Leave pin at NO_PIN.
+    // During a probe move (G38) a touch is the probe's and does not stop the axis
+    // as a limit; otherwise the input is the Z limit, as before (homing, hard limits).
+    handler.item("use_z_limit_pin", _useZLimitPin);
 
     // @config check_mode_start
     // @default true

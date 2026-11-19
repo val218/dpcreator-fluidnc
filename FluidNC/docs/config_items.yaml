@@ -246,6 +246,13 @@ probe:
     description: |
       An optional second probe input, treated identically to pin -- G38 can't target one or the other specifically, either triggers the same probe action. Having two lets N.C./N.O. (or PNP/NPN) probes be wired without an external OR'ing circuit, and each shows up as a separate switch in the '?' status report to help debug wiring.
 
+  use_z_limit_pin:
+    type: boolean
+    default: 'false'
+    tuning: typical
+    description: |
+      The probe shares the Z limit's input (dpCREATOR R3 / R3.1: the PROBE terminal and the Z limit are one line, one optocoupler, GPIO3). Leave pin at NO_PIN. During a probe move (G38) a touch is the probe's and does not stop the axis as a limit; otherwise the input is the Z limit, as before (homing, hard limits).
+
   check_mode_start:
     type: boolean
     default: 'true'

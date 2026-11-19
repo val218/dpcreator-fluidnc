@@ -9,6 +9,10 @@
 
 #include <cstdint>
 
+namespace Machine {
+    class LimitPin;
+}
+
 class Probe : public Configuration::Configurable {
     // Inverts the probe pin state depending on user settings and probing cycle mode.
     bool _away = false;
@@ -27,6 +31,10 @@ class Probe : public Configuration::Configurable {
     ProbeEventPin _probePin;
     ProbeEventPin _toolsetterPin;
 
+    // dpCREATOR: probe on the Z limit's input (one terminal / optocoupler for both)
+    bool               _useZLimitPin = false;
+    Machine::LimitPin* _zLimit       = nullptr;
+
 public:
     bool _hard_stop        = false;
     bool _probe_hard_limit = false;
@@ -39,7 +47,10 @@ public:
     Probe() : _probePin("Probe"), _toolsetterPin("Toolsetter") {}
 
     // Configurable
-    bool exists() { return _probePin.defined() || _toolsetterPin.defined(); }
+    bool exists() { return _probePin.defined() || _toolsetterPin.defined() || _zLimit; }
+
+    // The Z limit's input, when the probe shares it and it is active (status report 'P')
+    bool sharedActive();
 
     void init();
 

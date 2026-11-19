@@ -41,9 +41,24 @@ Tested on a dpCREATOR R2/R3 (ESP32-S3-WROOM-1-N16R8).
 **Board configs** (`example_configs/`): `dpcreator_r3_w5500.yaml` (the one in
 `littlefs.bin` / `merged-flash.bin`), `dpcreator_r3_1_w5500.yaml`,
 `dpcreator_r2_w5500.yaml`. R3: `shared_stepper_disable_pin: gpio.8:low`
-(GPIO8 HIGH enables the step/dir outputs), Z limit `gpio.3:low` (shared with
-the PROBE terminal, so probe `NO_PIN`), `idle_ms: 255`; R2 has the Z limit on
-GPIO45.
+(GPIO8 HIGH enables the step/dir outputs), Z limit `gpio.3:low`, `idle_ms:
+255`; R2 has the Z limit on GPIO45.
+
+**Probe and Z limit on one input** (R3 / R3.1: the Z limit and PROBE
+terminals are one line through one optocoupler to GPIO3). FluidNC gives a pin
+one role, so the probe takes the Z limit's input instead of a pin of its own:
+
+```yaml
+probe:
+  pin: NO_PIN
+  use_z_limit_pin: true
+```
+
+During a probe move (G38.2-G38.5) a touch is the probe's, on either edge,
+and does not stop the axis as a limit (no hard limit alarm while probing);
+the rest of the time the input is the Z limit (homing, hard limits). The
+status report shows `Pn:PZ` while it is closed. The firmware cannot tell the
+plate from the switch: a touch plate closed during a normal move is a Z limit.
 
 **E-stop.** On R3 the E-stop is hardware only: it cuts the step/dir outputs
 and no ESP32 pin reads it, so FluidNC learns of it from the SmartTabUI
