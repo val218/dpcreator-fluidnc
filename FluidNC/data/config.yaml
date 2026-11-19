@@ -1,5 +1,5 @@
 board: dpCREATOR R3
-name: dpCREATOR 4-axis CNC (W5500)
+name: dpCREATOR CNC, dual Y (W5500)
 meta: ESP32-S3-WROOM-1-N16R8, FluidNC 4.1.1 + W5500
 
 # ------------------------------------------------------------------
@@ -104,13 +104,23 @@ axes:
       feed_mm_per_min: 200.000
       seek_mm_per_min: 1500.000
       settle_ms: 250
+    # Two Y motors (gantry): Y1 on the Y driver, Y2 on the 4th (A) driver,
+    # each with its own limit switch, so homing squares the gantry.
     motor0:
-      limit_all_pin: gpio.48:low         # LIM_Y
+      limit_all_pin: gpio.48:low         # LIM_Y  (Y1)
       hard_limits: false
       pulloff_mm: 2.000
       standard_stepper:
         step_pin: gpio.6
         direction_pin: gpio.7
+        disable_pin: NO_PIN
+    motor1:
+      limit_all_pin: gpio.38:low         # LIM_A  (Y2)
+      hard_limits: false
+      pulloff_mm: 2.000
+      standard_stepper:
+        step_pin: gpio.17                # A driver
+        direction_pin: gpio.18           # add :low here if Y2 must turn the other way
         disable_pin: NO_PIN
 
   z:
@@ -137,20 +147,21 @@ axes:
         direction_pin: gpio.16
         disable_pin: NO_PIN
 
-  a:
-    steps_per_mm: 44.444                 # <-- SET (rotary: steps per degree)
-    max_rate_mm_per_min: 3000.000
-    acceleration_mm_per_sec2: 200.000
-    max_travel_mm: 360.000
-    soft_limits: false
-    motor0:
-      limit_all_pin: gpio.38:low         # LIM_A
-      hard_limits: false
-      pulloff_mm: 2.000
-      standard_stepper:
-        step_pin: gpio.17
-        direction_pin: gpio.18
-        disable_pin: NO_PIN
+  # A rotary axis instead of Y2: remove motor1 from y: above and uncomment.
+  # a:
+  #   steps_per_mm: 44.444               # <-- SET (rotary: steps per degree)
+  #   max_rate_mm_per_min: 3000.000
+  #   acceleration_mm_per_sec2: 200.000
+  #   max_travel_mm: 360.000
+  #   soft_limits: false
+  #   motor0:
+  #     limit_all_pin: gpio.38:low       # LIM_A
+  #     hard_limits: false
+  #     pulloff_mm: 2.000
+  #     standard_stepper:
+  #       step_pin: gpio.17
+  #       direction_pin: gpio.18
+  #       disable_pin: NO_PIN
 
 # ---------------- Probe ----------------
 probe:
