@@ -1,11 +1,12 @@
-board: dpCREATOR R2/R3
+board: dpCREATOR R3
 name: dpCREATOR 4-axis CNC (W5500)
 meta: ESP32-S3-WROOM-1-N16R8, FluidNC 4.1.1 + W5500
 
 # ------------------------------------------------------------------
-# UART0 = FluidNC console, fixed in firmware (not configurable here):
-#   TXD0 = GPIO43, RXD0 = GPIO44, 115200 8N1  (UART_0 connector J7)
-#   Reserved for future GPIO expansion (needs a firmware change).
+# UART0 = FluidNC console: TXD0 = GPIO43, RXD0 = GPIO44, 115200 8N1
+#   (UART_0 connector J7). A uart0: section gives it to an I/O expander
+#   (uart_channel2 with uart_num: 0); the console then stays on USB only.
+#   See W5500_ETHERNET.md section 18.
 # USB CDC console on native USB (GPIO19/20) is also available.
 # ------------------------------------------------------------------
 
@@ -64,7 +65,7 @@ kinematics:
   Cartesian:
 
 axes:
-  shared_stepper_disable_pin: gpio.8     # STEP_EN_RAW - add :low if drivers enable on low
+  shared_stepper_disable_pin: gpio.8:low # STEP_EN: GPIO8 HIGH enables the step/dir outputs (U7)
   shared_stepper_reset_pin: NO_PIN
   homing_runs: 2
 
@@ -126,11 +127,11 @@ axes:
       seek_mm_per_min: 800.000
       settle_ms: 250
     motor0:
-      # LIM_Z_PROBE on GPIO45 is shared with the probe on R2.
+      # LIM_Z on GPIO3 is shared with the PROBE terminal.
       # FluidNC allows one role per pin: it is the Z limit here.
       # To use it as the probe instead, set this to NO_PIN and
-      # set probe: pin: gpio.45:low
-      limit_all_pin: gpio.45:low
+      # set probe: pin: gpio.3:low
+      limit_all_pin: gpio.3:low
       hard_limits: false
       pulloff_mm: 2.000
       standard_stepper:
@@ -155,8 +156,7 @@ axes:
 
 # ---------------- Probe ----------------
 probe:
-  pin: NO_PIN                            # R2: shared with Z limit (GPIO45)
-  # pin: gpio.3:low                      # R3: separate PROBE on GPIO3
+  pin: NO_PIN                            # GPIO3 is the Z limit (shared PROBE terminal)
   toolsetter_pin: NO_PIN
   check_mode_start: true
 
@@ -189,6 +189,12 @@ coolant:
   mist_pin: NO_PIN
 
 control:
+  # The R3 E-stop is hardware only: it cuts the step/dir outputs (U5 -> U7 OE)
+  # and no ESP32 pin reads it. The SmartTabUI pendant sends a reset when its
+  # E-stop is pressed, so FluidNC goes into Alarm. R3.1 reads it on GPIO46
+  # (HIGH = E-stop active): see dpcreator_r3_1_w5500.yaml. Do not set it on
+  # an R3, where GPIO46 (a strapping pin) is not connected to the E-stop.
+  estop_pin: NO_PIN
   safety_door_pin: NO_PIN
   reset_pin: NO_PIN
   feed_hold_pin: NO_PIN
