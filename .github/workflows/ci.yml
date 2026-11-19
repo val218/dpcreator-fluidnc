@@ -19,7 +19,7 @@ jobs:
     # scripts are pure-stdlib Python, so this job is deliberately its own
     # fast, independent check rather than a step tacked onto the firmware
     # build below.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - name: Set up Python
@@ -56,7 +56,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-24.04
         # - macos-latest
         # - windows-latest
         pio_env:
@@ -90,7 +90,7 @@ jobs:
           key: platformio-${{ runner.os }}
       - name: Build target ${{ matrix.pio_env }}${{ matrix.pio_env_variant }}
         run: pio run -e ${{ matrix.pio_env }}${{ matrix.pio_env_variant }}
-      - if: matrix.os == 'ubuntu-latest'
+      - if: matrix.os == 'ubuntu-24.04'
         name: Generate .addrinfo for ${{ matrix.pio_env }}${{ matrix.pio_env_variant }}
         run: |
           python tools/stack_trace_decoder/generate_addrinfo.py \
@@ -98,7 +98,7 @@ jobs:
             -o .pio/build/${{ matrix.pio_env }}${{ matrix.pio_env_variant }}/firmware.addrinfo \
             --build ${{ matrix.pio_env }}${{ matrix.pio_env_variant }} \
             --verbose
-      - if: matrix.os == 'ubuntu-latest'
+      - if: matrix.os == 'ubuntu-24.04'
         name: Upload ${{ matrix.pio_env }}${{ matrix.pio_env_variant }} firmware.bin
         uses: actions/upload-artifact@v7
         with:
@@ -112,7 +112,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             pio_env: tests
           - os: macos-latest
             pio_env: tests

@@ -9,7 +9,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04, whose system headers break the
+    # Arduino-Emulator's Binary.h (and which has no Python 3.9 for the tests)
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4

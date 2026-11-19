@@ -38,6 +38,24 @@ plus dpCREATOR additions:
 
 Tested on a dpCREATOR R2/R3 (ESP32-S3-WROOM-1-N16R8).
 
+**Board configs** (`example_configs/`): `dpcreator_r3_w5500.yaml` (the one in
+`littlefs.bin` / `merged-flash.bin`), `dpcreator_r3_1_w5500.yaml`,
+`dpcreator_r2_w5500.yaml`. R3: `shared_stepper_disable_pin: gpio.8:low`
+(GPIO8 HIGH enables the step/dir outputs), Z limit `gpio.3:low` (shared with
+the PROBE terminal, so probe `NO_PIN`), `idle_ms: 255`; R2 has the Z limit on
+GPIO45.
+
+**E-stop.** On R3 the E-stop is hardware only: it cuts the step/dir outputs
+and no ESP32 pin reads it, so FluidNC learns of it from the SmartTabUI
+pendant, which sends a reset (Ctrl-X) on the press and keeps FluidNC in
+Alarm while it is held. R3.1 also reads it on GPIO46 (HIGH = active):
+`control: estop_pin: gpio.46` (no `:low`, no `:pu` - GPIO46 is a strapping
+pin). As in upstream FluidNC, a press stops at once with `ALARM:13` (Hard
+Stop, all axes unhomed); only a reset clears it, and then `$X` / homing.
+Note (also upstream): the pin acts on its edge, so a reset while the E-stop
+is still active returns to Idle; with the pendant connected it raises the
+alarm again until the button is released.
+
 ## Quick start: turn on Ethernet
 
 A **fresh install** (`merged-flash.bin`, or after erasing settings) already
@@ -130,7 +148,7 @@ Or from Actions (needs a GitHub login):
 
 | File | Use |
 |---|---|
-| `merged-flash.bin` | Fresh board. Bootloader + partitions + firmware + filesystem, flash at `0x0`. **Overwrites `config.yaml` with the dpCREATOR R2/R3 example config (`example_configs/dpcreator_r2_r3_w5500.yaml`) - back yours up first if you changed it.** |
+| `merged-flash.bin` | Fresh board. Bootloader + partitions + firmware + filesystem, flash at `0x0`. **Overwrites `config.yaml` with the dpCREATOR R3 config (`example_configs/dpcreator_r3_w5500.yaml`) - back yours up first if you changed it.** R2 and R3.1 boards: `dpcreator_r2_w5500.yaml` / `dpcreator_r3_1_w5500.yaml`. |
 | `firmware.bin` | Board already running FluidNC. Flash at `0x10000` or upload via WebUI. Keeps config and settings. |
 | `littlefs.bin` | Filesystem only (WebUI + config). |
 | `firmware.elf` | In the separate debug zip: symbols to decode a crash backtrace. |

@@ -1,4 +1,4 @@
-board: dpCREATOR R2/R3
+board: dpCREATOR R2
 name: dpCREATOR 4-axis CNC (W5500)
 meta: ESP32-S3-WROOM-1-N16R8, FluidNC 4.1.1 + W5500
 
@@ -157,7 +157,6 @@ axes:
 # ---------------- Probe ----------------
 probe:
   pin: NO_PIN                            # R2: shared with Z limit (GPIO45)
-  # pin: gpio.3:low                      # R3: separate PROBE on GPIO3
   toolsetter_pin: NO_PIN
   check_mode_start: true
 
