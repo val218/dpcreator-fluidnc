@@ -42,7 +42,10 @@ Tested on a dpCREATOR R2/R3 (ESP32-S3-WROOM-1-N16R8).
 `littlefs.bin` / `merged-flash.bin`), `dpcreator_r3_1_w5500.yaml`,
 `dpcreator_r2_w5500.yaml`. R3: `shared_stepper_disable_pin: gpio.8:low`
 (GPIO8 HIGH enables the step/dir outputs), Z limit `gpio.3:low`, `idle_ms:
-255`; R2 has the Z limit on GPIO45.
+255`; R2 has the Z limit on GPIO45. The R3 / R3.1 configs use the 4th (A)
+driver as Y2: `y: motor1` on step 17 / dir 18 with LIM_A (`gpio.38:low`) as
+its own limit, so homing squares the gantry. For a rotary A axis instead,
+remove `motor1` from `y:` and uncomment the `a:` block.
 
 **Probe and Z limit on one input** (R3 / R3.1: the Z limit and PROBE
 terminals are one line through one optocoupler to GPIO3). FluidNC gives a pin
