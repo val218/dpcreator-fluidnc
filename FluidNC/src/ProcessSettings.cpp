@@ -1,6 +1,7 @@
 // Copyright (c) 2020 Mitch Bradley
 // Use of this source code is governed by a GPLv3 license that can be found in the LICENSE file.
 
+#include "FwUpdate.h"
 #include "Settings.h"
 #include "Modbus/ModbusBus.h"  // $Modbus/Values
 #include <algorithm>  // std::min
@@ -606,7 +607,7 @@ static Error go_to_sleep(const char* value, AuthenticationLevel auth_level, Chan
 // The chip ID identifies the board (WebUI licence installs from dpcreator.eu);
 // api is the level of the dpCREATOR commands this firmware has, so a WebUI can
 // tell when it is older than the firmware.
-static constexpr int DPC_API_LEVEL = 5;  // 2: $Spindle, spindle tools:/offset_mm; 3: compact pendant previews (VZ2); 4: $Measure/Save; 5: $VFD/State, $Modbus/Read|Write|Raw|Scan
+static constexpr int DPC_API_LEVEL = 6;  // 2: $Spindle, spindle tools:/offset_mm; 3: compact pendant previews (VZ2); 4: $Measure/Save; 5: $VFD/State, $Modbus/Read|Write|Raw|Scan; 6: $Update/List, /dpc/update
 // $Homed -> [MSG:HomedAxes:<axes homed since power-up / reset>:of=<axes that home>]
 // The WebUI asks after connecting: machine positions only mean "where on the
 // bed" once the axes have homed. (The live [MSG:Homed:..] only comes at the end
@@ -1244,6 +1245,7 @@ void make_user_commands() {
     make_motion_commands();
     extern void make_expander_commands();  // ExpanderCommands.cpp: $Expander/State, $Expander/Pins
     make_expander_commands();
+    FwUpdate::make_commands();  // $Update/List
     extern void motion_stats_commands();  // MotionStats.cpp: $Stepping/Stats, $Stepping/Trace
     motion_stats_commands();
     extern void make_automation_commands();  // Automation.cpp: $Automation/List, Reload, Run

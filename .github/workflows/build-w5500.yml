@@ -69,6 +69,10 @@ jobs:
           cp $B/firmware.bin $B/bootloader.bin $B/partitions.bin out/
           cp $B/littlefs.bin out/ 2>/dev/null || true
           cp $B/merged-flash.bin out/ 2>/dev/null || true
+          # boot_app0.bin at 0xE000 with a USB update of firmware.bin: after a
+          # network update the board may run its second program slot, and
+          # this makes it start the first one (where USB writes) again.
+          cp $(find ~/.platformio/packages -path '*framework-arduinoespressif32*/tools/partitions/boot_app0.bin' | head -1) out/
           cp $B/firmware.elf debug/
           ls -l out debug
 
@@ -149,6 +153,20 @@ jobs:
             0xe000 $P/framework-arduinoespressif32/tools/partitions/boot_app0.bin 0x10000 $B/firmware.bin
           ls -l ../out/camera-*
 
+      # Network updates (System update in the WebUI) take only signed files:
+      # firmware.bin.sig = ECDSA P-256 / SHA-256, hex (tools/fw_sign.sh). The
+      # key is the secret DPC_FW_SIGN_KEY; without it no .sig is published and
+      # the WebUI offers USB only. WROOM-32 has one program slot: USB only.
+      - name: Sign firmware for network updates
+        env:
+          KEY: ${{ secrets.DPC_FW_SIGN_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then echo "::notice title=Signing::no DPC_FW_SIGN_KEY secret: no firmware.bin.sig"; exit 0; fi
+          umask 077; printf '%s\n' "$KEY" > "$RUNNER_TEMP/k.pem"
+          tools/fw_sign.sh "$RUNNER_TEMP/k.pem" out/firmware.bin
+          rm -f "$RUNNER_TEMP/k.pem"
+          sha256sum out/firmware.bin | cut -d' ' -f1 > out/firmware.bin.sha256
+
       - name: Decode backtrace
         if: ${{ inputs.backtrace != '' || hashFiles('.github/backtrace.txt') != '' }}
         env:
@@ -193,4 +211,4 @@ jobs:
           gh release delete w5500-latest -y --cleanup-tag || true
           gh release create w5500-latest out/* --prerelease --target "$GITHUB_SHA" \
             --title "dpCREATOR FluidNC 4.1.1 W5500 - latest build ($SHORT)" \
-            --notes "Latest build of branch fluidnc-4.1.1-w5500 (commit $SHORT), replaced on every push. merged-flash.bin = fresh board at 0x0 (overwrites config.yaml); firmware.bin = update at 0x10000 over USB (network updates are off since 063dee80). Set the login password over USB with \$Auth/Set=<password> or on the first WebUI visit. The dpCREATOR WebUI is installed separately from dpcreator.eu. ESP32 (WROOM-32) boards: wroom32-merged-flash.bin = fresh board at 0x0 (starter config.yaml without pins, Wi-Fi only, no W5500); wroom32-firmware.bin = update at 0x10000 over USB. Head camera (WebUI camera crosshair): camera-s3-eye-flash.bin (ESP32-S3-EYE, Freenove ESP32-S3 CAM), camera-xiao-s3-flash.bin (XIAO ESP32S3 Sense), camera-esp32cam-flash.bin (AI-Thinker ESP32-CAM), each at 0x0 on the camera board. See W5500_ETHERNET.md."
+            --notes "Latest build of branch fluidnc-4.1.1-w5500 (commit $SHORT), replaced on every push. merged-flash.bin = fresh board at 0x0 (overwrites config.yaml); firmware.bin = update at 0x10000 over USB, together with boot_app0.bin at 0xE000; or over the network from the WebUI's System update (firmware.bin.sig). Set the login password over USB with \$Auth/Set=<password> or on the first WebUI visit. The dpCREATOR WebUI is installed separately from dpcreator.eu. ESP32 (WROOM-32) boards: wroom32-merged-flash.bin = fresh board at 0x0 (starter config.yaml without pins, Wi-Fi only, no W5500); wroom32-firmware.bin = update at 0x10000 over USB. Head camera (WebUI camera crosshair): camera-s3-eye-flash.bin (ESP32-S3-EYE, Freenove ESP32-S3 CAM), camera-xiao-s3-flash.bin (XIAO ESP32S3 Sense), camera-esp32cam-flash.bin (AI-Thinker ESP32-CAM), each at 0x0 on the camera board. See W5500_ETHERNET.md."

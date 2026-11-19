@@ -112,6 +112,10 @@ void pendant_report(Channel& out) {
     }
 }
 
+const char* pendant_info() {
+    return _link == Link::Connected ? _info : "";
+}
+
 void pendant_hello(const char* info) {
     size_t n = 0;
     for (const char* p = info; *p && n < sizeof(_info) - 1; p++) {

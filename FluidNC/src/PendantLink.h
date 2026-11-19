@@ -26,3 +26,4 @@ void         pendant_debug(Channel& out);  // $Pendant/Debug: raw counters
 void         pendant_trace(Channel& out, bool on);  // $Pendant/Trace=on|off
 const char*  pendant_state_name();
 void         pendant_hello(const char* info);   // $Pendant/Hello=<chip>:<version>
+const char*  pendant_info();                    // "<chip>:<version>" while connected, else ""

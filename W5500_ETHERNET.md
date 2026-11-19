@@ -1038,9 +1038,46 @@ reached) only starts once you have set its password, `$AP/Password=...`
 (8 characters or more). There is no default AP password, and the board never
 opens an access point without one.
 
-**Firmware updates** happen over USB only (dpcreator.eu → Flash Firmware, with
-the board in boot mode), so someone has to be at the machine. The old
-network update page (`/updatefw`) is not in this firmware.
+**Firmware updates** come from the dpCREATOR WebUI's **System update** window
+(the WebUI downloads the build from dpcreator.eu and gives it to the board), or
+over USB (dpcreator.eu → Flash Firmware, board in boot mode). A network update
+is taken only:
+
+- logged in, with the machine **Idle** (it stops if the machine starts moving);
+- when the file is **signed with the dpCREATOR key** (ECDSA P-256 over SHA-256
+  of the file; the public half is built in, `FluidNC/src/FwUpdateKey.h`) - so
+  someone on the network with the password can still only install dpCREATOR's
+  own builds;
+- on boards with two program slots (the R3 / ESP32-S3 with 8 MB flash or more).
+  ESP32 WROOM-32 boards have one slot: USB only.
+
+The board writes the spare slot, checks the image and the signature, switches,
+restarts. If the new firmware crashes twice before it has run for a minute, the
+board starts the previous one again and the WebUI says so. After a minute it
+logs `Firmware updated to <version>`.
+
+    $Update/List ($UPL)      what can be updated, for the WebUI:
+      [UPD:host,fluidnc-s3,esp32s3,<board id>,<version>,slot|usb]
+      [UPD:pendant,smarttabui,esp32,<chip id>,<version>,no]
+      [UPD:io16:<ch>,io16,stm32,,<version>,no[,offline]]
+    GET  /dpc/update         {"how","key","slot","running","rolled","busy"}
+    POST /dpc/update?target=host&size=<bytes>&sig=<hex>&ver=<version>   (one file, multipart)
+
+The pendant and the IO16 show as `no` for now (update over USB); passing their
+files on through the board is the next step. The whole protocol, for the
+WebUI, the Link, SmartTabUI, the MPG pendant, the HMI and dpcreator.eu, is in
+dpcreator-webui `docs/UPDATES.md`.
+
+**USB update after a network update:** the board may now run from its second
+slot. Flash `boot_app0.bin` at 0xE000 together with `firmware.bin` at 0x10000
+(both in the release) so it starts the first slot again; the merged image
+already contains it.
+
+**Signing key:** `tools/fw_key.sh <folder outside the repo>` makes the key pair
+once and writes the public half into `FwUpdateKey.h`; the private key goes into
+the GitHub secret `DPC_FW_SIGN_KEY`. The release workflow then publishes
+`firmware.bin.sig` and `firmware.bin.sha256`. Without the key in a build, the
+board answers "no update key in this build" and `$Update/List` says `usb`.
 
 ## 18. Inputs, outputs and Modbus I/O (dpCREATOR Motion)
 
