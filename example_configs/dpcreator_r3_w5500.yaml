@@ -1,5 +1,5 @@
 board: dpCREATOR R3
-name: dpCREATOR CNC, dual Y (W5500)
+name: dpCREATOR CNC, dual Y, RS485 VFD (W5500)
 meta: ESP32-S3-WROOM-1-N16R8, FluidNC 4.1.1 + W5500
 
 # ------------------------------------------------------------------
@@ -149,7 +149,7 @@ axes:
 
   # A rotary axis instead of Y2: remove motor1 from y: above and uncomment.
   # a:
-  #   steps_per_mm: 44.444               # <-- SET (rotary: steps per degree)
+  #   steps_per_mm: 400.000               # <-- SET (rotary: steps per degree)
   #   max_rate_mm_per_min: 3000.000
   #   acceleration_mm_per_sec2: 200.000
   #   max_travel_mm: 360.000
@@ -172,8 +172,23 @@ probe:
   check_mode_start: true
 
 # ---------------- Spindle ----------------
-# PWM on GPIO21 (also feeds the 0-10V output if AOUT is derived from PWM)
-# Relay on GPIO39 used as spindle on/off
+# Tool 0 = RS485 VFD on UART2 (main spindle). Select with M6 T0 (default).
+# R3 RS485 terminal J8: A -> VFD RS+ (A), B -> VFD RS- (B), GND -> VFD COM.
+# Huanyang settings: PD001=2, PD002=2, PD163=1 (= modbus_id), PD164=1 (9600), PD165=3 (8N1 RTU).
+# Other VFDs: replace "Huanyang:" with H100, H2A, YL620, NowForever, SiemensV20,
+#   DeltaMS300, FolinnBD600 or MollomG70 (same keys). Add "debug: 1" to log Modbus traffic.
+Huanyang:
+  uart_num: 2
+  modbus_id: 1
+  tool_num: 0
+  spinup_ms: 5000
+  spindown_ms: 5000
+  speed_map: 0=0% 24000=100%
+  off_on_alarm: true
+
+# Tool 1 = PWM on GPIO21 (5 V PWM terminal + 0-10 V output), relay K1 (GPIO39) as on/off.
+# Select with M6 T1. For a laser on this output, change "PWM:" to "Laser:" and remove
+# enable_pin/spinup_ms/spindown_ms.
 PWM:
   pwm_hz: 5000
   output_pin: gpio.21
@@ -183,17 +198,8 @@ PWM:
   s0_with_disable: true
   spinup_ms: 2000
   spindown_ms: 2000
-  tool_num: 0
+  tool_num: 1
   speed_map: 0=0.000% 24000=100.000%
-
-# RS485 VFD on UART2 - uncomment and pick your VFD type:
-# Huanyang:
-#   uart_num: 2
-#   modbus_id: 1
-#   tool_num: 1
-#   spinup_ms: 5000
-#   spindown_ms: 5000
-#   speed_map: 0=0% 24000=100%
 
 coolant:
   flood_pin: NO_PIN
