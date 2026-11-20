@@ -10,6 +10,12 @@
 
 #include "WebUIServer.h"
 #include "DpcAuth.h"
+#include "FwUpdate.h"  // System update: /dpc/update
+#include "System.h"    // state_is
+#ifdef ARDUINO_ARCH_ESP32
+#    include <esp_timer.h>
+#    include <esp_system.h>
+#endif
 
 #if !HOSTED
 #    include "WifiScanAsync.h"  // beginAsyncWifiScan(), pollAsyncWifiScan()
@@ -273,6 +279,10 @@ namespace WebUI {
 
     bool     WebUI_Server::_setupdone            = false;
     uint16_t WebUI_Server::_port                 = 0;
+    // System update routes (defined further down)
+    static void upd_info(AsyncWebServerRequest* request);
+    static void upd_answer(AsyncWebServerRequest* request);
+    static void upd_upload(AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final);
     bool     WebUI_Server::_schedule_reboot      = false;
     uint32_t WebUI_Server::_schedule_reboot_time = 0;
 
@@ -423,6 +433,9 @@ namespace WebUI {
         _webserver->on("/dpc/auth/change", HTTP_POST, handle_dpc_auth_change);
         _webserver->on("/dpc/auth/logout", HTTP_ANY, handle_dpc_auth_logout);
         _webserver->on("/dpc/auth/key", HTTP_GET, handle_dpc_auth_key);
+        // System update (FwUpdate.h)
+        _webserver->on("/dpc/update", HTTP_GET, upd_info);
+        _webserver->on("/dpc/update", HTTP_POST, upd_answer, upd_upload);
 
         //web commands
         _webserver->on("/command", HTTP_ANY, handle_web_command);
@@ -768,6 +781,78 @@ namespace WebUI {
     void WebUI_Server::handle_dpc_auth_key(AsyncWebServerRequest* request) {
         if (!DpcAuth::request_ok(request)) return auth_reply(request, 401, "{\"auth\":\"login\"}");
         auth_reply(request, 200, "{\"key\":\"" + DpcAuth::new_key() + "\"}");
+    }
+
+    // ---- System update (FwUpdate.h, dpcreator-webui docs/UPDATES.md) ----
+    // GET  /dpc/update   what this board can take
+    // POST /dpc/update?target=host&size=<bytes>&sig=<hex>&ver=<version>  (multipart, one file)
+    // The middleware has checked the login already.
+    static std::string upd_err;  // the reason the upload was refused, for the answer
+    static bool        upd_done = false;
+    static std::string upd_q(AsyncWebServerRequest* r, const char* name) {
+        return r->hasParam(name) ? std::string(r->getParam(name)->value().c_str()) : std::string();
+    }
+    static void upd_info(AsyncWebServerRequest* request) {
+        std::string j = std::string("{\"how\":\"") + FwUpdate::how() + "\",\"key\":" + (FwUpdate::have_key() ? "true" : "false") +
+                        ",\"slot\":" + std::to_string(FwUpdate::slot_size()) + ",\"running\":" + json_str(FwUpdate::running()) +
+                        ",\"rolled\":" + json_str(FwUpdate::rolled()) + ",\"busy\":" + (FwUpdate::busy() ? "true" : "false") + "}";
+        request->send(200, "application/json", j.c_str());
+    }
+#ifdef ARDUINO_ARCH_ESP32
+    static void upd_restart(void*) { esp_restart(); }
+#endif
+    static void upd_answer(AsyncWebServerRequest* request) {
+        if (!upd_err.empty() || !upd_done) {
+            std::string e = upd_err.empty() ? "no firmware file in the request" : upd_err;
+            upd_err.clear();
+            upd_done = false;
+            request->send(400, "application/json", ("{\"error\":" + json_str(e) + "}").c_str());
+            return;
+        }
+        upd_done = false;
+        request->send(200, "application/json", "{\"ok\":true,\"restart\":true}");
+        // Restart once the answer is out.
+#ifdef ARDUINO_ARCH_ESP32
+        static esp_timer_handle_t t = nullptr;
+        if (!t) {
+            esp_timer_create_args_t a = {};
+            a.callback                = upd_restart;
+            a.name                    = "fw_restart";
+            esp_timer_create(&a, &t);
+        }
+        if (t) esp_timer_start_once(t, 1500 * 1000);
+#endif
+    }
+    static void upd_upload(AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {
+        wd_mark(WD_NET, "firmware update upload");
+        if (!index) {
+            upd_err.clear();
+            upd_done = false;
+            std::string target = upd_q(request, "target");
+            if (target != "host") {
+                upd_err = target.empty() ? "say which device (target)" : "updating " + target + " through the board is not in this firmware yet";
+            } else if (!state_is(State::Idle)) {
+                upd_err = "not Idle: finish or stop the job first";
+            } else if (FwUpdate::begin(atoi(upd_q(request, "size").c_str()), upd_q(request, "sig"), upd_q(request, "ver"), upd_err)) {
+                request->onDisconnect([]() {
+                    if (FwUpdate::busy()) FwUpdate::abort();  // the browser went away mid-way
+                });
+            }
+        }
+        if (!upd_err.empty() || !FwUpdate::busy()) {
+            return;  // refused: the rest of the body is dropped
+        }
+        if (!state_is(State::Idle)) {
+            FwUpdate::abort();
+            upd_err = "the machine started moving: update stopped";
+            return;
+        }
+        if (len && !FwUpdate::write(data, len, upd_err)) {
+            return;
+        }
+        if (final && FwUpdate::finish(upd_err)) {
+            upd_done = true;
+        }
     }
 
     void WebUI_Server::handle_root(AsyncWebServerRequest* request) {

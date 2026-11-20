@@ -18,6 +18,7 @@
 #    include "MotionControl.h"
 #    include "Platform.h"
 #    include "StartupLog.h"
+#    include "FwUpdate.h"
 #    include "Module.h"
 #    include "FluidPath.h"
 
@@ -44,6 +45,7 @@ WEAK_LINK bool console_release_uart0() {
 
 void setup() {
     platform_preinit();
+    FwUpdate::boot();  // after a network update: a crashing new firmware goes back to the old one
 
     set_state(State::Starting);
 
@@ -238,3 +240,4 @@ void loop() {
 #endif
 
 void WEAK_LINK machine_init() {}
+
