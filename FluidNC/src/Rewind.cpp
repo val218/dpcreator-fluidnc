@@ -49,6 +49,10 @@ namespace {
     constexpr float RAPID_FEED      = 1000.0f;  // rapids are retraced at this feed
     constexpr float Z_FEED          = 200.0f;   // Z height changes
     constexpr float CHUNK           = 1.0f;     // mm per move while turning the wheel
+    // How far the wheel's target may run ahead of the tool (each move above is
+    // done before the next): turning faster than the machine can follow does
+    // not pile up, and the tool stops within this when the wheel stops
+    constexpr float MAX_LEAD = 2.0f;
 
     const char* state_name() {
         if (!_active) return "off";
@@ -318,9 +322,12 @@ bool rewind_command(const char* line, Channel& channel) {
             report_err("bad distance");
             return true;
         }
-        // - = back along the path (larger "back" distance)
-        float s = _sTarget - mm;
-        _sTarget = std::max(0.0f, std::min(s, (float)_len));
+        // - = back along the path (larger "back" distance), at most MAX_LEAD
+        // ahead of where the tool is
+        float cur = _sCur;
+        float s   = _sTarget - mm;
+        s         = std::max(cur - MAX_LEAD, std::min(s, cur + MAX_LEAD));
+        _sTarget  = std::max(0.0f, std::min(s, (float)_len));
         return true;
     }
     if (strncasecmp(c, "/Z=", 3) == 0) {
