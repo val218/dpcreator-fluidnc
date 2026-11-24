@@ -1241,6 +1241,8 @@ void make_user_commands() {
     new ReportCommand("MBV", "Modbus/Values", showModbusValues, anyState);
     extern void make_modbus_commands();  // Modbus/ModbusCommands.cpp: $VFD/State, $Modbus/Read, Write, Raw, Scan
     make_modbus_commands();
+    extern void make_panel_commands();  // Panels.cpp: $Output/Set, $Output/Toggle, $Panel/List
+    make_panel_commands();
     extern void make_motion_commands();  // MotionInfo.cpp: $Motion/Show, $Motion/Steps (pendant)
     make_motion_commands();
     extern void make_expander_commands();  // ExpanderCommands.cpp: $Expander/State, $Expander/Pins
