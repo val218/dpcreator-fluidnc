@@ -222,6 +222,43 @@ jobs:
           [ "$(grep -c 'ALARM:1$' out.txt)" -eq 1 ]                 # only the plain G1 trips the hard limit
           grep -q "Pn:PZ" out.txt
 
+      - name: Panels and outputs ($Panel/List, $Output/Toggle during a job)
+        run: |
+          mkdir -p pn/native_localfs pn/native_sd/.dpc/panels && cd pn
+          cat > native_localfs/config.yaml <<'YAML'
+          name: panels
+          board: host
+          axes:
+            x:
+              steps_per_mm: 80
+              max_rate_mm_per_min: 6000
+              acceleration_mm_per_sec2: 500
+              max_travel_mm: 300
+              motor0:
+                null_motor:
+          user_outputs:
+            digital1_pin: gpio.13
+            digital2_pin: gpio.12
+          YAML
+          cat > native_sd/.dpc/panels/shop.json <<'JSON'
+          {"format":"dpcreator-panel/1","id":"shop","title":"Shop",
+           "fields":[{"id":"d","label":"D","type":"number","default":2.5}],
+           "buttons":[{"label":"Light","output":2},{"label":"Go","macro":"go"},{"label":"Park","gcode":["G53 G0 X0"]}],
+           "macros":{"go":["G91 G1 X[#<_panel_d>] F600","G90"]}}
+          JSON
+          python3 -c "open('native_sd/long.nc','w').write('G91\n' + 'G1 X1 F300\n'*40 + 'G90\n')"
+          (sleep 2.5; printf '$Panel/List\n'; sleep 0.4; printf '$SD/Run=/long.nc\n'; sleep 1
+           printf '$Output/Toggle=2\n$Output/Set=1,1\n'; sleep 0.4; printf '?'; sleep 0.3) \
+            | timeout 10 ../.pio/build/linux_x86_64/program - > out.txt 2>&1 || true
+          cat out.txt
+          set -x
+          grep -q "\[PANELBTN:shop|0|#94a3b8|Light|any|\]" out.txt
+          grep -q "\[PANELCMD:shop|1|#<_panel_d>=2.5\]" out.txt
+          grep -q "\[PANELCMD:shop|1|\$SD/Run=/.dpc/panels/shop/go.nc\]" out.txt
+          grep -q "\[PANEL:end|3\]" out.txt
+          grep -q "\[OUT:2,1\]" out.txt && grep -q "\[OUT:1,1\]" out.txt   # switched while the job runs
+          ! grep -q "error:120" out.txt
+
       - name: Motion check (S-curve vs straight ramps, from the segment trace)
         run: python3 tools/motion_check.py .pio/build/linux_x86_64/program
 

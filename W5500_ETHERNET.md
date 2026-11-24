@@ -1241,6 +1241,19 @@ Huanyang on `uart1` talks to a built-in simulated Huanyang;
 `python3 tools/vfd_check.py` plays a YL620 and an I/O module on `uart1` and
 checks the RS485 commands below.
 
+**User outputs from any screen, and custom panels.**
+
+- `$Output/Set=<n>,<0|1>` (`$OUTS`) and `$Output/Toggle=<n>` (`$OUTT`) switch user output
+  n (`user_outputs: digitalN_pin`) at once and answer `[OUT:<n>,<0|1>]`. They work in
+  every state, from any screen, while a job runs too (other commands from a second
+  screen get `error:120` during a job). Outputs only, never motion.
+- `$Panel/List` (`$PNL`): the buttons of the WebUI's custom panels
+  (`/.dpc/panels/*.json`, format `dpcreator-panel/1`) for the pendant, with the lines a
+  press sends: `[PANEL:<id>|<title>]`, `[PANELBTN:<id>|<n>|<colour>|<label>|<when>|<confirm>]`,
+  `[PANELCMD:<id>|<n>|<line>]` per line, then `[PANEL:end|<buttons>]`. A macro button sends
+  the fields' defaults (`#<_panel_<field>>=<value>`), then `$SD/Run` of its macro; an output
+  button `$Output/Toggle=<n>` (when `any`, unless the panel says otherwise).
+
 **RS485 / Modbus commands** (WebUI: Machine › RS485…). They use the VFD
 spindle's UART, or the `modbus_bus:` one when there is no VFD, and never
 overlap a VFD command or an I/O module's poll on the wire.
